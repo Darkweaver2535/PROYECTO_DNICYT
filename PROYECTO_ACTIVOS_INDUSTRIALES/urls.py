@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from views import landing  # Ajusta el import según tu estructura
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('', landing, name='landing'),
@@ -27,4 +28,12 @@ urlpatterns = [
     path('equipos/', include('apps.equipos.urls')),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('destacadas/', TemplateView.as_view(template_name="secciones/destacadas.html"), name='destacadas'),
+    path('comunicados/', TemplateView.as_view(template_name="secciones/comunicados.html"), name='comunicados'),
+    path('multimedia/', TemplateView.as_view(template_name="secciones/multimedia.html"), name='multimedia'),
+    path('videos/', TemplateView.as_view(template_name="secciones/videos.html"), name='videos'),
+    path('cursos/', TemplateView.as_view(template_name="secciones/cursos.html"), name='cursos'),
+    path('laboratorio/', TemplateView.as_view(template_name="secciones/laboratorio.html"), name='laboratorio'),
+    path('documentos/', TemplateView.as_view(template_name="secciones/documentos.html"), name='documentos'),
+    path('contacto/', TemplateView.as_view(template_name="secciones/contacto.html"), name='contacto'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunicados - EMI Laboratorio Metal Mecánica</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* Variables CSS mejoradas */
+        :root {
+            --primary-navy: #1e3a8a;
+            --secondary-yellow: #fbbf24;
+            --accent-white: #ffffff;
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
+            --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            --gradient-secondary: linear-gradient(135deg, #fbbf24, #f59e0b);
+            --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--bg-light);
+            overflow-x: hidden;
+        }
+
+        /* Navbar mejorado */
+        .navbar {
+            background: var(--gradient-primary);
+            padding: 1rem 0;
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.3);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--accent-white) !important;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--accent-white) !important;
+            font-weight: 500;
+            margin: 0 15px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--secondary-yellow) !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 50%;
+            background: var(--secondary-yellow);
+            transition: var(--transition);
+        }
+
+        .navbar-nav .nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        /* Hero section mejorado */
+        .hero-section {
+            background: var(--gradient-primary);
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            margin-top: 76px;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23fbbf24" fill-opacity="0.1" points="0,1000 1000,0 1000,1000"/></svg>');
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: var(--accent-white);
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        /* Filtros y búsqueda */
+        .filters-section {
+            background: var(--accent-white);
+            padding: 2rem 0;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 3rem;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 50px;
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary-yellow);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-navy);
+            font-size: 1.2rem;
+        }
+
+        .filter-pills {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-pill {
+            padding: 8px 20px;
+            background: #f3f4f6;
+            border: 2px solid transparent;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .filter-pill:hover,
+        .filter-pill.active {
+            background: var(--secondary-yellow);
+            border-color: var(--primary-navy);
+            color: var(--primary-navy);
+            transform: translateY(-2px);
+        }
+
+        /* Comunicados grid mejorado */
+        .comunicados-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .comunicado-card {
+            background: var(--accent-white);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .comunicado-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-secondary);
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .comunicado-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--secondary-yellow);
+        }
+
+        .comunicado-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .comunicado-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--gradient-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-navy);
+            font-size: 1.8rem;
+            transition: var(--transition);
+        }
+
+        .comunicado-card:hover .comunicado-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .comunicado-title {
+            color: var(--primary-navy);
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .comunicado-content {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .comunicado-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .comunicado-department {
+            color: var(--primary-navy);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .comunicado-date {
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+
+        .priority-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .priority-medium {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fed7aa;
+        }
+
+        .priority-low {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* Botón de acción */
+        .action-btn {
+            background: var(--gradient-primary);
+            color: var(--accent-white);
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 1rem;
+        }
+
+        .action-btn:hover {
+            color: var(--accent-white);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+
+        /* Estadísticas */
+        .stats-section {
+            background: var(--accent-white);
+            padding: 3rem 0;
+            margin: 4rem 0;
+            border-radius: 20px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        /* Footer mejorado */
+        .footer {
+            background: var(--primary-navy);
+            color: var(--accent-white);
+            padding: 4rem 0 2rem;
+            margin-top: 5rem;
+        }
+
+        .footer h5 {
+            color: var(--secondary-yellow);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer a:hover {
+            color: var(--secondary-yellow);
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .comunicados-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .search-container {
+                margin: 0 1rem 2rem;
+            }
+            
+            .filter-pills {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .filter-pill {
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .comunicado-card {
+                padding: 1.5rem;
+            }
+            
+            .stats-section {
+                margin: 2rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Comunicados Institucionales</h1>
+                <p class="hero-subtitle">Mantente informado sobre las últimas noticias, horarios y eventos del Laboratorio de Metal Mecánica EMI</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="container">
+        <section class="filters-section">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Buscar comunicados..." id="searchInput">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            
+            <div class="filter-pills">
+                <div class="filter-pill active" data-filter="all">Todos</div>
+                <div class="filter-pill" data-filter="laboratorio">Laboratorio</div>
+                <div class="filter-pill" data-filter="academico">Académico</div>
+                <div class="filter-pill" data-filter="mantenimiento">Mantenimiento</div>
+                <div class="filter-pill" data-filter="eventos">Eventos</div>
+                <div class="filter-pill" data-filter="urgente">Urgente</div>
+            </div>
+        </section>
+
+        <!-- Estadísticas -->
+        <section class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">24</span>
+                        <div class="stat-label">Comunicados Activos</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">7</span>
+                        <div class="stat-label">Esta Semana</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">3</span>
+                        <div class="stat-label">Urgentes</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">12</span>
+                        <div class="stat-label">Departamentos</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comunicados Grid -->
+        <section id="comunicados" class="comunicados-section">
+            <div class="comunicados-grid" id="comunicadosGrid">
+                <!-- Comunicado 1 - Alta prioridad -->
+                <div class="comunicado-card" data-category="laboratorio urgente" data-date="2024-06-03">
+                    <div class="priority-badge priority-high">Urgente</div>
+                    <div class="comunicado-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 class="comunicado-title">Suspensión Temporal - Área de Soldadura</h3>
+                    <p class="comunicado-content">Por trabajos de mantenimiento crítico en el sistema de ventilación, el área de soldadura permanecerá cerrada desde hoy hasta el viernes 7 de junio. Se reprogramarán todas las prácticas.</p>
+                    <div class="comunicado-meta">
+                        <span class="comunicado-department">Seguridad Industrial</span>
+                        <span class="comunicado-date">Hoy, 14:30</span>
+                    </div>
+                    <a href="#" class="action-btn">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Comunicado 2 -->
+                <div class="comunicado-card" data-category="laboratorio" data-date="2024-06-03">
+                    <div class="comunicado-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="comunicado-title">Horarios Extendidos de Laboratorio</h3>
+                    <p class="comunicado-content">Este jueves el laboratorio abrirá sus puertas desde las 7:00 hasta las 15:00 para prácticas supervisadas. Aprovecha el tiempo adicional para tus proyectos y consulta con los encargados sobre el uso de equipos.</p>
+                    <div class="comunicado-meta">
+                        <span class="comunicado-department">Lab. Central - Área Industrial</span>
+                        <span class="comunicado-date">Hace 2 horas</span>
+                    </div>
+                    <a href="#" class="action-btn">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Comunicado 3 -->
+                <div class="comunicado-card" data-category="academico" data-date="2024-06-02">
+                    <div class="priority-badge priority-medium">Importante</div>
+                    <div class="comunicado-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="comunicado-title">Proceso de Inscripciones Semestre 2024-II</h3>
+                    <p class="comunicado-content">Se informa que el período de inscripciones para el próximo semestre estará abierto del 15 al 30 de junio. Prepara tu documentación y verifica los prerrequisitos en el sistema académico.</p>
+                    <div class="comunicado-meta">
+                        <span class="comunicado-department">Secretaría Académica</span>
+                        <span class="comunicado-date">Ayer, 16:45</span>
+                    </div>
+                    <a href="#" class="action-btn">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Comunicado 4 -->
+                <div class="comunicado-card" data-category="mantenimiento" data-date="2024-06-02">
+                    <div class="comunicado-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3 class="comunicado-title">Mantenimiento Preventivo CNC</h3>
+                    <p class="comunicado-content">Los talleres de mecánica CNC estarán cerrados por mantenimiento preventivo del lunes 10 al miércoles 12 de junio. Se calibrarán y actualizarán todos los sistemas de control numérico.</p>
+                    <div class="comunicado-meta">
+                        <span class="comunicado-department">Área de Mantenimiento</span>
+                        <span class="comunicado-date">Hace 1 día</span>
+                    </div>
+                    <a href="#" class="action-btn">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Comunicado 5 -->
+                <div class="comunicado-card" data-category="academico" data-date="2024-06-01">
+                    <div class="comunicado-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3 class="comunicado-title">Nueva Biblioteca Digital Especializada</h3>
+                    <p class="comunicado-content">La biblioteca ha incorporado nuevos textos especializados en tecnología industrial y gestión de procesos. Ahora disponible acceso digital 24/7 a más de 500 publicaciones técnicas actualizadas.</p>
+                    <div class="comunicado-meta">
+                        <span class="comunicado-department">Biblioteca Central</span>
+                        <span class="comunicado-date">Hace 2 días</span>
+                    </div>
+                    <a href="#" class="action-btn">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Comunicado 6 -->
+                <div class="comunicado-card" data-category="eventos" data-date="2024-05-31">
+                    <div class="priority-badge priority-medium">Próximamente</div>
+                    <div class="comunicado-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="comunicado-title">Reunión de Padres de Familia</h3>
+                    <p class="comunicado-content">Se convoca a todos los padres de familia a la reunión informativa que se realizará el viernes 7 de junio a las 18:00 horas. Se presentarán los avances académicos y proyectos del semestre.</p>
+                    <div class="comunicado-meta">
+                        <span class="comunicado-department">Dirección General</span>
+                        <span class="comunicado-date">Hace 3 días</span>
+                    </div>
+                    <a href="#" class="action-btn">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Comunicado 7 -->
+                <div class="comunicado-card" data-category="eventos" data-date="2024-05-30">
+                    <div class="priority-badge priority-low">Inscripciones</div>
+                    <div class="comunicado-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3 class="comunicado-title">Concurso de Innovación Tecnológica 2024</h3>
+                    <p class="comunicado-content">Están abiertas las inscripciones para el concurso anual de proyectos innovadores. Premio principal: $5,000 para el primer lugar, más oportunidades de financiamiento para desarrollo de prototipos.</p>
+                    <div class="comunicado-meta">
+                        <span class="comunicado-department">Área de Investigación</span>
+                        <span class="comunicado-date">Hace 4 días</span>
+                    </div>
+                    <a href="#" class="action-btn">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Comunicado 8 -->
+                <div class="comunicado-card" data-category="laboratorio" data-date="2024-05-29">
+                    <div class="priority-badge priority-high">Seguridad</div>
+                    <div class="comunicado-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="comunicado-title">Actualización Protocolos de Seguridad</h3>
+                    <p class="comunicado-content">Recordamos a toda la comunidad educativa la importancia de seguir los nuevos protocolos de seguridad en laboratorios y talleres. Capacitación obligatoria programada para esta semana.</p>
+                    <div class="comunicado-meta">
+                        <span class="comunicado-department">Comité de Seguridad</span>
+                        <span class="comunicado-date">Hace 5 días</span>
+                    </div>
+                    <a href="#" class="action-btn">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Comunicado 9 -->
+                <div class="comunicado-card" data-category="eventos" data-date="2024-05-28">
+                    <div class="comunicado-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="comunicado-title">Campaña Solidaria Comunitaria</h3>
+                    <p class="comunicado-content">Se invita a participar en la campaña de recolección de alimentos no perecederos para familias necesitadas de la comunidad. Punto de recolección: entrada principal del laboratorio.</p>
+                    <div class="comunicado-meta">
+                        <span class="comunicado-department">Bienestar Estudiantil</span>
+                        <span class="comunicado-date">Hace 6 días</span>
+                    </div>
+                    <a href="#" class="action-btn">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mensaje cuando no hay resultados -->
+            <div class="text-center" id="noResults" style="display: none; padding: 3rem;">
+                <i class="fas fa-search" style="font-size: 4rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+                <h3 style="color: #6b7280;">No se encontraron comunicados</h3>
+                <p style="color: #9ca3af;">Intenta con otros términos de búsqueda o filtros</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    {% include 'footer.html' %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Funcionalidad de búsqueda y filtros
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const filterPills = document.querySelectorAll('.filter-pill');
+            const comunicadoCards = document.querySelectorAll('.comunicado-card');
+            const noResults = document.getElementById('noResults');
+
+            // Función de búsqueda
+            function performSearch() {
+                const searchTerm = searchInput.value.toLowerCase();
+                let visibleCount = 0;
+                comunicadoCards.forEach(card => {
+                    const title = card.querySelector('.comunicado-title').textContent.toLowerCase();
+                    const content = card.querySelector('.comunicado-content').textContent.toLowerCase();
+                    if (title.includes(searchTerm) || content.includes(searchTerm)) {
+                        card.style.display = '';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                noResults.style.display = visibleCount === 0 ? '' : 'none';
+            }
+
+            // Función de filtrado por categoría
+            function filterByCategory(category) {
+                let visibleCount = 0;
+                comunicadoCards.forEach(card => {
+                    const categories = card.getAttribute('data-category');
+                    if (category === 'all' || categories.includes(category)) {
+                        card.style.display = '';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                noResults.style.display = visibleCount === 0 ? '' : 'none';
+            }
+
+            // Evento de búsqueda
+            searchInput.addEventListener('input', function() {
+                performSearch();
+            });
+
+            // Evento de filtros
+            filterPills.forEach(pill => {
+                pill.addEventListener('click', function() {
+                    filterPills.forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    const category = this.getAttribute('data-filter');
+                    filterByCategory(category);
+                    searchInput.value = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
