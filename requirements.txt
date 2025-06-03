@@ -4,3 +4,4 @@ pillow==11.2.1
 qrcode==8.2
 sqlparse==0.5.3
 typing_extensions==4.13.2
+qrcode[pil]==8.2

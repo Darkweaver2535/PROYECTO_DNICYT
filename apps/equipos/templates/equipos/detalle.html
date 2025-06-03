@@ -1,0 +1,110 @@
+<!-- templates/equipos/detalle.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-md-5">
+        <div class="card mb-3">
+            <div class="card-body text-center">
+                {% if equipo.foto %}
+                    <img src="{{ equipo.foto.url }}" class="img-fluid rounded mb-3" style="max-height:250px;" alt="Foto equipo">
+                {% else %}
+                    <div class="text-muted mb-3"><i class="fas fa-image fa-3x"></i><br>Sin foto</div>
+                {% endif %}
+                <hr>
+                {% if equipo.qr_code %}
+                    <img src="{{ equipo.qr_code.url }}" class="img-fluid mb-2" style="max-width:150px;" alt="QR">
+                {% else %}
+                    <a href="{% url 'equipos:generar-qr' equipo.pk %}" class="btn btn-marino fw-bold mb-2 d-inline-flex align-items-center gap-1">
+                        <i class="fas fa-qrcode"></i>
+                        <span>Generar Código QR</span>
+                    </a>
+                {% endif %}
+                <div class="d-grid gap-2 mt-3">
+                    <a href="#" class="btn btn-marino fw-bold d-inline-flex align-items-center gap-1 disabled">
+                        <i class="fas fa-edit"></i>
+                        <span>Editar (próximamente)</span>
+                    </a>
+                    <a href="{% url 'equipos:generar-qr' equipo.pk %}" class="btn btn-marino fw-bold d-inline-flex align-items-center gap-1">
+                        <i class="fas fa-qrcode"></i>
+                        <span>Generar QR</span>
+                    </a>
+                    <a href="#" class="btn btn-marino fw-bold d-inline-flex align-items-center gap-1 disabled">
+                        <i class="fas fa-tools"></i>
+                        <span>Mantenimiento (próximamente)</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <h3 class="fw-bold text-primary mb-3">{{ equipo.codigo_interno }} - {{ equipo.nombre }}</h3>
+        <div class="row g-2">
+            <div class="col-12">
+                <div class="card mb-2">
+                    <div class="card-header bg-primary text-white"><i class="fas fa-info-circle"></i> Información General</div>
+                    <div class="card-body">
+                        <strong>Modelo:</strong> {{ equipo.modelo }}<br>
+                        <strong>Serie:</strong> {{ equipo.serie }}<br>
+                        <strong>Fabricante:</strong> {{ equipo.fabricante }}<br>
+                        <strong>Año de Fabricación:</strong> {{ equipo.año_fabricacion|default:"-" }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card mb-2">
+                    <div class="card-header bg-secondary text-white"><i class="fas fa-bolt"></i> Especificaciones Técnicas</div>
+                    <div class="card-body">
+                        <strong>Potencia:</strong> {{ equipo.potencia|default:"-" }}<br>
+                        <strong>Capacidad:</strong> {{ equipo.capacidad|default:"-" }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card mb-2">
+                    <div class="card-header bg-info text-white"><i class="fas fa-map-marker-alt"></i> Ubicación</div>
+                    <div class="card-body">
+                        <strong>Sección:</strong> {{ equipo.get_seccion_display }}<br>
+                        <strong>Ubicación Física:</strong> {{ equipo.ubicacion_fisica }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card mb-2">
+                    <div class="card-header bg-success text-white"><i class="fas fa-check-circle"></i> Estado y Responsable</div>
+                    <div class="card-body">
+                        <strong>Estado:</strong>
+                        <span class="badge 
+                            {% if equipo.estado == 'OPERATIVO' %}bg-success
+                            {% elif equipo.estado == 'MANTENIMIENTO' %}bg-warning text-dark
+                            {% else %}bg-danger{% endif %}">
+                            {{ equipo.get_estado_display }}
+                        </span><br>
+                        <strong>Responsable:</strong> {{ equipo.responsable }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card mb-2">
+                    <div class="card-header bg-dark text-white"><i class="fas fa-comment-dots"></i> Observaciones</div>
+                    <div class="card-body">
+                        {{ equipo.observaciones|default:"Sin observaciones." }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-history"></i> Historial <span class="badge bg-warning">Próximamente</span>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-2">
+                    <li class="nav-item"><a class="nav-link active disabled" href="#">Mantenimientos</a></li>
+                    <li class="nav-item"><a class="nav-link disabled" href="#">Fallas/Diagnósticos</a></li>
+                    <li class="nav-item"><a class="nav-link disabled" href="#">Repuestos</a></li>
+                </ul>
+                <div class="text-muted">Esta sección estará disponible próximamente.</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

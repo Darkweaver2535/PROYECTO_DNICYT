@@ -1,0 +1,100 @@
+<!-- templates/equipos/lista.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-primary"><i class="fas fa-cogs"></i> Inventario de Equipos</h2>
+    <a href="{% url 'equipos:equipo-crear' %}" class="btn btn-marino">
+        <i class="fas fa-plus"></i> Agregar Nuevo Equipo
+    </a>
+</div>
+
+<div class="mb-3">
+    <div class="btn-group" role="group" aria-label="Filtrar por sección">
+        <a href="{% url 'equipos:equipo-lista' %}" class="btn btn-outline-primary btn-sm {% if not request.GET.seccion %}active{% endif %}">Todos</a>
+        {% for key, value in equipos.model.SECCION_CHOICES %}
+            <a href="?seccion={{ key }}" class="btn btn-outline-primary btn-sm {% if request.GET.seccion == key %}active{% endif %}">{{ value }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Sección</th>
+                <th>Estado</th>
+                <th>Responsable</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% if equipos %}
+            {% for equipo in equipos %}
+                <tr>
+                    <td>{{ equipo.codigo_interno }}</td>
+                    <td>{{ equipo.nombre }}</td>
+                    <td>{{ equipo.get_seccion_display }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if equipo.estado == 'OPERATIVO' %}bg-success
+                            {% elif equipo.estado == 'MANTENIMIENTO' %}bg-warning text-dark
+                            {% else %}bg-danger{% endif %}">
+                            {{ equipo.get_estado_display }}
+                        </span>
+                    </td>
+                    <td>{{ equipo.responsable }}</td>
+                    <td>
+                        <a href="{% url 'equipos:equipo-detalle' equipo.pk %}" class="btn btn-sm btn-marino fw-bold d-inline-flex align-items-center gap-1" title="Ver Detalle">
+                            <i class="fas fa-eye"></i>
+                            <span>Ver detalle</span>
+                        </a>
+                        <a href="{% url 'equipos:generar-qr' equipo.pk %}" class="btn btn-sm btn-marino fw-bold d-inline-flex align-items-center gap-1" title="Generar QR">
+                            <i class="fas fa-qrcode"></i>
+                            <span>Generar QR</span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    <i class="fas fa-robot fa-2x mb-2"></i><br>
+                    ¡No hay equipos registrados aún! <br>
+                    ¡El futuro de la industria lo construyes tú!
+                </td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.seccion %}&seccion={{ request.GET.seccion }}{% endif %}">&laquo;</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+        {% for num in paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.seccion %}&seccion={{ request.GET.seccion }}{% endif %}">{{ num }}</a>
+            </li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.seccion %}&seccion={{ request.GET.seccion }}{% endif %}">&raquo;</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
