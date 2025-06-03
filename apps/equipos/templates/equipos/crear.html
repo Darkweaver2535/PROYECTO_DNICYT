@@ -1,0 +1,107 @@
+<!-- templates/equipos/crear.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-plus"></i> Registrar Nuevo Equipo</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="equipoForm" novalidate>
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_codigo_interno" class="form-label">Código Interno *</label>
+                            {{ form.codigo_interno }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_nombre" class="form-label">Nombre *</label>
+                            {{ form.nombre }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_modelo" class="form-label">Modelo *</label>
+                            {{ form.modelo }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_serie" class="form-label">Serie *</label>
+                            {{ form.serie }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_fabricante" class="form-label">Fabricante *</label>
+                            {{ form.fabricante }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_año_fabricacion" class="form-label">Año de Fabricación</label>
+                            {{ form.año_fabricacion }}
+                            <div class="form-text">Opcional. Ejemplo: 2022</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_potencia" class="form-label">Potencia</label>
+                            {{ form.potencia }}
+                            <div class="form-text">Ejemplo: 5 kW</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_capacidad" class="form-label">Capacidad</label>
+                            {{ form.capacidad }}
+                            <div class="form-text">Ejemplo: 200 kg/h</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_ubicacion_fisica" class="form-label">Ubicación Física *</label>
+                            {{ form.ubicacion_fisica }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_seccion" class="form-label">Sección *</label>
+                            {{ form.seccion }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_tipo_equipo" class="form-label">Tipo de Equipo *</label>
+                            {{ form.tipo_equipo }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_estado" class="form-label">Estado *</label>
+                            {{ form.estado }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_foto" class="form-label">Foto</label>
+                            {{ form.foto }}
+                            <div class="form-text">Opcional. Formato JPG o PNG.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_responsable" class="form-label">Responsable *</label>
+                            {{ form.responsable }}
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="id_observaciones" class="form-label">Observaciones</label>
+                            {{ form.observaciones }}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-industrial"><i class="fas fa-save"></i> Guardar</button>
+                        <a href="{% url 'equipos:equipo-lista' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Validación básica de campos requeridos
+    document.getElementById('equipoForm').addEventListener('submit', function(e) {
+        let required = ['id_codigo_interno','id_nombre','id_modelo','id_serie','id_fabricante','id_ubicacion_fisica','id_seccion','id_tipo_equipo','id_estado','id_responsable'];
+        let valid = true;
+        required.forEach(function(id){
+            let el = document.getElementById(id);
+            if(el && !el.value){
+                el.classList.add('is-invalid');
+                valid = false;
+            } else if(el) {
+                el.classList.remove('is-invalid');
+            }
+        });
+        if(!valid){
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

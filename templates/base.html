@@ -1,0 +1,627 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Sistema de Inventario - Lab Metal Mecánica{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #3b82f6;
+            --light-blue: #dbeafe;
+            --primary-yellow: #fbbf24;
+            --secondary-yellow: #fcd34d;
+            --light-yellow: #fef3c7;
+            --pure-white: #ffffff;
+            --off-white: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --sidebar-width: 280px;
+            --navbar-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--off-white) 50%, var(--light-yellow) 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--navbar-height);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg);
+            z-index: 1030;
+            padding: 0;
+        }
+
+        .navbar-container {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            color: var(--pure-white) !important;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: -0.025em;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            margin-right: 12px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--pure-white);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logout-btn {
+            background: var(--primary-yellow);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .logout-btn:hover {
+            background: var(--secondary-yellow);
+            color: var(--text-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: var(--navbar-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--navbar-height));
+            background: var(--pure-white);
+            border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow-xl);
+            overflow-y: auto;
+            z-index: 1020;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin: 0;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .nav-item {
+            margin: 0.25rem 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--pure-white);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-link.disabled:hover {
+            background: transparent;
+            transform: none;
+        }
+
+        .nav-icon {
+            font-size: 1.25rem;
+            margin-right: 0.75rem;
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-text {
+            flex: 1;
+        }
+
+        .nav-badge {
+            background: var(--primary-yellow);
+            color: var(--text-dark);
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 1rem;
+            font-weight: 500;
+        }
+
+        .nav-link.disabled .nav-badge {
+            background: var(--text-light);
+            color: var(--pure-white);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--navbar-height);
+            padding: 2rem;
+            min-height: calc(100vh - var(--navbar-height));
+            transition: margin-left 0.3s ease;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+
+        .content-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Cards and Components */
+        .card {
+            background: var(--pure-white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            border: none;
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+            border: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning:hover {
+            color: var(--text-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-marino {
+            background-color: #005792 !important;
+            color: #fff !important;
+            font-weight: 600;
+            border: none;
+        }
+        .btn-marino:hover, .btn-marino:focus {
+            background-color: #003f63 !important;
+            color: #fff !important;
+        }
+
+        .btn-byn-disabled {
+            background: #fff !important;
+            color: #222 !important;
+            border: 1px solid #bbb;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-md);
+            pointer-events: none;
+            opacity: 0.7;
+            text-decoration: none;
+        }
+
+        /* Alerts */
+        .alert {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Footer */
+        .footer {
+            margin-left: var(--sidebar-width);
+            background: var(--pure-white);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .footer {
+                margin-left: 0;
+            }
+
+            .navbar-container {
+                padding: 0 1rem;
+            }
+
+            .navbar-brand {
+                font-size: 1rem;
+            }
+
+            .navbar-brand img {
+                height: 32px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+
+            .navbar-brand span {
+                display: none;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .flash-message {
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--off-white);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-light);
+        }
+
+        .container-fluid, .main-content {
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg shadow-sm mb-4">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center fw-bold" href="{% url 'equipos:equipo-lista' %}">
+                <div class="bg-white rounded shadow-sm d-flex align-items-center justify-content-center"
+                     style="height:40px; min-width:40px; padding: 2px 10px;">
+                    <img src="{% static 'images/dnicyt.png' %}" alt="Logo EMI" style="height:32px; width:auto; display:block;">
+                </div>
+                <span class="ms-2 text-white">Sistema de Inventario - Lab Metal Mecánica</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse">
+                <!-- Menú principal centrado -->
+                <ul class="navbar-nav mx-auto gap-3">
+                    <!-- ... tus items de menú aquí ... -->
+                </ul>
+                <!-- Botón de sesión a la derecha -->
+                <div class="d-flex ms-auto">
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="logout-btn ms-2">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="d-none d-sm-inline">Cerrar sesión</span>
+                        </a>
+                    {% else %}
+                        <span class="btn-byn-disabled ms-2">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span class="d-none d-sm-inline">Iniciar sesión</span>
+                            <span class="nav-badge ms-2">Próximamente</span>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h5 class="sidebar-title">Lab Metal Mecánica</h5>
+            <p class="sidebar-subtitle">Sistema de Gestión Integral</p>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Gestión Principal</div>
+                <div class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'equipo-lista' %}active{% endif %}" 
+                       href="{% url 'equipos:equipo-lista' %}">
+                        <i class="nav-icon bi bi-cpu"></i>
+                        <span class="nav-text">Equipos</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Operaciones</div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-tools"></i>
+                        <span class="nav-text">Mantenimiento</span>
+                        <span class="nav-badge">Próximamente</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Administración</div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-people"></i>
+                        <span class="nav-text">Usuarios</span>
+                        <span class="nav-badge">Próximamente</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-shield-lock"></i>
+                        <span class="nav-text">Seguridad</span>
+                        <span class="nav-badge">Próximamente</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Desarrollo</div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-mortarboard"></i>
+                        <span class="nav-text">Capacitación</span>
+                        <span class="nav-badge">Próximamente</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show flash-message" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle me-2"></i>
+                            {{ message }}
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="text-center">
+            <small>&copy; {{ now|date:"Y" }} Laboratorio Metal Mecánica - EMI. Todos los derechos reservados.</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        // Sidebar Toggle Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+
+                // Close sidebar when clicking outside on mobile
+                document.addEventListener('click', function(event) {
+                    if (window.innerWidth <= 991) {
+                        if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                            sidebar.classList.remove('show');
+                        }
+                    }
+                });
+
+                // Handle window resize
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 991) {
+                        sidebar.classList.remove('show');
+                    }
+                });
+            }
+
+            // Auto-hide flash messages
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.flash-message');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
