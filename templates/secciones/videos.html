@@ -1,7 +1,767 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="container py-5">
-    <h1>Videos</h1>
-    <p>Contenido de la sección Videos.</p>
-</div>
-{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videos - EMI Laboratorio Metal Mecánica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #1e3a8a;
+            --secondary-yellow: #fbbf24;
+            --accent-white: #ffffff;
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
+            --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            --gradient-yellow: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding-top: 80px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Hero Section for Videos */
+        .video-hero {
+            background: var(--gradient-primary);
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23fbbf24" fill-opacity="0.1" points="0,1000 1000,0 1000,1000"/></svg>');
+            z-index: 1;
+        }
+
+        .video-hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+        }
+
+        .video-hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .video-hero p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 80px 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--secondary-yellow);
+            border-radius: 2px;
+        }
+
+        /* Video Grid */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+        }
+
+        .video-card {
+            background: var(--accent-white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .video-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 80px rgba(30, 58, 138, 0.15);
+            border-color: var(--secondary-yellow);
+        }
+
+        .video-thumbnail {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+            background: var(--gradient-primary);
+        }
+
+        .video-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .video-card:hover .video-thumb {
+            transform: scale(1.1);
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(30, 58, 138, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-card:hover .play-overlay {
+            opacity: 1;
+        }
+
+        .play-btn {
+            background: var(--gradient-yellow);
+            color: var(--primary-navy);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 8px 30px rgba(251, 191, 36, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .play-btn:hover {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            transform: scale(1.1);
+            box-shadow: 0 12px 40px rgba(251, 191, 36, 0.6);
+        }
+
+        .video-content {
+            padding: 2rem;
+        }
+
+        .video-title {
+            color: var(--primary-navy);
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .video-description {
+            color: #6b7280;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .video-duration {
+            background: var(--primary-navy);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .video-date {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        /* Category Filter */
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 2px solid var(--primary-navy);
+            color: var(--primary-navy);
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary-navy);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+
+        /* Featured Video Section */
+        .featured-video {
+            background: var(--accent-white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            margin-bottom: 4rem;
+        }
+
+        .featured-video .row {
+            align-items: center;
+        }
+
+        .featured-thumbnail {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+        }
+
+        .featured-content {
+            padding: 3rem;
+        }
+
+        .featured-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 1.5rem;
+        }
+
+        .featured-description {
+            font-size: 1.1rem;
+            color: #6b7280;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .watch-btn {
+            background: var(--gradient-yellow);
+            color: var(--primary-navy);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .watch-btn:hover {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(251, 191, 36, 0.4);
+            color: var(--primary-navy);
+        }
+
+        /* Stats Section */
+        .video-stats {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .stat-item {
+            margin-bottom: 2rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--secondary-yellow);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .video-hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .video-hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .video-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .featured-content {
+                padding: 2rem;
+            }
+            
+            .featured-title {
+                font-size: 1.8rem;
+            }
+            
+            .filter-tabs {
+                gap: 0.5rem;
+            }
+            
+            .filter-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .video-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .featured-thumbnail {
+                height: 250px;
+            }
+            
+            .video-thumbnail {
+                height: 200px;
+            }
+            
+            .play-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+        }
+
+        /* Loading state */
+        .loading {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .loading.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <!-- Video Hero Section -->
+    <section class="video-hero">
+        <div class="container">
+            <div class="video-hero-content">
+                <h1><i class="fas fa-play-circle me-3"></i>Videos Destacados</h1>
+                <p>Descubre los procesos, técnicas y tecnologías del Laboratorio de Metal Mecánica a través de nuestros videos educativos</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Statistics (subido aquí, justo después del hero) -->
+    <section class="video-stats">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">25+</span>
+                        <span class="stat-label">Videos Educativos</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">5,000+</span>
+                        <span class="stat-label">Visualizaciones</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">12</span>
+                        <span class="stat-label">Procesos Documentados</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Contenido Original</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Video Section -->
+    <section class="section">
+        <div class="container">
+            <div class="featured-video">
+                <div class="row g-0">
+                    <div class="col-lg-6">
+                        <div class="featured-thumbnail" style="position:relative; border-radius: 20px; overflow: hidden; height: 400px;">
+                            <img src="{% static 'images/fabricacion_cnc.png' %}" alt="Proceso Completo de Fabricación CNC" class="img-fluid w-100 h-100" style="object-fit: cover; border-radius: 20px;">
+                            <!-- Icono de play eliminado -->
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="featured-content">
+                            <h2 class="featured-title">Proceso Completo de Fabricación CNC</h2>
+                            <p class="featured-description">
+                                Sumérgete en el fascinante mundo de la manufactura moderna. Este video te lleva paso a paso por todo el proceso de fabricación utilizando nuestras máquinas CNC de última generación, desde el diseño CAD hasta el producto terminado.
+                            </p>
+                            <div class="d-flex align-items-center gap-4 mb-3">
+                                <span class="video-duration">8:15</span>
+                                <span class="video-date">Publicado: 2024</span>
+                            </div>
+                            <a href="https://www.youtube.com/watch?v=Gl7BrP6SFo0&pp=ygUkUHJvY2VzbyBDb21wbGV0byBkZSBGYWJyaWNhY2nDs24gQ05D" target="_blank" class="watch-btn">
+                                <i class="fas fa-play"></i>
+                                Ver video completo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Tabs -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="filter-tabs">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="fabricacion">Fabricación</button>
+                <button class="filter-btn" data-filter="soldadura">Soldadura</button>
+                <button class="filter-btn" data-filter="cnc">CNC</button>
+                <button class="filter-btn" data-filter="seguridad">Seguridad</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Videos Grid -->
+    <section class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="video-grid">
+                <!-- Video 1 -->
+                <div class="video-card loading" data-category="fabricacion">
+                    <div class="video-thumbnail">
+                        <img src="{% static 'images/video_thumb1.jpg' %}" alt="Proceso de Fabricación" class="video-thumb">
+                        <div class="play-overlay">
+                            <a href="https://www.youtube.com/watch?v=VIDEO_ID_1" target="_blank" class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="video-content">
+                        <h3 class="video-title">Fundamentos del Proceso de Fabricación</h3>
+                        <p class="video-description">
+                            Aprende los conceptos básicos y las técnicas fundamentales utilizadas en nuestros procesos de fabricación industrial.
+                        </p>
+                        <div class="video-meta">
+                            <span class="video-duration">3:45</span>
+                            <span class="video-date">2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video 2 -->
+                <div class="video-card loading" data-category="soldadura">
+                    <div class="video-thumbnail">
+                        <img src="{% static 'images/video_thumb2.jpg' %}" alt="Técnicas de Soldadura" class="video-thumb">
+                        <div class="play-overlay">
+                            <a href="https://www.youtube.com/watch?v=VIDEO_ID_2" target="_blank" class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="video-content">
+                        <h3 class="video-title">Técnicas Avanzadas de Soldadura</h3>
+                        <p class="video-description">
+                            Domina las técnicas de soldadura más utilizadas en la industria metalmecánica con nuestros expertos instructores.
+                        </p>
+                        <div class="video-meta">
+                            <span class="video-duration">5:20</span>
+                            <span class="video-date">2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video 3 -->
+                <div class="video-card loading" data-category="cnc">
+                    <div class="video-thumbnail">
+                        <img src="{% static 'images/video_thumb3.jpg' %}" alt="Operación de CNC" class="video-thumb">
+                        <div class="play-overlay">
+                            <a href="https://www.youtube.com/watch?v=VIDEO_ID_3" target="_blank" class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="video-content">
+                        <h3 class="video-title">Operación y Programación CNC</h3>
+                        <p class="video-description">
+                            Descubre cómo operar y programar nuestras máquinas CNC para obtener resultados de precisión milimétrica.
+                        </p>
+                        <div class="video-meta">
+                            <span class="video-duration">7:10</span>
+                            <span class="video-date">2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video 4 -->
+                <div class="video-card loading" data-category="seguridad">
+                    <div class="video-thumbnail">
+                        <img src="{% static 'images/video_thumb4.jpg' %}" alt="Procedimientos de Seguridad" class="video-thumb">
+                        <div class="play-overlay">
+                            <a href="https://www.youtube.com/watch?v=VIDEO_ID_4" target="_blank" class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="video-content">
+                        <h3 class="video-title">Protocolos de Seguridad Industrial</h3>
+                        <p class="video-description">
+                            Conoce los procedimientos de seguridad esenciales para trabajar de manera segura en el laboratorio.
+                        </p>
+                        <div class="video-meta">
+                            <span class="video-duration">4:30</span>
+                            <span class="video-date">2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video 5 -->
+                <div class="video-card loading" data-category="fabricacion">
+                    <div class="video-thumbnail">
+                        <img src="{% static 'images/video_thumb1.jpg' %}" alt="Cortadora Láser" class="video-thumb">
+                        <div class="play-overlay">
+                            <a href="https://www.youtube.com/watch?v=VIDEO_ID_5" target="_blank" class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="video-content">
+                        <h3 class="video-title">Cortadora Láser de Fibra Óptica</h3>
+                        <p class="video-description">
+                            Explora las capacidades de nuestra cortadora láser DXTECH y aprende sobre corte de precisión en diversos metales.
+                        </p>
+                        <div class="video-meta">
+                            <span class="video-duration">6:15</span>
+                            <span class="video-date">2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video 6 -->
+                <div class="video-card loading" data-category="cnc">
+                    <div class="video-thumbnail">
+                        <img src="{% static 'images/video_thumb3.jpg' %}" alt="Fresadora CNC" class="video-thumb">
+                        <div class="play-overlay">
+                            <a href="https://www.youtube.com/watch?v=VIDEO_ID_6" target="_blank" class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="video-content">
+                        <h3 class="video-title">Fresado CNC de Alta Precisión</h3>
+                        <p class="video-description">
+                            Aprende las técnicas de fresado CNC para crear piezas complejas con tolerancias extremadamente precisas.
+                        </p>
+                        <div class="video-meta">
+                            <span class="video-duration">8:45</span>
+                            <span class="video-date">2024</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'footer.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Page loading animation
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '1';
+            
+            // Animate cards on load
+            const cards = document.querySelectorAll('.video-card.loading');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('loaded');
+                }, index * 200);
+            });
+        });
+
+        // Filter functionality
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const videoCards = document.querySelectorAll('.video-card');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Update active button
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const filter = button.getAttribute('data-filter');
+
+                // Filter cards
+                videoCards.forEach(card => {
+                    const category = card.getAttribute('data-category');
+                    
+                    if (filter === 'all' || category === filter) {
+                        card.style.display = 'block';
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, 100);
+                    } else {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            card.style.display = 'none';
+                        }, 300);
+                    }
+                });
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.video-card, .featured-video, .stat-item').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Enhanced hover effects
+        document.querySelectorAll('.video-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+
+        // Play button click tracking
+        document.querySelectorAll('.play-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Add analytics or tracking here if needed
+                console.log('Video play clicked:', this.closest('.video-card').querySelector('.video-title').textContent);
+            });
+        });
+
+        // Smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
