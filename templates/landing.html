@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %} 
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -366,6 +367,12 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .hero img {
+                height: 40vh !important;
+            }
+        }
+
+        @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
             }
@@ -434,61 +441,26 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="#inicio">
-                <i class="fas fa-graduation-cap"></i>
-                EMI - Laboratorio Metal Mecánica
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center">
-                    <li class="nav-item"><a class="nav-link" href="#destacadas">Destacadas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#comunicados">Comunicados</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#multimedia">Multimedia</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#videos">Videos</a></li>
-                    <!-- Dropdown para "Más" solo en escritorio -->
-                    <li class="nav-item dropdown d-none d-lg-block position-relative">
-                        <a class="nav-link d-flex align-items-center gap-1" href="#" id="navbarMore" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span>Más</span>
-                        </a>
-                        <ul class="dropdown-menu custom-dropdown-menu dropdown-menu-end animate__animated" aria-labelledby="navbarMore">
-                            <li><a class="dropdown-item" href="#cursos"><i class="fas fa-chalkboard-teacher me-2 text-primary"></i> Cursos</a></li>
-                            <li><a class="dropdown-item" href="#laboratorio"><i class="fas fa-flask me-2 text-warning"></i> Laboratorio</a></li>
-                            <li><a class="dropdown-item" href="#documentos"><i class="fas fa-book me-2 text-success"></i> Documentos</a></li>
-                            <li><a class="dropdown-item" href="#contacto"><i class="fas fa-envelope me-2 text-danger"></i> Contacto</a></li>
-                        </ul>
-                    </li>
-                    <!-- Las opciones "extra" siguen visibles en móvil -->
-                    <li class="nav-item d-lg-none"><a class="nav-link" href="#cursos">Cursos</a></li>
-                    <li class="nav-item d-lg-none"><a class="nav-link" href="#laboratorio">Laboratorio</a></li>
-                    <li class="nav-item d-lg-none"><a class="nav-link" href="#documentos">Documentos</a></li>
-                    <li class="nav-item d-lg-none"><a class="nav-link" href="#contacto">Contacto</a></li>
-                </ul>
-                <a href="{% url 'equipos:equipo-lista' %}" class="btn btn-login ms-3">
-                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
-                </a>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Hero Section -->
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+
+        <!-- Hero Section -->
     <section id="inicio" class="hero">
-        <div class="container">
-            <div class="row align-items-center">
+        <div class="container h-100">
+            <div class="row align-items-center h-100" style="min-height: 100vh;">
                 <div class="col-lg-6 hero-content">
                     <h1>Laboratorio de Metal Mecánica</h1>
                     <p>Centro de excelencia en formación práctica, investigación y desarrollo tecnológico para la ingeniería moderna.</p>
-                    <button class="btn btn-hero">
+                    <a href="#laboratorio" class="btn btn-hero">
                         <i class="fas fa-rocket me-2"></i>Explorar Laboratorio
-                    </button>
+                    </a>
                 </div>
-                <div class="col-lg-6">
-                    <div class="text-center">
-                        <i class="fas fa-cogs" style="font-size: 15rem; color: rgba(251, 191, 36, 0.3);"></i>
+                <div class="col-lg-6 d-flex align-items-center justify-content-center" style="height: 100%;">
+                    <div style="width:100%; height:100%;">
+                        <img src="{% static 'images/4.jpeg' %}" alt="Laboratorio de Metal Mecánica EMI"
+                            class="img-fluid rounded-3 shadow-lg"
+                            style="width:100%; height:100%; object-fit:cover;">
                     </div>
                 </div>
             </div>
@@ -500,24 +472,50 @@
         <div class="container">
             <h2 class="section-title">Destacadas</h2>
             <div class="row">
-                <div class="col-lg-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-laser-pointer"></i>
+                <div class="col-lg-6 d-flex align-items-stretch">
+                    <div class="feature-card w-100 d-flex flex-column justify-content-center">
+                        <div class="feature-icon p-0 mb-3" style="background:none;">
+                            <img src="{% static 'images/cortadora-laser.jpeg' %}" alt="Cortadora Láser CNC" class="img-fluid rounded shadow" style="max-height:180px;">
                         </div>
                         <h3>Cortadora Láser CNC de Fibra Óptica</h3>
                         <p>Nuestra cortadora láser DXTECH es una herramienta de alta precisión utilizada para cortar metales como acero, aluminio y latón con rapidez y exactitud milimétrica. Ideal para fabricación industrial, prototipado y desarrollo de piezas personalizadas.</p>
                         <div class="text-center mt-3">
-                            <button class="btn" style="background: var(--secondary-yellow); color: var(--primary-navy); border-radius: 20px;">
+                            <a href="{% url 'destacadas' %}" class="btn" style="background: var(--secondary-yellow); color: var(--primary-navy); border-radius: 20px;">
                                 Ver más <i class="fas fa-arrow-right ms-2"></i>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="media-item">
-                        <h4><i class="fas fa-image me-2"></i>Galería de Equipos</h4>
-                    </div>
+                <div class="col-lg-6 d-flex align-items-stretch">
+                    <a href="{% url 'destacadas' %}" style="text-decoration:none; color:inherit; width:100%; display:block;">
+                        <div class="feature-card w-100 d-flex flex-column justify-content-center" style="cursor:pointer;">
+                            <div id="equiposCarousel" class="carousel slide mb-3" data-bs-ride="carousel" data-bs-interval="3000">
+                                <div class="carousel-inner rounded shadow" style="height: 260px; background: #f8fafc;">
+                                    <div class="carousel-item active h-100">
+                                        <img src="{% static 'images/equipo1.png' %}" class="d-block w-100 h-100" alt="Equipo 1" style="object-fit:cover;">
+                                    </div>
+                                    <div class="carousel-item h-100">
+                                        <img src="{% static 'images/equipo2.png' %}" class="d-block w-100 h-100" alt="Equipo 2" style="object-fit:cover;">
+                                    </div>
+                                    <div class="carousel-item h-100">
+                                        <img src="{% static 'images/equipo3.png' %}" class="d-block w-100 h-100" alt="Equipo 3" style="object-fit:cover;">
+                                    </div>
+                                    <div class="carousel-item h-100">
+                                        <img src="{% static 'images/equipo4.png' %}" class="d-block w-100 h-100" alt="Equipo 4" style="object-fit:cover;">
+                                    </div>
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#equiposCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                    <span class="visually-hidden">Anterior</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#equiposCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                    <span class="visually-hidden">Siguiente</span>
+                                </button>
+                            </div>
+                            <h3 class="mt-2 text-center text-primary-navy">Galería de Equipos</h3>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -528,26 +526,20 @@
         <div class="container">
             <h2 class="section-title">Comunicados</h2>
             <div class="row g-4">
+                {% for comunicado in comunicados|slice:":2" %}
                 <div class="col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-calendar-alt"></i>
+                    <a href="{% url 'comunicados' %}" style="text-decoration:none; color:inherit;">
+                        <div class="feature-card" style="cursor:pointer;">
+                            <div class="feature-icon">
+                                <i class="{{ comunicado.icon }}"></i>
+                            </div>
+                            <h3>{{ comunicado.titulo }}</h3>
+                            <p>{{ comunicado.texto }}</p>
+                            <small class="text-muted">{{ comunicado.meta }}</small>
                         </div>
-                        <h3>Horarios de Laboratorio</h3>
-                        <p>Este jueves el laboratorio abrirá sus puertas desde las 7:00 hasta las 15:00 para prácticas supervisadas. Aprovechen el tiempo y consulten con los encargados sobre el uso de los nuevos equipos.</p>
-                        <small class="text-muted">Lab. Central - Área Industrial</small>
-                    </div>
+                    </a>
                 </div>
-                <div class="col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-bullhorn"></i>
-                        </div>
-                        <h3>Nueva Cortadora Láser</h3>
-                        <p>¡Gran noticia! La próxima semana recibiremos nuestra nueva cortadora láser CNC de alta precisión. A partir del 15 de mayo estará disponible para proyectos de prototipado y fabricación personalizada.</p>
-                        <small class="text-muted">Departamento de Ingeniería</small>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </section>
@@ -664,9 +656,9 @@
             <div class="row align-items-center">
                 <div class="col-lg-8">
                     <p class="lead mb-4">El Laboratorio de Metal Mecánica de la EMI es un centro de vanguardia dedicado a la formación práctica, investigación y desarrollo tecnológico en áreas clave de la ingeniería. Contamos con equipos de última generación y personal altamente capacitado, brindando a nuestros estudiantes y colaboradores las herramientas para transformar conocimientos en soluciones tangibles y contribuir al progreso industrial y de defensa del país.</p>
-                    <button class="btn btn-hero">
+                    <a href="{% url 'laboratorio' %}" class="btn btn-hero">
                         Leer más <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
+                    </a>
                 </div>
                 <div class="col-lg-4">
                     <div class="text-center">
@@ -749,57 +741,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h5><i class="fas fa-graduation-cap me-2"></i>EMI Lab</h5>
-                    <p>Formando ingenieros de excelencia con tecnología de vanguardia y disciplina militar.</p>
-                    <div class="social-icons">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Servicios</h5>
-                    <ul>
-                        <li><a href="#destacadas">Cortadora Láser CNC</a></li>
-                        <li><a href="#multimedia">Equipos Industriales</a></li>
-                        <li><a href="#cursos">Capacitación Técnica</a></li>
-                        <li><a href="#documentos">Documentación</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Recursos</h5>
-                    <ul>
-                        <li><a href="#videos">Biblioteca de Videos</a></li>
-                        <li><a href="#documentos">Manuales y Guías</a></li>
-                        <li><a href="#comunicados">Noticias y Avisos</a></li>
-                        <li><a href="#laboratorio">Sobre el Lab</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Contacto</h5>
-                    <ul>
-                        <li><i class="fas fa-map-marker-alt me-2"></i>Alto Irpavi, La Paz</li>
-                        <li><i class="fas fa-envelope me-2"></i>contacto@emi.gob.bo</li>
-                        <li><i class="fas fa-phone me-2"></i>+591 2 2782222</li>
-                        <li><i class="fas fa-clock me-2"></i>Lun-Vie: 7:00-17:00</li>
-                    </ul>
-                </div>
-            </div>
-            <hr style="border-color: rgba(255, 255, 255, 0.2); margin: 2rem 0 1rem;">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0">&copy; 2024 EMI - Escuela Militar de Ingeniería. Todos los derechos reservados.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0">Desarrollado con <i class="fas fa-heart text-danger"></i> para la excelencia académica</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+    {% include 'footer.html' %}
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>

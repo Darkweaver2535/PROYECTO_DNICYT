@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+{% load static %} 
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMI - Laboratorio Metal Mecánica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        /* Paleta y estilos principales */
+        :root {
+            --primary-navy: #1e3a8a;
+            --secondary-yellow: #fbbf24;
+            --accent-white: #ffffff;
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
+            --academic-blue: #3b82f6;
+            --research-green: #059669;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            padding-top: 80px;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-navy) 0%, #2563eb 100%);
+            padding: 1rem 0;
+            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            color: var(--accent-white) !important;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--secondary-yellow) !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-toggler {
+            border: none;
+            color: var(--accent-white);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .footer {
+            background: var(--primary-navy);
+            color: var(--accent-white);
+            padding: 50px 0 30px;
+        }
+
+        .footer h5 {
+            color: var(--secondary-yellow);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Estilos específicos para equipos destacados */
+        .hero-equipos {
+            background: linear-gradient(135deg, var(--primary-navy) 0%, #2563eb 50%, #1e40af 100%);
+            color: var(--accent-white);
+            padding: 100px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-equipos::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .floating-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-icon:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-icon:nth-child(2) { top: 60%; right: 15%; animation-delay: 2s; }
+        .floating-icon:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--secondary-yellow), #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .equipment-card {
+            background: var(--accent-white);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            border: none;
+            margin-bottom: 2rem;
+        }
+
+        .equipment-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-image-container {
+            position: relative;
+            overflow: hidden;
+            height: 300px;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.4s ease;
+        }
+
+        .equipment-card:hover .card-image {
+            transform: scale(1.05);
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(30, 58, 138, 0.8), rgba(37, 99, 235, 0.6));
+            opacity: 0;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .equipment-card:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .overlay-icon {
+            font-size: 3rem;
+            color: var(--accent-white);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 1rem;
+        }
+
+        .card-subtitle {
+            color: var(--academic-blue);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .spec-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .spec-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .spec-list li:last-child {
+            border-bottom: none;
+        }
+
+        .spec-list li i {
+            color: var(--secondary-yellow);
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-navy), #2563eb);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            color: var(--accent-white);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(30, 58, 138, 0.3);
+            color: var(--accent-white);
+        }
+
+        .lab-stats-section {
+            background: var(--bg-light);
+            padding: 80px 0;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: var(--accent-white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            color: var(--secondary-yellow);
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .academic-activities-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05), rgba(251, 191, 36, 0.05));
+        }
+
+        .activity-card {
+            background: var(--accent-white);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--academic-blue);
+        }
+
+        .activity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+        }
+
+        .activity-icon {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: var(--academic-blue);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .activity-title {
+            margin: 0 0 1rem 0;
+            color: var(--primary-navy);
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .activity-description {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .activity-details {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .activity-tag {
+            background: rgba(30, 58, 138, 0.1);
+            color: var(--primary-navy);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .application-item {
+            text-align: center;
+            padding: 2rem;
+            background: var(--accent-white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .application-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .application-icon {
+            font-size: 2.5rem;
+            color: var(--primary-navy);
+            margin-bottom: 1rem;
+        }
+
+        .application-title {
+            font-weight: 600;
+            color: var(--primary-navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .application-desc {
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-equipos {
+                padding: 80px 0 60px;
+            }
+            
+            .card-content {
+                padding: 1.5rem;
+            }
+            
+            .lab-stats-section, .academic-activities-section {
+                padding: 60px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    {% include 'navbar.html' %}
+
+    <!-- SECCIÓN EQUIPOS DESTACADOS -->
+    <section id="equipos" class="hero-equipos">
+        <div class="floating-icon"><i class="fas fa-cogs"></i></div>
+        <div class="floating-icon"><i class="fas fa-microscope"></i></div>
+        <div class="floating-icon"><i class="fas fa-university"></i></div>
+        
+        <div class="container">
+            <div class="hero-content text-center">
+                <h1 class="section-title animate__animated animate__fadeInUp">Equipos Destacados</h1>
+                <p class="lead mb-5 animate__animated animate__fadeInUp animate__delay-1s">
+                    Tecnología de vanguardia al servicio de la formación académica - EMI 2025
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- EQUIPO PRINCIPAL -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="equipment-card animate__animated animate__fadeInLeft">
+                        <div class="card-image-container">
+                            <img src="{% static 'images/cortadora-laser.jpeg' %}" alt="Cortadora Láser CNC" class="card-image">
+                            <div class="image-overlay">
+                                <i class="fas fa-graduation-cap overlay-icon"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h2 class="card-title">Cortadora Láser CNC de Fibra Óptica</h2>
+                            <p class="card-subtitle">Equipo de Formación Académica - IPG Photonics 3000W</p>
+                            <p class="text-muted mb-4">
+                                Este equipo de última generación permite a nuestros estudiantes experimentar con 
+                                tecnología industrial avanzada, desarrollando competencias técnicas fundamentales 
+                                para su formación profesional en ingeniería metalmecánica.
+                            </p>
+                            
+                            <h5 class="text-primary mb-3">Características Técnicas</h5>
+                            <ul class="spec-list">
+                                <li><i class="fas fa-bolt"></i><strong>Potencia:</strong> 3000W de fibra óptica</li>
+                                <li><i class="fas fa-expand-arrows-alt"></i><strong>Área de trabajo:</strong> 1500 x 3000 mm</li>
+                                <li><i class="fas fa-crosshairs"></i><strong>Precisión:</strong> ±0.03 mm</li>
+                                <li><i class="fas fa-tachometer-alt"></i><strong>Velocidad:</strong> Hasta 120 m/min</li>
+                                <li><i class="fas fa-layer-group"></i><strong>Capacidad:</strong> Múltiples materiales y espesores</li>
+                                <li><i class="fas fa-graduation-cap"></i><strong>Uso:</strong> Prácticas académicas y proyectos de investigación</li>
+                            </ul>
+                            
+                            <div class="d-flex gap-3">
+                                <a href="#actividades" class="btn-primary-custom">
+                                    <i class="fas fa-book-open me-2"></i>Ver Actividades
+                                </a>
+                                <a href="#proyectos" class="btn-primary-custom">
+                                    <i class="fas fa-project-diagram me-2"></i>Proyectos Estudiantiles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="applications-grid">
+                        <div class="application-item animate__animated animate__fadeInRight animate__delay-1s">
+                            <div class="application-icon">
+                                <i class="fas fa-flask"></i>
+                            </div>
+                            <h6 class="application-title">Investigación Aplicada</h6>
+                            <p class="application-desc">Proyectos de tesis y investigación estudiantil</p>
+                        </div>
+                        
+                        <div class="application-item animate__animated animate__fadeInRight animate__delay-2s">
+                            <div class="application-icon">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <h6 class="application-title">Prácticas de Laboratorio</h6>
+                            <p class="application-desc">Experiencias prácticas de manufactura avanzada</p>
+                        </div>
+                        
+                        <div class="application-item animate__animated animate__fadeInRight animate__delay-3s">
+                            <div class="application-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h6 class="application-title">Formación Estudiantil</h6>
+                            <p class="application-desc">Capacitación en tecnologías modernas</p>
+                        </div>
+                        
+                        <div class="application-item animate__animated animate__fadeInRight animate__delay-4s">
+                            <div class="application-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h6 class="application-title">Innovación</h6>
+                            <p class="application-desc">Desarrollo de prototipos y soluciones creativas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ESTADÍSTICAS DEL LABORATORIO -->
+    <section class="lab-stats-section">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-12">
+                    <h2 class="h1 text-primary mb-3">Impacto Académico</h2>
+                    <p class="lead text-muted">Nuestro laboratorio en cifras: formación e investigación universitaria</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card animate__animated animate__fadeInUp">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="stat-number">850+</div>
+                        <div class="stat-label">Estudiantes Formados</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card animate__animated animate__fadeInUp animate__delay-1s">
+                        <div class="stat-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="stat-number">120+</div>
+                        <div class="stat-label">Proyectos de Tesis</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card animate__animated animate__fadeInUp animate__delay-2s">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number">2400+</div>
+                        <div class="stat-label">Horas de Prácticas</div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card animate__animated animate__fadeInUp animate__delay-3s">
+                        <div class="stat-icon">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="stat-number">45+</div>
+                        <div class="stat-label">Cursos Especializados</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ACTIVIDADES ACADÉMICAS -->
+    <section class="academic-activities-section">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <h2 class="h1 text-primary mb-3">Actividades Académicas</h2>
+                    <p class="lead text-muted">Experiencias formativas que desarrollamos en nuestro laboratorio</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="activity-card animate__animated animate__fadeInUp">
+                        <div class="activity-icon">
+                            <i class="fas fa-microscope"></i>
+                        </div>
+                        <h5 class="activity-title">Prácticas de Laboratorio Avanzadas</h5>
+                        <p class="activity-description">
+                            Los estudiantes realizan prácticas dirigidas utilizando equipos de última generación, 
+                            aprendiendo principios de manufactura moderna y desarrollando habilidades técnicas 
+                            fundamentales para su carrera profesional.
+                        </p>
+                        <div class="activity-details">
+                            <span class="activity-tag">Ing. Mecánica</span>
+                            <span class="activity-tag">Ing. Industrial</span>
+                            <span class="activity-tag">8 semanas</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="activity-card animate__animated animate__fadeInUp animate__delay-1s">
+                        <div class="activity-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h5 class="activity-title">Proyectos de Tesis y Grado</h5>
+                        <p class="activity-description">
+                            Estudiantes de últimos semestres desarrollan sus proyectos de investigación utilizando 
+                            nuestros equipos, creando soluciones innovadoras y contribuyendo al conocimiento en 
+                            el área de metalmecánica.
+                        </p>
+                        <div class="activity-details">
+                            <span class="activity-tag">Investigación</span>
+                            <span class="activity-tag">Tesis</span>
+                            <span class="activity-tag">Individual</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="activity-card animate__animated animate__fadeInUp animate__delay-2s">
+                        <div class="activity-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h5 class="activity-title">Cursos de Especialización</h5>
+                        <p class="activity-description">
+                            Ofrecemos cursos especializados en tecnologías avanzadas de manufactura, permitiendo 
+                            a estudiantes y docentes mantenerse actualizados con las últimas tendencias de la industria.
+                        </p>
+                        <div class="activity-details">
+                            <span class="activity-tag">Capacitación</span>
+                            <span class="activity-tag">Certificación</span>
+                            <span class="activity-tag">Continua</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="activity-card animate__animated animate__fadeInUp animate__delay-3s">
+                        <div class="activity-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h5 class="activity-title">Competencias y Concursos</h5>
+                        <p class="activity-description">
+                            Organizamos y participamos en competencias estudiantiles que desafían la creatividad 
+                            y conocimientos técnicos de nuestros estudiantes, fomentando la innovación y el 
+                            trabajo en equipo.
+                        </p>
+                        <div class="activity-details">
+                            <span class="activity-tag">Competencia</span>
+                            <span class="activity-tag">Innovación</span>
+                            <span class="activity-tag">Equipos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- FOOTER -->
+    {% include 'footer.html' %}
+</body>
+</html>

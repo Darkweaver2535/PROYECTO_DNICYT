@@ -1,0 +1,205 @@
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'landing' %}">
+            <i class="fas fa-graduation-cap"></i>
+            EMI - Laboratorio Metal Mecánica
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item"><a class="nav-link" href="#destacadas">Destacadas</a></li>
+                <li class="nav-item"><a class="nav-link" href="#comunicados">Comunicados</a></li>
+                <li class="nav-item"><a class="nav-link" href="#multimedia">Multimedia</a></li>
+                <li class="nav-item"><a class="nav-link" href="#videos">Videos</a></li>
+                <!-- Dropdown para "Más" solo en escritorio -->
+                <li class="nav-item dropdown d-none d-lg-block position-relative">
+                    <a class="nav-link d-flex align-items-center gap-1" href="#" id="navbarMore" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span>Más</span>
+                    </a>
+                    <ul class="dropdown-menu custom-dropdown-menu dropdown-menu-end animate__animated" aria-labelledby="navbarMore">
+                        <li><a class="dropdown-item" href="#cursos"><i class="fas fa-chalkboard-teacher me-2 text-primary"></i> Cursos</a></li>
+                        <li><a class="dropdown-item" href="#laboratorio"><i class="fas fa-flask me-2 text-warning"></i> Laboratorio</a></li>
+                        <li><a class="dropdown-item" href="#documentos"><i class="fas fa-book me-2 text-success"></i> Documentos</a></li>
+                        <li><a class="dropdown-item" href="#contacto"><i class="fas fa-envelope me-2 text-danger"></i> Contacto</a></li>
+                    </ul>
+                </li>
+                <!-- Las opciones "extra" siguen visibles en móvil -->
+                <li class="nav-item d-lg-none"><a class="nav-link" href="#cursos">Cursos</a></li>
+                <li class="nav-item d-lg-none"><a class="nav-link" href="#laboratorio">Laboratorio</a></li>
+                <li class="nav-item d-lg-none"><a class="nav-link" href="#documentos">Documentos</a></li>
+                <li class="nav-item d-lg-none"><a class="nav-link" href="#contacto">Contacto</a></li>
+            </ul>
+            <a href="{% url 'equipos:equipo-lista' %}" class="btn btn-login ms-3">
+                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Incluye esto en el <head> de tu base.html o en tu CSS global -->
+<style>
+    :root {
+        --primary-navy: #1e3a8a;
+        --secondary-yellow: #fbbf24;
+        --accent-white: #ffffff;
+        --text-dark: #1f2937;
+        --bg-light: #f8fafc;
+    }
+
+    .navbar {
+        background: linear-gradient(135deg, var(--primary-navy) 0%, #2563eb 100%);
+        padding: 1rem 0;
+        box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: var(--accent-white) !important;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .navbar-nav .nav-link {
+        color: var(--accent-white) !important;
+        font-weight: 500;
+        margin: 0 10px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .navbar-nav .nav-link:hover {
+        color: var(--secondary-yellow) !important;
+        transform: translateY(-2px);
+    }
+
+    .navbar-nav .nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -5px;
+        left: 50%;
+        background-color: var(--secondary-yellow);
+        transition: all 0.3s ease;
+    }
+
+    .navbar-nav .nav-link:hover::after {
+        width: 100%;
+        left: 0;
+    }
+
+    .btn-login {
+        background: var(--secondary-yellow);
+        color: var(--primary-navy);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+    }
+
+    .btn-login:hover {
+        background: #f59e0b;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+    }
+
+    /* Footer */
+    .footer {
+        background: var(--primary-navy);
+        color: var(--accent-white);
+        padding: 50px 0 30px;
+    }
+
+    .footer h5 {
+        color: var(--secondary-yellow);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .footer ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .footer ul li {
+        margin-bottom: 10px;
+    }
+
+    .footer ul li a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .footer ul li a:hover {
+        color: var(--secondary-yellow);
+    }
+
+    .social-icons {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .social-icons a {
+        width: 40px;
+        height: 40px;
+        background: var(--secondary-yellow);
+        color: var(--primary-navy);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .social-icons a:hover {
+        background: #f59e0b;
+        transform: translateY(-3px);
+    }
+
+    /* Animación y estilo personalizado para el menú "Más" */
+    .custom-dropdown-menu {
+        background: linear-gradient(135deg, var(--primary-navy) 80%, #2563eb 100%);
+        border: none;
+        box-shadow: 0 8px 32px rgba(30,58,138,0.18);
+        min-width: 180px;
+        padding: 0.5rem 0;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.25s cubic-bezier(.4,0,.2,1), transform 0.25s cubic-bezier(.4,0,.2,1);
+    }
+    .custom-dropdown-menu.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .custom-dropdown-menu .dropdown-item {
+        color: #fff;
+        font-weight: 500;
+        border-radius: 0.375rem;
+        margin: 2px 8px;
+        transition: background 0.2s;
+    }
+    .custom-dropdown-menu .dropdown-item:hover, 
+    .custom-dropdown-menu .dropdown-item:focus {
+        background: var(--secondary-yellow);
+        color: var(--primary-navy);
+    }
+    .custom-dropdown-menu .dropdown-item i {
+        min-width: 20px;
+        text-align: center;
+    }
+</style>
+
