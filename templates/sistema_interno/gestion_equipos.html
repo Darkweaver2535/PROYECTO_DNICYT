@@ -1,0 +1,44 @@
+<!-- filepath: /Users/alvaroencinas/Desktop/PROY. ALTO IRPAVI/PROYECTO_DNICYT/templates/sistema_interno/gestion_equipos.html -->
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Equipos - Sistema de Inventario{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4">Gestión de Equipos</h1>
+    <p>Aquí puedes gestionar todos los equipos del sistema.</p>
+    
+    <!-- Add your content for the Gestión de Equipos module here -->
+    
+    <div class="card mt-3">
+        <div class="card-header">
+            <h5>Lista de Equipos</h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre del Equipo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Example row -->
+                    <tr>
+                        <td>1</td>
+                        <td>Equipo A</td>
+                        <td>Activo</td>
+                        <td>
+                            <a href="#" class="btn btn-primary btn-sm">Editar</a>
+                            <a href="#" class="btn btn-danger btn-sm">Eliminar</a>
+                        </td>
+                    </tr>
+                    <!-- More rows can be added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

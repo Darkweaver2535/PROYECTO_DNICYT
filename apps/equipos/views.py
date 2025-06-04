@@ -11,18 +11,18 @@ from django.http import JsonResponse
 
 class EquipoListView(ListView):
     model = Equipo
-    template_name = 'equipos/lista.html'
+    template_name = 'sistema_interno/inventario_equipos.html'  # Cambiado para usar tu ubicación personalizada
     context_object_name = 'equipos'
     paginate_by = 10
 
 class EquipoDetailView(DetailView):
     model = Equipo
-    template_name = 'equipos/detalle.html'
+    template_name = 'sistema_interno/detalle.html'  # Cambiado para usar tu ubicación personalizada
     context_object_name = 'equipo'
 
 class EquipoCreateView(CreateView):
     model = Equipo
-    template_name = 'equipos/crear.html'
+    template_name = 'sistema_interno/crear.html'  # Cambiado para usar tu ubicación personalizada
     fields = [
         'codigo_interno', 'nombre', 'modelo', 'serie', 'fabricante', 'año_fabricacion',
         'potencia', 'capacidad', 'ubicacion_fisica', 'seccion', 'tipo_equipo',
