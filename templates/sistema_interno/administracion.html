@@ -1,0 +1,41 @@
+<!-- filepath: /Users/alvaroencinas/Desktop/PROY. ALTO IRPAVI/PROYECTO_DNICYT/templates/sistema_interno/administracion.html -->
+{% extends 'base.html' %}
+
+{% block title %}Administración - Sistema de Inventario{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Administración</h1>
+    <p>Bienvenido al módulo de Administración. Aquí puedes gestionar usuarios, roles y permisos, así como realizar respaldos del sistema.</p>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Gestión de Usuarios</h5>
+        </div>
+        <div class="card-body">
+            <p>Administra los usuarios del sistema, asigna roles y permisos según sea necesario.</p>
+            <a href="#" class="btn btn-primary">Ver Usuarios</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Roles y Permisos</h5>
+        </div>
+        <div class="card-body">
+            <p>Define y gestiona los roles y permisos de los usuarios en el sistema.</p>
+            <a href="#" class="btn btn-primary">Ver Roles y Permisos</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Respaldos</h5>
+        </div>
+        <div class="card-body">
+            <p>Realiza respaldos de la base de datos y configura la frecuencia de los mismos.</p>
+            <a href="#" class="btn btn-primary">Realizar Respaldo</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

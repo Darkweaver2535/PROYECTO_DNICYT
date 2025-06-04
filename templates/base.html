@@ -27,12 +27,16 @@
             --text-dark: #1e293b;
             --text-light: #64748b;
             --border-color: #e2e8f0;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            --sidebar-width: 280px;
+            --sidebar-width: 300px;
             --navbar-height: 70px;
+            --transition-speed: 0.3s;
         }
 
         * {
@@ -101,8 +105,9 @@
             color: var(--pure-white);
             padding: 0.5rem;
             border-radius: 0.5rem;
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
             display: none;
+            cursor: pointer;
         }
 
         .sidebar-toggle:hover {
@@ -127,7 +132,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
             box-shadow: var(--shadow-md);
         }
 
@@ -150,26 +155,60 @@
             box-shadow: var(--shadow-xl);
             overflow-y: auto;
             z-index: 1020;
-            transition: transform 0.3s ease;
+            transition: transform var(--transition-speed) ease;
         }
 
         .sidebar-header {
             padding: 1.5rem;
             border-bottom: 1px solid var(--border-color);
             background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
+            position: relative;
         }
 
         .sidebar-title {
             font-size: 1.1rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary-blue);
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .sidebar-subtitle {
-            font-size: 0.875rem;
+            font-size: 0.825rem;
             color: var(--text-light);
-            margin: 0;
+            margin: 0.25rem 0 0 0;
+            font-weight: 500;
+        }
+
+        .sidebar-stats {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.375rem;
+            flex: 1;
+            margin: 0 0.25rem;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-size: 1rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .sidebar-nav {
@@ -177,21 +216,32 @@
         }
 
         .nav-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .nav-section-title {
             font-size: 0.75rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-light);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             padding: 0 1.5rem;
             margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-section-title::before {
+            content: '';
+            width: 3px;
+            height: 12px;
+            background: var(--primary-blue);
+            border-radius: 2px;
         }
 
         .nav-item {
-            margin: 0.25rem 1rem;
+            margin: 0.125rem 1rem;
         }
 
         .nav-link {
@@ -200,14 +250,15 @@
             padding: 0.75rem 1rem;
             color: var(--text-dark);
             text-decoration: none;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
+            border-radius: 0.625rem;
+            transition: all var(--transition-speed) ease;
             position: relative;
             font-weight: 500;
+            font-size: 0.875rem;
         }
 
         .nav-link:hover {
-            background: var(--light-blue);
+            background: linear-gradient(135deg, var(--light-blue), rgba(59, 130, 246, 0.1));
             color: var(--primary-blue);
             transform: translateX(4px);
         }
@@ -218,14 +269,41 @@
             box-shadow: var(--shadow-md);
         }
 
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 70%;
+            background: var(--primary-yellow);
+            border-radius: 0 2px 2px 0;
+        }
+
         .nav-link.disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
+            position: relative;
         }
 
         .nav-link.disabled:hover {
             background: transparent;
             transform: none;
+            color: var(--text-dark);
+        }
+
+        .nav-link.coming-soon::after {
+            content: 'Beta';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--warning-orange);
+            color: white;
+            font-size: 0.6rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
         }
 
         .nav-icon {
@@ -244,15 +322,70 @@
         .nav-badge {
             background: var(--primary-yellow);
             color: var(--text-dark);
-            font-size: 0.75rem;
-            padding: 0.125rem 0.5rem;
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
             border-radius: 1rem;
-            font-weight: 500;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-badge.soon {
+            background: var(--warning-orange);
+            color: white;
+        }
+
+        .nav-badge.beta {
+            background: var(--success-green);
+            color: white;
         }
 
         .nav-link.disabled .nav-badge {
             background: var(--text-light);
             color: var(--pure-white);
+        }
+
+        .nav-counter {
+            background: var(--danger-red);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 50%;
+            font-weight: 600;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Submenu Styles */
+        .nav-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-speed) ease;
+            background: var(--off-white);
+            margin: 0.25rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .nav-submenu.show {
+            max-height: 300px;
+        }
+
+        .nav-submenu .nav-link {
+            padding: 0.5rem 1rem 0.5rem 3rem;
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+
+        .nav-toggle {
+            margin-left: auto;
+            font-size: 0.875rem;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .nav-toggle.rotated {
+            transform: rotate(180deg);
         }
 
         /* Main Content */
@@ -261,7 +394,7 @@
             margin-top: var(--navbar-height);
             padding: 2rem;
             min-height: calc(100vh - var(--navbar-height));
-            transition: margin-left 0.3s ease;
+            transition: margin-left var(--transition-speed) ease;
             max-width: 100vw;
             overflow-x: hidden;
         }
@@ -277,7 +410,7 @@
             border: 1px solid var(--border-color);
             border-radius: 0.75rem;
             box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
         }
 
         .card:hover {
@@ -293,7 +426,7 @@
             padding: 0.625rem 1.25rem;
             border-radius: 0.5rem;
             box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
         }
 
         .btn-primary:hover {
@@ -309,7 +442,7 @@
             padding: 0.625rem 1.25rem;
             border-radius: 0.5rem;
             box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
         }
 
         .btn-warning:hover {
@@ -324,25 +457,10 @@
             font-weight: 600;
             border: none;
         }
+        
         .btn-marino:hover, .btn-marino:focus {
             background-color: #003f63 !important;
             color: #fff !important;
-        }
-
-        .btn-byn-disabled {
-            background: #fff !important;
-            color: #222 !important;
-            border: 1px solid #bbb;
-            font-weight: 600;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: var(--shadow-md);
-            pointer-events: none;
-            opacity: 0.7;
-            text-decoration: none;
         }
 
         /* Alerts */
@@ -360,7 +478,7 @@
             padding: 1.5rem 2rem;
             color: var(--text-light);
             font-size: 0.875rem;
-            transition: margin-left 0.3s ease;
+            transition: margin-left var(--transition-speed) ease;
         }
 
         /* Mobile Responsiveness */
@@ -397,6 +515,15 @@
             .navbar-brand img {
                 height: 32px;
             }
+
+            .sidebar-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .stat-item {
+                margin: 0;
+            }
         }
 
         @media (max-width: 576px) {
@@ -421,8 +548,21 @@
             }
         }
 
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
         .flash-message {
             animation: slideIn 0.3s ease;
+        }
+
+        .nav-badge.pulse {
+            animation: pulse 2s infinite;
         }
 
         /* Custom Scrollbar */
@@ -447,6 +587,56 @@
             max-width: 100vw;
             overflow-x: hidden;
         }
+
+        /* Loading states */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Botón flotante de retroceso */
+        .btn-fab-back {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 2000;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 24px rgba(251, 191, 36, 0.25);
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+            color: var(--text-dark);
+            border: none;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .btn-fab-back:hover {
+            box-shadow: 0 12px 32px rgba(251, 191, 36, 0.35);
+            transform: translateY(-3px) scale(1.07);
+            color: var(--text-dark);
+        }
+        @media (max-width: 600px) {
+            .btn-fab-back {
+                bottom: 16px;
+                right: 16px;
+                width: 48px;
+                height: 48px;
+                font-size: 1.3rem;
+            }
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -457,32 +647,19 @@
             <a class="navbar-brand d-flex align-items-center fw-bold" href="{% url 'equipos:equipo-lista' %}">
                 <div class="bg-white rounded shadow-sm d-flex align-items-center justify-content-center"
                      style="height:40px; min-width:40px; padding: 2px 10px;">
-                    <img src="{% static 'images/dnicyt.png' %}" alt="Logo EMI" style="height:32px; width:auto; display:block;">
+                    <img src="{% static 'images/1dnicyt.png' %}" alt="Logo EMI" style="height:32px; width:auto; display:block;">
                 </div>
                 <span class="ms-2 text-white">Sistema de Inventario - Lab Metal Mecánica</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="sidebar-toggle" id="sidebarToggle" type="button">
+                <i class="bi bi-list"></i>
             </button>
-            <div class="collapse navbar-collapse">
-                <!-- Menú principal centrado -->
-                <ul class="navbar-nav mx-auto gap-3">
-                    <!-- ... tus items de menú aquí ... -->
-                </ul>
-                <!-- Botón de sesión a la derecha -->
-                <div class="d-flex ms-auto">
-                    {% if request.user.is_authenticated %}
-                        <a href="{% url 'logout' %}" class="logout-btn ms-2">
-                            <i class="bi bi-box-arrow-right"></i>
-                            <span class="d-none d-sm-inline">Cerrar sesión</span>
-                        </a>
-                    {% else %}
-                        <span class="btn-byn-disabled ms-2">
-                            <i class="bi bi-box-arrow-in-right"></i>
-                            <span class="d-none d-sm-inline">Iniciar sesión</span>
-                            <span class="nav-badge ms-2">Próximamente</span>
-                        </span>
-                    {% endif %}
+            <div class="navbar-actions">
+                <div class="user-menu">
+                    <a href="{% url 'logout' %}" class="logout-btn">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span class="d-none d-sm-inline">Cerrar sesión</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -491,137 +668,319 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h5 class="sidebar-title">Lab Metal Mecánica</h5>
-            <p class="sidebar-subtitle">Sistema de Gestión Integral</p>
+            <h5 class="sidebar-title">
+                <i class="bi bi-gear-fill"></i>
+                Lab Metal Mecánica
+            </h5>
+            <p class="sidebar-subtitle">Sistema de Gestión Integral v2.0</p>
+            
+            <!-- Stats Dashboard -->
+            <div class="sidebar-stats">
+                <div class="stat-item">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">Equipos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Secciones</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Alertas</div>
+                </div>
+            </div>
         </div>
         
         <nav class="sidebar-nav">
+            <!-- Gestión de Equipos -->
             <div class="nav-section">
-                <div class="nav-section-title">Gestión Principal</div>
+                <div class="nav-section-title">
+                    <i class="bi bi-cpu"></i>
+                    Gestión de Equipos
+                </div>
                 <div class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'equipo-lista' %}active{% endif %}" 
-                       href="{% url 'equipos:equipo-lista' %}">
-                        <i class="nav-icon bi bi-cpu"></i>
-                        <span class="nav-text">Equipos</span>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'inventario_equipos' %}active{% endif %}" 
+                       href="{% url 'inventario_equipos' %}">
+                        <i class="nav-icon bi bi-list-ul"></i>
+                        <span class="nav-text">Inventario de Equipos</span>
                     </a>
                 </div>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">Operaciones</div>
+                <div class="nav-item">
+                    <a class="nav-link disabled coming-soon" href="#">
+                        <i class="nav-icon bi bi-qr-code"></i>
+                        <span class="nav-text">Códigos QR</span>
+                    </a>
+                </div>
                 <div class="nav-item">
                     <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-tools"></i>
-                        <span class="nav-text">Mantenimiento</span>
-                        <span class="nav-badge">Próximamente</span>
+                        <i class="nav-icon bi bi-clipboard-data"></i>
+                        <span class="nav-text">Fichas Técnicas</span>
+                        <span class="nav-badge soon">Próximamente</span>
                     </a>
                 </div>
             </div>
 
+            <!-- Mantenimiento -->
             <div class="nav-section">
-                <div class="nav-section-title">Administración</div>
+                <div class="nav-section-title">
+                    <i class="bi bi-tools"></i>
+                    Mantenimiento
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#" onclick="toggleSubmenu('maintenance-submenu', this)">
+                        <i class="nav-icon bi bi-calendar-check"></i>
+                        <span class="nav-text">Planes de Mantenimiento</span>
+                        <i class="nav-toggle bi bi-chevron-down"></i>
+                    </a>
+                    <div class="nav-submenu" id="maintenance-submenu">
+                        <a class="nav-link disabled" href="#">
+                            <span class="nav-text">Preventivo</span>
+                        </a>
+                        <a class="nav-link disabled" href="#">
+                            <span class="nav-text">Correctivo</span>
+                        </a>
+                        <a class="nav-link disabled" href="#">
+                            <span class="nav-text">Predictivo</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-wrench"></i>
+                        <span class="nav-text">Órdenes de Trabajo</span>
+                        <span class="nav-counter">5</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-journal-medical"></i>
+                        <span class="nav-text">Historial de Mantenimiento</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Operaciones -->
+            <div class="nav-section">
+                <div class="nav-section-title">
+                    <i class="bi bi-play-circle"></i>
+                    Operaciones
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-file-earmark-text"></i>
+                        <span class="nav-text">Procedimientos (POP)</span>
+                        <span class="nav-badge beta">Beta</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-exclamation-triangle"></i>
+                        <span class="nav-text">Diagnósticos</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-shield-check"></i>
+                        <span class="nav-text">Seguridad Industrial</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Inventario -->
+            <div class="nav-section">
+                <div class="nav-section-title">
+                    <i class="bi bi-boxes"></i>
+                    Inventario
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-box-seam"></i>
+                        <span class="nav-text">Repuestos</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-graph-down-arrow"></i>
+                        <span class="nav-text">Stock Crítico</span>
+                        <span class="nav-counter">2</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-cart-plus"></i>
+                        <span class="nav-text">Solicitudes de Compra</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Reportes -->
+            <div class="nav-section">
+                <div class="nav-section-title">
+                    <i class="bi bi-bar-chart"></i>
+                    Reportes y Análisis
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-file-earmark-bar-graph"></i>
+                        <span class="nav-text">Reportes de Equipos</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-graph-up"></i>
+                        <span class="nav-text">Análisis de Fallas</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-speedometer2"></i>
+                        <span class="nav-text">Dashboard</span>
+                        <span class="nav-badge pulse">Nuevo</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Administración -->
+            <div class="nav-section">
+                <div class="nav-section-title">
+                    <i class="bi bi-gear"></i>
+                    Administración
+                </div>
                 <div class="nav-item">
                     <a class="nav-link disabled" href="#">
                         <i class="nav-icon bi bi-people"></i>
                         <span class="nav-text">Usuarios</span>
-                        <span class="nav-badge">Próximamente</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a class="nav-link disabled" href="#">
                         <i class="nav-icon bi bi-shield-lock"></i>
-                        <span class="nav-text">Seguridad</span>
-                        <span class="nav-badge">Próximamente</span>
+                        <span class="nav-text">Roles y Permisos</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-arrow-clockwise"></i>
+                        <span class="nav-text">Respaldos</span>
                     </a>
                 </div>
             </div>
 
+            <!-- Capacitación -->
             <div class="nav-section">
-                <div class="nav-section-title">Desarrollo</div>
+                <div class="nav-section-title">
+                    <i class="bi bi-mortarboard"></i>
+                    Capacitación
+                </div>
                 <div class="nav-item">
                     <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-mortarboard"></i>
-                        <span class="nav-text">Capacitación</span>
-                        <span class="nav-badge">Próximamente</span>
+                        <i class="nav-icon bi bi-journal-bookmark"></i>
+                        <span class="nav-text">Cursos y Talleres</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-camera-video"></i>
+                        <span class="nav-text">Videos y Multimedia</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-file-earmark-text"></i>
+                        <span class="nav-text">Documentos Técnicos</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Normativas y Seguridad -->
+            <div class="nav-section">
+                <div class="nav-section-title">
+                    <i class="bi bi-shield-exclamation"></i>
+                    Normativas y Seguridad
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-clipboard-check"></i>
+                        <span class="nav-text">Normativas</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-shield-check"></i>
+                        <span class="nav-text">Seguridad Industrial</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-exclamation-triangle"></i>
+                        <span class="nav-text">Alertas y Riesgos</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sistemas y Administración -->
+            <div class="nav-section">
+                <div class="nav-section-title">
+                    <i class="bi bi-hdd-network"></i>
+                    Sistemas y Administración
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-qr-code-scan"></i>
+                        <span class="nav-text">Códigos QR</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-bar-chart-line"></i>
+                        <span class="nav-text">Reportes</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-people"></i>
+                        <span class="nav-text">Usuarios</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-shield-lock"></i>
+                        <span class="nav-text">Roles y Permisos</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link disabled" href="#">
+                        <i class="nav-icon bi bi-arrow-clockwise"></i>
+                        <span class="nav-text">Respaldos</span>
                     </a>
                 </div>
             </div>
         </nav>
     </aside>
-
     <!-- Main Content -->
     <main class="main-content">
         <div class="content-container">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show flash-message" role="alert">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-info-circle me-2"></i>
-                            {{ message }}
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-            
-            {% block content %}{% endblock %}
+            {% block content %}
+            <!-- Aquí va el contenido principal de cada sección -->
+            {% endblock %}
         </div>
     </main>
-
     <!-- Footer -->
-    <footer class="footer">
-        <div class="text-center">
-            <small>&copy; {{ now|date:"Y" }} Laboratorio Metal Mecánica - EMI. Todos los derechos reservados.</small>
+    <footer class="footer mt-auto">
+        <div class="container-fluid text-center">
+            <span>&copy; {{ year|default:2025 }} Lab Metal Mecánica - EMI. Todos los derechos reservados.</span>
         </div>
     </footer>
-
-    <!-- Bootstrap JS -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- DataTables JS -->
-    <script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-    
-    <script>
-        // Sidebar Toggle Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-            
-            if (sidebarToggle && sidebar) {
-                sidebarToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('show');
-                });
-
-                // Close sidebar when clicking outside on mobile
-                document.addEventListener('click', function(event) {
-                    if (window.innerWidth <= 991) {
-                        if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
-                            sidebar.classList.remove('show');
-                        }
-                    }
-                });
-
-                // Handle window resize
-                window.addEventListener('resize', function() {
-                    if (window.innerWidth > 991) {
-                        sidebar.classList.remove('show');
-                    }
-                });
-            }
-
-            // Auto-hide flash messages
-            setTimeout(function() {
-                const alerts = document.querySelectorAll('.flash-message');
-                alerts.forEach(function(alert) {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                });
-            }, 5000);
-        });
-    </script>
-    
-    {% block scripts %}{% endblock %}
+    {% block extra_js %}{% endblock %}
+    <!-- Botón flotante de retroceso -->
+    {% if request.resolver_match.url_name != 'inventario_equipos' %}
+    <a href="javascript:history.back()" 
+       class="btn btn-warning btn-fab-back"
+       title="Volver atrás">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    {% endif %}
 </body>
 </html>

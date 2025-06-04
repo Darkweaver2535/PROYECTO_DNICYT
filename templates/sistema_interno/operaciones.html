@@ -1,0 +1,32 @@
+<!-- filepath: /Users/alvaroencinas/Desktop/PROY. ALTO IRPAVI/PROYECTO_DNICYT/templates/sistema_interno/operaciones.html -->
+{% extends 'base.html' %}
+
+{% block title %}Operaciones - Sistema de Inventario{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Operaciones</h1>
+    <p>Bienvenido a la sección de Operaciones. Aquí podrás gestionar todos los procedimientos relacionados con las operaciones de mantenimiento y gestión de equipos.</p>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Procedimientos (POP)</h2>
+            <p>Accede a los procedimientos operativos estándar para asegurar la correcta operación de los equipos.</p>
+            <a href="#" class="btn btn-primary">Ver Procedimientos</a>
+        </div>
+        <div class="col-md-6">
+            <h2>Diagnósticos</h2>
+            <p>Consulta los diagnósticos realizados para los equipos y su estado actual.</p>
+            <a href="#" class="btn btn-primary">Ver Diagnósticos</a>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h2>Seguridad Industrial</h2>
+            <p>Revisa las normativas y procedimientos de seguridad industrial aplicables a las operaciones.</p>
+            <a href="#" class="btn btn-primary">Ver Normativas de Seguridad</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

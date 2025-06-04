@@ -1,0 +1,41 @@
+<!-- filepath: /Users/alvaroencinas/Desktop/PROY. ALTO IRPAVI/PROYECTO_DNICYT/templates/sistema_interno/reportes.html -->
+{% extends 'base.html' %}
+
+{% block title %}Reportes y Análisis - Sistema de Inventario{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Reportes y Análisis</h1>
+    <p>Aquí podrás encontrar los reportes y análisis relacionados con los equipos y su mantenimiento.</p>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Reportes Generales</h5>
+        </div>
+        <div class="card-body">
+            <p>Genera reportes sobre el estado de los equipos, mantenimientos realizados y más.</p>
+            <a href="#" class="btn btn-primary">Generar Reporte</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Análisis de Fallas</h5>
+        </div>
+        <div class="card-body">
+            <p>Accede a los análisis de fallas de los equipos para mejorar la gestión del mantenimiento.</p>
+            <a href="#" class="btn btn-primary">Ver Análisis</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Dashboard</h5>
+        </div>
+        <div class="card-body">
+            <p>Visualiza el rendimiento de los equipos y el estado de los mantenimientos en un solo lugar.</p>
+            <a href="#" class="btn btn-primary">Acceder al Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

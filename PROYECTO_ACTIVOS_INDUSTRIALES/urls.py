@@ -21,12 +21,13 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from views import landing  # Ajusta el import según tu estructura
 from django.views.generic import TemplateView
+from apps.equipos.views import EquipoListView  # Agrega este import
 
 urlpatterns = [
     path('', landing, name='landing'),
     path('admin/', admin.site.urls),
     path('equipos/', include('apps.equipos.urls')),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name="login.html"), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('destacadas/', TemplateView.as_view(template_name="secciones/destacadas.html"), name='destacadas'),
     path('comunicados/', TemplateView.as_view(template_name="secciones/comunicados.html"), name='comunicados'),
@@ -36,4 +37,5 @@ urlpatterns = [
     path('laboratorio/', TemplateView.as_view(template_name="secciones/laboratorio.html"), name='laboratorio'),
     path('documentos/', TemplateView.as_view(template_name="secciones/documentos.html"), name='documentos'),
     path('contacto/', TemplateView.as_view(template_name="secciones/contacto.html"), name='contacto'),
+    path('inventario/', EquipoListView.as_view(), name='inventario_equipos'),  # Cambia aquí
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
