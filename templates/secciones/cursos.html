@@ -1,7 +1,905 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="container py-5">
-    <h1>Cursos y Talleres</h1>
-    <p>Contenido de la sección Cursos y Talleres.</p>
-</div>
-{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursos Gratuitos - EMI Laboratorio Metal Mecánica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #1e3a8a;
+            --secondary-yellow: #fbbf24;
+            --accent-white: #ffffff;
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
+            --success-green: #10b981;
+            --info-blue: #3b82f6;
+            --university-purple: #7c3aed;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-navy) 0%, #1e40af 50%, var(--university-purple) 100%);
+            padding: 120px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23fbbf24" fill-opacity="0.1" points="0,1000 1000,0 1000,1000"/></svg>');
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent-white);
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--secondary-yellow), #f59e0b);
+            color: var(--primary-navy);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            animation: fadeInUp 1s ease-out 0.4s both;
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            text-align: center;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--secondary-yellow);
+            border-radius: 2px;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .course-card {
+            background: var(--accent-white);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 25px 70px rgba(0,0,0,0.15);
+            border-color: var(--secondary-yellow);
+        }
+
+        .course-header {
+            background: linear-gradient(135deg, var(--primary-navy) 0%, var(--university-purple) 100%);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="none" stroke="%23fbbf24" stroke-width="1" opacity="0.2"/><circle cx="20" cy="20" r="15" fill="none" stroke="%23fbbf24" stroke-width="1" opacity="0.1"/></svg>');
+            z-index: 1;
+        }
+
+        .course-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--secondary-yellow), #f59e0b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-navy);
+            font-size: 2.2rem;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+        }
+
+        .course-title {
+            color: var(--accent-white);
+            font-weight: 600;
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .course-level {
+            display: inline-block;
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--secondary-yellow);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 2;
+        }
+
+        .free-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--success-green);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 3;
+        }
+
+        .course-body {
+            padding: 2rem;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .meta-item i {
+            color: var(--secondary-yellow);
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+
+        .course-description {
+            color: #374151;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .course-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .course-features li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            color: #4b5563;
+        }
+
+        .course-features li i {
+            color: var(--success-green);
+            margin-right: 0.75rem;
+            width: 16px;
+        }
+
+        .instructor-info {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--university-purple);
+        }
+
+        .instructor-name {
+            font-weight: 600;
+            color: var(--primary-navy);
+            margin-bottom: 0.2rem;
+        }
+
+        .instructor-title {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .course-footer {
+            padding: 0 2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .course-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--success-green);
+        }
+
+        .btn-registrarse {
+            background: linear-gradient(135deg, var(--info-blue), #2563eb);
+            color: var(--accent-white);
+            border: none;
+            padding: 12px 32px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-registrarse:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: var(--accent-white);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-mas-info {
+            background: transparent;
+            color: var(--primary-navy);
+            border: 2px solid var(--primary-navy);
+            padding: 10px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-mas-info:hover {
+            background: var(--primary-navy);
+            color: var(--accent-white);
+            transform: translateY(-2px);
+        }
+
+        .featured-course {
+            position: relative;
+        }
+
+        .featured-course::before {
+            content: 'POPULAR';
+            position: absolute;
+            top: 20px;
+            left: -10px;
+            background: linear-gradient(135deg, var(--university-purple), #6d28d9);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transform: rotate(-5deg);
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+
+        .stats-section {
+            background: var(--primary-navy);
+            color: var(--accent-white);
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .stat-item {
+            padding: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--secondary-yellow);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .info-section {
+            background: linear-gradient(135deg, var(--bg-light) 0%, #e5e7eb 100%);
+            padding: 80px 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .info-card {
+            background: var(--accent-white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .info-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--info-blue), #3b82f6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+
+        .info-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-navy);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--university-purple) 0%, var(--primary-navy) 100%);
+            padding: 80px 0;
+            text-align: center;
+            color: var(--accent-white);
+        }
+
+        .cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-text {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn-cta {
+            background: linear-gradient(135deg, var(--secondary-yellow), #f59e0b);
+            color: var(--primary-navy);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-cta:hover {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: var(--primary-navy);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(251, 191, 36, 0.4);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .courses-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .course-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .course-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn-registrarse,
+            .btn-mas-info {
+                text-align: center;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .course-header,
+            .course-body {
+                padding: 1.5rem;
+            }
+            
+            .course-footer {
+                padding: 0 1.5rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Cursos Gratuitos</h1>
+                <p class="hero-subtitle">Formación especializada para la comunidad estudiantil de la EMI</p>
+                <div class="hero-badge">
+                    <i class="fas fa-gift"></i>
+                    100% Gratuito para Estudiantes SELLO EMI
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="info-section">
+        <div class="container">
+            <h2 class="section-title">¿Por qué ofrecemos estos cursos?</h2>
+            <p class="section-subtitle">Nuestro compromiso es fortalecer la formación práctica de nuestros estudiantes y promover el aprendizaje colaborativo en la comunidad universitaria.</p>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="info-title">Formación Complementaria</h3>
+                    <p>Complementa tu educación formal con habilidades prácticas demandadas en la industria actual.</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="info-title">Comunidad Universitaria</h3>
+                    <p>Exclusivo para estudiantes, docentes y personal de la EMI. Aprende junto a tus compañeros.</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3 class="info-title">Equipos de Vanguardia</h3>
+                    <p>Acceso directo a nuestro laboratorio con tecnología de última generación.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Programas Disponibles</h2>
+            <p class="section-subtitle">Cursos impartidos por nuestro equipo técnico especializado, diseñados para estudiantes de ingeniería</p>
+            
+            <div class="courses-grid">
+                <!-- Curso 1 - Popular -->
+                <div class="course-card featured-course">
+                    <div class="free-badge">GRATIS</div>
+                    <img src="{% static 'images/instalaciones.png' %}" alt="Miniatura Introducción a Metalmecánica" class="img-fluid rounded-top" style="width:100%; height:180px; object-fit:cover;">
+                    <div class="course-header">
+                        <div class="course-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h3 class="course-title">Introducción a Metalmecánica</h3>
+                        <span class="course-level">Nivel Inicial</span>
+                    </div>
+                    <div class="course-body">
+                        <div class="course-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>20 horas</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>20 cupos</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>4 semanas</span>
+                            </div>
+                        </div>
+                        <div class="instructor-info">
+                            <div class="instructor-name">Ing. Carlos Mendoza</div>
+                            <div class="instructor-title">Responsable Técnico del Laboratorio</div>
+                        </div>
+                        <p class="course-description">
+                            Curso introductorio que cubre los fundamentos teóricos y prácticos de la metalmecánica. Ideal para estudiantes de primeros semestres que buscan familiarizarse con el laboratorio.
+                        </p>
+                        <ul class="course-features">
+                            <li><i class="fas fa-check"></i>Fundamentos teóricos esenciales</li>
+                            <li><i class="fas fa-check"></i>Prácticas supervisadas</li>
+                            <li><i class="fas fa-check"></i>Certificado de participación</li>
+                            <li><i class="fas fa-check"></i>Material digital incluido</li>
+                        </ul>
+                    </div>
+                    <div class="course-footer">
+                        <div class="course-status">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Inscripciones Abiertas</span>
+                        </div>
+                        <a href="#" class="btn-registrarse">
+                            <i class="fas fa-user-plus"></i>
+                            Registrarse
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Curso 2 -->
+                <div class="course-card">
+                    <div class="free-badge">GRATIS</div>
+                    <img src="{% static 'images/soldadura_avanzada.png' %}" alt="Miniatura Soldadura para Estudiantes" class="img-fluid rounded-top" style="width:100%; height:180px; object-fit:cover;">
+                    <div class="course-header">
+                        <div class="course-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <h3 class="course-title">Soldadura para Estudiantes</h3>
+                        <span class="course-level">Nivel Intermedio</span>
+                    </div>
+                    <div class="course-body">
+                        <div class="course-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>16 horas</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>12 cupos</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>3 semanas</span>
+                            </div>
+                        </div>
+                        <div class="instructor-info">
+                            <div class="instructor-name">Téc. María Rodriguez</div>
+                            <div class="instructor-title">Especialista en Soldadura</div>
+                        </div>
+                        <p class="course-description">
+                            Aprende las técnicas básicas de soldadura eléctrica y MIG. Curso práctico con énfasis en seguridad industrial y buenas prácticas.
+                        </p>
+                        <ul class="course-features">
+                            <li><i class="fas fa-check"></i>Soldadura eléctrica y MIG</li>
+                            <li><i class="fas fa-check"></i>Normas de seguridad</li>
+                            <li><i class="fas fa-check"></i>Equipo de protección incluido</li>
+                            <li><i class="fas fa-check"></i>Evaluación práctica</li>
+                        </ul>
+                    </div>
+                    <div class="course-footer">
+                        <div class="course-status">
+                            <i class="fas fa-clock"></i>
+                            <span>Próximamente</span>
+                        </div>
+                        <a href="#" class="btn-mas-info">
+                            <i class="fas fa-info-circle"></i>
+                            Más Info
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Curso 3 -->
+                <div class="course-card">
+                    <div class="free-badge">GRATIS</div>
+                    <img src="{% static 'images/fresado_cnc.jpg.avif' %}" alt="Miniatura Iniciación al Control CNC" class="img-fluid rounded-top" style="width:100%; height:180px; object-fit:cover;">
+                    <div class="course-header">
+                        <div class="course-icon">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <h3 class="course-title">Iniciación al Control CNC</h3>
+                        <span class="course-level">Nivel Avanzado</span>
+                    </div>
+                    <div class="course-body">
+                        <div class="course-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>24 horas</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>8 cupos</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>4 semanas</span>
+                            </div>
+                        </div>
+                        <div class="instructor-info">
+                            <div class="instructor-name">Ing. Ana Vargas</div>
+                            <div class="instructor-title">Especialista en Automatización</div>
+                        </div>
+                        <p class="course-description">
+                            Introducción al mundo del control numérico computarizado. Programación básica y operación de equipos CNC del laboratorio.
+                        </p>
+                        <ul class="course-features">
+                            <li><i class="fas fa-check"></i>Programación CNC básica</li>
+                            <li><i class="fas fa-check"></i>Operación segura de equipos</li>
+                            <li><i class="fas fa-check"></i>Proyecto final</li>
+                            <li><i class="fas fa-check"></i>Requisito: conocimientos básicos</li>
+                        </ul>
+                    </div>
+                    <div class="course-footer">
+                        <div class="course-status">
+                            <i class="fas fa-users"></i>
+                            <span>Cupos Limitados</span>
+                        </div>
+                        <a href="#" class="btn-registrarse">
+                            <i class="fas fa-user-plus"></i>
+                            Registrarse
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Curso 4 -->
+                <div class="course-card">
+                    <div class="free-badge">GRATIS</div>
+                    <img src="{% static 'images/2cortadora_laser.jpg' %}" alt="Miniatura Corte Láser - Taller Práctico" class="img-fluid rounded-top" style="width:100%; height:180px; object-fit:cover;">
+                    <div class="course-header">
+                        <div class="course-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3 class="course-title">Corte Láser - Taller Práctico</h3>
+                        <span class="course-level">Nivel Intermedio</span>
+                    </div>
+                    <div class="course-body">
+                        <div class="course-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>12 horas</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>10 cupos</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>2 semanas</span>
+                            </div>
+                        </div>
+                        <div class="instructor-info">
+                            <div class="instructor-name">Téc. Roberto Silva</div>
+                            <div class="instructor-title">Operador Especializado DXTECH</div>
+                        </div>
+                        <p class="course-description">
+                            Taller práctico para aprender el manejo de nuestra cortadora láser DXTECH. Desde el diseño hasta el corte final de piezas.
+                        </p>
+                        <ul class="course-features">
+                            <li><i class="fas fa-check"></i>Operación de cortadora DXTECH</li>
+                            <li><i class="fas fa-check"></i>Diseño para corte láser</li>
+                            <li><i class="fas fa-check"></i>Optimización de materiales</li>
+                            <li><i class="fas fa-check"></i>Proyecto personal</li>
+                        </ul>
+                    </div>
+                    <div class="course-footer">
+                        <div class="course-status">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Disponible</span>
+                        </div>
+                        <a href="#" class="btn-registrarse">
+                            <i class="fas fa-user-plus"></i>
+                            Registrarse
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Curso 5 -->
+                <div class="course-card">
+                    <div class="free-badge">GRATIS</div>
+                    <img src="{% static 'images/proyectos.png' %}" alt="Miniatura Seguridad Industrial en el Taller" class="img-fluid rounded-top" style="width:100%; height:180px; object-fit:cover;">
+                    <div class="course-header">
+                        <div class="course-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="course-title">Seguridad Industrial en el Taller</h3>
+                        <span class="course-level">Nivel Básico</span>
+                    </div>
+                    <div class="course-body">
+                        <div class="course-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>8 horas</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>20 cupos</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>1 semana</span>
+                            </div>
+                        </div>
+                        <div class="instructor-info">
+                            <div class="instructor-name">Lic. Paola Guzmán</div>
+                            <div class="instructor-title">Especialista en Seguridad Industrial</div>
+                        </div>
+                        <p class="course-description">
+                            Aprende las normas y mejores prácticas para trabajar de forma segura en el laboratorio y talleres de metalmecánica.
+                        </p>
+                        <ul class="course-features">
+                            <li><i class="fas fa-check"></i>Normas de seguridad EMI</li>
+                            <li><i class="fas fa-check"></i>Uso correcto de EPP</li>
+                            <li><i class="fas fa-check"></i>Simulacros y primeros auxilios</li>
+                            <li><i class="fas fa-check"></i>Certificado de aprobación</li>
+                        </ul>
+                    </div>
+                    <div class="course-footer">
+                        <div class="course-status">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Disponible</span>
+                        </div>
+                        <a href="#" class="btn-registrarse">
+                            <i class="fas fa-user-plus"></i>
+                            Registrarse
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Estadísticas de Cursos -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">250+</span>
+                    <span class="stat-label">Estudiantes Capacitados</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">15</span>
+                    <span class="stat-label">Cursos Impartidos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">8</span>
+                    <span class="stat-label">Instructores Certificados</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Práctica en Laboratorio</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección CTA -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">¿Listo para potenciar tus habilidades?</h2>
+                <p class="cta-text">
+                    Inscríbete hoy y sé parte de la comunidad EMI que transforma la ingeniería con práctica y tecnología de vanguardia.
+                </p>
+                <a href="mailto:info@emi.edu.bo" class="btn-cta">
+                    <i class="fas fa-envelope"></i>
+                    Contactar al Laboratorio
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {% include 'footer.html' %}
+</body>
+</html>

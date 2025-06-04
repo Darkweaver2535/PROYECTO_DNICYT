@@ -1,7 +1,847 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="container py-5">
-    <h1>Documentos</h1>
-    <p>Contenido de la sección Documentos.</p>
-</div>
-{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentos - EMI Laboratorio Metal Mecánica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #1e3a8a;
+            --secondary-yellow: #fbbf24;
+            --accent-white: #ffffff;
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-navy) 0%, #1e40af 50%, #2563eb 100%);
+            color: var(--accent-white);
+            padding: 120px 0 80px 0;
+            position: relative;
+            overflow: hidden;
+            margin-top: 76px; /* Account for fixed navbar */
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23fbbf24" fill-opacity="0.1" points="0,1000 1000,0 1000,1000"/></svg>');
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: rgba(255,255,255,0.9);
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-yellow);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            text-align: center;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--secondary-yellow);
+            border-radius: 2px;
+        }
+
+        /* Document Grid */
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .doc-card {
+            background: var(--accent-white);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(30,58,138,0.08);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+            min-height: 380px;
+            overflow: hidden;
+        }
+
+        .doc-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-yellow), #f59e0b);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 80px rgba(30,58,138,0.15);
+            border-color: var(--secondary-yellow);
+        }
+
+        .doc-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .doc-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .doc-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--secondary-yellow), #f59e0b);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-navy);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .doc-card:hover .doc-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .doc-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--primary-navy);
+            margin: 0;
+            flex: 1;
+        }
+
+        .doc-desc {
+            color: #374151;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        .doc-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 12px;
+            border-left: 4px solid var(--secondary-yellow);
+        }
+
+        .doc-date {
+            color: #6b7280;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .doc-size {
+            background: var(--primary-navy);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: auto;
+        }
+
+        .doc-link {
+            background: var(--secondary-yellow);
+            color: var(--primary-navy);
+            border-radius: 25px;
+            padding: 12px 24px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(251,191,36,0.3);
+            flex: 1;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .doc-link:hover {
+            background: #f59e0b;
+            color: var(--primary-navy);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(251,191,36,0.4);
+        }
+
+        .doc-link-secondary {
+            background: transparent;
+            color: var(--primary-navy);
+            border: 2px solid var(--primary-navy);
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .doc-link-secondary:hover {
+            background: var(--primary-navy);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Categories Filter */
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background: white;
+            color: var(--primary-navy);
+            border: 2px solid var(--primary-navy);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filter-tab:hover,
+        .filter-tab.active {
+            background: var(--primary-navy);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Search Bar */
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto 3rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary-yellow);
+            box-shadow: 0 0 0 3px rgba(251,191,36,0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .docs-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .doc-card {
+                padding: 1.5rem;
+                min-height: 350px;
+            }
+
+            .doc-actions {
+                flex-direction: column;
+            }
+
+            .filter-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+
+            .section {
+                padding: 60px 0;
+            }
+
+            .doc-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .doc-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .hero-section,
+            .filter-tabs,
+            .search-container {
+                display: none;
+            }
+
+            .doc-card {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+                margin-bottom: 1rem;
+            }
+
+            .doc-actions {
+                display: none;
+            }
+        }
+
+        /* Accessibility */
+        .doc-card:focus-within {
+            outline: 3px solid var(--secondary-yellow);
+            outline-offset: 2px;
+        }
+
+        .doc-link:focus,
+        .doc-link-secondary:focus {
+            outline: 2px solid var(--primary-navy);
+            outline-offset: 2px;
+        }
+
+        /* Loading State */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 hero-content">
+                    <h1 class="hero-title">
+                        <i class="fas fa-folder-open me-3"></i>
+                        Centro de Documentos
+                    </h1>
+                    <p class="hero-subtitle">
+                        Accede a manuales técnicos, reglamentos, actas y documentos oficiales del Laboratorio de Metal Mecánica EMI. 
+                        Información transparente, actualizada y de calidad para toda la comunidad universitaria.
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">15+</span>
+                            <span class="stat-label">Documentos</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">5</span>
+                            <span class="stat-label">Categorías</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">2024</span>
+                            <span class="stat-label">Actualizado</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 d-flex justify-content-center">
+                    <div style="font-size: 12rem; color: rgba(251, 191, 36, 0.2);">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documents Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Documentos Disponibles</h2>
+            <p class="section-subtitle">
+                Encuentra toda la documentación técnica y oficial necesaria para el correcto funcionamiento del laboratorio
+            </p>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="position-relative">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Buscar documentos..." id="searchInput">
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-category="all">
+                    <i class="fas fa-th-large me-2"></i>Todos
+                </button>
+                <button class="filter-tab" data-category="manuales">
+                    <i class="fas fa-book me-2"></i>Manuales
+                </button>
+                <button class="filter-tab" data-category="seguridad">
+                    <i class="fas fa-shield-alt me-2"></i>Seguridad
+                </button>
+                <button class="filter-tab" data-category="organizacion">
+                    <i class="fas fa-sitemap me-2"></i>Organización
+                </button>
+                <button class="filter-tab" data-category="procedimientos">
+                    <i class="fas fa-clipboard-list me-2"></i>Procedimientos
+                </button>
+            </div>
+
+            <!-- Documents Grid -->
+            <div class="docs-grid" id="documentsGrid">
+                <!-- Organigrama -->
+                <div class="doc-card" data-category="organizacion">
+                    <div class="doc-header">
+                        <div class="doc-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <h3 class="doc-title">Organigrama del Laboratorio</h3>
+                    </div>
+                    <p class="doc-desc">
+                        Estructura jerárquica y funcional completa del laboratorio, detallando roles, responsabilidades 
+                        y la interconexión entre las diferentes áreas operativas y administrativas.
+                    </p>
+                    <div class="doc-meta">
+                        <div class="doc-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>15 de mayo, 2024</span>
+                        </div>
+                        <div class="doc-size">2.1 MB</div>
+                    </div>
+                    <div class="doc-actions">
+                        <a href="{% static 'docs/organigrama.pdf' %}" class="doc-link" target="_blank">
+                            <i class="fas fa-download"></i>Descargar PDF
+                        </a>
+                        <a href="#" class="doc-link-secondary">
+                            <i class="fas fa-eye"></i>Vista previa
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Manual CNC -->
+                <div class="doc-card" data-category="manuales">
+                    <div class="doc-header">
+                        <div class="doc-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3 class="doc-title">Manual de Operación CNC</h3>
+                    </div>
+                    <p class="doc-desc">
+                        Guía técnica exhaustiva para la operación segura y eficiente de las máquinas de Control Numérico 
+                        Computarizado, incluyendo procedimientos de mantenimiento y resolución de problemas.
+                    </p>
+                    <div class="doc-meta">
+                        <div class="doc-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>28 de junio, 2024</span>
+                        </div>
+                        <div class="doc-size">5.7 MB</div>
+                    </div>
+                    <div class="doc-actions">
+                        <a href="{% static 'docs/manual_cnc.pdf' %}" class="doc-link" target="_blank">
+                            <i class="fas fa-download"></i>Descargar PDF
+                        </a>
+                        <a href="#" class="doc-link-secondary">
+                            <i class="fas fa-eye"></i>Vista previa
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Actas de Seguridad -->
+                <div class="doc-card" data-category="seguridad">
+                    <div class="doc-header">
+                        <div class="doc-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="doc-title">Actas de Seguridad e Higiene</h3>
+                    </div>
+                    <p class="doc-desc">
+                        Compendio de actas y reportes del comité de seguridad industrial y salud ocupacional, 
+                        incluyendo protocolos de emergencia y evaluaciones de riesgo actualizadas.
+                    </p>
+                    <div class="doc-meta">
+                        <div class="doc-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>10 de junio, 2024</span>
+                        </div>
+                        <div class="doc-size">3.2 MB</div>
+                    </div>
+                    <div class="doc-actions">
+                        <a href="{% static 'docs/actas_seguridad.pdf' %}" class="doc-link" target="_blank">
+                            <i class="fas fa-download"></i>Descargar PDF
+                        </a>
+                        <a href="#" class="doc-link-secondary">
+                            <i class="fas fa-eye"></i>Vista previa
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Procedimientos de Soldadura -->
+                <div class="doc-card" data-category="procedimientos">
+                    <div class="doc-header">
+                        <div class="doc-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <h3 class="doc-title">Procedimientos de Soldadura</h3>
+                    </div>
+                    <p class="doc-desc">
+                        Manual técnico detallado de procedimientos de soldadura, incluyendo técnicas avanzadas, 
+                        parámetros óptimos y estándares de calidad para diferentes tipos de materiales.
+                    </p>
+                    <div class="doc-meta">
+                        <div class="doc-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>5 de julio, 2024</span>
+                        </div>
+                        <div class="doc-size">4.1 MB</div>
+                    </div>
+                    <div class="doc-actions">
+                        <a href="{% static 'docs/procedimientos_soldadura.pdf' %}" class="doc-link" target="_blank">
+                            <i class="fas fa-download"></i>Descargar PDF
+                        </a>
+                        <a href="#" class="doc-link-secondary">
+                            <i class="fas fa-eye"></i>Vista previa
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Manual de Equipos -->
+                <div class="doc-card" data-category="manuales">
+                    <div class="doc-header">
+                        <div class="doc-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h3 class="doc-title">Manual de Equipos Especializados</h3>
+                    </div>
+                    <p class="doc-desc">
+                        Documentación completa sobre el uso y mantenimiento de equipos especializados del laboratorio, 
+                        incluyendo cortadoras láser, prensas hidráulicas y fresadoras de precisión.
+                    </p>
+                    <div class="doc-meta">
+                        <div class="doc-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>22 de junio, 2024</span>
+                        </div>
+                        <div class="doc-size">6.8 MB</div>
+                    </div>
+                    <div class="doc-actions">
+                        <a href="{% static 'docs/manual_equipos.pdf' %}" class="doc-link" target="_blank">
+                            <i class="fas fa-download"></i>Descargar PDF
+                        </a>
+                        <a href="#" class="doc-link-secondary">
+                            <i class="fas fa-eye"></i>Vista previa
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Reglamento Interno -->
+                <div class="doc-card" data-category="organizacion">
+                    <div class="doc-header">
+                        <div class="doc-icon">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                        <h3 class="doc-title">Reglamento Interno</h3>
+                    </div>
+                    <p class="doc-desc">
+                        Normativas internas del laboratorio que establecen las reglas de conducta, uso de instalaciones, 
+                        horarios de operación y responsabilidades de estudiantes y personal académico.
+                    </p>
+                    <div class="doc-meta">
+                        <div class="doc-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>1 de marzo, 2024</span>
+                        </div>
+                        <div class="doc-size">1.9 MB</div>
+                    </div>
+                    <div class="doc-actions">
+                        <a href="{% static 'docs/reglamento_interno.pdf' %}" class="doc-link" target="_blank">
+                            <i class="fas fa-download"></i>Descargar PDF
+                        </a>
+                        <a href="#" class="doc-link-secondary">
+                            <i class="fas fa-eye"></i>Vista previa
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'footer.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Loading animation
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '1';
+        });
+
+        // Filter functionality
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const docCards = document.querySelectorAll('.doc-card');
+
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Update active tab
+                filterTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const category = this.dataset.category;
+                
+                // Filter documents
+                docCards.forEach(card => {
+                    if (category === 'all' || card.dataset.category === category) {
+                        card.style.display = 'flex';
+                        card.style.animation = 'fadeInUp 0.5s ease-out';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            docCards.forEach(card => {
+                const title = card.querySelector('.doc-title').textContent.toLowerCase();
+                const desc = card.querySelector('.doc-desc').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || desc.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all document cards
+        docCards.forEach(card => {
+            observer.observe(card);
+        });
+
+        // Download tracking (optional)
+        const downloadLinks = document.querySelectorAll('.doc-link[href*=".pdf"]');
+        downloadLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                // Track download analytics here if needed
+                console.log('Document downloaded:', this.href);
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Keyboard navigation for cards
+        docCards.forEach(card => {
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const primaryLink = card.querySelector('.doc-link');
+                    if (primaryLink) {
+                        primaryLink.click();
+                    }
+                }
+            });
+        });
+
+        // Add tooltips for better UX
+        const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        if (typeof bootstrap !== 'undefined') {
+            const tooltipList = [...tooltipElements].map(tooltipTriggerEl => 
+                new bootstrap.Tooltip(tooltipTriggerEl)
+            );
+        }
+    </script>
+</body>
+</html>
