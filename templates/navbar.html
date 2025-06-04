@@ -1,9 +1,11 @@
 <!-- Navigation -->
+ {% load static %} 
+
 <nav class="navbar navbar-expand-lg">
     <div class="container">
         <a class="navbar-brand" href="{% url 'landing' %}">
-            <i class="fas fa-graduation-cap"></i>
-            EMI - Laboratorio Metal Mecánica
+            <img src="{% static 'images/1dnicyt.png' %}" alt="Logo Universidad" class="navbar-logo">
+            <span class="brand-text">Laboratorio Metal Mecánica - EMI</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -39,7 +41,6 @@
     </div>
 </nav>
 
-<!-- Incluye esto en el <head> de tu base.html o en tu CSS global -->
 <style>
     :root {
         --primary-navy: #1e3a8a;
@@ -51,7 +52,7 @@
 
     .navbar {
         background: linear-gradient(135deg, var(--primary-navy) 0%, #2563eb 100%);
-        padding: 1rem 0;
+        padding: 0.8rem 0;
         box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
         position: fixed;
         top: 0;
@@ -62,11 +63,74 @@
 
     .navbar-brand {
         font-weight: bold;
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         color: var(--accent-white) !important;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand:hover {
+        color: var(--secondary-yellow) !important;
+        transform: scale(1.02);
+    }
+
+    .navbar-logo {
+        height: 45px;
+        width: auto;
+        max-width: 50px;
+        object-fit: contain;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 4px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .navbar-logo:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand-text {
+        font-size: 1.3rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+    }
+
+    /* Responsivo para móviles */
+    @media (max-width: 768px) {
+        .navbar {
+            padding: 0.6rem 0;
+        }
+        
+        .navbar-logo {
+            height: 35px;
+            max-width: 40px;
+        }
+        
+        .brand-text {
+            font-size: 1.1rem;
+        }
+        
+        .navbar-brand {
+            gap: 8px;
+        }
+    }
+
+    /* Para pantallas muy pequeñas, mostrar solo el logo */
+    @media (max-width: 480px) {
+        .brand-text {
+            display: none;
+        }
+        
+        .navbar-logo {
+            height: 40px;
+            max-width: 45px;
+        }
     }
 
     .navbar-nav .nav-link {
@@ -113,6 +177,7 @@
         background: #f59e0b;
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+        color: var(--primary-navy);
     }
 
     /* Footer */
@@ -181,10 +246,12 @@
         transform: translateY(10px);
         transition: opacity 0.25s cubic-bezier(.4,0,.2,1), transform 0.25s cubic-bezier(.4,0,.2,1);
     }
+    
     .custom-dropdown-menu.show {
         opacity: 1;
         transform: translateY(0);
     }
+    
     .custom-dropdown-menu .dropdown-item {
         color: #fff;
         font-weight: 500;
@@ -192,14 +259,15 @@
         margin: 2px 8px;
         transition: background 0.2s;
     }
+    
     .custom-dropdown-menu .dropdown-item:hover, 
     .custom-dropdown-menu .dropdown-item:focus {
         background: var(--secondary-yellow);
         color: var(--primary-navy);
     }
+    
     .custom-dropdown-menu .dropdown-item i {
         min-width: 20px;
         text-align: center;
     }
 </style>
-

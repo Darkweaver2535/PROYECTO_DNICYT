@@ -1,7 +1,706 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="container py-5">
-    <h1>Conoce el Laboratorio</h1>
-    <p>Contenido de la sección Conoce el Laboratorio.</p>
-</div>
-{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conoce el Laboratorio - EMI Metal Mecánica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #1e3a8a;
+            --secondary-yellow: #fbbf24;
+            --accent-white: #ffffff;
+            --text-dark: #1f2937;
+            --bg-light: #f8fafc;
+            --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            overflow-x: hidden;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Hero Section Mejorado */
+        .hero-section {
+            background: var(--gradient-primary);
+            color: var(--accent-white);
+            padding: 120px 0 80px 0;
+            position: relative;
+            overflow: hidden;
+            min-height: 70vh;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23fbbf24" fill-opacity="0.08" points="0,1000 1000,0 1000,1000"/></svg>');
+            z-index: 1;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            right: -5%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(251,191,36,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 1s ease-out;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 2.5rem;
+            color: rgba(255,255,255,0.9);
+            animation: fadeInUp 1s ease-out 0.2s both;
+            line-height: 1.7;
+        }
+
+        .hero-features {
+            list-style: none;
+            padding: 0;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .hero-features li {
+            padding: 0.8rem 0;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.95);
+        }
+
+        .hero-features li::before {
+            content: '✓';
+            background: var(--secondary-yellow);
+            color: var(--primary-navy);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .hero-image {
+            position: relative;
+            z-index: 2;
+            animation: fadeInRight 1s ease-out 0.6s both;
+        }
+
+        .hero-image img {
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-image:hover img {
+            transform: scale(1.05) rotate(-2deg);
+        }
+
+        .floating-icon {
+            position: absolute;
+            font-size: 6rem;
+            color: rgba(251,191,36,0.15);
+            right: 5%;
+            bottom: 10%;
+            z-index: 1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Secciones Mejoradas */
+        .section {
+            padding: 90px 0;
+            position: relative;
+        }
+
+        .section:nth-child(even) {
+            background: var(--bg-light);
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            text-align: center;
+            margin-bottom: 3.5rem;
+            position: relative;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-yellow), #f59e0b);
+            border-radius: 2px;
+        }
+
+        /* Cards Mejoradas */
+        .lab-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .lab-card {
+            background: var(--accent-white);
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(30,58,138,0.08);
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lab-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(251,191,36,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .lab-card:hover::before {
+            left: 100%;
+        }
+
+        .lab-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 80px rgba(30,58,138,0.15);
+            border: 2px solid var(--secondary-yellow);
+        }
+
+        .lab-card img {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 18px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 25px rgba(30,58,138,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .lab-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .lab-icon {
+            font-size: 2.5rem;
+            color: var(--primary-navy);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--secondary-yellow), #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lab-title {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: var(--primary-navy);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .lab-desc {
+            color: #4b5563;
+            text-align: center;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .lab-meta {
+            color: var(--secondary-yellow);
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            background: rgba(251,191,36,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        /* Sección de Valores Mejorada */
+        .values-section {
+            background: var(--gradient-primary);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .values-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="%23fbbf24" opacity="0.1"/><circle cx="80" cy="40" r="1.5" fill="%23fbbf24" opacity="0.1"/><circle cx="40" cy="80" r="1" fill="%23fbbf24" opacity="0.1"/></svg>');
+            z-index: 1;
+        }
+
+        .values-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .values-card:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .values-icon {
+            font-size: 3rem;
+            color: var(--secondary-yellow);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .values-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .values-desc {
+            color: rgba(255,255,255,0.9);
+            line-height: 1.6;
+        }
+
+        /* Estadísticas */
+        .stats-section {
+            background: var(--accent-white);
+            padding: 60px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* Observador de intersección */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .fade-in-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero-title { font-size: 2.5rem; }
+            .hero-subtitle { font-size: 1.2rem; }
+            .section-title { font-size: 2.2rem; }
+            .lab-info-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        }
+
+        @media (max-width: 576px) {
+            .hero-section { padding: 100px 0 60px 0; }
+            .hero-title { font-size: 2rem; }
+            .hero-subtitle { font-size: 1.1rem; }
+            .section-title { font-size: 1.8rem; }
+            .lab-card { padding: 2rem 1.5rem; }
+            .lab-card img { height: 150px; }
+            .floating-icon { font-size: 4rem; }
+        }
+
+        /* Efectos adicionales */
+        .pulse-on-hover:hover {
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <!-- Hero Section Mejorado -->
+    <section class="hero-section">
+        <div class="container position-relative">
+            <div class="row align-items-center min-vh-75">
+                <div class="col-lg-7 hero-content">
+                    <h1 class="hero-title">Conoce Nuestro Laboratorio</h1>
+                    <p class="hero-subtitle">
+                        Un espacio de innovación, aprendizaje y tecnología de vanguardia donde la teoría se convierte en práctica y los estudiantes forjan el futuro de la ingeniería boliviana.
+                    </p>
+                    <ul class="hero-features">
+                        <li>Infraestructura moderna y certificada internacionalmente</li>
+                        <li>Equipos de última generación con tecnología europea</li>
+                        <li>Personal técnico altamente especializado</li>
+                        <li>Proyectos de investigación y desarrollo activos</li>
+                        <li>Colaboraciones con la industria nacional</li>
+                    </ul>
+                </div>
+                <div class="col-lg-5 hero-image">
+                    <img src="{% static 'images/instalaciones.png' %}" alt="Instalaciones Laboratorio" class="img-fluid pulse-on-hover">
+                </div>
+            </div>
+            <i class="fas fa-cogs floating-icon"></i>
+        </div>
+    </section>
+
+    <!-- Estadísticas Rápidas -->
+    <section class="stats-section fade-in-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="15">0</span>
+                        <span class="stat-label">Equipos Especializados</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="500">0</span>
+                        <span class="stat-label">M² de Superficie</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="25">0</span>
+                        <span class="stat-label">Proyectos Anuales</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="8">0</span>
+                        <span class="stat-label">Años de Experiencia</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Áreas y Equipos Destacados -->
+    <section class="section fade-in-section">
+        <div class="container">
+            <h2 class="section-title">Áreas y Equipos Destacados</h2>
+            <div class="lab-info-grid">
+                <div class="lab-card">
+                    <img src="{% static 'images/2cortadora_laser.jpg' %}" alt="Cortadora Láser DXTECH">
+                    <div class="lab-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="lab-title">Cortadora Láser DXTECH</div>
+                    <div class="lab-desc">
+                        Sistema de corte láser de fibra óptica de alta precisión para metales. Tecnología alemana que permite cortes complejos con tolerancias milimétricas, ideal para prototipado rápido y fabricación industrial.
+                    </div>
+                    <div class="lab-meta">Capacidad: hasta 12mm acero inoxidable</div>
+                </div>
+                
+                <div class="lab-card">
+                    <img src="{% static 'images/soldadura_avanzada.png' %}" alt="Soldadura Avanzada">
+                    <div class="lab-icon"><i class="fas fa-fire"></i></div>
+                    <div class="lab-title">Centro de Soldadura Avanzada</div>
+                    <div class="lab-desc">
+                        Estaciones de soldadura TIG, MIG/MAG y por arco sumergido con sistemas de extracción y control atmosférico. Certificación AWS para soldadura estructural y de precisión.
+                    </div>
+                    <div class="lab-meta">Certificación AWS • Normas ISO</div>
+                </div>
+                
+                <div class="lab-card">
+                    <img src="{% static 'images/fresado_cnc.jpg.avif' %}" alt="Fresadora CNC">
+                    <div class="lab-icon"><i class="fas fa-microchip"></i></div>
+                    <div class="lab-title">Centro de Mecanizado CNC</div>
+                    <div class="lab-desc">
+                        Fresadoras CNC de 3 y 4 ejes con sistema de control Siemens. Fabricación de componentes complejos con precisión micrométrica para aplicaciones aeroespaciales y de defensa.
+                    </div>
+                    <div class="lab-meta">Precisión ±0.005mm • Control Siemens</div>
+                </div>
+                
+                <div class="lab-card">
+                    <img src="{% static 'images/proyectos.png' %}" alt="Laboratorio I+D">
+                    <div class="lab-icon"><i class="fas fa-lightbulb"></i></div>
+                    <div class="lab-title">Laboratorio de I+D</div>
+                    <div class="lab-desc">
+                        Espacio dedicado al desarrollo de prototipos innovadores, investigación aplicada y transferencia tecnológica. Colaboración directa con empresas e instituciones del sector defensa.
+                    </div>
+                    <div class="lab-meta">Innovación • Transferencia Tecnológica</div>
+                </div>
+                
+                <div class="lab-card">
+                    <img src="{% static 'images/impresora3d.jpg' %}" alt="Impresión 3D">
+                    <div class="lab-icon"><i class="fas fa-print"></i></div>
+                    <div class="lab-title">Centro de Manufactura Aditiva</div>
+                    <div class="lab-desc">
+                        Impresoras 3D industriales para materiales avanzados como titanio, acero inoxidable y polímeros técnicos. Prototipado rápido y fabricación de componentes únicos.
+                    </div>
+                    <div class="lab-meta">Materiales Avanzados • Prototipado Rápido</div>
+                </div>
+                
+                <div class="lab-card">
+                    <img src="{% static 'images/prensa_hidraulica.jpg' %}" alt="Prensa Hidráulica">
+                    <div class="lab-icon"><i class="fas fa-compress-alt"></i></div>
+                    <div class="lab-title">Sistema de Conformado</div>
+                    <div class="lab-desc">
+                        Prensas hidráulicas de alta tonelaje y sistemas de conformado para trabajos de embutido, estampado y forjado. Capacidad para piezas estructurales de gran tamaño.
+                    </div>
+                    <div class="lab-meta">Hasta 200 toneladas • Conformado Avanzado</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Valores y Seguridad Mejorado -->
+    <section class="section values-section" style="background: var(--primary-navy); color: white;">
+        <div class="container">
+            <h2 class="section-title" style="color: white;">Nuestros Valores y Compromiso</h2>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6 fade-in-section">
+                    <div class="values-card" style="background: rgba(30,58,138,0.7); border: 1px solid rgba(251,191,36,0.18);">
+                        <i class="fas fa-shield-alt values-icon"></i>
+                        <h3 class="values-title">Seguridad Industrial</h3>
+                        <p class="values-desc">
+                            Implementamos los más altos estándares de seguridad industrial con protocolos certificados internacionalmente. Capacitación continua y equipos de protección de última generación para garantizar un ambiente de trabajo seguro.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 fade-in-section">
+                    <div class="values-card" style="background: rgba(30,58,138,0.7); border: 1px solid rgba(251,191,36,0.18);">
+                        <i class="fas fa-users values-icon"></i>
+                        <h3 class="values-title">Colaboración y Sinergia</h3>
+                        <p class="values-desc">
+                            Fomentamos el trabajo en equipo multidisciplinario, donde estudiantes, docentes e investigadores colaboran en proyectos innovadores que impactan positivamente en la sociedad boliviana.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 fade-in-section">
+                    <div class="values-card" style="background: rgba(30,58,138,0.7); border: 1px solid rgba(251,191,36,0.18);">
+                        <i class="fas fa-award values-icon"></i>
+                        <h3 class="values-title">Excelencia e Innovación</h3>
+                        <p class="values-desc">
+                            Compromiso inquebrantable con la calidad educativa y la mejora continua. Buscamos la excelencia en cada proceso, desde la formación académica hasta el desarrollo tecnológico.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'footer.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Carga inicial
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '1';
+        });
+
+        // Animación de números con contador
+        function animateCounter(element, target, duration = 2000) {
+            let start = 0;
+            const increment = target / (duration / 16);
+            
+            function updateCounter() {
+                start += increment;
+                if (start >= target) {
+                    element.textContent = target;
+                } else {
+                    element.textContent = Math.floor(start);
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+            updateCounter();
+        }
+
+        // Observador de intersección para animaciones
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    // Animar contadores si es la sección de estadísticas
+                    if (entry.target.classList.contains('stats-section')) {
+                        const counters = entry.target.querySelectorAll('.stat-number[data-count]');
+                        counters.forEach(counter => {
+                            const target = parseInt(counter.getAttribute('data-count'));
+                            animateCounter(counter, target);
+                        });
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Observar elementos
+        document.querySelectorAll('.fade-in-section').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Efecto parallax sutil para el hero
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero-section');
+            const rate = scrolled * -0.5;
+            
+            if (hero) {
+                hero.style.transform = `translateY(${rate}px)`;
+            }
+        });
+
+        // Animaciones hover mejoradas
+        document.querySelectorAll('.lab-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-12px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Efecto de ondas en las cards
+        document.querySelectorAll('.lab-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                const ripple = document.createElement('div');
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(251, 191, 36, 0.3)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                ripple.style.left = x - 50 + 'px';
+                ripple.style.top = y - 50 + 'px';
+                ripple.style.width = '100px';
+                ripple.style.height = '100px';
+                ripple.style.pointerEvents = 'none';
+                
+                this.style.position = 'relative';
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // CSS para la animación de ondas
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
