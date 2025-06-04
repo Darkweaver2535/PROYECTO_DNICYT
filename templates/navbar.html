@@ -271,3 +271,63 @@
         text-align: center;
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- FIX para el dropdown en todas las vistas ---
+    // Bootstrap requiere que el botón tenga data-bs-toggle="dropdown" y que el JS de Bootstrap esté cargado.
+    // Forzamos el comportamiento manualmente si no funciona por alguna razón.
+    var dropdownTrigger = document.getElementById('navbarMore');
+    if (dropdownTrigger) {
+        dropdownTrigger.addEventListener('click', function(e) {
+            // Permite el despliegue normal de Bootstrap si está presente
+            var menu = this.nextElementSibling;
+            if (menu && menu.classList.contains('custom-dropdown-menu')) {
+                // Si Bootstrap no lo abre, lo abrimos manualmente
+                setTimeout(function() {
+                    if (!menu.classList.contains('show')) {
+                        menu.classList.add('show');
+                    }
+                }, 10);
+                // Cierra el dropdown si se hace click fuera
+                document.addEventListener('click', function handler(ev) {
+                    if (!menu.contains(ev.target) && ev.target !== dropdownTrigger) {
+                        menu.classList.remove('show');
+                        document.removeEventListener('click', handler);
+                    }
+                });
+            }
+        });
+    }
+
+    // Detecta si estamos en landing.html por la URL (ajusta si usas otra lógica)
+    const isLanding = window.location.pathname === "{% url 'landing' %}";
+
+    // Mapea las secciones a sus URLs
+    const sectionToUrl = {
+        'destacadas': "{% url 'destacadas' %}",
+        'comunicados': "{% url 'comunicados' %}",
+        'multimedia': "{% url 'multimedia' %}",
+        'videos': "{% url 'videos' %}",
+        'cursos': "{% url 'cursos' %}",
+        'laboratorio': "{% url 'laboratorio' %}",
+        'documentos': "{% url 'documentos' %}",
+        'contacto': "{% url 'contacto' %}"
+    };
+
+    // Selecciona todos los enlaces de la navbar que apuntan a secciones
+    document.querySelectorAll('.navbar-nav .nav-link, .dropdown-menu .dropdown-item').forEach(function(link) {
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+            const section = href.replace('#', '');
+            link.addEventListener('click', function(e) {
+                if (!isLanding && sectionToUrl[section]) {
+                    e.preventDefault();
+                    window.location.href = sectionToUrl[section];
+                }
+                // Si es landing, el scroll suave ya está implementado en landing.html
+            });
+        }
+    });
+});
+</script>
