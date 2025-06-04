@@ -1,107 +1,785 @@
 <!-- templates/equipos/crear.html -->
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registrar Nuevo Equipo - Lab Metal Mecánica{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos heredados del dashboard */
+    .dashboard-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .dashboard-card:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border-radius: 2px;
+    }
+
+    /* Estilos específicos del formulario */
+    .form-container {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: rotate(45deg);
+    }
+
+    .form-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .form-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        position: relative;
+        z-index: 2;
+    }
+
+    .form-section {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+        position: relative;
+    }
+
+    .form-section:hover {
+        box-shadow: var(--shadow-sm);
+        transform: translateY(-2px);
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--light-blue);
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+        position: relative;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .form-label .required {
+        color: var(--danger-red);
+        font-weight: 700;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all var(--transition-speed) ease;
+        background: var(--pure-white);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--danger-red);
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .form-control.is-valid {
+        border-color: var(--success-green);
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .form-text {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .form-text i {
+        color: var(--primary-blue);
+    }
+
+    /* Botones mejorados */
+    .btn-industrial {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all var(--transition-speed) ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-industrial:hover {
+        background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, var(--pure-white), var(--off-white));
+        border: 2px solid var(--border-color);
+        color: var(--text-dark);
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all var(--transition-speed) ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Indicadores de progreso del formulario */
+    .form-progress {
+        background: var(--off-white);
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+
+    .progress-steps::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border-color);
+        z-index: 1;
+    }
+
+    .progress-step {
+        background: var(--primary-blue);
+        color: white;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 2;
+    }
+
+    .progress-step.inactive {
+        background: var(--border-color);
+        color: var(--text-light);
+    }
+
+    /* Sección de vista previa de imagen */
+    .image-preview {
+        border: 2px dashed var(--border-color);
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+        background: var(--off-white);
+        transition: all var(--transition-speed) ease;
+        cursor: pointer;
+    }
+
+    .image-preview:hover {
+        border-color: var(--primary-blue);
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+    .image-preview img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Alertas de validación */
+    .validation-alert {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        color: var(--danger-red);
+        display: none;
+    }
+
+    .validation-alert.show {
+        display: block;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-header {
+            padding: 1.5rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .form-section {
+            padding: 1rem;
+        }
+        
+        .btn-industrial,
+        .btn-secondary {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Variables CSS personalizadas */
+    :root {
+        --primary-blue: #2563eb;
+        --secondary-blue: #1d4ed8;
+        --light-blue: #dbeafe;
+        --light-yellow: #fef3c7;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --danger-red: #ef4444;
+        --pure-white: #ffffff;
+        --off-white: #f8fafc;
+        --text-dark: #1f2937;
+        --text-light: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --transition-speed: 0.2s;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="fas fa-plus"></i> Registrar Nuevo Equipo</h4>
+<div class="container-fluid py-4">
+    <!-- Encabezado principal -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <div class="form-header">
+                    <h1><i class="bi bi-plus-circle me-2"></i>Registrar Nuevo Equipo</h1>
+                    <p>Complete la información para agregar un nuevo equipo al inventario del laboratorio</p>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="post" enctype="multipart/form-data" id="equipoForm" novalidate>
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="id_codigo_interno" class="form-label">Código Interno *</label>
-                            {{ form.codigo_interno }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_nombre" class="form-label">Nombre *</label>
-                            {{ form.nombre }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_modelo" class="form-label">Modelo *</label>
-                            {{ form.modelo }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_serie" class="form-label">Serie *</label>
-                            {{ form.serie }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_fabricante" class="form-label">Fabricante *</label>
-                            {{ form.fabricante }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_año_fabricacion" class="form-label">Año de Fabricación</label>
-                            {{ form.año_fabricacion }}
-                            <div class="form-text">Opcional. Ejemplo: 2022</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_potencia" class="form-label">Potencia</label>
-                            {{ form.potencia }}
-                            <div class="form-text">Ejemplo: 5 kW</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_capacidad" class="form-label">Capacidad</label>
-                            {{ form.capacidad }}
-                            <div class="form-text">Ejemplo: 200 kg/h</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_ubicacion_fisica" class="form-label">Ubicación Física *</label>
-                            {{ form.ubicacion_fisica }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_seccion" class="form-label">Sección *</label>
-                            {{ form.seccion }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_tipo_equipo" class="form-label">Tipo de Equipo *</label>
-                            {{ form.tipo_equipo }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_estado" class="form-label">Estado *</label>
-                            {{ form.estado }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_foto" class="form-label">Foto</label>
-                            {{ form.foto }}
-                            <div class="form-text">Opcional. Formato JPG o PNG.</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="id_responsable" class="form-label">Responsable *</label>
-                            {{ form.responsable }}
-                        </div>
-                        <div class="col-12 mb-3">
-                            <label for="id_observaciones" class="form-label">Observaciones</label>
-                            {{ form.observaciones }}
+        </div>
+    </div>
+
+    <!-- Progreso del formulario -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="form-progress">
+                <div class="progress-steps">
+                    <div class="progress-step">1</div>
+                    <div class="progress-step inactive">2</div>
+                    <div class="progress-step inactive">3</div>
+                    <div class="progress-step inactive">4</div>
+                </div>
+                <div class="text-center mt-2">
+                    <small class="text-muted">Información Básica → Especificaciones → Ubicación → Confirmación</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario principal -->
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <div class="form-container dashboard-card">
+                <div class="p-4">
+                    <!-- Alerta de validación -->
+                    <div class="validation-alert" id="validationAlert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Por favor complete todos los campos requeridos</strong>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="submit" class="btn btn-industrial"><i class="fas fa-save"></i> Guardar</button>
-                        <a href="{% url 'equipos:equipo-lista' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
-                    </div>
-                </form>
+
+                    <form method="post" enctype="multipart/form-data" id="equipoForm" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Sección 1: Información Básica -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-info-circle"></i>
+                                Información Básica del Equipo
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_codigo_interno" class="form-label">
+                                            <i class="bi bi-hash"></i>
+                                            Código Interno <span class="required">*</span>
+                                        </label>
+                                        {{ form.codigo_interno }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Código único para identificar el equipo
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_nombre" class="form-label">
+                                            <i class="bi bi-tag"></i>
+                                            Nombre del Equipo <span class="required">*</span>
+                                        </label>
+                                        {{ form.nombre }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Nombre descriptivo del equipo
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_modelo" class="form-label">
+                                            <i class="bi bi-cpu"></i>
+                                            Modelo <span class="required">*</span>
+                                        </label>
+                                        {{ form.modelo }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Modelo específico del fabricante
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_serie" class="form-label">
+                                            <i class="bi bi-upc"></i>
+                                            Número de Serie <span class="required">*</span>
+                                        </label>
+                                        {{ form.serie }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Número de serie único del fabricante
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección 2: Especificaciones Técnicas -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-gear"></i>
+                                Especificaciones Técnicas
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_fabricante" class="form-label">
+                                            <i class="bi bi-building"></i>
+                                            Fabricante <span class="required">*</span>
+                                        </label>
+                                        {{ form.fabricante }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Empresa fabricante del equipo
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_año_fabricacion" class="form-label">
+                                            <i class="bi bi-calendar"></i>
+                                            Año de Fabricación
+                                        </label>
+                                        {{ form.año_fabricacion }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Año de fabricación del equipo
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_potencia" class="form-label">
+                                            <i class="bi bi-lightning"></i>
+                                            Potencia
+                                        </label>
+                                        {{ form.potencia }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Ejemplo: 5 kW, 10 HP, 220V
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_capacidad" class="form-label">
+                                            <i class="bi bi-speedometer2"></i>
+                                            Capacidad
+                                        </label>
+                                        {{ form.capacidad }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Ejemplo: 200 kg/h, 500 mm, 10 bar
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección 3: Ubicación y Clasificación -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-geo-alt"></i>
+                                Ubicación y Clasificación
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_ubicacion_fisica" class="form-label">
+                                            <i class="bi bi-pin-map"></i>
+                                            Ubicación Física <span class="required">*</span>
+                                        </label>
+                                        {{ form.ubicacion_fisica }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Ubicación específica dentro del laboratorio
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_seccion" class="form-label">
+                                            <i class="bi bi-diagram-3"></i>
+                                            Sección <span class="required">*</span>
+                                        </label>
+                                        {{ form.seccion }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Sección del laboratorio donde se encuentra
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_tipo_equipo" class="form-label">
+                                            <i class="bi bi-collection"></i>
+                                            Tipo de Equipo <span class="required">*</span>
+                                        </label>
+                                        {{ form.tipo_equipo }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Categoría o tipo del equipo
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_estado" class="form-label">
+                                            <i class="bi bi-activity"></i>
+                                            Estado Actual <span class="required">*</span>
+                                        </label>
+                                        {{ form.estado }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Estado operacional del equipo
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección 4: Información Adicional -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-plus-circle"></i>
+                                Información Adicional
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_responsable" class="form-label">
+                                            <i class="bi bi-person-check"></i>
+                                            Responsable <span class="required">*</span>
+                                        </label>
+                                        {{ form.responsable }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Persona responsable del equipo
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_foto" class="form-label">
+                                            <i class="bi bi-camera"></i>
+                                            Fotografía del Equipo
+                                        </label>
+                                        <div class="image-preview" id="imagePreview">
+                                            <div class="upload-placeholder">
+                                                <i class="bi bi-cloud-upload display-4 text-muted"></i>
+                                                <p class="mt-2 mb-0">Haga clic para seleccionar una imagen</p>
+                                                <small class="text-muted">JPG, PNG - Max 5MB</small>
+                                            </div>
+                                        </div>
+                                        {{ form.foto }}
+                                        <div class="form-text mt-2">
+                                            <i class="bi bi-info-circle"></i>
+                                            Imagen del equipo para identificación visual
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="id_observaciones" class="form-label">
+                                            <i class="bi bi-chat-text"></i>
+                                            Observaciones
+                                        </label>
+                                        {{ form.observaciones }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Información adicional, características especiales o notas importantes
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a href="{% url 'equipos:equipo-lista' %}" class="btn-secondary">
+                                <i class="bi bi-arrow-left"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn-industrial">
+                                <i class="bi bi-check-circle"></i>
+                                Registrar Equipo
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 <script>
-    // Validación básica de campos requeridos
-    document.getElementById('equipoForm').addEventListener('submit', function(e) {
-        let required = ['id_codigo_interno','id_nombre','id_modelo','id_serie','id_fabricante','id_ubicacion_fisica','id_seccion','id_tipo_equipo','id_estado','id_responsable'];
-        let valid = true;
-        required.forEach(function(id){
-            let el = document.getElementById(id);
-            if(el && !el.value){
-                el.classList.add('is-invalid');
-                valid = false;
-            } else if(el) {
-                el.classList.remove('is-invalid');
-            }
-        });
-        if(!valid){
-            e.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('equipoForm');
+    const validationAlert = document.getElementById('validationAlert');
+    const imageInput = document.getElementById('id_foto');
+    const imagePreview = document.getElementById('imagePreview');
+    
+    // Campos requeridos
+    const requiredFields = [
+        'id_codigo_interno', 'id_nombre', 'id_modelo', 'id_serie', 
+        'id_fabricante', 'id_ubicacion_fisica', 'id_seccion', 
+        'id_tipo_equipo', 'id_estado', 'id_responsable'
+    ];
+
+    // Validación en tiempo real
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('blur', function() {
+                validateField(this);
+            });
+
+            field.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) {
+                    validateField(this);
+                }
+            });
         }
     });
+
+    // Función de validación individual
+    function validateField(field) {
+        if (field.value.trim() === '') {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+        } else {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+        }
+    }
+
+    // Validación del formulario
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field && !field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            validationAlert.classList.add('show');
+            document.querySelector('.validation-alert').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
+            setTimeout(() => {
+                validationAlert.classList.remove('show');
+            }, 5000);
+        }
+    });
+
+    // Preview de imagen
+    if (imageInput) {
+        imageInput.style.display = 'none';
+        
+        imagePreview.addEventListener('click', function() {
+            imageInput.click();
+        });
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.innerHTML = `
+                        <img src="${e.target.result}" alt="Vista previa" class="img-fluid">
+                        <p class="mt-2 mb-0 small text-success">
+                            <i class="bi bi-check-circle"></i> ${file.name}
+                        </p>
+                        <small class="text-muted">Haga clic para cambiar la imagen</small>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Animación de progreso simulada
+    let currentStep = 1;
+    const steps = document.querySelectorAll('.progress-step');
+    
+    // Simulación de progreso basada en campos completados
+    function updateProgress() {
+        const filledFields = requiredFields.filter(fieldId => {
+            const field = document.getElementById(fieldId);
+            return field && field.value.trim() !== '';
+        }).length;
+        
+        const progressPercent = (filledFields / requiredFields.length) * 100;
+        const newStep = Math.ceil((progressPercent / 100) * 4);
+        
+        if (newStep !== currentStep) {
+            steps.forEach((step, index) => {
+                if (index < newStep) {
+                    step.classList.remove('inactive');
+                } else {
+                    step.classList.add('inactive');
+                }
+            });
+            currentStep = newStep;
+        }
+    }
+
+    // Actualizar progreso cuando se completen campos
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('input', updateProgress);
+        }
+    });
+
+    // Inicializar progreso
+    updateProgress();
+});
 </script>
 {% endblock %}

@@ -38,4 +38,5 @@ urlpatterns = [
     path('documentos/', TemplateView.as_view(template_name="secciones/documentos.html"), name='documentos'),
     path('contacto/', TemplateView.as_view(template_name="secciones/contacto.html"), name='contacto'),
     path('inventario/', EquipoListView.as_view(), name='inventario_equipos'),  # Cambia aquí
+    path('dashboard/', TemplateView.as_view(template_name="sistema_interno/dashboard.html"), name='dashboard'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
