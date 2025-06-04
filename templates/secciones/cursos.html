@@ -28,7 +28,7 @@
 
         .hero-section {
             background: linear-gradient(135deg, var(--primary-navy) 0%, #1e40af 50%, var(--university-purple) 100%);
-            padding: 120px 0 80px;
+            padding: 220px 0 80px 0; /* Aumenta el padding-top para más separación */
             position: relative;
             overflow: hidden;
         }
@@ -53,8 +53,12 @@
         .hero-title {
             font-size: 3.5rem;
             font-weight: 700;
-            color: var(--accent-white);
             margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--secondary-yellow), #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
             animation: fadeInUp 1s ease-out;
         }
 
@@ -522,6 +526,10 @@
             .btn-mas-info {
                 text-align: center;
                 justify-content: center;
+            }
+
+            .hero-section {
+                padding: 100px 0 60px 0; /* Más separación en móvil también */
             }
         }
 

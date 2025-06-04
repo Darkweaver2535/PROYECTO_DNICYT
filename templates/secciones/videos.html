@@ -36,7 +36,7 @@
         /* Hero Section for Videos */
         .video-hero {
             background: var(--gradient-primary);
-            padding: 80px 0;
+            padding: 220px 0 80px 0; /* Aumenta el padding-top para más separación */
             position: relative;
             overflow: hidden;
         }
@@ -63,6 +63,11 @@
             font-size: 3.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--secondary-yellow), #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
             animation: fadeInUp 1s ease-out;
         }
 
@@ -364,6 +369,10 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .video-hero {
+                padding: 100px 0 60px 0; /* También más separación en móvil */
+            }
+            
             .video-hero h1 {
                 font-size: 2.5rem;
             }
