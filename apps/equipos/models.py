@@ -1,6 +1,7 @@
 # equipos/models.py
 from django.db import models
 from django.urls import reverse
+from django.core.validators import RegexValidator
 
 class Seccion(models.Model):
     nombre = models.CharField(max_length=100)
@@ -73,7 +74,13 @@ class Equipo(models.Model):
     udb_numero = models.CharField(
         "Número de Disposición",
         max_length=20,
-        help_text="Ejemplo: 1-22386"
+        help_text="Ejemplo: 1-22386",
+        validators=[
+            RegexValidator(
+                regex=r'^\d-\d{5}$',
+                message='El número debe tener el formato 1-12345 (un dígito, guion, cinco dígitos)'
+            )
+        ]
     )
 
     def __str__(self):

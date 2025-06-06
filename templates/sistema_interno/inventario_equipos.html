@@ -136,25 +136,43 @@
         border-radius: 1rem;
         overflow: hidden;
         box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
     }
 
     .table {
         margin-bottom: 0;
         border-collapse: separate;
         border-spacing: 0;
+        table-layout: fixed; /* Fija el ancho de las columnas */
+        width: 100%;
     }
 
     .table thead th {
         background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
         color: white;
         border: none;
-        padding: 1.25rem 1rem;
+        padding: 1.25rem 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         font-size: 0.875rem;
         letter-spacing: 0.05em;
+        text-align: left;
+        vertical-align: middle;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
 
+    /* Anchos específicos para cada columna */
+    .table thead th:nth-child(1) { width: 12%; } /* Código */
+    .table thead th:nth-child(2) { width: 25%; } /* Equipo */
+    .table thead th:nth-child(3) { width: 15%; } /* Sección */
+    .table thead th:nth-child(4) { width: 15%; } /* Estado */
+    .table thead th:nth-child(5) { width: 18%; } /* Responsable */
+    .table thead th:nth-child(6) { width: 15%; } /* Acciones */
+
+    /* Filas del cuerpo */
     .table tbody tr {
         transition: all var(--transition-speed) ease;
         border-bottom: 1px solid var(--border-color);
@@ -162,15 +180,19 @@
 
     .table tbody tr:hover {
         background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
-        transform: scale(1.01);
+        transform: scale(1.005);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
     }
 
     .table tbody td {
-        padding: 1.25rem 1rem;
+        padding: 1rem 0.75rem;
         vertical-align: middle;
         border: none;
+        word-wrap: break-word;
+        overflow: hidden;
     }
 
+    /* Código del equipo */
     .equipment-code {
         font-family: 'Courier New', monospace;
         font-weight: 700;
@@ -178,31 +200,51 @@
         background: var(--light-blue);
         padding: 0.25rem 0.5rem;
         border-radius: 0.5rem;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
+        display: inline-block;
+        white-space: nowrap;
     }
 
+    /* Información del equipo */
     .equipment-name {
         font-weight: 600;
         color: var(--text-dark);
         margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+        line-height: 1.2;
     }
 
     .equipment-description {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         color: var(--text-light);
+        line-height: 1.2;
     }
 
-    .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        font-weight: 600;
+    /* Badge de sección */
+    .badge.bg-primary {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)) !important;
+        padding: 0.4rem 0.8rem;
+        border-radius: 1rem;
         font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    /* Estados */
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 1.5rem;
+        font-weight: 600;
+        font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         border: 2px solid;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.4rem;
+        white-space: nowrap;
+        min-width: fit-content;
     }
 
     .status-operativo {
@@ -223,33 +265,60 @@
         border-color: var(--danger-red);
     }
 
-    .action-btn {
-        background: linear-gradient(135deg, var(--pure-white), var(--off-white));
-        border: 2px solid var(--border-color);
+    /* Responsable */
+    .table tbody td:nth-child(5) {
+        font-size: 0.9rem;
+    }
+
+    .table tbody td:nth-child(5) .fw-semibold {
+        font-weight: 600;
         color: var(--text-dark);
-        padding: 0.6rem 1.2rem;
-        border-radius: 0.75rem;
+    }
+
+    /* Contenedor de acciones */
+    .actions-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    /* Botones de acción rediseñados */
+    .action-btn {
+        background: var(--pure-white);
+        border: 1.5px solid var(--border-color);
+        color: var(--text-dark);
+        padding: 0.4rem 0.7rem;
+        border-radius: 0.6rem;
         text-decoration: none;
         transition: all var(--transition-speed) ease;
         font-weight: 500;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-right: 0.5rem;
-        font-size: 0.875rem;
+        gap: 0.3rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        min-width: fit-content;
+        text-align: center;
+        justify-content: center;
     }
 
     .action-btn:hover {
-        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-        border-color: var(--primary-blue);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        text-decoration: none;
     }
 
+    /* Colores específicos para cada acción */
     .action-btn.btn-view {
         border-color: var(--primary-blue);
         color: var(--primary-blue);
+    }
+
+    .action-btn.btn-view:hover {
+        background: var(--primary-blue);
+        color: white;
     }
 
     .action-btn.btn-qr {
@@ -258,10 +327,170 @@
     }
 
     .action-btn.btn-qr:hover {
-        background: linear-gradient(135deg, var(--warning-orange), #d97706);
-        border-color: var(--warning-orange);
+        background: var(--warning-orange);
+        color: white;
     }
 
+    .action-btn.btn-edit {
+        border-color: var(--success-green);
+        color: var(--success-green);
+    }
+
+    .action-btn.btn-edit:hover {
+        background: var(--success-green);
+        color: white;
+    }
+
+    .action-btn.btn-delete {
+        border-color: var(--danger-red);
+        color: var(--danger-red);
+    }
+
+    .action-btn.btn-delete:hover {
+        background: var(--danger-red);
+        color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .table thead th:nth-child(1) { width: 10%; }
+        .table thead th:nth-child(2) { width: 22%; }
+        .table thead th:nth-child(3) { width: 13%; }
+        .table thead th:nth-child(4) { width: 13%; }
+        .table thead th:nth-child(5) { width: 17%; }
+        .table thead th:nth-child(6) { width: 25%; }
+        
+        .action-btn {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.7rem;
+            gap: 0.2rem;
+        }
+        
+        .actions-container {
+            gap: 0.2rem;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .table thead th {
+            padding: 1rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .table tbody td {
+            padding: 0.8rem 0.5rem;
+        }
+        
+        .equipment-name {
+            font-size: 0.9rem;
+        }
+        
+        .equipment-description {
+            font-size: 0.75rem;
+        }
+        
+        .status-badge {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.65rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        /* En móviles, apilamos los botones verticalmente */
+        .actions-container {
+            flex-direction: column;
+            gap: 0.25rem;
+            align-items: stretch;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.7rem;
+            justify-content: center;
+        }
+        
+        /* Ajustamos los anchos de columna para móvil */
+        .table thead th:nth-child(1) { width: 15%; }
+        .table thead th:nth-child(2) { width: 25%; }
+        .table thead th:nth-child(3) { width: 15%; }
+        .table thead th:nth-child(4) { width: 15%; }
+        .table thead th:nth-child(5) { width: 15%; }
+        .table thead th:nth-child(6) { width: 15%; }
+        
+        .table thead th {
+            padding: 0.8rem 0.4rem;
+            font-size: 0.75rem;
+        }
+        
+        .table tbody td {
+            padding: 0.7rem 0.4rem;
+        }
+        
+        .equipment-code {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+        }
+        
+        .equipment-name {
+            font-size: 0.85rem;
+        }
+        
+        .equipment-description {
+            font-size: 0.7rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.6rem;
+            gap: 0.2rem;
+        }
+        
+        .badge.bg-primary {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.7rem;
+        }
+    }
+
+    /* Scroll horizontal suave para la tabla */
+    .table-responsive {
+        border-radius: 1rem;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-blue) var(--off-white);
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: var(--off-white);
+        border-radius: 4px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: var(--primary-blue);
+        border-radius: 4px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary-blue);
+    }
+
+    /* Animaciones suaves */
+    @keyframes fadeIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(10px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+
+    /* Estados empty */
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
@@ -281,100 +510,76 @@
         margin-bottom: 0.5rem;
     }
 
-    .pagination-container {
-        background: var(--pure-white);
-        border-radius: 1rem;
-        padding: 1.5rem;
-        margin-top: 1.5rem;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
-    }
-
-    .pagination {
-        margin-bottom: 0;
-        justify-content: center;
-    }
-
-    .page-link {
-        border: 2px solid var(--border-color);
-        color: var(--text-dark);
-        padding: 0.75rem 1rem;
-        margin: 0 0.25rem;
-        border-radius: 0.75rem;
-        transition: all var(--transition-speed) ease;
-        font-weight: 500;
-    }
-
-    .page-link:hover {
-        background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
-        border-color: var(--primary-blue);
-        color: var(--primary-blue);
-        transform: translateY(-2px);
-    }
-
-    .page-item.active .page-link {
-        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-        border-color: var(--primary-blue);
-        color: white;
-        box-shadow: var(--shadow-md);
+    /* Mejora visual para iconos en headers */
+    .table thead th i {
+        margin-right: 0.5rem;
+        font-size: 0.9em;
     }
 
     .stats-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
+        gap: 1.2rem;
         margin-bottom: 2rem;
     }
-
     .stat-card {
         background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
-        border: 1px solid var(--border-color);
+        border: 2px solid var(--primary-blue);
         border-radius: 1rem;
-        padding: 1.5rem;
+        padding: 1.5rem 1rem 1.2rem 1rem;
         text-align: center;
         transition: all var(--transition-speed) ease;
         position: relative;
         overflow: hidden;
+        min-height: 120px;
+        box-shadow: 0 2px 16px rgba(59,130,246,0.08);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
-
     .stat-card::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
+        height: 3px;
         background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
     }
-
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-lg);
+    .stat-number {
+        font-size: 2.2rem;
+        color: var(--primary-blue);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 0.3rem;
+        text-shadow: 0 1px 4px rgba(59,130,246,0.08);
     }
-
+    .stat-label-inventario {
+        color: #111;
+        font-size: 1.05rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 0;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: 0 6px 24px rgba(59,130,246,0.13);
+    }
     @media (max-width: 768px) {
-        .section-title {
-            font-size: 1.5rem;
+        .stats-container {
+            grid-template-columns: 1fr;
         }
-        
-        .add-equipment-btn {
-            padding: 0.75rem 1.5rem;
-            font-size: 0.875rem;
+        .stat-card {
+            padding: 1rem 0.5rem 0.8rem 0.5rem;
+            min-height: 90px;
         }
-        
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
+        .stat-number {
+            font-size: 1.3rem;
         }
-        
-        .table-responsive {
-            border-radius: 1rem;
-            overflow: hidden;
-        }
-        
-        .action-btn {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.75rem;
+        .stat-label-inventario {
+            font-size: 0.92rem;
         }
     }
 </style>
@@ -400,19 +605,19 @@
     <div class="stats-container">
         <div class="stat-card">
             <div class="stat-number">{{ equipos.count|default:0 }}</div>
-            <div class="stat-label">Total Equipos</div>
+            <div class="stat-label-inventario">Total Equipos</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">9</div>
-            <div class="stat-label">Operativos</div>
+            <div class="stat-label-inventario">Operativos</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">2</div>
-            <div class="stat-label">En Mantenimiento</div>
+            <div class="stat-label-inventario">En Mantenimiento</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">1</div>
-            <div class="stat-label">Fuera de Servicio</div>
+            <div class="stat-label-inventario">Fuera de Servicio</div>
         </div>
     </div>
 
@@ -462,7 +667,7 @@
                     <tr>
                         <th><i class="bi bi-hash me-2"></i>Código</th>
                         <th><i class="bi bi-gear me-2"></i>Equipo</th>
-                        <th><i class="bi bi-building me-2"></i>Sección</th>
+                        <th><i class="bi bi-grid-fill me-2 text-white"></i>Sección</th>
                         <th><i class="bi bi-activity me-2"></i>Estado</th>
                         <th><i class="bi bi-person me-2"></i>Responsable</th>
                         <th><i class="bi bi-three-dots me-2"></i>Acciones</th>
@@ -506,18 +711,31 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="d-flex flex-wrap gap-1">
+                                <div class="actions-container">
                                     <a href="{% url 'equipos:equipo-detalle' equipo.pk %}" 
                                        class="action-btn btn-view" 
                                        title="Ver Detalles">
                                         <i class="bi bi-eye"></i>
-                                        Ver
+                                        <span>Ver</span>
                                     </a>
                                     <a href="{% url 'equipos:generar-qr' equipo.pk %}" 
                                        class="action-btn btn-qr" 
                                        title="Generar Código QR">
-                                        <i class="bi bi-qrcode"></i>
-                                        QR
+                                        <i class="bi bi-qr-code"></i>
+                                        <span>QR</span>
+                                    </a>
+                                    <a href="{% url 'equipos:equipo-editar' equipo.pk %}" 
+                                       class="action-btn btn-edit" 
+                                       title="Editar Equipo">
+                                        <i class="bi bi-pencil-square"></i>
+                                        <span>Editar</span>
+                                    </a>
+                                    <a href="{% url 'equipos:equipo-eliminar' equipo.pk %}" 
+                                       class="action-btn btn-delete" 
+                                       title="Eliminar Equipo"
+                                       onclick="return confirm('¿Estás seguro de que deseas eliminar este equipo?')">
+                                        <i class="bi bi-trash"></i>
+                                        <span>Eliminar</span>
                                     </a>
                                 </div>
                             </td>

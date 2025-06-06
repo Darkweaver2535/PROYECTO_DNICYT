@@ -419,14 +419,23 @@
                                                 <option value="TROP" {% if form.udb_unidad.value == 'TROP' %}selected{% endif %}>TROP</option>
                                             </select>
                                             <!-- Número -->
-                                            <input type="text" name="udb_numero" id="id_udb_numero" class="form-control" placeholder="1-22386" style="max-width:120px;" value="{{ form.udb_numero.value|default:'' }}" required>
+                                            <input type="text" name="udb_numero" id="id_udb_numero" class="form-control"
+                                                placeholder="1-22386"
+                                                style="max-width:120px;"
+                                                value="{{ form.udb_numero.value|default:'' }}"
+                                                pattern="^\d-\d{5}$"
+                                                title="Debe tener el formato 1-12345 (un dígito, guion, cinco dígitos)"
+                                                required>
                                             <!-- Año actual: solo texto, no input -->
                                             <span class="fw-bold" style="min-width:60px; color: #000000;">{{ current_year }}</span>
                                         </div>
                                         <div class="form-text">
                                             <i class="bi bi-info-circle"></i>
                                             Formato: <strong>EMI - [UNIDAD] [NÚMERO] [AÑO]</strong>
-                                            <br><small class="text-muted">Ejemplo: EMI - LPZ 1-22386 {{ current_year }}</small>
+                                            <br>
+                                            <small class="text-muted">
+                                                El número debe tener el formato 1-12345 (cinco dígitos después del guion)<br>
+                                            </small>
                                         </div>
                                         {% if form.udb_unidad.errors %}
                                             <div class="text-danger small mt-1">{{ form.udb_unidad.errors }}</div>
