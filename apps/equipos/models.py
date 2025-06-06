@@ -16,6 +16,14 @@ class Seccion(models.Model):
         verbose_name = "Sección"
         verbose_name_plural = "Secciones"
 
+UDB_UNIDADES = [
+    ('LPZ', 'LPZ'),
+    ('SCZ', 'SCZ'),
+    ('CBAA', 'CBAA'),
+    ('RIB', 'RIB'),
+    ('TROP', 'TROP'),
+]
+
 class Equipo(models.Model):
     SECCION_CHOICES = [
         ('SOLDADURA', 'Soldadura'),
@@ -49,6 +57,24 @@ class Equipo(models.Model):
     qr_code = models.ImageField(upload_to='qr_codes/', null=True, blank=True)
     responsable = models.CharField(max_length=100)
     observaciones = models.TextField(null=True, blank=True)
+    codigo_udb = models.CharField(
+        "Código Unidad de Disposición de Bienes",
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Formato: EMI - LPZ [NÚMERO] [AÑO] - Ejemplo: EMI - LPZ 1-22386 2025"
+    )
+    udb_unidad = models.CharField(
+        "Unidad EMI",
+        max_length=5,
+        choices=UDB_UNIDADES,
+        default='LPZ'
+    )
+    udb_numero = models.CharField(
+        "Número de Disposición",
+        max_length=20,
+        help_text="Ejemplo: 1-22386"
+    )
 
     def __str__(self):
         return f"{self.codigo_interno} - {self.nombre}"

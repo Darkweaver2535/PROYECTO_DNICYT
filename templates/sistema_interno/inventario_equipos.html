@@ -7,24 +7,6 @@
 {% block extra_css %}
 <style>
     /* Aplicando el mismo sistema de variables CSS del dashboard */
-    :root {
-        --primary-blue: #3b82f6;
-        --secondary-blue: #1e40af;
-        --light-blue: rgba(59, 130, 246, 0.05);
-        --light-yellow: rgba(251, 191, 36, 0.05);
-        --success-green: #10b981;
-        --warning-orange: #f59e0b;
-        --danger-red: #ef4444;
-        --pure-white: #ffffff;
-        --off-white: #f8fafc;
-        --text-dark: #1f2937;
-        --text-light: #6b7280;
-        --border-color: #e5e7eb;
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        --transition-speed: 0.2s;
-    }
 
     .inventory-card {
         background: var(--pure-white);
@@ -368,21 +350,6 @@
     .stat-card:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-lg);
-    }
-
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--primary-blue);
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-        color: var(--text-light);
-        font-weight: 500;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
     }
 
     @media (max-width: 768px) {

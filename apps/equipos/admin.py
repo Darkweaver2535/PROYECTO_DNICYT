@@ -10,13 +10,13 @@ class SeccionAdmin(admin.ModelAdmin):
 
 @admin.register(Equipo)
 class EquipoAdmin(admin.ModelAdmin):
-    list_display = ('codigo_interno', 'nombre', 'seccion', 'estado', 'responsable')
+    list_display = ('codigo_interno', 'codigo_udb', 'nombre', 'seccion', 'estado', 'responsable')
     list_filter = ('seccion', 'estado', 'responsable')
     search_fields = ('codigo_interno', 'nombre', 'modelo', 'serie')
     readonly_fields = ('fecha_ingreso', 'qr_code')
     fieldsets = (
         ('Identificación', {
-            'fields': ('codigo_interno', 'nombre', 'modelo', 'serie', 'fabricante', 'año_fabricacion')
+            'fields': ('codigo_udb', 'codigo_interno', 'nombre', 'modelo', 'serie', 'fabricante', 'año_fabricacion')
         }),
         ('Características Técnicas', {
             'fields': ('potencia', 'capacidad', 'tipo_equipo')

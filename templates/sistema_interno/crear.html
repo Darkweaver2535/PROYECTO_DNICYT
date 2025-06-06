@@ -400,6 +400,44 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="bi bi-upc-scan"></i>
+                                            Código Unidad de Disposición de Bienes <span class="required">*</span>
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <!-- EMI: constante -->
+                                            <input type="text" class="form-control" value="EMI" readonly style="max-width:70px; background-color: #f8f9fa;">
+                                            <!-- Guion -->
+                                            <span class="fw-bold">-</span>
+                                            <!-- Unidad: select -->
+                                            <select name="udb_unidad" id="id_udb_unidad" class="form-select" style="max-width:100px;" required>
+                                                <option value="">Seleccione</option>
+                                                <option value="LPZ" {% if form.udb_unidad.value == 'LPZ' %}selected{% endif %}>LPZ</option>
+                                                <option value="SCZ" {% if form.udb_unidad.value == 'SCZ' %}selected{% endif %}>SCZ</option>
+                                                <option value="CBAA" {% if form.udb_unidad.value == 'CBAA' %}selected{% endif %}>CBAA</option>
+                                                <option value="RIB" {% if form.udb_unidad.value == 'RIB' %}selected{% endif %}>RIB</option>
+                                                <option value="TROP" {% if form.udb_unidad.value == 'TROP' %}selected{% endif %}>TROP</option>
+                                            </select>
+                                            <!-- Número -->
+                                            <input type="text" name="udb_numero" id="id_udb_numero" class="form-control" placeholder="1-22386" style="max-width:120px;" value="{{ form.udb_numero.value|default:'' }}" required>
+                                            <!-- Año actual: solo texto, no input -->
+                                            <span class="fw-bold" style="min-width:60px; color: #000000;">{{ current_year }}</span>
+                                        </div>
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i>
+                                            Formato: <strong>EMI - [UNIDAD] [NÚMERO] [AÑO]</strong>
+                                            <br><small class="text-muted">Ejemplo: EMI - LPZ 1-22386 {{ current_year }}</small>
+                                        </div>
+                                        {% if form.udb_unidad.errors %}
+                                            <div class="text-danger small mt-1">{{ form.udb_unidad.errors }}</div>
+                                        {% endif %}
+                                        {% if form.udb_numero.errors %}
+                                            <div class="text-danger small mt-1">{{ form.udb_numero.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
                                         <label for="id_codigo_interno" class="form-label">
                                             <i class="bi bi-hash"></i>
                                             Código Interno <span class="required">*</span>
@@ -660,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Campos requeridos
     const requiredFields = [
-        'id_codigo_interno', 'id_nombre', 'id_modelo', 'id_serie', 
+        'id_codigo_udb', 'id_codigo_interno', 'id_nombre', 'id_modelo', 'id_serie', 
         'id_fabricante', 'id_ubicacion_fisica', 'id_seccion', 
         'id_tipo_equipo', 'id_estado', 'id_responsable'
     ];
