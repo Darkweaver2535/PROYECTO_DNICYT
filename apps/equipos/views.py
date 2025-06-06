@@ -8,6 +8,7 @@ from django.core.files.base import ContentFile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from datetime import datetime
 
 class EquipoListView(ListView):
     model = Equipo
@@ -22,13 +23,19 @@ class EquipoDetailView(DetailView):
 
 class EquipoCreateView(CreateView):
     model = Equipo
-    template_name = 'sistema_interno/crear.html'  # Cambiado para usar tu ubicación personalizada
+    template_name = 'sistema_interno/crear.html'
     fields = [
         'codigo_interno', 'nombre', 'modelo', 'serie', 'fabricante', 'año_fabricacion',
         'potencia', 'capacidad', 'ubicacion_fisica', 'seccion', 'tipo_equipo',
-        'estado', 'foto', 'responsable', 'observaciones'
+        'estado', 'foto', 'responsable', 'observaciones',
+        'udb_unidad', 'udb_numero'  # asegúrate de incluir estos campos
     ]
     success_url = reverse_lazy('equipos:equipo-lista')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_year'] = datetime.now().year
+        return context
 
 def generar_qr_view(request, pk):
     equipo = get_object_or_404(Equipo, pk=pk)
@@ -47,3 +54,24 @@ def mi_vista(request):
 
 def mi_ajax_view(request):
     return JsonResponse({'success': True, 'message': 'OK'})
+
+def crear_equipo(request):
+    form = EquipoForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        form.save()
+        return redirect('equipos:equipo-lista')
+    context = {
+        'form': form,
+        'current_year': datetime.now().year,
+    }
+    return render(request, 'sistema_interno/crear.html', context)
+
+from datetime import datetime
+def tu_vista_crear_equipo(request):
+    # ...
+    context = {
+        'form': form,
+        'current_year': datetime.now().year,
+        # ...
+    }
+    return render(request, 'sistema_interno/crear.html', context)
