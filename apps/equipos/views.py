@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
 from .models import Equipo
 import qrcode
@@ -75,3 +75,14 @@ def tu_vista_crear_equipo(request):
         # ...
     }
     return render(request, 'sistema_interno/crear.html', context)
+
+class EquipoUpdateView(UpdateView):
+    model = Equipo
+    fields = '__all__'  # O especifica los campos que quieres editar
+    template_name = 'sistema_interno/editar.html'
+    success_url = reverse_lazy('equipos:equipo-lista')
+
+class EquipoDeleteView(DeleteView):
+    model = Equipo
+    template_name = 'sistema_interno/eliminar.html'
+    success_url = reverse_lazy('equipos:equipo-lista')

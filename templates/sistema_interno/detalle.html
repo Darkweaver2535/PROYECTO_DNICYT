@@ -469,8 +469,10 @@
                         <div class="info-card">
                             <div class="info-label">Código UDB</div>
                             <div class="info-value">
-                                <span class="badge bg-primary fs-6 font-monospace">
-                                    EMI-{{ equipo.udb_unidad }} {{ equipo.udb_numero }} {{ equipo.fecha_ingreso.year }}
+                                <span class="badge bg-primary fs-6 font-monospace text-break" style="white-space: pre-line;">
+                                    EMI-{{ equipo.udb_unidad }}<br>
+                                    {{ equipo.udb_numero }}<br>
+                                    {{ equipo.fecha_ingreso.year }}
                                 </span>
                             </div>
                             
