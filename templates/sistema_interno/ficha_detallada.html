@@ -1,0 +1,922 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ficha Técnica Completa - {{ equipo.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --ficha-primary: #2563eb;
+        --ficha-secondary: #1d4ed8;
+        --ficha-light: #dbeafe;
+        --ficha-success: #10b981;
+        --ficha-warning: #f59e0b;
+        --ficha-danger: #ef4444;
+        --ficha-white: #ffffff;
+        --ficha-off-white: #f8fafc;
+        --ficha-text: #1f2937;
+        --ficha-text-light: #6b7280;
+        --ficha-border: #e5e7eb;
+        --ficha-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --ficha-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --ficha-transition: 0.3s;
+    }
+
+    .ficha-header {
+        background: linear-gradient(135deg, var(--ficha-primary), var(--ficha-secondary));
+        color: var(--ficha-white);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ficha-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .ficha-section {
+        background: var(--ficha-white);
+        border-radius: 1.25rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--ficha-shadow);
+        border: 1px solid var(--ficha-border);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ficha-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--ficha-primary), var(--ficha-secondary));
+        border-radius: 1.25rem 1.25rem 0 0;
+    }
+
+    .ficha-section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--ficha-primary);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding-top: 0.5rem;
+    }
+
+    .ficha-section-icon {
+        font-size: 2rem;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, var(--ficha-light), rgba(37, 99, 235, 0.1));
+        border-radius: 1rem;
+        color: var(--ficha-primary);
+    }
+
+    .ficha-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .ficha-grid-small {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .ficha-item {
+        background: linear-gradient(135deg, var(--ficha-off-white), rgba(248, 250, 252, 0.8));
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 2px solid var(--ficha-border);
+        transition: all var(--ficha-transition) ease;
+        position: relative;
+    }
+
+    .ficha-item:hover {
+        border-color: var(--ficha-primary);
+        box-shadow: var(--ficha-shadow);
+        transform: translateY(-2px);
+    }
+
+    .ficha-item.has-data {
+        border-color: var(--ficha-success);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.1));
+    }
+
+    .ficha-item.no-data {
+        border-color: var(--ficha-text-light);
+        opacity: 0.7;
+    }
+
+    .ficha-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--ficha-text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ficha-label i {
+        color: var(--ficha-primary);
+        font-size: 1rem;
+    }
+
+    .ficha-value {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--ficha-text);
+        line-height: 1.4;
+    }
+
+    .ficha-value.empty {
+        color: var(--ficha-text-light);
+        font-style: italic;
+        font-weight: 400;
+    }
+
+    .ficha-equipment-code {
+        font-family: 'Monaco', 'Courier New', monospace;
+        background: linear-gradient(135deg, var(--ficha-primary), var(--ficha-secondary));
+        color: var(--ficha-white);
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: inline-block;
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .ficha-status-badge {
+        padding: 0.75rem 1.5rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        position: relative;
+        z-index: 2;
+    }
+
+    .status-operativo {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
+        color: var(--ficha-success);
+        border: 2px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-mantenimiento {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.2));
+        color: var(--ficha-warning);
+        border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-fuera-servicio {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2));
+        color: var(--ficha-danger);
+        border: 2px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .ficha-document-item {
+        background: linear-gradient(135deg, var(--ficha-white), var(--ficha-off-white));
+        border: 2px solid var(--ficha-border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all var(--ficha-transition) ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .ficha-document-item:hover {
+        border-color: var(--ficha-primary);
+        box-shadow: var(--ficha-shadow);
+        transform: translateY(-2px);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .ficha-document-item.available {
+        border-color: var(--ficha-success);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.1));
+    }
+
+    .ficha-document-item.available:hover {
+        border-color: var(--ficha-success);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.15));
+    }
+
+    .ficha-document-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--ficha-primary);
+    }
+
+    .ficha-document-icon.available {
+        color: var(--ficha-success);
+    }
+
+    .ficha-breadcrumb {
+        background: linear-gradient(135deg, var(--ficha-off-white), var(--ficha-white));
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--ficha-border);
+    }
+
+    .ficha-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .ficha-btn {
+        background: linear-gradient(135deg, var(--ficha-primary), var(--ficha-secondary));
+        border: none;
+        color: var(--ficha-white);
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all var(--ficha-transition) ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        box-shadow: var(--ficha-shadow);
+    }
+
+    .ficha-btn:hover {
+        background: linear-gradient(135deg, var(--ficha-secondary), var(--ficha-primary));
+        color: var(--ficha-white);
+        transform: translateY(-2px);
+        box-shadow: var(--ficha-shadow-lg);
+        text-decoration: none;
+    }
+
+    .ficha-btn-secondary {
+        background: linear-gradient(135deg, var(--ficha-white), var(--ficha-off-white));
+        color: var(--ficha-text);
+        border: 2px solid var(--ficha-border);
+    }
+
+    .ficha-btn-secondary:hover {
+        background: linear-gradient(135deg, var(--ficha-light), rgba(37, 99, 235, 0.1));
+        color: var(--ficha-primary);
+        border-color: var(--ficha-primary);
+    }
+
+    .ficha-btn-success {
+        background: linear-gradient(135deg, var(--ficha-success), #059669);
+    }
+
+    .ficha-btn-success:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    .ficha-progress {
+        background: var(--ficha-off-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 2px solid var(--ficha-primary);
+        text-align: center;
+    }
+
+    .ficha-progress-bar {
+        background: var(--ficha-border);
+        border-radius: 1rem;
+        height: 12px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+
+    .ficha-progress-fill {
+        background: linear-gradient(90deg, var(--ficha-success), var(--ficha-primary));
+        height: 100%;
+        border-radius: 1rem;
+        transition: width 0.5s ease;
+    }
+
+    .ficha-text-content {
+        background: linear-gradient(135deg, var(--ficha-off-white), rgba(248, 250, 252, 0.8));
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 2px solid var(--ficha-border);
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--ficha-text);
+        white-space: pre-wrap;
+    }
+
+    .ficha-text-content.empty {
+        color: var(--ficha-text-light);
+        font-style: italic;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .ficha-header {
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .ficha-section {
+            padding: 1.5rem;
+        }
+        
+        .ficha-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .ficha-actions {
+            flex-direction: column;
+        }
+        
+        .ficha-btn {
+            justify-content: center;
+        }
+    }
+
+    .ficha-empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--ficha-text-light);
+        background: linear-gradient(135deg, var(--ficha-off-white), rgba(107, 114, 128, 0.05));
+        border-radius: 1rem;
+        border: 2px dashed var(--ficha-text-light);
+    }
+
+    .ficha-empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav class="ficha-breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door"></i> Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'equipos:fichas-tecnicas' %}" class="text-decoration-none">
+                    <i class="bi bi-file-earmark-text"></i> Fichas Técnicas
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                <i class="bi bi-gear"></i> {{ equipo.codigo_interno }}
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Header Principal -->
+    <div class="ficha-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-3 fw-bold">
+                    <i class="bi bi-file-earmark-text me-3"></i>
+                    Ficha Técnica Completa
+                </h1>
+                <div class="ficha-equipment-code mb-3">{{ equipo.codigo_interno }}</div>
+                <h2 class="h3 mb-3">{{ equipo.nombre }}</h2>
+                <p class="mb-3 opacity-75 fs-5">{{ equipo.fabricante|default:"Fabricante no especificado" }} | {{ equipo.modelo|default:"Modelo no especificado" }}</p>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <span class="ficha-status-badge 
+                        {% if equipo.estado == 'OPERATIVO' %}status-operativo
+                        {% elif equipo.estado == 'MANTENIMIENTO' %}status-mantenimiento
+                        {% else %}status-fuera-servicio{% endif %}">
+                        {% if equipo.estado == 'OPERATIVO' %}
+                            <i class="bi bi-check-circle-fill"></i>
+                        {% elif equipo.estado == 'MANTENIMIENTO' %}
+                            <i class="bi bi-tools"></i>
+                        {% else %}
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        {% endif %}
+                        {{ equipo.get_estado_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="ficha-progress">
+                    <h4 class="mb-2">Completitud de Documentación</h4>
+                    <div class="ficha-progress-bar">
+                        <div class="ficha-progress-fill" style="width: {{ equipo.calcular_completitud_ficha }}%"></div>
+                    </div>
+                    <div class="fw-bold fs-4">{{ equipo.calcular_completitud_ficha }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información Básica del Equipo -->
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-info-circle ficha-section-icon"></i>
+            Información Básica del Equipo
+        </h2>
+        <div class="ficha-grid">
+            <div class="ficha-item {% if equipo.codigo_interno %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-hash"></i>
+                    Código Interno
+                </div>
+                <div class="ficha-value {% if not equipo.codigo_interno %}empty{% endif %}">
+                    {{ equipo.codigo_interno|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.nombre %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-gear"></i>
+                    Nombre del Equipo
+                </div>
+                <div class="ficha-value {% if not equipo.nombre %}empty{% endif %}">
+                    {{ equipo.nombre|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.numero_serie %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-upc"></i>
+                    Número de Serie
+                </div>
+                <div class="ficha-value {% if not equipo.numero_serie %}empty{% endif %}">
+                    {{ equipo.numero_serie|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.fabricante %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-building"></i>
+                    Fabricante
+                </div>
+                <div class="ficha-value {% if not equipo.fabricante %}empty{% endif %}">
+                    {{ equipo.fabricante|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.modelo %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-cpu"></i>
+                    Modelo
+                </div>
+                <div class="ficha-value {% if not equipo.modelo %}empty{% endif %}">
+                    {{ equipo.modelo|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.año_fabricacion %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-calendar"></i>
+                    Año de Fabricación
+                </div>
+                <div class="ficha-value {% if not equipo.año_fabricacion %}empty{% endif %}">
+                    {{ equipo.año_fabricacion|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.peso %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-rulers"></i>
+                    Peso
+                </div>
+                <div class="ficha-value {% if not equipo.peso %}empty{% endif %}">
+                    {% if equipo.peso %}{{ equipo.peso }} kg{% else %}No especificado{% endif %}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.potencia %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-lightning"></i>
+                    Potencia
+                </div>
+                <div class="ficha-value {% if not equipo.potencia %}empty{% endif %}">
+                    {{ equipo.potencia|default:"No especificada" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.capacidad %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-speedometer"></i>
+                    Capacidad
+                </div>
+                <div class="ficha-value {% if not equipo.capacidad %}empty{% endif %}">
+                    {{ equipo.capacidad|default:"No especificada" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.serie %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-barcode"></i>
+                    Serie
+                </div>
+                <div class="ficha-value {% if not equipo.serie %}empty{% endif %}">
+                    {{ equipo.serie|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.tipo_equipo %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-tag"></i>
+                    Tipo de Equipo
+                </div>
+                <div class="ficha-value {% if not equipo.tipo_equipo %}empty{% endif %}">
+                    {{ equipo.tipo_equipo|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.responsable %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-person-badge"></i>
+                    Responsable
+                </div>
+                <div class="ficha-value {% if not equipo.responsable %}empty{% endif %}">
+                    {{ equipo.responsable|default:"No asignado" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Especificaciones Eléctricas -->
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-lightning-charge ficha-section-icon"></i>
+            Especificaciones Eléctricas
+        </h2>
+        <div class="ficha-grid ficha-grid-small">
+            <div class="ficha-item {% if equipo.voltaje %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-plug"></i>
+                    Voltaje
+                </div>
+                <div class="ficha-value {% if not equipo.voltaje %}empty{% endif %}">
+                    {{ equipo.voltaje|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.amperaje %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-activity"></i>
+                    Amperaje
+                </div>
+                <div class="ficha-value {% if not equipo.amperaje %}empty{% endif %}">
+                    {{ equipo.amperaje|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.fases %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-diagram-3"></i>
+                    Tipo de Alimentación
+                </div>
+                <div class="ficha-value {% if not equipo.fases %}empty{% endif %}">
+                    {{ equipo.get_fases_display|default:"No especificado" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.frecuencia %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-wave-square"></i>
+                    Frecuencia
+                </div>
+                <div class="ficha-value {% if not equipo.frecuencia %}empty{% endif %}">
+                    {{ equipo.get_frecuencia_display|default:"No especificada" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.consumo_electrico %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-battery-charging"></i>
+                    Consumo Eléctrico
+                </div>
+                <div class="ficha-value {% if not equipo.consumo_electrico %}empty{% endif %}">
+                    {% if equipo.consumo_electrico %}{{ equipo.consumo_electrico }} kW{% else %}No especificado{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Condiciones de Operación -->
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-thermometer-half ficha-section-icon"></i>
+            Condiciones de Operación
+        </h2>
+        <div class="ficha-grid ficha-grid-small">
+            <div class="ficha-item {% if equipo.temperatura_min %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-thermometer-snow"></i>
+                    Temperatura Mínima
+                </div>
+                <div class="ficha-value {% if not equipo.temperatura_min %}empty{% endif %}">
+                    {% if equipo.temperatura_min %}{{ equipo.temperatura_min }}°C{% else %}No especificada{% endif %}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.temperatura_max %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-thermometer-sun"></i>
+                    Temperatura Máxima
+                </div>
+                <div class="ficha-value {% if not equipo.temperatura_max %}empty{% endif %}">
+                    {% if equipo.temperatura_max %}{{ equipo.temperatura_max }}°C{% else %}No especificada{% endif %}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.humedad_max %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-droplet"></i>
+                    Humedad Máxima
+                </div>
+                <div class="ficha-value {% if not equipo.humedad_max %}empty{% endif %}">
+                    {% if equipo.humedad_max %}{{ equipo.humedad_max }}%{% else %}No especificada{% endif %}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.presion_trabajo %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-speedometer2"></i>
+                    Presión de Trabajo
+                </div>
+                <div class="ficha-value {% if not equipo.presion_trabajo %}empty{% endif %}">
+                    {% if equipo.presion_trabajo %}{{ equipo.presion_trabajo }} Bar{% else %}No especificada{% endif %}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.caudal_aire %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-wind"></i>
+                    Caudal de Aire
+                </div>
+                <div class="ficha-value {% if not equipo.caudal_aire %}empty{% endif %}">
+                    {% if equipo.caudal_aire %}{{ equipo.caudal_aire }} L/min{% else %}No especificado{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ubicación y Organización -->
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-geo-alt ficha-section-icon"></i>
+            Ubicación y Organización
+        </h2>
+        <div class="ficha-grid">
+            <div class="ficha-item {% if equipo.seccion %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-building"></i>
+                    Sección
+                </div>
+                <div class="ficha-value {% if not equipo.seccion %}empty{% endif %}">
+                    {{ equipo.get_seccion_display|default:"No especificada" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.ubicacion_fisica %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-map"></i>
+                    Ubicación Física
+                </div>
+                <div class="ficha-value {% if not equipo.ubicacion_fisica %}empty{% endif %}">
+                    {{ equipo.ubicacion_fisica|default:"No especificada" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.ubicacion_especifica %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-pin-map"></i>
+                    Ubicación Específica
+                </div>
+                <div class="ficha-value {% if not equipo.ubicacion_especifica %}empty{% endif %}">
+                    {{ equipo.ubicacion_especifica|default:"No especificada" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.udb_unidad %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-collection"></i>
+                    Unidad UDB
+                </div>
+                <div class="ficha-value {% if not equipo.udb_unidad %}empty{% endif %}">
+                    {{ equipo.get_udb_unidad_display|default:"No especificada" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.udb_numero %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-123"></i>
+                    Número UDB
+                </div>
+                <div class="ficha-value {% if not equipo.udb_numero %}empty{% endif %}">
+                    {{ equipo.udb_numero|default:"No especificado" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seguridad Industrial -->
+    {% if equipo.epp_requerido %}
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-shield-check ficha-section-icon"></i>
+            Seguridad Industrial
+        </h2>
+        <div class="ficha-item has-data">
+            <div class="ficha-label">
+                <i class="bi bi-person-check"></i>
+                Equipos de Protección Personal (EPP) Requeridos
+            </div>
+            <div class="ficha-text-content">{{ equipo.epp_requerido }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Plan de Mantenimiento -->
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-tools ficha-section-icon"></i>
+            Plan de Mantenimiento
+        </h2>
+        <div class="ficha-grid">
+            <div class="ficha-item {% if equipo.frecuencia_mantenimiento %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-calendar-event"></i>
+                    Frecuencia de Mantenimiento
+                </div>
+                <div class="ficha-value {% if not equipo.frecuencia_mantenimiento %}empty{% endif %}">
+                    {{ equipo.get_frecuencia_mantenimiento_display|default:"No especificada" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.tiempo_mantenimiento %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-clock"></i>
+                    Tiempo Estimado
+                </div>
+                <div class="ficha-value {% if not equipo.tiempo_mantenimiento %}empty{% endif %}">
+                    {% if equipo.tiempo_mantenimiento %}{{ equipo.tiempo_mantenimiento }} horas{% else %}No especificado{% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if equipo.procedimientos_mantenimiento %}
+        <div class="mt-3">
+            <div class="ficha-item has-data">
+                <div class="ficha-label">
+                    <i class="bi bi-list-check"></i>
+                    Procedimientos de Mantenimiento
+                </div>
+                <div class="ficha-text-content">{{ equipo.procedimientos_mantenimiento }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Documentos Técnicos -->
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-file-earmark-pdf ficha-section-icon"></i>
+            Documentos Técnicos
+        </h2>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {% if equipo.esquema_electrico %}
+                <a href="{{ equipo.esquema_electrico.url }}" target="_blank" class="ficha-document-item available">
+                    <i class="bi bi-diagram-2 ficha-document-icon available"></i>
+                    <h5 class="mb-2">Esquema Eléctrico</h5>
+                    <p class="mb-0 text-success">Disponible - Hacer clic para ver</p>
+                </a>
+                {% else %}
+                <div class="ficha-document-item">
+                    <i class="bi bi-diagram-2 ficha-document-icon"></i>
+                    <h5 class="mb-2">Esquema Eléctrico</h5>
+                    <p class="mb-0 text-muted">No disponible</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                {% if equipo.manual_operacion %}
+                <a href="{{ equipo.manual_operacion.url }}" target="_blank" class="ficha-document-item available">
+                    <i class="bi bi-book ficha-document-icon available"></i>
+                    <h5 class="mb-2">Manual de Operación</h5>
+                    <p class="mb-0 text-success">Disponible - Hacer clic para ver</p>
+                </a>
+                {% else %}
+                <div class="ficha-document-item">
+                    <i class="bi bi-book ficha-document-icon"></i>
+                    <h5 class="mb-2">Manual de Operación</h5>
+                    <p class="mb-0 text-muted">No disponible</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Observaciones Generales -->
+    {% if equipo.observaciones %}
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-chat-text ficha-section-icon"></i>
+            Observaciones Generales
+        </h2>
+        <div class="ficha-item has-data">
+            <div class="ficha-text-content">{{ equipo.observaciones }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Información de Registro -->
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-calendar-check ficha-section-icon"></i>
+            Información de Registro
+        </h2>
+        <div class="ficha-grid ficha-grid-small">
+            <div class="ficha-item has-data">
+                <div class="ficha-label">
+                    <i class="bi bi-calendar-plus"></i>
+                    Fecha de Ingreso
+                </div>
+                <div class="ficha-value">
+                    {{ equipo.fecha_ingreso|date:"d/m/Y H:i" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item has-data">
+                <div class="ficha-label">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Última Actualización
+                </div>
+                <div class="ficha-value">
+                    {{ equipo.fecha_actualizacion|date:"d/m/Y H:i" }}
+                </div>
+            </div>
+            
+            <div class="ficha-item {% if equipo.ficha_tecnica_completa %}has-data{% else %}no-data{% endif %}">
+                <div class="ficha-label">
+                    <i class="bi bi-check-circle"></i>
+                    Estado de Ficha
+                </div>
+                <div class="ficha-value">
+                    {% if equipo.ficha_tecnica_completa %}
+                        <span class="text-success">Completa</span>
+                    {% else %}
+                        <span class="text-warning">Incompleta</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="ficha-actions">
+        <a href="{% url 'equipos:editar-ficha' equipo.pk %}" class="ficha-btn ficha-btn-secondary">
+            <i class="bi bi-pencil"></i>
+            Editar Ficha Técnica
+        </a>
+        
+        <a href="{% url 'equipos:exportar-ficha-pdf' equipo.pk %}" class="ficha-btn ficha-btn-success">
+            <i class="bi bi-download"></i>
+            Exportar PDF
+        </a>
+        
+        <a href="{% url 'equipos:imprimir-ficha' equipo.pk %}" target="_blank" class="ficha-btn">
+            <i class="bi bi-printer"></i>
+            Imprimir
+        </a>
+        
+        <a href="{% url 'equipos:fichas-tecnicas' %}" class="ficha-btn ficha-btn-secondary">
+            <i class="bi bi-arrow-left"></i>
+            Volver a Fichas
+        </a>
+    </div>
+</div>
+{% endblock %}

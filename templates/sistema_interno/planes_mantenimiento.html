@@ -1,0 +1,1255 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Planes de Mantenimiento - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --plan-primary: #2563eb;
+        --plan-secondary: #1d4ed8;
+        --plan-light: #dbeafe;
+        --plan-success: #10b981;
+        --plan-warning: #f59e0b;
+        --plan-danger: #ef4444;
+        --plan-info: #0ea5e9;
+        --plan-white: #ffffff;
+        --plan-off-white: #f8fafc;
+        --plan-text: #1f2937;
+        --plan-text-light: #6b7280;
+        --plan-border: #e5e7eb;
+        --plan-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --plan-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --plan-transition: 0.3s;
+    }
+
+    .plan-header {
+        background: linear-gradient(135deg, var(--plan-primary), var(--plan-secondary));
+        color: var(--plan-white);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .plan-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .plan-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .plan-stat-card {
+        background: var(--plan-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--plan-shadow);
+        border: 1px solid var(--plan-border);
+        position: relative;
+        overflow: hidden;
+        transition: all var(--plan-transition) ease;
+    }
+
+    .plan-stat-card:hover {
+        box-shadow: var(--plan-shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .plan-stat-card.success {
+        border-left: 4px solid var(--plan-success);
+    }
+
+    .plan-stat-card.warning {
+        border-left: 4px solid var(--plan-warning);
+    }
+
+    .plan-stat-card.danger {
+        border-left: 4px solid var(--plan-danger);
+    }
+
+    .plan-stat-card.primary {
+        border-left: 4px solid var(--plan-primary);
+    }
+
+    .plan-stat-card.info {
+        border-left: 4px solid var(--plan-info);
+    }
+
+    .plan-stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--plan-primary);
+        line-height: 1;
+    }
+
+    .plan-stat-label {
+        color: var(--plan-text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.5rem;
+    }
+
+    .plan-filters {
+        background: var(--plan-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--plan-shadow);
+        border: 1px solid var(--plan-border);
+    }
+
+    .plan-filter-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .plan-filter-control {
+        border: 2px solid var(--plan-border);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        font-size: 0.875rem;
+        transition: all var(--plan-transition) ease;
+        background: var(--plan-white);
+    }
+
+    .plan-filter-control:focus {
+        border-color: var(--plan-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    .plan-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .plan-card {
+        background: var(--plan-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--plan-shadow);
+        border: 1px solid var(--plan-border);
+        transition: all var(--plan-transition) ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .plan-card:hover {
+        box-shadow: var(--plan-shadow-lg);
+        transform: translateY(-4px);
+    }
+
+    .plan-card.atrasado {
+        border-left: 4px solid var(--plan-danger);
+        background: linear-gradient(135deg, var(--plan-white), rgba(239, 68, 68, 0.02));
+    }
+
+    .plan-card.proximo {
+        border-left: 4px solid var(--plan-warning);
+        background: linear-gradient(135deg, var(--plan-white), rgba(245, 158, 11, 0.02));
+    }
+
+    .plan-card.normal {
+        border-left: 4px solid var(--plan-success);
+    }
+
+    .plan-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .plan-codigo {
+        font-family: 'Monaco', 'Courier New', monospace;
+        background: var(--plan-primary);
+        color: var(--plan-white);
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .plan-nombre {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--plan-text);
+        margin: 0.5rem 0;
+        line-height: 1.3;
+    }
+
+    .plan-equipo {
+        color: var(--plan-text-light);
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .plan-badges {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .plan-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .badge-tipo-preventivo {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--plan-success);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-tipo-correctivo {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--plan-danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .badge-tipo-predictivo {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--plan-primary);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+    }
+
+    .badge-tipo-autonomo {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--plan-warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-prioridad-baja {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--plan-text-light);
+        border: 1px solid rgba(107, 114, 128, 0.3);
+    }
+
+    .badge-prioridad-media {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--plan-primary);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+    }
+
+    .badge-prioridad-alta {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--plan-warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-prioridad-critica {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--plan-danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* *** NUEVOS BADGES PARA ISO Y NORMATIVAS *** */
+    .badge-iso {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--plan-info);
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        font-weight: 700;
+    }
+
+    .badge-api {
+        background: rgba(139, 69, 19, 0.1);
+        color: #8b4513;
+        border: 1px solid rgba(139, 69, 19, 0.3);
+        font-weight: 700;
+    }
+
+    .badge-asme {
+        background: rgba(75, 0, 130, 0.1);
+        color: #4b0082;
+        border: 1px solid rgba(75, 0, 130, 0.3);
+        font-weight: 700;
+    }
+
+    .plan-fecha {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+    }
+
+    .plan-fecha-item {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .plan-fecha-label {
+        color: var(--plan-text-light);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .plan-fecha-valor {
+        color: var(--plan-text);
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+
+    /* *** NUEVA SECCIÓN TÉCNICA *** */
+    .plan-technical-info {
+        background: rgba(37, 99, 235, 0.03);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin: 1rem 0;
+        border: 1px solid rgba(37, 99, 235, 0.1);
+    }
+
+    .plan-technical-info small {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--plan-text-light);
+        font-size: 0.75rem;
+    }
+
+    .plan-technical-info i {
+        color: var(--plan-primary);
+        margin-right: 0.5rem;
+        width: 14px;
+    }
+
+    .plan-dias-restantes {
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    .dias-positivos {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--plan-success);
+        border: 2px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .dias-atencion {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--plan-warning);
+        border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .dias-atrasado {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--plan-danger);
+        border: 2px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .plan-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .plan-btn {
+        background: var(--plan-primary);
+        border: none;
+        color: var(--plan-white);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all var(--plan-transition) ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .plan-btn:hover {
+        background: var(--plan-secondary);
+        color: var(--plan-white);
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .plan-btn-secondary {
+        background: var(--plan-white);
+        color: var(--plan-text);
+        border: 2px solid var(--plan-border);
+    }
+
+    .plan-btn-secondary:hover {
+        background: var(--plan-light);
+        border-color: var(--plan-primary);
+        color: var(--plan-primary);
+    }
+
+    .plan-btn-warning {
+        background: var(--plan-warning);
+    }
+
+    .plan-btn-warning:hover {
+        background: #d97706;
+    }
+
+    .plan-btn-success {
+        background: var(--plan-success);
+    }
+
+    .plan-btn-success:hover {
+        background: #059669;
+    }
+
+    .plan-empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--plan-text-light);
+    }
+
+    .plan-empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .plan-pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .plan-breadcrumb {
+        background: var(--plan-white);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--plan-border);
+    }
+
+    /* NUEVO CSS PARA FILTROS MEJORADOS */
+    .filter-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--plan-text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-title i {
+        font-size: 1.5rem;
+        color: var(--plan-primary);
+    }
+
+    .filter-subtitle {
+        font-size: 0.875rem;
+        color: var(--plan-text-light);
+        margin-top: 0.25rem;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .filter-group {
+        background: var(--plan-off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        border: 1px solid var(--plan-border);
+        position: relative;
+    }
+
+    .filter-group.full-width {
+        grid-column: span 2;
+    }
+
+    .filter-label {
+        font-weight: 500;
+        color: var(--plan-text);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-label i {
+        color: var(--plan-primary);
+        font-size: 1.2rem;
+    }
+
+    .filter-input-container {
+        position: relative;
+    }
+
+    .filter-input {
+        border: 2px solid var(--plan-border);
+        border-radius: 0.5rem;
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        font-size: 0.875rem;
+        width: 100%;
+        transition: all var(--plan-transition) ease;
+        background: var(--plan-white);
+    }
+
+    .filter-input:focus {
+        border-color: var(--plan-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    .filter-input-icon {
+        position: absolute;
+        top: 50%;
+        left: 0.75rem;
+        transform: translateY(-50%);
+        color: var(--plan-text-light);
+    }
+
+    .filter-clear-btn {
+        position: absolute;
+        top: 50%;
+        right: 0.75rem;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--plan-danger);
+        cursor: pointer;
+    }
+
+    .filter-help {
+        font-size: 0.75rem;
+        color: var(--plan-text-light);
+        margin-top: 0.25rem;
+    }
+
+    .filter-select-container {
+        position: relative;
+    }
+
+    .filter-select {
+        border: 2px solid var(--plan-border);
+        border-radius: 0.5rem;
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        font-size: 0.875rem;
+        width: 100%;
+        transition: all var(--plan-transition) ease;
+        background: var(--plan-white);
+    }
+
+    .filter-select:focus {
+        border-color: var(--plan-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    .filter-select-icon {
+        position: absolute;
+        top: 50%;
+        right: 0.75rem;
+        transform: translateY(-50%);
+        color: var(--plan-text-light);
+    }
+
+    .filter-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .filter-stats {
+        font-size: 0.875rem;
+        color: var(--plan-text);
+    }
+
+    .filter-result-count {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all var(--plan-transition) ease;
+        cursor: pointer;
+        border: none;
+    }
+
+    .filter-btn-primary {
+        background: var(--plan-primary);
+        color: var(--plan-white);
+    }
+
+    .filter-btn-primary:hover {
+        background: var(--plan-secondary);
+    }
+
+    .filter-btn-secondary {
+        background: var(--plan-white);
+        color: var(--plan-text);
+        border: 2px solid var(--plan-border);
+    }
+
+    .filter-btn-secondary:hover {
+        background: var(--plan-light);
+        border-color: var(--plan-primary);
+        color: var(--plan-primary);
+    }
+
+    .filter-btn-clear {
+        background: var(--plan-danger);
+        color: var(--plan-white);
+    }
+
+    .filter-btn-clear:hover {
+        background: #c62828;
+    }
+
+    .advanced-filters {
+        background: var(--plan-off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        border: 1px solid var(--plan-border);
+    }
+
+    .advanced-filters-header {
+        font-weight: 600;
+        color: var(--plan-text);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .advanced-filters-header i {
+        color: var(--plan-primary);
+        font-size: 1.2rem;
+    }
+
+    .advanced-filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .plan-header {
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .plan-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .plan-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .plan-filter-group {
+            grid-template-columns: 1fr;
+        }
+        
+        .plan-actions {
+            flex-direction: column;
+        }
+
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav class="plan-breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door"></i> Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                <i class="bi bi-tools"></i> Planes de Mantenimiento
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="plan-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-3 fw-bold">
+                    <i class="bi bi-calendar-check me-3"></i>
+                    Planes de Mantenimiento Industrial
+                </h1>
+                <p class="mb-0 opacity-75 fs-5">Gestión integral de planes de mantenimiento preventivo, correctivo y predictivo según normativas ISO 55000</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'mantenimiento:crear-plan' %}" class="plan-btn plan-btn-success">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear Nuevo Plan
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Mejoradas -->
+    <div class="plan-stats">
+        <div class="plan-stat-card primary">
+            <div class="plan-stat-value">{{ total_planes }}</div>
+            <div class="plan-stat-label">Total de Planes</div>
+        </div>
+        <div class="plan-stat-card success">
+            <div class="plan-stat-value">{{ planes_activos }}</div>
+            <div class="plan-stat-label">Planes Activos</div>
+        </div>
+        <div class="plan-stat-card danger">
+            <div class="plan-stat-value">{{ planes_atrasados }}</div>
+            <div class="plan-stat-label">Planes Atrasados</div>
+        </div>
+        <div class="plan-stat-card warning">
+            <div class="plan-stat-value">{{ planes_proximos }}</div>
+            <div class="plan-stat-label">Próximos 7 Días</div>
+        </div>
+        <div class="plan-stat-card info">
+            <div class="plan-stat-value">{{ eficiencia_promedio }}%</div>
+            <div class="plan-stat-label">Eficiencia Promedio</div>
+        </div>
+        <div class="plan-stat-card info">
+            <div class="plan-stat-value">{{ planes_iso_compliant }}</div>
+            <div class="plan-stat-label">Planes ISO Compliant</div>
+        </div>
+        <div class="plan-stat-card success">
+            <div class="plan-stat-value">{{ cumplimiento_promedio }}%</div>
+            <div class="plan-stat-label">Tasa Cumplimiento</div>
+        </div>
+        <div class="plan-stat-card primary">
+            <div class="plan-stat-value">{{ total_repuestos_criticos }}</div>
+            <div class="plan-stat-label">Repuestos Críticos</div>
+        </div>
+    </div>
+
+    <!-- Filtros Mejorados -->
+    <div class="plan-filters">
+        <div class="filter-header">
+            <div class="filter-title">
+                <i class="bi bi-funnel-fill me-2"></i>
+                <span>Filtros de Búsqueda Avanzada</span>
+            </div>
+            <div class="filter-subtitle">
+                Utilice los filtros para encontrar planes específicos según sus criterios
+            </div>
+        </div>
+        
+        <form method="get" class="filter-form">
+            <div class="filter-grid">
+                <!-- Búsqueda General -->
+                <div class="filter-group full-width">
+                    <label class="filter-label">
+                        <i class="bi bi-search"></i>
+                        Búsqueda General
+                    </label>
+                    <div class="filter-input-container">
+                        <input type="text" 
+                               name="search" 
+                               value="{{ search }}" 
+                               class="filter-input" 
+                               placeholder="Buscar por nombre, código, equipo o descripción..."
+                               autocomplete="off">
+                        <div class="filter-input-icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        {% if search %}
+                            <button type="button" class="filter-clear-btn" onclick="clearSearch()">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div class="filter-help">Busque por cualquier campo del plan de mantenimiento</div>
+                </div>
+
+                <!-- Filtros Específicos -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-layers"></i>
+                        Tipo de Mantenimiento
+                    </label>
+                    <div class="filter-select-container">
+                        <select name="tipo" class="filter-select">
+                            <option value="">Todos los tipos</option>
+                            {% for key, value in tipos_mantenimiento %}
+                                <option value="{{ key }}" {% if key == tipo_filtro %}selected{% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="filter-select-icon">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-toggle-on"></i>
+                        Estado del Plan
+                    </label>
+                    <div class="filter-select-container">
+                        <select name="estado" class="filter-select">
+                            <option value="">Todos los estados</option>
+                            {% for key, value in estados %}
+                                <option value="{{ key }}" {% if key == estado_filtro %}selected{% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="filter-select-icon">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-flag"></i>
+                        Nivel de Prioridad
+                    </label>
+                    <div class="filter-select-container">
+                        <select name="prioridad" class="filter-select">
+                            <option value="">Todas las prioridades</option>
+                            {% for key, value in prioridades %}
+                                <option value="{{ key }}" {% if key == prioridad_filtro %}selected{% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="filter-select-icon">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nuevos Filtros Técnicos -->
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-shield-check"></i>
+                        Cumplimiento Normativo
+                    </label>
+                    <div class="filter-select-container">
+                        <select name="normativa" class="filter-select">
+                            <option value="">Todas las normativas</option>
+                            <option value="iso" {% if 'iso' == normativa_filtro %}selected{% endif %}>
+                                Solo ISO Compliant
+                            </option>
+                            <option value="api" {% if 'api' == normativa_filtro %}selected{% endif %}>
+                                Solo API 580
+                            </option>
+                            <option value="asme" {% if 'asme' == normativa_filtro %}selected{% endif %}>
+                                Solo ASME
+                            </option>
+                        </select>
+                        <div class="filter-select-icon">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="bi bi-clock-history"></i>
+                        Estado Temporal
+                    </label>
+                    <div class="filter-select-container">
+                        <select name="temporal" class="filter-select">
+                            <option value="">Todos los periodos</option>
+                            <option value="atrasado" {% if 'atrasado' == temporal_filtro %}selected{% endif %}>
+                                Solo Atrasados
+                            </option>
+                            <option value="proximo" {% if 'proximo' == temporal_filtro %}selected{% endif %}>
+                                Próximos 7 días
+                            </option>
+                            <option value="mes" {% if 'mes' == temporal_filtro %}selected{% endif %}>
+                                Próximo mes
+                            </option>
+                        </select>
+                        <div class="filter-select-icon">
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones del Filtro -->
+            <div class="filter-actions">
+                <div class="filter-stats">
+                    <span class="filter-result-count">
+                        <i class="bi bi-funnel"></i>
+                        {{ planes.count }} de {{ total_planes }} planes mostrados
+                    </span>
+                </div>
+                
+                <div class="filter-buttons">
+                    {% if search or tipo_filtro or estado_filtro or prioridad_filtro or normativa_filtro or temporal_filtro %}
+                        <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="filter-btn filter-btn-clear">
+                            <i class="bi bi-x-circle"></i>
+                            Limpiar Filtros
+                        </a>
+                    {% endif %}
+                    
+                    <button type="submit" class="filter-btn filter-btn-primary">
+                        <i class="bi bi-search"></i>
+                        Aplicar Filtros
+                    </button>
+                    
+                    <button type="button" class="filter-btn filter-btn-secondary" onclick="toggleAdvancedFilters()">
+                        <i class="bi bi-sliders"></i>
+                        Filtros Avanzados
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros Avanzados (Colapsables) -->
+            <div class="advanced-filters" id="advancedFilters" style="display: none;">
+                <div class="advanced-filters-header">
+                    <i class="bi bi-sliders2"></i>
+                    <span>Filtros Avanzados</span>
+                </div>
+                
+                <div class="advanced-filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="bi bi-speedometer"></i>
+                            Eficiencia Mínima (%)
+                        </label>
+                        <input type="number" 
+                               name="eficiencia_min" 
+                               value="{{ eficiencia_min }}" 
+                               class="filter-input"
+                               min="0" 
+                               max="100"
+                               placeholder="0">
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="bi bi-calendar-range"></i>
+                            Frecuencia
+                        </label>
+                        <div class="filter-select-container">
+                            <select name="frecuencia" class="filter-select">
+                                <option value="">Todas las frecuencias</option>
+                                <option value="diaria">Diaria</option>
+                                <option value="semanal">Semanal</option>
+                                <option value="mensual">Mensual</option>
+                                <option value="trimestral">Trimestral</option>
+                                <option value="semestral">Semestral</option>
+                                <option value="anual">Anual</option>
+                            </select>
+                            <div class="filter-select-icon">
+                                <i class="bi bi-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="bi bi-tools"></i>
+                            Con Repuestos Críticos
+                        </label>
+                        <div class="filter-checkbox-container">
+                            <input type="checkbox" 
+                                   name="con_repuestos" 
+                                   id="con_repuestos"
+                                   class="filter-checkbox"
+                                   {% if con_repuestos %}checked{% endif %}>
+                            <label for="con_repuestos" class="filter-checkbox-label">
+                                Solo planes con repuestos críticos definidos
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Grid de Planes -->
+    {% if planes %}
+        <div class="plan-grid">
+            {% for plan in planes %}
+                <div class="plan-card {% if plan.atrasado %}atrasado{% elif plan.dias_restantes <= 7 %}proximo{% else %}normal{% endif %}">
+                    <div class="plan-card-header">
+                        <div>
+                            <div class="plan-codigo">{{ plan.codigo_plan }}</div>
+                            <h5 class="plan-nombre">{{ plan.nombre }}</h5>
+                        </div>
+                        {% if plan.atrasado %}
+                            <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
+                        {% elif plan.dias_restantes <= 7 %}
+                            <i class="bi bi-clock text-warning fs-4"></i>
+                        {% else %}
+                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        {% endif %}
+                    </div>
+
+                    <div class="plan-equipo">
+                        <i class="bi bi-gear"></i>
+                        <strong>{{ plan.equipo.codigo_interno }}</strong> - {{ plan.equipo.nombre }}
+                    </div>
+
+                    <div class="plan-badges">
+                        <span class="plan-badge badge-tipo-{{ plan.tipo_mantenimiento }}">
+                            {{ plan.get_tipo_mantenimiento_display }}
+                        </span>
+                        <span class="plan-badge badge-prioridad-{{ plan.prioridad }}">
+                            {{ plan.get_prioridad_display }}
+                        </span>
+                        <!-- *** NUEVOS BADGES DE CUMPLIMIENTO NORMATIVO *** -->
+                        {% if plan.cumple_iso %}
+                            <span class="plan-badge badge-iso">ISO Compliant</span>
+                        {% endif %}
+                        {% if plan.cumple_api %}
+                            <span class="plan-badge badge-api">API 580</span>
+                        {% endif %}
+                        {% if plan.cumple_asme %}
+                            <span class="plan-badge badge-asme">ASME</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- *** NUEVA INFORMACIÓN TÉCNICA *** -->
+                    <div class="plan-technical-info">
+                        <small>
+                            <i class="bi bi-tools"></i>
+                            Repuestos críticos: {{ plan.repuestos_criticos.count }}
+                        </small>
+                        <small>
+                            <i class="bi bi-shield-check"></i>
+                            Norma aplicable: {{ plan.get_norma_aplicable_display }}
+                        </small>
+                        <small>
+                            <i class="bi bi-speedometer2"></i>
+                            Eficiencia: {{ plan.eficiencia_promedio }}%
+                        </small>
+                        {% if plan.mtbf %}
+                        <small>
+                            <i class="bi bi-graph-up-arrow"></i>
+                            MTBF: {{ plan.mtbf }} horas
+                        </small>
+                        {% endif %}
+                    </div>
+
+                    <div class="plan-fecha">
+                        <div class="plan-fecha-item">
+                            <div class="plan-fecha-label">Última</div>
+                            <div class="plan-fecha-valor">
+                                {% if plan.ultima_ejecucion %}
+                                    {{ plan.ultima_ejecucion|date:"d/m/Y" }}
+                                {% else %}
+                                    Sin registro
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="plan-fecha-item">
+                            <div class="plan-fecha-label">Próxima</div>
+                            <div class="plan-fecha-valor">
+                                {% if plan.proxima_ejecucion %}
+                                    {{ plan.proxima_ejecucion|date:"d/m/Y" }}
+                                {% else %}
+                                    No programada
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="plan-fecha-item">
+                            <div class="plan-fecha-label">Frecuencia</div>
+                            <div class="plan-fecha-valor">{{ plan.get_frecuencia_display }}</div>
+                        </div>
+                    </div>
+
+                    {% if plan.dias_restantes is not None %}
+                        <div class="plan-dias-restantes {% if plan.atrasado %}dias-atrasado{% elif plan.dias_restantes <= 7 %}dias-atencion{% else %}dias-positivos{% endif %}">
+                            {% if plan.atrasado %}
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Atrasado {{ plan.dias_restantes|add:"-1" }} días
+                            {% elif plan.dias_restantes == 0 %}
+                                <i class="bi bi-calendar-event me-2"></i>
+                                Hoy
+                            {% elif plan.dias_restantes == 1 %}
+                                <i class="bi bi-calendar-plus me-2"></i>
+                                Mañana
+                            {% else %}
+                                <i class="bi bi-calendar me-2"></i>
+                                {{ plan.dias_restantes }} días
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="plan-actions">
+                        <a href="{% url 'mantenimiento:plan-detalle' plan.pk %}" 
+                           class="plan-btn plan-btn-secondary">
+                            <i class="bi bi-eye"></i>
+                            Ver
+                        </a>
+                        <a href="{% url 'mantenimiento:editar-plan' plan.pk %}" 
+                           class="plan-btn plan-btn-warning">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </a>
+                        {% if plan.atrasado or plan.dias_restantes <= 7 %}
+                            <button class="plan-btn plan-btn-success" 
+                                    onclick="ejecutarMantenimiento({{ plan.pk }})">
+                                <i class="bi bi-play-circle"></i>
+                                Ejecutar
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+            <div class="plan-pagination">
+                <nav aria-label="Paginación de planes">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">
+                                    <i class="bi bi-chevron-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="plan-empty-state">
+            <i class="bi bi-calendar-x plan-empty-icon"></i>
+            <h3>No hay planes de mantenimiento</h3>
+            <p>No se encontraron planes que coincidan con los filtros aplicados.</p>
+            <a href="{% url 'mantenimiento:crear-plan' %}" class="plan-btn">
+                <i class="bi bi-plus-circle"></i>
+                Crear Primer Plan
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit filtros cuando cambian
+    const filterForm = document.querySelector('.plan-filters form');
+    const filterInputs = filterForm.querySelectorAll('select');
+    
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            filterForm.submit();
+        });
+    });
+    
+    // Función para ejecutar mantenimiento (placeholder)
+    window.ejecutarMantenimiento = function(planId) {
+        if (confirm('¿Está seguro de que desea ejecutar este mantenimiento?')) {
+            // Aquí iría la lógica para ejecutar el mantenimiento
+            alert('Funcionalidad de ejecución próximamente disponible');
+        }
+    };
+
+    // Función para limpiar búsqueda
+    window.clearSearch = function() {
+        const searchInput = document.querySelector('input[name="search"]');
+        searchInput.value = '';
+        searchInput.focus();
+        filterForm.submit();
+    }
+
+    // Función para togglear filtros avanzados
+    window.toggleAdvancedFilters = function() {
+        const advancedFilters = document.getElementById('advancedFilters');
+        if (advancedFilters.style.display === 'none' || advancedFilters.style.display === '') {
+            advancedFilters.style.display = 'block';
+        } else {
+            advancedFilters.style.display = 'none';
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1040 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load file_extras %}
+
+{% block title %}{{ accion|title }} Ficha Técnica - {{ equipo.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Variables específicas para el formulario de fichas técnicas */
+    :root {
+        --ficha-form-primary: #2563eb;
+        --ficha-form-secondary: #1d4ed8;
+        --ficha-form-light: #dbeafe;
+        --ficha-form-success: #10b981;
+        --ficha-form-warning: #f59e0b;
+        --ficha-form-danger: #ef4444;
+        --ficha-form-white: #ffffff;
+        --ficha-form-off-white: #f8fafc;
+        --ficha-form-text: #1f2937;
+        --ficha-form-text-light: #6b7280;
+        --ficha-form-border: #e5e7eb;
+        --ficha-form-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --ficha-form-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --ficha-form-transition: 0.3s;
+    }
+
+    .ficha-form-container {
+        background: linear-gradient(135deg, var(--ficha-form-white) 0%, var(--ficha-form-off-white) 100%);
+        border-radius: 1.5rem;
+        box-shadow: var(--ficha-form-shadow-lg);
+        border: 1px solid var(--ficha-form-border);
+        overflow: hidden;
+    }
+
+    .ficha-form-header {
+        background: linear-gradient(135deg, var(--ficha-form-primary), var(--ficha-form-secondary));
+        color: var(--ficha-form-white);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ficha-form-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .ficha-form-body {
+        padding: 2.5rem;
+    }
+
+    .ficha-form-section {
+        background: linear-gradient(135deg, var(--ficha-form-white) 0%, var(--ficha-form-off-white) 100%);
+        border-radius: 1.25rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--ficha-form-border);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ficha-form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--ficha-form-primary), var(--ficha-form-secondary));
+        border-radius: 1.25rem 1.25rem 0 0;
+    }
+
+    .ficha-form-section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--ficha-form-primary);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding-top: 0.5rem;
+    }
+
+    .ficha-form-section-icon {
+        font-size: 2rem;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, var(--ficha-form-light), rgba(37, 99, 235, 0.1));
+        border-radius: 1rem;
+        color: var(--ficha-form-primary);
+    }
+
+    .ficha-form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .ficha-form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .ficha-form-group {
+        position: relative;
+    }
+
+    .ficha-form-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ficha-form-text);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .ficha-form-label i {
+        color: var(--ficha-form-primary);
+        font-size: 1.2rem;
+        padding: 0.25rem;
+        background: linear-gradient(135deg, var(--ficha-form-light), rgba(37, 99, 235, 0.1));
+        border-radius: 0.5rem;
+    }
+
+    .ficha-required {
+        color: var(--ficha-form-danger);
+        font-weight: 700;
+        margin-left: 0.25rem;
+    }
+
+    .ficha-form-control {
+        border: 2px solid var(--ficha-form-border);
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all var(--ficha-form-transition) cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(135deg, var(--ficha-form-white) 0%, rgba(248, 250, 252, 0.8) 100%);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        width: 100%;
+    }
+
+    .ficha-form-control:hover {
+        border-color: var(--ficha-form-primary);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .ficha-form-control:focus {
+        border-color: var(--ficha-form-primary);
+        box-shadow: 
+            0 0 0 4px rgba(37, 99, 235, 0.2),
+            0 8px 25px rgba(37, 99, 235, 0.2),
+            inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        outline: none;
+        transform: translateY(-2px);
+        background: var(--ficha-form-white);
+    }
+
+    .ficha-form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23374151' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px 12px;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+
+    .ficha-form-select:focus {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%232563eb' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+    }
+
+    .ficha-form-textarea {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .ficha-form-help {
+        font-size: 0.875rem;
+        color: var(--ficha-form-text-light);
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(248, 250, 252, 0.8) 100%);
+        border-radius: 0.5rem;
+        border-left: 3px solid var(--ficha-form-primary);
+    }
+
+    .ficha-form-help i {
+        color: var(--ficha-form-primary);
+        font-size: 1rem;
+    }
+
+    .ficha-form-error {
+        color: var(--ficha-form-danger);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        border-radius: 0.5rem;
+        border-left: 3px solid var(--ficha-form-danger);
+    }
+
+    .ficha-form-error i {
+        color: var(--ficha-form-danger);
+        font-size: 1rem;
+    }
+
+    .ficha-breadcrumb {
+        background: linear-gradient(135deg, var(--ficha-form-off-white), var(--ficha-form-white));
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--ficha-form-border);
+    }
+
+    .ficha-equipment-info {
+        background: linear-gradient(135deg, var(--ficha-form-light), rgba(37, 99, 235, 0.1));
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 2px solid var(--ficha-form-primary);
+    }
+
+    .ficha-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 2rem;
+        border-top: 2px solid var(--ficha-form-border);
+        margin-top: 2rem;
+    }
+
+    .ficha-btn {
+        background: linear-gradient(135deg, var(--ficha-form-primary), var(--ficha-form-secondary));
+        border: none;
+        color: var(--ficha-form-white);
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all var(--ficha-form-transition) ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        box-shadow: var(--ficha-form-shadow);
+        cursor: pointer;
+    }
+
+    .ficha-btn:hover {
+        background: linear-gradient(135deg, var(--ficha-form-secondary), var(--ficha-form-primary));
+        color: var(--ficha-form-white);
+        transform: translateY(-2px);
+        box-shadow: var(--ficha-form-shadow-lg);
+        text-decoration: none;
+    }
+
+    .ficha-btn-secondary {
+        background: linear-gradient(135deg, var(--ficha-form-white), var(--ficha-form-off-white));
+        color: var(--ficha-form-text);
+        border: 2px solid var(--ficha-form-border);
+    }
+
+    .ficha-btn-secondary:hover {
+        background: linear-gradient(135deg, var(--ficha-form-light), rgba(37, 99, 235, 0.1));
+        color: var(--ficha-form-primary);
+        border-color: var(--ficha-form-primary);
+    }
+
+    .ficha-btn-success {
+        background: linear-gradient(135deg, var(--ficha-form-success), #059669);
+    }
+
+    .ficha-btn-success:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    .file-upload-area {
+        border: 3px dashed var(--ficha-form-border);
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, var(--ficha-form-off-white), rgba(37, 99, 235, 0.05));
+        transition: all var(--ficha-form-transition) ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--ficha-form-primary);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), var(--ficha-form-light));
+        transform: translateY(-2px);
+        box-shadow: var(--ficha-form-shadow);
+    }
+
+    .file-upload-area.has-file {
+        border-color: var(--ficha-form-success);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    }
+
+    .file-info {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        border: 2px solid var(--ficha-form-success);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .file-info-icon {
+        font-size: 2rem;
+        color: var(--ficha-form-success);
+    }
+
+    .file-info-content {
+        flex: 1;
+    }
+
+    .file-info-name {
+        font-weight: 600;
+        color: var(--ficha-form-text);
+        margin-bottom: 0.25rem;
+    }
+
+    .file-info-details {
+        font-size: 0.875rem;
+        color: var(--ficha-form-text-light);
+    }
+
+    .progress-container {
+        background: var(--ficha-form-off-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        border: 2px solid var(--ficha-form-primary);
+    }
+
+    .progress-bar {
+        background: var(--ficha-form-border);
+        border-radius: 1rem;
+        height: 12px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+
+    .progress-fill {
+        background: linear-gradient(90deg, var(--ficha-form-success), var(--ficha-form-primary));
+        height: 100%;
+        border-radius: 1rem;
+        transition: width 0.5s ease;
+    }
+
+    @media (max-width: 768px) {
+        .ficha-form-header {
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .ficha-form-body {
+            padding: 2rem;
+        }
+        
+        .ficha-form-section {
+            padding: 1.5rem;
+        }
+        
+        .ficha-form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .ficha-actions {
+            flex-direction: column;
+        }
+        
+        .ficha-btn {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav class="ficha-breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door"></i> Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'equipos:fichas-tecnicas' %}" class="text-decoration-none">
+                    <i class="bi bi-file-earmark-text"></i> Fichas Técnicas
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                <i class="bi bi-gear"></i> {{ accion|title }} Ficha - {{ equipo.codigo_interno }}
+            </li>
+        </ol>
+    </nav>
+
+    <!-- DEBUG: Mostrar errores del formulario -->
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <h4>Errores en el formulario:</h4>
+        {% for field, errors in form.errors.items %}
+            <p><strong>{{ field }}:</strong> {{ errors|join:", " }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- DEBUG: Mostrar errores no de campo -->
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        <h4>Errores generales:</h4>
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <!-- Información del equipo -->
+    <div class="ficha-equipment-info">
+        <div class="row">
+            <div class="col-md-3">
+                <strong>Equipo:</strong> {{ equipo.nombre }}
+            </div>
+            <div class="col-md-3">
+                <strong>Código:</strong> {{ equipo.codigo_interno }}
+            </div>
+            <div class="col-md-3">
+                <strong>Fabricante:</strong> {{ equipo.fabricante|default:"No especificado" }}
+            </div>
+            <div class="col-md-3">
+                <strong>Modelo:</strong> {{ equipo.modelo|default:"No especificado" }}
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-3">
+                <strong>Sección:</strong> {{ equipo.get_seccion_display }}
+            </div>
+            <div class="col-md-3">
+                <strong>Estado:</strong> {{ equipo.get_estado_display }}
+            </div>
+            <div class="col-md-3">
+                <strong>Ubicación:</strong> {{ equipo.ubicacion_fisica }}
+            </div>
+            <div class="col-md-3">
+                <strong>Tipo:</strong> {{ equipo.tipo_equipo }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Progreso de completitud -->
+    <div class="progress-container">
+        <h4 class="mb-2">Completitud de Ficha Técnica</h4>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: {{ equipo.calcular_completitud_ficha }}%"></div>
+        </div>
+        <div class="fw-bold fs-5" id="progressText">{{ equipo.calcular_completitud_ficha }}%</div>
+        <small class="text-muted">Complete más campos para mejorar la documentación técnica</small>
+    </div>
+
+    <!-- Formulario -->
+    <div class="ficha-form-container">
+        <div class="ficha-form-header">
+            <h1 class="h2 mb-3 fw-bold">
+                <i class="bi bi-file-earmark-text me-3"></i>
+                {{ accion|title }} Ficha Técnica
+            </h1>
+            <p class="mb-0 opacity-75 fs-5">Complete la información técnica detallada del equipo</p>
+        </div>
+
+        <div class="ficha-form-body">
+            <form method="post" enctype="multipart/form-data" id="fichaForm">
+                {% csrf_token %}
+                
+                <!-- Información Técnica Básica -->
+                <div class="ficha-form-section">
+                    <h2 class="ficha-form-section-title">
+                        <i class="bi bi-info-circle ficha-form-section-icon"></i>
+                        Información Técnica Básica
+                    </h2>
+                    
+                    <div class="ficha-form-grid">
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-upc"></i>
+                                    Número de Serie <span class="ficha-required">*</span>
+                                </label>
+                                {{ form.numero_serie }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Número de serie único del fabricante
+                                </div>
+                                {% if form.numero_serie.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.numero_serie.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-rulers"></i>
+                                    Peso (kg)
+                                </label>
+                                {{ form.peso }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Peso total del equipo en kilogramos
+                                </div>
+                                {% if form.peso.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.peso.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Especificaciones Eléctricas -->
+                <div class="ficha-form-section">
+                    <h2 class="ficha-form-section-title">
+                        <i class="bi bi-lightning-charge ficha-form-section-icon"></i>
+                        Especificaciones Eléctricas
+                    </h2>
+                    
+                    <div class="ficha-form-grid">
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-plug"></i>
+                                    Voltaje <span class="ficha-required">*</span>
+                                </label>
+                                {{ form.voltaje }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Voltaje de operación del equipo
+                                </div>
+                                {% if form.voltaje.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.voltaje.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-activity"></i>
+                                    Amperaje
+                                </label>
+                                {{ form.amperaje }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Corriente de operación en amperios
+                                </div>
+                                {% if form.amperaje.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.amperaje.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-diagram-3"></i>
+                                    Tipo de Alimentación
+                                </label>
+                                {{ form.fases }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Tipo de alimentación eléctrica
+                                </div>
+                                {% if form.fases.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.fases.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-wave-square"></i>
+                                    Frecuencia
+                                </label>
+                                {{ form.frecuencia }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Frecuencia de la corriente alterna
+                                </div>
+                                {% if form.frecuencia.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.frecuencia.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-battery-charging"></i>
+                                    Consumo Eléctrico (kW)
+                                </label>
+                                {{ form.consumo_electrico }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Consumo eléctrico en kilovatios
+                                </div>
+                                {% if form.consumo_electrico.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.consumo_electrico.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Condiciones de Operación -->
+                <div class="ficha-form-section">
+                    <h2 class="ficha-form-section-title">
+                        <i class="bi bi-thermometer-half ficha-form-section-icon"></i>
+                        Condiciones de Operación
+                    </h2>
+                    
+                    <div class="ficha-form-grid">
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-thermometer-snow"></i>
+                                    Temperatura Mínima (°C)
+                                </label>
+                                {{ form.temperatura_min }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Temperatura mínima de operación
+                                </div>
+                                {% if form.temperatura_min.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.temperatura_min.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-thermometer-sun"></i>
+                                    Temperatura Máxima (°C)
+                                </label>
+                                {{ form.temperatura_max }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Temperatura máxima de operación
+                                </div>
+                                {% if form.temperatura_max.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.temperatura_max.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-droplet"></i>
+                                    Humedad Máxima (%)
+                                </label>
+                                {{ form.humedad_max }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Humedad relativa máxima permitida
+                                </div>
+                                {% if form.humedad_max.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.humedad_max.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-speedometer2"></i>
+                                    Presión de Trabajo (Bar)
+                                </label>
+                                {{ form.presion_trabajo }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Presión de trabajo en bar
+                                </div>
+                                {% if form.presion_trabajo.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.presion_trabajo.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-wind"></i>
+                                    Caudal de Aire (L/min)
+                                </label>
+                                {{ form.caudal_aire }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Caudal de aire requerido en litros por minuto
+                                </div>
+                                {% if form.caudal_aire.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.caudal_aire.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seguridad Industrial -->
+                <div class="ficha-form-section">
+                    <h2 class="ficha-form-section-title">
+                        <i class="bi bi-shield-check ficha-form-section-icon"></i>
+                        Seguridad Industrial
+                    </h2>
+                    
+                    <div class="ficha-form-row">
+                        <div class="ficha-form-group">
+                            <label class="ficha-form-label">
+                                <i class="bi bi-person-check"></i>
+                                Equipos de Protección Personal (EPP) Requeridos
+                            </label>
+                            {{ form.epp_requerido }}
+                            <div class="ficha-form-help">
+                                <i class="bi bi-info-circle"></i>
+                                Especifique los EPP requeridos para operar este equipo de forma segura
+                            </div>
+                            {% if form.epp_requerido.errors %}
+                                <div class="ficha-form-error">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.epp_requerido.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documentos Técnicos -->
+                <div class="ficha-form-section">
+                    <h2 class="ficha-form-section-title">
+                        <i class="bi bi-file-earmark-pdf ficha-form-section-icon"></i>
+                        Documentos Técnicos
+                    </h2>
+                    
+                    <div class="ficha-form-grid">
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-diagram-3"></i>
+                                    Esquema Eléctrico
+                                </label>
+                                {% if equipo.esquema_electrico %}
+                                    <div class="file-info">
+                                        <i class="bi bi-file-earmark-pdf file-info-icon"></i>
+                                        <div class="file-info-content">
+                                            <div class="file-info-name">
+                                                <a href="{{ equipo.esquema_electrico.url }}" target="_blank">{{ equipo.esquema_electrico.name|basename }}</a>
+                                            </div>
+                                            <div class="file-info-details">
+                                                Archivo actual disponible - Seleccione un nuevo archivo para reemplazar
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {{ form.esquema_electrico }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    PDF, JPG, PNG - Máx. 10MB
+                                </div>
+                                {% if form.esquema_electrico.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.esquema_electrico.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-book"></i>
+                                    Manual de Operación
+                                </label>
+                                {% if equipo.manual_operacion %}
+                                    <div class="file-info">
+                                        <i class="bi bi-file-earmark-pdf file-info-icon"></i>
+                                        <div class="file-info-content">
+                                            <div class="file-info-name">
+                                                <a href="{{ equipo.manual_operacion.url }}" target="_blank">{{ equipo.manual_operacion.name|basename }}</a>
+                                            </div>
+                                            <div class="file-info-details">
+                                                Archivo actual disponible - Seleccione un nuevo archivo para reemplazar
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {{ form.manual_operacion }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Solo PDF - Máx. 50MB
+                                </div>
+                                {% if form.manual_operacion.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.manual_operacion.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan de Mantenimiento -->
+                <div class="ficha-form-section">
+                    <h2 class="ficha-form-section-title">
+                        <i class="bi bi-tools ficha-form-section-icon"></i>
+                        Plan de Mantenimiento
+                    </h2>
+                    
+                    <div class="ficha-form-grid">
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-calendar-event"></i>
+                                    Frecuencia de Mantenimiento
+                                </label>
+                                {{ form.frecuencia_mantenimiento }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Frecuencia recomendada de mantenimiento
+                                </div>
+                                {% if form.frecuencia_mantenimiento.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.frecuencia_mantenimiento.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-clock"></i>
+                                    Tiempo Estimado (horas)
+                                </label>
+                                {{ form.tiempo_mantenimiento }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Tiempo estimado para realizar el mantenimiento
+                                </div>
+                                {% if form.tiempo_mantenimiento.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.tiempo_mantenimiento.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <label class="ficha-form-label">
+                                    <i class="bi bi-list-check"></i>
+                                    Procedimientos de Mantenimiento
+                                </label>
+                                {{ form.procedimientos_mantenimiento }}
+                                <div class="ficha-form-help">
+                                    <i class="bi bi-info-circle"></i>
+                                    Describa los procedimientos específicos de mantenimiento
+                                </div>
+                                {% if form.procedimientos_mantenimiento.errors %}
+                                    <div class="ficha-form-error">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        {{ form.procedimientos_mantenimiento.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observaciones y Notas -->
+                <div class="ficha-form-section">
+                    <h2 class="ficha-form-section-title">
+                        <i class="bi bi-chat-text ficha-form-section-icon"></i>
+                        Observaciones y Notas
+                    </h2>
+                    
+                    <div class="ficha-form-row">
+                        <div class="ficha-form-group">
+                            <label class="ficha-form-label">
+                                <i class="bi bi-pin-map"></i>
+                                Ubicación Específica
+                            </label>
+                            {{ form.ubicacion_especifica }}
+                            <div class="ficha-form-help">
+                                <i class="bi bi-info-circle"></i>
+                                Ubicación específica dentro de la sección o laboratorio
+                            </div>
+                            {% if form.ubicacion_especifica.errors %}
+                                <div class="ficha-form-error">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.ubicacion_especifica.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="ficha-actions">
+                    <a href="{% url 'equipos:fichas-tecnicas' %}" class="ficha-btn ficha-btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                        Cancelar
+                    </a>
+                    
+                    <button type="submit" class="ficha-btn ficha-btn-success" name="submit_form">
+                        <i class="bi bi-check-circle"></i>
+                        {{ accion|title }} Ficha Técnica
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('fichaForm');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    console.log('Form loaded:', form); // Debug
+    
+    // Aplicar clases CSS a todos los campos del formulario
+    const formFields = form.querySelectorAll('input, select, textarea');
+    formFields.forEach(field => {
+        if (field.type === 'file') {
+            field.classList.add('ficha-form-file-input');
+        } else if (field.tagName === 'SELECT') {
+            field.classList.add('ficha-form-control', 'ficha-form-select');
+        } else if (field.tagName === 'TEXTAREA') {
+            field.classList.add('ficha-form-control', 'ficha-form-textarea');
+        } else {
+            field.classList.add('ficha-form-control');
+        }
+    });
+    
+    // Función para calcular el progreso
+    function updateProgress() {
+        const inputs = form.querySelectorAll('input:not([type="file"]):not([type="checkbox"]):not([type="hidden"]), select, textarea');
+        let totalFields = inputs.length;
+        let completedFields = 0;
+        
+        inputs.forEach(input => {
+            if (input.value && input.value.trim() !== '') {
+                completedFields++;
+            }
+        });
+        
+        const percentage = Math.round((completedFields / totalFields) * 100);
+        if (progressBar) {
+            progressBar.style.width = percentage + '%';
+        }
+        if (progressText) {
+            progressText.textContent = percentage + '%';
+        }
+        
+        console.log(`Progress: ${completedFields}/${totalFields} = ${percentage}%`); // Debug
+    }
+    
+    // Actualizar progreso en tiempo real
+    form.addEventListener('input', updateProgress);
+    form.addEventListener('change', updateProgress);
+    
+    // Calcular progreso inicial
+    updateProgress();
+    
+    // Validación y envío del formulario
+    form.addEventListener('submit', function(e) {
+        console.log('Form submitted'); // Debug
+        
+        // Mostrar indicador de carga
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+        }
+        
+        console.log('Form is being submitted...'); // Debug
+        return true;
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,899 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --tarea-primary: #2563eb;
+        --tarea-secondary: #1d4ed8;
+        --tarea-success: #10b981;
+        --tarea-warning: #f59e0b;
+        --tarea-danger: #ef4444;
+        --tarea-info: #0ea5e9;
+        --tarea-white: #ffffff;
+        --tarea-off-white: #f8fafc;
+        --tarea-text: #1f2937;
+        --tarea-text-light: #6b7280;
+        --tarea-border: #e5e7eb;
+        --tarea-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --tarea-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --tarea-transition: 0.3s;
+    }
+
+    .tarea-header {
+        background: linear-gradient(135deg, var(--tarea-primary), var(--tarea-secondary));
+        color: var(--tarea-white);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tarea-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .tarea-progress {
+        background: var(--tarea-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--tarea-shadow);
+        border: 1px solid var(--tarea-border);
+    }
+
+    .progress-indicator {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .progress-step {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        position: relative;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--tarea-primary);
+        color: var(--tarea-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .step-info h6 {
+        margin: 0;
+        color: var(--tarea-primary);
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .step-info small {
+        color: var(--tarea-text-light);
+        font-size: 0.8rem;
+    }
+
+    .tarea-form-container {
+        background: var(--tarea-white);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: var(--tarea-shadow-lg);
+        border: 1px solid var(--tarea-border);
+        margin-bottom: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--tarea-border);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .form-section-title {
+        color: var(--tarea-primary);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-section-title::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, var(--tarea-primary), var(--tarea-secondary));
+        border-radius: 2px;
+    }
+
+    .form-section-subtitle {
+        color: var(--tarea-text-light);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+        font-style: italic;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row.full-width {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--tarea-text);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-label .required {
+        color: var(--tarea-danger);
+        font-weight: 700;
+    }
+
+    .form-label i {
+        color: var(--tarea-primary);
+        font-size: 1.1rem;
+    }
+
+    .form-help {
+        font-size: 0.8rem;
+        color: var(--tarea-text-light);
+        margin-top: 0.25rem;
+    }
+
+    .tarea-form-control {
+        border: 2px solid var(--tarea-border);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        font-size: 0.9rem;
+        transition: all var(--tarea-transition) ease;
+        background: var(--tarea-white);
+        width: 100%;
+    }
+
+    .tarea-form-control:focus {
+        border-color: var(--tarea-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    .tarea-form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .tarea-form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+
+    .tarea-form-check {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--tarea-primary);
+        cursor: pointer;
+        margin-right: 0.75rem;
+    }
+
+    .checkbox-container {
+        background: var(--tarea-off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border: 1px solid var(--tarea-border);
+        margin-top: 1rem;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--tarea-white);
+        border-radius: 0.5rem;
+        border: 1px solid var(--tarea-border);
+        transition: all var(--tarea-transition) ease;
+        margin-bottom: 1rem;
+    }
+
+    .checkbox-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .checkbox-item:hover {
+        box-shadow: var(--tarea-shadow);
+        transform: translateY(-1px);
+    }
+
+    .checkbox-item label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--tarea-text);
+        flex: 1;
+    }
+
+    .checkbox-item small {
+        color: var(--tarea-text-light);
+        font-size: 0.8rem;
+        display: block;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        padding-top: 2rem;
+        border-top: 1px solid var(--tarea-border);
+        margin-top: 2rem;
+    }
+
+    .tarea-btn {
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all var(--tarea-transition) ease;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .tarea-btn-primary {
+        background: linear-gradient(135deg, var(--tarea-primary), var(--tarea-secondary));
+        color: var(--tarea-white);
+        box-shadow: var(--tarea-shadow);
+    }
+
+    .tarea-btn-primary:hover {
+        background: linear-gradient(135deg, var(--tarea-secondary), #1e40af);
+        transform: translateY(-2px);
+        box-shadow: var(--tarea-shadow-lg);
+        color: var(--tarea-white);
+        text-decoration: none;
+    }
+
+    .tarea-btn-secondary {
+        background: var(--tarea-white);
+        color: var(--tarea-text);
+        border: 2px solid var(--tarea-border);
+    }
+
+    .tarea-btn-secondary:hover {
+        background: var(--tarea-off-white);
+        border-color: var(--tarea-primary);
+        color: var(--tarea-primary);
+        text-decoration: none;
+    }
+
+    .plan-info-card {
+        background: linear-gradient(135deg, var(--tarea-off-white), rgba(37, 99, 235, 0.05));
+        border: 1px solid var(--tarea-border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .plan-info-title {
+        color: var(--tarea-primary);
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .plan-info-details {
+        color: var(--tarea-text-light);
+        font-size: 0.9rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .plan-info-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .tarea-breadcrumb {
+        background: var(--tarea-white);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--tarea-border);
+    }
+
+    .validation-error {
+        color: var(--tarea-danger);
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .validation-summary {
+        background: rgba(239, 68, 68, 0.1);
+        border: 2px solid var(--tarea-danger);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: none;
+    }
+
+    .validation-summary.show {
+        display: block;
+    }
+
+    .validation-title {
+        color: var(--tarea-danger);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .order-helper {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--tarea-success);
+    }
+
+    @media (max-width: 768px) {
+        .tarea-header {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .tarea-form-container {
+            padding: 1.5rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .progress-indicator {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav class="tarea-breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door"></i> Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="text-decoration-none">
+                    <i class="bi bi-tools"></i> Planes de Mantenimiento
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'mantenimiento:plan-detalle' plan.pk %}" class="text-decoration-none">
+                    <i class="bi bi-eye"></i> {{ plan.codigo_plan }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                <i class="bi bi-plus-circle"></i> Nueva Tarea
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-11">
+            <!-- Header -->
+            <div class="tarea-header">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="h2 mb-3 fw-bold">
+                            <i class="bi bi-plus-circle me-3"></i>
+                            {{ titulo }}
+                        </h1>
+                        <p class="mb-0 opacity-75 fs-5">
+                            Definir nueva tarea de mantenimiento con especificaciones técnicas detalladas
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <a href="{% url 'mantenimiento:plan-detalle' plan.pk %}" class="tarea-btn tarea-btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Volver al Plan
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del Plan -->
+            <div class="plan-info-card">
+                <div class="plan-info-title">
+                    <i class="bi bi-calendar-check"></i>
+                    {{ plan.codigo_plan }} - {{ plan.nombre }}
+                </div>
+                <div class="plan-info-details">
+                    <div class="plan-info-detail">
+                        <i class="bi bi-gear"></i>
+                        <span>{{ plan.equipo.nombre }}</span>
+                    </div>
+                    <div class="plan-info-detail">
+                        <i class="bi bi-layers"></i>
+                        <span>{{ plan.get_tipo_mantenimiento_display }}</span>
+                    </div>
+                    <div class="plan-info-detail">
+                        <i class="bi bi-clock"></i>
+                        <span>{{ plan.get_frecuencia_display }}</span>
+                    </div>
+                    <div class="plan-info-detail">
+                        <i class="bi bi-list-ol"></i>
+                        <span>{{ tareas_count }} tareas existentes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progreso -->
+            <div class="tarea-progress">
+                <div class="progress-indicator">
+                    <div class="progress-step">
+                        <div class="step-circle">1</div>
+                        <div class="step-info">
+                            <h6>Información Básica</h6>
+                            <small>Nombre, descripción y orden de ejecución</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="tarea-form-container">
+                <form method="post" id="tareaForm">
+                    {% csrf_token %}
+                    
+                    <!-- Validación Summary -->
+                    <div id="validationSummary" class="validation-summary">
+                        <div class="validation-title">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Por favor corrija los siguientes errores:
+                        </div>
+                        <ul id="validationList" class="list-unstyled mb-0"></ul>
+                    </div>
+
+                    <!-- Sección 1: Información Básica -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">
+                            <i class="bi bi-info-circle"></i>
+                            Información Básica de la Tarea
+                        </h3>
+                        <p class="form-section-subtitle">
+                            Defina los datos fundamentales de la tarea de mantenimiento
+                        </p>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.nombre.id_for_label }}">
+                                    <i class="bi bi-tag"></i>
+                                    Nombre de la Tarea
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="tarea-form-control" 
+                                       id="{{ form.nombre.id_for_label }}"
+                                       name="{{ form.nombre.name }}" 
+                                       value="{{ form.nombre.value|default:'' }}"
+                                       placeholder="Ej: Inspección visual del equipo"
+                                       required>
+                                <div class="form-help">Nombre descriptivo y específico de la tarea</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.orden.id_for_label }}">
+                                    <i class="bi bi-list-ol"></i>
+                                    Orden de Ejecución
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="number" 
+                                       class="tarea-form-control" 
+                                       id="{{ form.orden.id_for_label }}"
+                                       name="{{ form.orden.name }}" 
+                                       value="{{ form.orden.value|default:'' }}"
+                                       min="1"
+                                       placeholder="1"
+                                       required>
+                                <div class="form-help">Secuencia de ejecución dentro del plan</div>
+                                <div class="order-helper">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Sugerido: {{ siguiente_orden|default:1 }} (próximo número disponible)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row full-width">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.descripcion.id_for_label }}">
+                                    <i class="bi bi-file-text"></i>
+                                    Descripción Detallada
+                                </label>
+                                <textarea class="tarea-form-control tarea-form-textarea" 
+                                          id="{{ form.descripcion.id_for_label }}"
+                                          name="{{ form.descripcion.name }}" 
+                                          rows="3"
+                                          placeholder="Descripción detallada de los procedimientos y pasos a seguir...">{{ form.descripcion.value|default:'' }}</textarea>
+                                <div class="form-help">Descripción técnica completa de la tarea</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 2: Especificaciones Técnicas -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">
+                            <i class="bi bi-sliders"></i>
+                            Especificaciones Técnicas
+                        </h3>
+                        <p class="form-section-subtitle">
+                            Configure los parámetros técnicos y operacionales de la tarea
+                        </p>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.duracion_estimada.id_for_label }}">
+                                    <i class="bi bi-stopwatch"></i>
+                                    Duración Estimada (minutos)
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="number" 
+                                       class="tarea-form-control" 
+                                       id="{{ form.duracion_estimada.id_for_label }}"
+                                       name="{{ form.duracion_estimada.name }}" 
+                                       value="{{ form.duracion_estimada.value|default:'' }}"
+                                       min="1"
+                                       placeholder="30"
+                                       required>
+                                <div class="form-help">Tiempo estimado para completar la tarea</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.responsable.id_for_label }}">
+                                    <i class="bi bi-person-badge"></i>
+                                    Responsable Asignado
+                                </label>
+                                <select class="tarea-form-control tarea-form-select" 
+                                        id="{{ form.responsable.id_for_label }}"
+                                        name="{{ form.responsable.name }}">
+                                    <option value="">Seleccionar responsable...</option>
+                                    {% for choice in form.responsable.field.choices %}
+                                        {% if choice.0 %}
+                                            <option value="{{ choice.0 }}" {% if form.responsable.value == choice.0|stringformat:"s" %}selected{% endif %}>
+                                                {{ choice.1 }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <div class="form-help">Personal técnico responsable de ejecutar la tarea</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Características de la Tarea -->
+                        <div class="form-row full-width">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-check2-all"></i>
+                                    Características de la Tarea
+                                </label>
+                                <div class="checkbox-container">
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" 
+                                               class="tarea-form-check" 
+                                               id="{{ form.es_critica.id_for_label }}"
+                                               name="{{ form.es_critica.name }}"
+                                               {% if form.es_critica.value %}checked{% endif %}>
+                                        <label for="{{ form.es_critica.id_for_label }}">
+                                            <strong>Tarea Crítica</strong>
+                                            <small>Esta tarea es fundamental para el funcionamiento del equipo</small>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" 
+                                               class="tarea-form-check" 
+                                               id="{{ form.requiere_verificacion.id_for_label }}"
+                                               name="{{ form.requiere_verificacion.name }}"
+                                               {% if form.requiere_verificacion.value %}checked{% endif %}>
+                                        <label for="{{ form.requiere_verificacion.id_for_label }}">
+                                            <strong>Requiere Verificación</strong>
+                                            <small>La tarea debe ser verificada por un supervisor</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 3: Instrucciones y Herramientas -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">
+                            <i class="bi bi-tools"></i>
+                            Instrucciones y Herramientas
+                        </h3>
+                        <p class="form-section-subtitle">
+                            Especifique las instrucciones detalladas y herramientas necesarias
+                        </p>
+                        
+                        <div class="form-row full-width">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.instrucciones.id_for_label }}">
+                                    <i class="bi bi-list-check"></i>
+                                    Instrucciones Específicas
+                                </label>
+                                <textarea class="tarea-form-control tarea-form-textarea" 
+                                          id="{{ form.instrucciones.id_for_label }}"
+                                          name="{{ form.instrucciones.name }}" 
+                                          rows="4"
+                                          placeholder="Paso a paso detallado para ejecutar la tarea...">{{ form.instrucciones.value|default:'' }}</textarea>
+                                <div class="form-help">Instrucciones paso a paso para la ejecución segura</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row full-width">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.herramientas_necesarias.id_for_label }}">
+                                    <i class="bi bi-wrench"></i>
+                                    Herramientas Necesarias
+                                </label>
+                                <textarea class="tarea-form-control tarea-form-textarea" 
+                                          id="{{ form.herramientas_necesarias.id_for_label }}"
+                                          name="{{ form.herramientas_necesarias.name }}" 
+                                          rows="3"
+                                          placeholder="Lista de herramientas, equipos de medición, EPP requerido...">{{ form.herramientas_necesarias.value|default:'' }}</textarea>
+                                <div class="form-help">Enumere todas las herramientas y equipos necesarios</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones del formulario -->
+                    <div class="form-actions">
+                        <a href="{% url 'mantenimiento:plan-detalle' plan.pk %}" class="tarea-btn tarea-btn-secondary">
+                            <i class="bi bi-x-circle"></i>
+                            Cancelar
+                        </a>
+                        
+                        <button type="button" id="previewBtn" class="tarea-btn tarea-btn-secondary">
+                            <i class="bi bi-eye"></i>
+                            Vista Previa
+                        </button>
+                        
+                        <button type="submit" class="tarea-btn tarea-btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            Crear Tarea
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('tareaForm');
+    const validationSummary = document.getElementById('validationSummary');
+    const validationList = document.getElementById('validationList');
+    
+    // Validación en tiempo real
+    const requiredFields = form.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', validateField);
+        field.addEventListener('input', clearFieldError);
+    });
+    
+    function validateField(event) {
+        const field = event.target;
+        const formGroup = field.closest('.form-group');
+        const existingError = formGroup.querySelector('.validation-error');
+        
+        if (!field.value.trim() && field.hasAttribute('required')) {
+            if (!existingError) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'validation-error';
+                errorDiv.innerHTML = '<i class="bi bi-exclamation-circle"></i> Este campo es obligatorio';
+                field.parentNode.insertBefore(errorDiv, field.nextSibling);
+            }
+            field.style.borderColor = 'var(--tarea-danger)';
+        }
+    }
+    
+    function clearFieldError(event) {
+        const field = event.target;
+        const formGroup = field.closest('.form-group');
+        const existingError = formGroup.querySelector('.validation-error');
+        
+        if (field.value.trim() && existingError) {
+            existingError.remove();
+            field.style.borderColor = 'var(--tarea-border)';
+        }
+    }
+    
+    // Auto-sugerencia de orden
+    const ordenField = document.querySelector('[name="orden"]');
+    if (ordenField && !ordenField.value) {
+        ordenField.value = {{ siguiente_orden|default:1 }};
+    }
+    
+    // Vista previa de la tarea
+    document.getElementById('previewBtn').addEventListener('click', function() {
+        const formData = new FormData(form);
+        const previewData = {
+            nombre: formData.get('nombre') || 'Sin especificar',
+            orden: formData.get('orden') || '1',
+            duracion: formData.get('duracion_estimada') || '0',
+            responsable: form.querySelector('[name="responsable"] option:checked')?.text || 'Sin asignar',
+            es_critica: formData.get('es_critica') ? 'Sí' : 'No',
+            requiere_verificacion: formData.get('requiere_verificacion') ? 'Sí' : 'No'
+        };
+        
+        const previewHtml = `
+            <div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                <h3 style="color: var(--tarea-primary); margin-bottom: 1rem;">
+                    <i class="bi bi-eye"></i> Vista Previa de la Tarea
+                </h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div><strong>Nombre:</strong> ${previewData.nombre}</div>
+                    <div><strong>Orden:</strong> ${previewData.orden}</div>
+                    <div><strong>Duración:</strong> ${previewData.duracion} minutos</div>
+                    <div><strong>Responsable:</strong> ${previewData.responsable}</div>
+                    <div><strong>Tarea Crítica:</strong> ${previewData.es_critica}</div>
+                    <div><strong>Requiere Verificación:</strong> ${previewData.requiere_verificacion}</div>
+                </div>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button onclick="this.closest('.preview-modal').remove()" 
+                            style="background: var(--tarea-primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer;">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        const modal = document.createElement('div');
+        modal.className = 'preview-modal';
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); display: flex; align-items: center; 
+            justify-content: center; z-index: 9999;
+        `;
+        modal.innerHTML = previewHtml;
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+        
+        document.body.appendChild(modal);
+    });
+    
+    // Validación del formulario al enviar
+    form.addEventListener('submit', function(event) {
+        const errors = [];
+        
+        // Validar campos requeridos
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                const label = field.closest('.form-group').querySelector('label').textContent.replace('*', '').trim();
+                errors.push(`${label} es obligatorio`);
+            }
+        });
+        
+        // Validación específica de duración
+        const duracion = parseInt(form.querySelector('[name="duracion_estimada"]').value) || 0;
+        if (duracion <= 0) {
+            errors.push('La duración debe ser mayor a 0 minutos');
+        }
+        
+        // Validación de orden
+        const orden = parseInt(form.querySelector('[name="orden"]').value) || 0;
+        if (orden <= 0) {
+            errors.push('El orden debe ser mayor a 0');
+        }
+        
+        if (errors.length > 0) {
+            event.preventDefault();
+            
+            validationList.innerHTML = errors.map(error => 
+                `<li style="color: var(--tarea-danger); padding: 0.5rem 0;">
+                    <i class="bi bi-x-circle me-2"></i> ${error}
+                </li>`
+            ).join('');
+            
+            validationSummary.classList.add('show');
+            validationSummary.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            validationSummary.classList.remove('show');
+        }
+    });
+    
+    // Animaciones de entrada
+    const sections = document.querySelectorAll('.form-section');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(section);
+    });
+});
+</script>
+{% endblock %}

@@ -518,10 +518,13 @@
                         Acciones Rápidas
                     </h3>
                     <div class="d-grid gap-2">
-                        <a href="#" class="action-btn disabled">
+                        <a href="{% url 'equipos:equipo-editar' equipo.pk %}" class="action-btn">
                             <i class="bi bi-pencil-square"></i>
                             Editar Información
-                            <small class="ms-auto">(Próximamente)</small>
+                        </a>
+                        <a href="{% url 'equipos:editar-ficha' equipo.pk %}" class="action-btn">
+                            <i class="bi bi-file-earmark-text"></i>
+                            Editar Ficha Técnica
                         </a>
                         <a href="#" class="action-btn disabled">
                             <i class="bi bi-tools"></i>
@@ -529,7 +532,7 @@
                             <small class="ms-auto">(Próximamente)</small>
                         </a>
                         <a href="#" class="action-btn disabled">
-                            <i class="bi bi-file-earmark-text"></i>
+                            <i class="bi bi-file-earmark-pdf"></i>
                             Generar Reporte
                             <small class="ms-auto">(Próximamente)</small>
                         </a>

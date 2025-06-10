@@ -1,0 +1,1498 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fichas Técnicas - Lab Metal Mecánica{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Variables específicas para fichas técnicas */
+    :root {
+        --ficha-primary: #2563eb;
+        --ficha-secondary: #1d4ed8;
+        --ficha-light: #dbeafe;
+        --ficha-success: #10b981;
+        --ficha-warning: #f59e0b;
+        --ficha-danger: #ef4444;
+        --ficha-white: #ffffff;
+        --ficha-off-white: #f8fafc;
+        --ficha-text: #1f2937;
+        --ficha-text-light: #6b7280;
+        --ficha-border: #e5e7eb;
+        --ficha-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --ficha-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --ficha-transition: 0.3s;
+    }
+
+    .ficha-card {
+        background: var(--ficha-white);
+        border-radius: 1.5rem;
+        box-shadow: var(--ficha-shadow);
+        transition: all var(--ficha-transition) cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid var(--ficha-border);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .ficha-card:hover {
+        box-shadow: var(--ficha-shadow-lg);
+        transform: translateY(-8px) scale(1.02);
+        border-color: var(--ficha-primary);
+    }
+
+    .ficha-section-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--ficha-text);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .ficha-section-title::before {
+        content: '';
+        width: 6px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--ficha-primary), var(--ficha-secondary));
+        border-radius: 3px;
+    }
+
+    .ficha-header-stats {
+        background: linear-gradient(135deg, var(--ficha-primary), var(--ficha-secondary));
+        color: var(--ficha-white);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ficha-header-stats::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .ficha-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .ficha-stat-item {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .ficha-stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .ficha-stat-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .ficha-container {
+        position: relative;
+        background: linear-gradient(135deg, var(--ficha-light), rgba(37, 99, 235, 0.1));
+        padding: 2rem;
+        border-radius: 1.25rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        border: 2px solid var(--ficha-primary);
+    }
+
+    .ficha-preview {
+        background: var(--ficha-white);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+        display: inline-block;
+        border: 3px solid var(--ficha-primary);
+        transition: all var(--ficha-transition) ease;
+        position: relative;
+        z-index: 2;
+        max-width: 100%;
+    }
+
+    .ficha-preview:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 35px rgba(37, 99, 235, 0.25);
+    }
+
+    .ficha-preview img {
+        display: block;
+        border-radius: 0.5rem;
+        max-width: 100%;
+        height: auto;
+    }
+
+    .ficha-placeholder {
+        background: linear-gradient(135deg, var(--ficha-off-white), var(--ficha-border));
+        border: 3px dashed var(--ficha-text-light);
+        border-radius: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--ficha-text-light);
+        min-height: 300px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .ficha-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        margin-top: 1rem;
+        position: relative;
+        z-index: 2;
+        flex-wrap: wrap;
+    }
+
+    .ficha-btn {
+        background: linear-gradient(135deg, var(--ficha-primary), var(--ficha-secondary));
+        border: none;
+        color: var(--ficha-white);
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all var(--ficha-transition) ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        white-space: nowrap;
+    }
+
+    .ficha-btn:hover {
+        background: linear-gradient(135deg, var(--ficha-secondary), var(--ficha-primary));
+        color: var(--ficha-white);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    .ficha-btn-secondary {
+        background: linear-gradient(135deg, var(--ficha-white), var(--ficha-off-white));
+        color: var(--ficha-text);
+        border: 2px solid var(--ficha-border);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ficha-btn-secondary:hover {
+        background: linear-gradient(135deg, var(--ficha-light), rgba(37, 99, 235, 0.1));
+        color: var(--ficha-primary);
+        border-color: var(--ficha-primary);
+    }
+
+    .ficha-btn-generate {
+        background: linear-gradient(135deg, var(--ficha-success), #059669);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .ficha-btn-generate:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .ficha-btn-danger {
+        background: linear-gradient(135deg, var(--ficha-danger), #dc2626);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .ficha-btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .ficha-info-section {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--ficha-white) 0%, rgba(248, 250, 252, 0.8) 100%);
+    }
+
+    .ficha-equipment-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--ficha-text);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .ficha-equipment-code {
+        font-family: 'Monaco', 'Courier New', monospace;
+        background: linear-gradient(135deg, var(--ficha-primary), var(--ficha-secondary));
+        color: var(--ficha-white);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .ficha-details-grid {
+        display: grid;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .ficha-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(37, 99, 235, 0.05);
+        border-radius: 0.5rem;
+        border-left: 3px solid var(--ficha-primary);
+    }
+
+    .ficha-detail-icon {
+        color: var(--ficha-primary);
+        font-size: 1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .ficha-detail-label {
+        font-weight: 600;
+        color: var(--ficha-text);
+        min-width: 100px;
+    }
+
+    .ficha-detail-value {
+        color: var(--ficha-text-light);
+        flex: 1;
+    }
+
+    .ficha-status-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 1rem;
+        font-weight: 600;
+        font-size: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .ficha-status-complete {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
+        color: var(--ficha-success);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .ficha-status-pending {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.2));
+        color: var(--ficha-warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .ficha-status-missing {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2));
+        color: var(--ficha-danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .ficha-search-bar {
+        background: var(--ficha-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--ficha-shadow);
+        border: 1px solid var(--ficha-border);
+    }
+
+    .ficha-search-input {
+        border: 2px solid var(--ficha-border);
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem 1rem 3rem;
+        font-size: 1rem;
+        width: 100%;
+        transition: all var(--ficha-transition) ease;
+        background: var(--ficha-off-white);
+    }
+
+    .ficha-search-input:focus {
+        outline: none;
+        border-color: var(--ficha-primary);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        background: var(--ficha-white);
+    }
+
+    .ficha-search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--ficha-text-light);
+        font-size: 1.2rem;
+    }
+
+    .ficha-filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .ficha-filter-tab {
+        background: var(--ficha-off-white);
+        border: 2px solid var(--ficha-border);
+        color: var(--ficha-text);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--ficha-transition) ease;
+        text-decoration: none;
+    }
+
+    .ficha-filter-tab:hover,
+    .ficha-filter-tab.active {
+        background: linear-gradient(135deg, var(--ficha-primary), var(--ficha-secondary));
+        color: var(--ficha-white);
+        border-color: var(--ficha-primary);
+        transform: translateY(-2px);
+    }
+
+    .ficha-empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--ficha-text-light);
+    }
+
+    .ficha-empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .ficha-progress-bar {
+        background: var(--ficha-off-white);
+        border-radius: 1rem;
+        height: 8px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .ficha-progress-fill {
+        background: linear-gradient(135deg, var(--ficha-success), #059669);
+        height: 100%;
+        border-radius: 1rem;
+        transition: width 0.5s ease;
+    }
+
+    .ficha-progress-text {
+        font-size: 0.75rem;
+        color: var(--ficha-text-light);
+        margin-top: 0.25rem;
+        text-align: right;
+    }
+
+    /* Modal para vista de ficha técnica */
+    .ficha-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: fichaModalFadeIn 0.3s ease-out;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+
+    .ficha-modal.show {
+        display: flex;
+    }
+
+    .ficha-modal-content {
+        background: var(--ficha-white);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        max-width: 900px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        animation: fichaModalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .ficha-modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--ficha-text-light);
+        color: var(--ficha-white);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--ficha-transition) ease;
+    }
+
+    .ficha-modal-close:hover {
+        background: var(--ficha-danger);
+        transform: scale(1.1);
+    }
+
+    @keyframes fichaModalFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fichaModalSlideIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(-50px) scale(0.9); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+        }
+    }
+
+    /* Nuevos estilos para las mejoras */
+    .ficha-subsection {
+        border-top: 1px solid var(--ficha-border);
+        padding-top: 1rem;
+    }
+
+    .ficha-subsection-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ficha-primary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        position: relative;
+    }
+
+    .ficha-badge-coming-soon {
+        background: linear-gradient(135deg, var(--ficha-warning), #f59e0b);
+        color: white;
+        font-size: 0.6rem;
+        font-weight: 600;
+        padding: 0.2rem 0.5rem;
+        border-radius: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-left: auto;
+        animation: pulse 2s infinite;
+    }
+
+    .ficha-detail-disabled {
+        opacity: 0.6;
+        background: rgba(37, 99, 235, 0.02);
+        border-left-color: var(--ficha-text-light);
+    }
+
+    .ficha-detail-disabled .ficha-detail-icon {
+        color: var(--ficha-text-light);
+    }
+
+    .ficha-documents-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .ficha-document-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1rem;
+        background: rgba(37, 99, 235, 0.05);
+        border-radius: 0.75rem;
+        border: 2px solid var(--ficha-border);
+        transition: all var(--ficha-transition) ease;
+        gap: 0.5rem;
+    }
+
+    .ficha-document-item i {
+        font-size: 2rem;
+        color: var(--ficha-primary);
+    }
+
+    .ficha-document-item span {
+        font-weight: 600;
+        color: var(--ficha-text);
+    }
+
+    .ficha-document-item small {
+        color: var(--ficha-text-light);
+        font-size: 0.75rem;
+    }
+
+    .ficha-document-disabled {
+        opacity: 0.5;
+        border-color: var(--ficha-text-light);
+        cursor: not-allowed;
+    }
+
+    .ficha-document-disabled i {
+        color: var(--ficha-text-light);
+    }
+
+    .ficha-compliance-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .ficha-compliance-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 0.75rem;
+        background: rgba(16, 185, 129, 0.05);
+        border-radius: 0.5rem;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        gap: 0.25rem;
+    }
+
+    .ficha-compliance-item i {
+        font-size: 1.5rem;
+        color: var(--ficha-success);
+    }
+
+    .ficha-compliance-item .compliance-title {
+        font-weight: 700;
+        color: var(--ficha-text);
+    }
+
+    .ficha-compliance-item small {
+        color: var(--ficha-text-light);
+    }
+
+    .ficha-compliance-disabled {
+        opacity: 0.5;
+        border-color: var(--ficha-text-light);
+    }
+
+    .ficha-compliance-disabled i {
+        color: var(--ficha-text-light);
+    }
+
+    .ficha-status-section {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(37, 99, 235, 0.1));
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--ficha-primary);
+    }
+
+    .ficha-btn-qr {
+        background: linear-gradient(135deg, var(--ficha-primary), var(--ficha-secondary));
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all var(--ficha-transition) ease;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .ficha-btn-qr:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    .ficha-progress-details {
+        text-align: center;
+    }
+
+    /* Modal QR Code */
+    .qr-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .qr-modal.show {
+        display: flex;
+    }
+
+    .qr-modal-content {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        max-width: 400px;
+        width: 90%;
+    }
+
+    .qr-modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--ficha-text-light);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+        .ficha-section-title {
+            font-size: 1.5rem;
+        }
+        
+        .ficha-container {
+            padding: 1.5rem;
+        }
+        
+        .ficha-actions {
+            flex-direction: column;
+        }
+        
+        .ficha-btn {
+            justify-content: center;
+        }
+        
+        .ficha-stat-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .ficha-stat-number {
+            font-size: 2rem;
+        }
+
+        .ficha-modal {
+            padding: 1rem;
+        }
+
+        .ficha-modal-content {
+            padding: 1.5rem;
+        }
+
+        .ficha-documents-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .ficha-compliance-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .ficha-subsection-title {
+            font-size: 0.9rem;
+        }
+        
+        .ficha-badge-coming-soon {
+            font-size: 0.5rem;
+            padding: 0.1rem 0.3rem;
+        }
+    }
+
+    /* Animaciones de entrada */
+    .ficha-card {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fichaCardSlideIn 0.6s ease-out forwards;
+    }
+
+    @keyframes fichaCardSlideIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .ficha-card:nth-child(1) { animation-delay: 0.1s; }
+    .ficha-card:nth-child(2) { animation-delay: 0.2s; }
+    .ficha-card:nth-child(3) { animation-delay: 0.3s; }
+    .ficha-card:nth-child(4) { animation-delay: 0.4s; }
+    .ficha-card:nth-child(5) { animation-delay: 0.5s; }
+    .ficha-card:nth-child(6) { animation-delay: 0.6s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header con estadísticas -->
+    <div class="ficha-header-stats">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="ficha-section-title text-white mb-0">
+                    <i class="bi bi-file-earmark-text"></i>
+                    Fichas Técnicas de Equipos
+                </h1>
+                <p class="mb-0 opacity-75">Documentación técnica completa y especificaciones detalladas</p>
+            </div>
+            <div class="col-md-6">
+                <div class="ficha-stat-grid">
+                    <div class="ficha-stat-item">
+                        <div class="ficha-stat-number">{{ fichas_completas }}</div>
+                        <div class="ficha-stat-label">Completas</div>
+                    </div>
+                    <div class="ficha-stat-item">
+                        <div class="ficha-stat-number">{{ fichas_pendientes }}</div>
+                        <div class="ficha-stat-label">Pendientes</div>
+                    </div>
+                    <div class="ficha-stat-item">
+                        <div class="ficha-stat-number">{{ total_equipos }}</div>
+                        <div class="ficha-stat-label">Total</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de búsqueda y filtros -->
+    <div class="ficha-search-bar">
+        <div class="position-relative">
+            <i class="bi bi-search ficha-search-icon"></i>
+            <input type="text" class="ficha-search-input" id="fichaSearchInput" 
+                   placeholder="Buscar equipos por nombre, código interno o fabricante...">
+        </div>
+        <div class="ficha-filter-tabs">
+            <a href="#" class="ficha-filter-tab active" data-filter="all">
+                <i class="bi bi-list"></i> Todos
+            </a>
+            <a href="#" class="ficha-filter-tab" data-filter="complete">
+                <i class="bi bi-check-circle"></i> Completas
+            </a>
+            <a href="#" class="ficha-filter-tab" data-filter="pending">
+                <i class="bi bi-clock"></i> Pendientes
+            </a>
+            <a href="#" class="ficha-filter-tab" data-filter="missing">
+                <i class="bi bi-exclamation-triangle"></i> Sin Ficha
+            </a>
+        </div>
+    </div>
+
+    <!-- Galería de Fichas Técnicas -->
+    {% if equipos %}
+        <div class="row g-4" id="fichasGallery">
+            {% for equipo in equipos %}
+            <div class="col-xl-4 col-lg-6 col-md-6" 
+                 data-search="{{ equipo.nombre|lower }} {{ equipo.codigo_interno|lower }} {{ equipo.fabricante|lower }}"
+                 data-status="{% if equipo.ficha_tecnica_completa or equipo.tiene_ficha_tecnica %}complete{% else %}missing{% endif %}">
+                <div class="ficha-card">
+                    <!-- Sección de la ficha técnica -->
+                    <div class="ficha-container">
+                        {% if equipo.ficha_tecnica_completa or equipo.tiene_ficha_tecnica %}
+    <div class="ficha-preview">
+        <!-- Miniatura de la ficha técnica (simulada) -->
+        <div class="text-center p-3">
+            <i class="bi bi-file-earmark-check" style="font-size: 4rem; color: var(--ficha-success);"></i>
+            <p class="mt-2 mb-0 fw-semibold">Ficha Técnica Creada</p>
+            <small class="text-muted">{{ equipo.calcular_completitud_ficha }}% completa</small>
+        </div>
+    </div>
+    <div class="ficha-actions">
+        <a href="{% url 'equipos:ficha-detallada' equipo.pk %}" 
+           class="ficha-btn ficha-btn-secondary">
+            <i class="bi bi-eye"></i>
+            Ver Ficha
+        </a>
+        <a href="{% url 'equipos:exportar-ficha-pdf' equipo.pk %}" 
+           class="ficha-btn ficha-btn-secondary">
+            <i class="bi bi-download"></i>
+            Descargar PDF
+        </a>
+        <a href="{% url 'equipos:editar-ficha' equipo.pk %}" 
+           class="ficha-btn">
+            <i class="bi bi-pencil"></i>
+            Editar
+        </a>
+    </div>
+                        {% else %}
+                            <div class="ficha-placeholder">
+                                <i class="bi bi-file-earmark-plus fs-1 mb-3"></i>
+                                <p class="mb-2 fw-semibold">Ficha técnica no creada</p>
+                                <small>Genere la ficha técnica para este equipo</small>
+                            </div>
+                            <div class="ficha-actions">
+                                <a href="{% url 'equipos:crear-ficha' equipo.pk %}" 
+                                   class="ficha-btn ficha-btn-generate">
+                                    <i class="bi bi-file-earmark-plus"></i>
+                                    Crear Ficha
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Información del equipo -->
+                    <div class="ficha-info-section">
+                        <h3 class="ficha-equipment-name">{{ equipo.nombre }}</h3>
+                        <div class="ficha-equipment-code">{{ equipo.codigo_interno }}</div>
+                        
+                        <!-- Información Técnica Básica -->
+                        <div class="ficha-details-grid">
+                            <div class="ficha-detail-item">
+                                <i class="bi bi-building ficha-detail-icon"></i>
+                                <span class="ficha-detail-label">Fabricante:</span>
+                                <span class="ficha-detail-value">{{ equipo.fabricante }}</span>
+                            </div>
+                            
+                            <div class="ficha-detail-item">
+                                <i class="bi bi-cpu ficha-detail-icon"></i>
+                                <span class="ficha-detail-label">Modelo:</span>
+                                <span class="ficha-detail-value">{{ equipo.modelo }}</span>
+                            </div>
+                            
+                            <div class="ficha-detail-item">
+                                <i class="bi bi-upc ficha-detail-icon"></i>
+                                <span class="ficha-detail-label">Serie:</span>
+                                <span class="ficha-detail-value">{{ equipo.serie|default:"No especificado" }}</span>
+                            </div>
+                            
+                            <div class="ficha-detail-item">
+                                <i class="bi bi-calendar ficha-detail-icon"></i>
+                                <span class="ficha-detail-label">Año Fab.:</span>
+                                <span class="ficha-detail-value">{{ equipo.año_fabricacion|default:"No especificado" }}</span>
+                            </div>
+                            
+                            <div class="ficha-detail-item">
+                                <i class="bi bi-lightning ficha-detail-icon"></i>
+                                <span class="ficha-detail-label">Potencia:</span>
+                                <span class="ficha-detail-value">{{ equipo.potencia|default:"No especificada" }}</span>
+                            </div>
+                            
+                            <div class="ficha-detail-item">
+                                <i class="bi bi-speedometer ficha-detail-icon"></i>
+                                <span class="ficha-detail-label">Capacidad:</span>
+                                <span class="ficha-detail-value">{{ equipo.capacidad|default:"No especificada" }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Nueva Sección: Especificaciones Eléctricas -->
+                        <div class="ficha-subsection mt-3">
+                            <h5 class="ficha-subsection-title">
+                                <i class="bi bi-lightning-charge"></i>
+                                Especificaciones Eléctricas
+                            </h5>
+                            <div class="ficha-details-grid">
+                                <div class="ficha-detail-item">
+                                    <i class="bi bi-plug ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Voltaje:</span>
+                                    <span class="ficha-detail-value">{{ equipo.voltaje|default:"No especificado" }}</span>
+                                </div>
+                                <div class="ficha-detail-item">
+                                    <i class="bi bi-activity ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Amperaje:</span>
+                                    <span class="ficha-detail-value">{{ equipo.amperaje|default:"No especificado" }}</span>
+                                </div>
+                                <div class="ficha-detail-item">
+                                    <i class="bi bi-diagram-3 ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Fases:</span>
+                                    <span class="ficha-detail-value">{{ equipo.fases|default:"No especificado" }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nueva Sección: Seguridad Industrial -->
+                        <div class="ficha-subsection mt-3">
+                            <h5 class="ficha-subsection-title">
+                                <i class="bi bi-shield-check"></i>
+                                Seguridad Industrial
+                            </h5>
+                            <div class="ficha-details-grid">
+                                <div class="ficha-detail-item">
+                                    <i class="bi bi-person-gear ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">EPP Requerido:</span>
+                                    <span class="ficha-detail-value">{{ equipo.epp_requerido|default:"No especificado" }}</span>
+                                </div>
+                                <div class="ficha-detail-item ficha-detail-disabled">
+                                    <i class="bi bi-exclamation-triangle ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Procedimiento POP:</span>
+                                    <span class="ficha-detail-value">En desarrollo</span>
+                                </div>
+                                <div class="ficha-detail-item ficha-detail-disabled">
+                                    <i class="bi bi-shield-x ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Matriz IPER:</span>
+                                    <span class="ficha-detail-value">En desarrollo</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nueva Sección: Documentos Técnicos -->
+                        <div class="ficha-subsection mt-3">
+                            <h5 class="ficha-subsection-title">
+                                <i class="bi bi-file-earmark-text"></i>
+                                Documentos Técnicos
+                            </h5>
+                            <div class="ficha-documents-grid">
+                                <div class="ficha-document-item">
+                                    <i class="bi bi-diagram-3"></i>
+                                    <span>Esquema Eléctrico</span>
+                                    <small>{% if equipo.esquema_electrico %}Disponible{% else %}No disponible{% endif %}</small>
+                                </div>
+                                <div class="ficha-document-item ficha-document-disabled">
+                                    <i class="bi bi-gear"></i>
+                                    <span>Diagrama Neumático</span>
+                                    <small>En desarrollo</small>
+                                </div>
+                                <div class="ficha-document-item">
+                                    <i class="bi bi-book"></i>
+                                    <span>Manual de Operación</span>
+                                    <small>{% if equipo.manual_operacion %}Disponible{% else %}No disponible{% endif %}</small>
+                                </div>
+                                <div class="ficha-document-item">
+                                    <i class="bi bi-tools"></i>
+                                    <span>Plan de Mantenimiento</span>
+                                    <small>{% if equipo.frecuencia_mantenimiento %}Disponible{% else %}No disponible{% endif %}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nueva Sección: Mantenimiento -->
+                        <div class="ficha-subsection mt-3">
+                            <h5 class="ficha-subsection-title">
+                                <i class="bi bi-tools"></i>
+                                Información de Mantenimiento
+                            </h5>
+                            <div class="ficha-details-grid">
+                                <div class="ficha-detail-item ficha-detail-disabled">
+                                    <i class="bi bi-calendar-check ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Último Mant.:</span>
+                                    <span class="ficha-detail-value">En desarrollo</span>
+                                </div>
+                                <div class="ficha-detail-item ficha-detail-disabled">
+                                    <i class="bi bi-calendar-plus ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Próximo Mant.:</span>
+                                    <span class="ficha-detail-value">En desarrollo</span>
+                                </div>
+                                <div class="ficha-detail-item">
+                                    <i class="bi bi-list-check ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Frecuencia:</span>
+                                    <span class="ficha-detail-value">{{ equipo.frecuencia_mantenimiento|default:"No especificada" }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nueva Sección: Normativas y Cumplimiento -->
+                        <div class="ficha-subsection mt-3">
+                            <h5 class="ficha-subsection-title">
+                                <i class="bi bi-clipboard-check"></i>
+                                Normativas y Cumplimiento
+                                <span class="ficha-badge-coming-soon">Próximamente</span>
+                            </h5>
+                            <div class="ficha-compliance-grid">
+                                <div class="ficha-compliance-item ficha-compliance-disabled">
+                                    <i class="bi bi-award"></i>
+                                    <span class="compliance-title">ISO 9001</span>
+                                    <small>Gestión de Calidad</small>
+                                </div>
+                                <div class="ficha-compliance-item ficha-compliance-disabled">
+                                    <i class="bi bi-shield-check"></i>
+                                    <span class="compliance-title">ISO 45001</span>
+                                    <small>Seguridad Industrial</small>
+                                </div>
+                                <div class="ficha-compliance-item ficha-compliance-disabled">
+                                    <i class="bi bi-gear-wide"></i>
+                                    <span class="compliance-title">IEEE</span>
+                                    <small>Estándares Eléctricos</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección de Estado de Ficha (Mejorada) -->
+                        <div class="ficha-status-section mt-3">
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <div class="ficha-detail-item">
+                                        <i class="bi bi-file-text ficha-detail-icon"></i>
+                                        <span class="ficha-detail-label">Estado Ficha:</span>
+                                        <span class="ficha-status-badge 
+                                            {% if equipo.ficha_tecnica_completa or equipo.tiene_ficha_tecnica %}ficha-status-complete
+                                            {% else %}ficha-status-missing{% endif %}">
+                                            <i class="bi bi-circle-fill"></i>
+                                            {% if equipo.ficha_tecnica_completa or equipo.tiene_ficha_tecnica %}Creada{% else %}Sin Ficha{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    {% if equipo.codigo_qr %}
+                                        <button class="ficha-btn-qr" onclick="showQRCode('{{ equipo.codigo_interno }}', '{{ equipo.qr_code.url }}')">
+                                            <i class="bi bi-qr-code"></i>
+                                        </button>
+                                    {% else %}
+                                        <span class="ficha-badge-coming-soon small">QR Próximamente</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barra de progreso de completitud (Mejorada) -->
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="fw-semibold">Completitud de Documentación</small>
+                                <small class="text-muted">{{ equipo.completitud_porcentaje }}%</small>
+                            </div>
+                            <div class="ficha-progress-bar">
+                                <div class="ficha-progress-fill" style="width: {{ equipo.calcular_completitud_ficha }}%"></div>
+                            </div>
+                            <div class="ficha-progress-text">{{ equipo.calcular_completitud_ficha }}% completado</div>
+                        </div>
+
+                        <!-- Botón ver más (Mejorado) -->
+                        <div class="mt-3 d-grid gap-2">
+                            <a href="{% url 'equipos:ficha-detallada' equipo.pk %}" 
+                               class="ficha-btn">
+                                <i class="bi bi-eye"></i>
+                                Ver Detalles Completos del Equipo
+                            </a>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <a href="{% url 'equipos:exportar-ficha-pdf' equipo.pk %}" 
+                                       class="ficha-btn ficha-btn-secondary w-100">
+                                        <i class="bi bi-download"></i>
+                                        <span class="d-none d-sm-inline">Exportar</span> PDF
+                                    </a>
+                                </div>
+                                <div class="col-6">
+                                    <a href="{% url 'equipos:imprimir-ficha' equipo.pk %}" 
+                                       class="ficha-btn ficha-btn-secondary w-100" 
+                                       target="_blank">
+                                        <i class="bi bi-printer"></i>
+                                        <span class="d-none d-sm-inline">Imprimir</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="ficha-empty-state">
+            <i class="bi bi-file-earmark-text ficha-empty-icon"></i>
+            <h3>No hay equipos registrados</h3>
+            <p>Comience agregando equipos al inventario para crear sus fichas técnicas.</p>
+            <a href="{% url 'equipos:equipo-crear' %}" class="ficha-btn mt-3">
+                <i class="bi bi-plus-circle"></i>
+                Agregar Primer Equipo
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal para vista de ficha técnica -->
+<div class="ficha-modal" id="fichaModal">
+    <div class="ficha-modal-content">
+        <button class="ficha-modal-close" onclick="closeFichaModal()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div id="fichaModalContent">
+            <!-- El contenido se cargará dinámicamente -->
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Búsqueda en tiempo real
+    const searchInput = document.getElementById('fichaSearchInput');
+    const galleryItems = document.querySelectorAll('#fichasGallery > div');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        galleryItems.forEach(item => {
+            const searchData = item.getAttribute('data-search');
+            const isVisible = !searchTerm || searchData.includes(searchTerm);
+            
+            if (isVisible) {
+                item.style.display = '';
+                item.style.animation = 'fichaCardSlideIn 0.3s ease-out';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        updateEmptyState();
+    });
+    
+    // Filtros por estado
+    const filterTabs = document.querySelectorAll('.ficha-filter-tab');
+    
+    filterTabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Actualizar tabs activos
+            filterTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            
+            galleryItems.forEach(item => {
+                const status = item.getAttribute('data-status');
+                const searchData = item.getAttribute('data-search');
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                
+                let showByFilter = filter === 'all' || status === filter;
+                let showBySearch = !searchTerm || searchData.includes(searchTerm);
+                
+                if (showByFilter && showBySearch) {
+                    item.style.display = '';
+                    item.style.animation = 'fichaCardSlideIn 0.3s ease-out';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            updateEmptyState();
+        });
+    });
+    
+    // Función para mostrar/ocultar estado vacío
+    function updateEmptyState() {
+        const visibleItems = Array.from(galleryItems).filter(item => 
+            item.style.display !== 'none'
+        ).length;
+        
+        const gallery = document.getElementById('fichasGallery');
+        let emptyState = document.querySelector('.ficha-empty-state');
+        
+        if (visibleItems === 0 && !emptyState) {
+            emptyState = document.createElement('div');
+            emptyState.className = 'ficha-empty-state col-12';
+            emptyState.innerHTML = `
+                <i class="bi bi-search ficha-empty-icon"></i>
+                <h3>No se encontraron resultados</h3>
+                <p>Intente con otros términos de búsqueda o cambie los filtros.</p>
+            `;
+            gallery.appendChild(emptyState);
+        } else if (visibleItems > 0 && emptyState) {
+            emptyState.remove();
+        }
+    }
+    
+    // Animación escalonada inicial
+    const cards = document.querySelectorAll('.ficha-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+});
+
+// Funciones del modal
+function openFichaModal(equipoId, equipoCode, equipoName) {
+    const modalContent = document.getElementById('fichaModalContent');
+    
+    modalContent.innerHTML = `
+        <div class="text-center mb-4">
+            <h2 class="ficha-equipment-name">${equipoName}</h2>
+            <div class="ficha-equipment-code">${equipoCode}</div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h4 class="mb-3">
+                    <i class="bi bi-lightning"></i>
+                    Especificaciones Técnicas
+                </h4>
+                <div class="ficha-details-grid">
+                    <div class="ficha-detail-item">
+                        <i class="bi bi-lightning ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">Potencia:</span>
+                        <span class="ficha-detail-value">5 HP</span>
+                    </div>
+                    <div class="ficha-detail-item">
+                        <i class="bi bi-speedometer ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">Velocidad:</span>
+                        <span class="ficha-detail-value">1800 RPM</span>
+                    </div>
+                    <div class="ficha-detail-item">
+                        <i class="bi bi-plug ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">Voltaje:</span>
+                        <span class="ficha-detail-value">220V / 380V</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4 class="mb-3">
+                    <i class="bi bi-shield-check"></i>
+                    Seguridad Industrial
+                </h4>
+                <div class="ficha-details-grid">
+                    <div class="ficha-detail-item">
+                        <i class="bi bi-person-gear ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">EPP:</span>
+                        <span class="ficha-detail-value">En desarrollo</span>
+                    </div>
+                    <div class="ficha-detail-item ficha-detail-disabled">
+                        <i class="bi bi-exclamation-triangle ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">POP:</span>
+                        <span class="ficha-detail-value">En desarrollo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h4 class="mb-3">
+                <i class="bi bi-tools"></i>
+                Mantenimiento
+                <span class="ficha-badge-coming-soon">Próximamente</span>
+            </h4>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Sistema de Mantenimiento Preventivo en desarrollo:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Calendario de mantenimientos programados</li>
+                    <li>Historial de intervenciones</li>
+                    <li>Lista de repuestos críticos</li>
+                    <li>Procedimientos específicos por equipo</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h4 class="mb-3">
+                <i class="bi bi-clipboard-check"></i>
+                Cumplimiento Normativo
+                <span class="ficha-badge-coming-soon">Próximamente</span>
+            </h4>
+            <div class="ficha-compliance-grid">
+                <div class="ficha-compliance-item ficha-compliance-disabled">
+                    <i class="bi bi-award"></i>
+                    <span class="compliance-title">ISO 9001</span>
+                    <small>Gestión de Calidad</small>
+                </div>
+                <div class="ficha-compliance-item ficha-compliance-disabled">
+                    <i class="bi bi-shield-check"></i>
+                    <span class="compliance-title">ISO 45001</span>
+                    <small>Seguridad Industrial</small>
+                </div>
+                <div class="ficha-compliance-item ficha-compliance-disabled">
+                    <i class="bi bi-gear-wide"></i>
+                    <span class="compliance-title">IEEE</span>
+                    <small>Estándares Eléctricos</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ficha-actions mt-4">
+            <a href="/media/fichas/equipo_${equipoId}.pdf" class="ficha-btn ficha-btn-secondary" download>
+                <i class="bi bi-download"></i>
+                Descargar PDF
+            </a>
+            <a href="/equipos/editar-ficha/${equipoId}/" class="ficha-btn">
+                <i class="bi bi-pencil"></i>
+                Editar Ficha
+            </a>
+            <button class="ficha-btn ficha-btn-secondary" onclick="printFicha()">
+                <i class="bi bi-printer"></i>
+                Imprimir
+            </button>
+            <button class="ficha-btn ficha-btn-secondary" disabled>
+                <i class="bi bi-cloud-upload"></i>
+                Sincronizar
+                <small>Próximamente</small>
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('fichaModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeFichaModal() {
+    document.getElementById('fichaModal').classList.remove('show');
+    document.body.style.overflow = 'auto';
+}
+
+function printFicha() {
+    window.print();
+}
+
+// Función para mostrar QR Code
+function showQRCode(equipoCode, qrUrl) {
+    const modal = document.createElement('div');
+    modal.className = 'qr-modal show';
+    modal.innerHTML = `
+        <div class="qr-modal-content">
+            <button class="qr-modal-close" onclick="this.closest('.qr-modal').remove()">×</button>
+            <h4 class="mb-3">${equipoCode}</h4>
+            <img src="${qrUrl}" alt="QR Code" style="max-width: 200px; width: 100%;">
+            <p class="mt-3 small text-muted">Escanee para acceso rápido</p>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.remove();
+        }
+    });
+}
+
+// Actualizar modal existente con información mejorada
+function openFichaModal(equipoId, equipoCode, equipoName) {
+    const modalContent = document.getElementById('fichaModalContent');
+    
+    modalContent.innerHTML = `
+        <div class="text-center mb-4">
+            <h2 class="ficha-equipment-name">${equipoName}</h2>
+            <div class="ficha-equipment-code">${equipoCode}</div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h4 class="mb-3">
+                    <i class="bi bi-lightning"></i>
+                    Especificaciones Técnicas
+                </h4>
+                <div class="ficha-details-grid">
+                    <div class="ficha-detail-item">
+                        <i class="bi bi-lightning ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">Potencia:</span>
+                        <span class="ficha-detail-value">5 HP</span>
+                    </div>
+                    <div class="ficha-detail-item">
+                        <i class="bi bi-speedometer ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">Velocidad:</span>
+                        <span class="ficha-detail-value">1800 RPM</span>
+                    </div>
+                    <div class="ficha-detail-item">
+                        <i class="bi bi-plug ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">Voltaje:</span>
+                        <span class="ficha-detail-value">220V / 380V</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4 class="mb-3">
+                    <i class="bi bi-shield-check"></i>
+                    Seguridad Industrial
+                </h4>
+                <div class="ficha-details-grid">
+                    <div class="ficha-detail-item">
+                        <i class="bi bi-person-gear ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">EPP:</span>
+                        <span class="ficha-detail-value">En desarrollo</span>
+                    </div>
+                    <div class="ficha-detail-item ficha-detail-disabled">
+                        <i class="bi bi-exclamation-triangle ficha-detail-icon"></i>
+                        <span class="ficha-detail-label">POP:</span>
+                        <span class="ficha-detail-value">En desarrollo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h4 class="mb-3">
+                <i class="bi bi-tools"></i>
+                Mantenimiento
+                <span class="ficha-badge-coming-soon">Próximamente</span>
+            </h4>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Sistema de Mantenimiento Preventivo en desarrollo:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Calendario de mantenimientos programados</li>
+                    <li>Historial de intervenciones</li>
+                    <li>Lista de repuestos críticos</li>
+                    <li>Procedimientos específicos por equipo</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h4 class="mb-3">
+                <i class="bi bi-clipboard-check"></i>
+                Cumplimiento Normativo
+                <span class="ficha-badge-coming-soon">Próximamente</span>
+            </h4>
+            <div class="ficha-compliance-grid">
+                <div class="ficha-compliance-item ficha-compliance-disabled">
+                    <i class="bi bi-award"></i>
+                    <span class="compliance-title">ISO 9001</span>
+                    <small>Gestión de Calidad</small>
+                </div>
+                <div class="ficha-compliance-item ficha-compliance-disabled">
+                    <i class="bi bi-shield-check"></i>
+                    <span class="compliance-title">ISO 45001</span>
+                    <small>Seguridad Industrial</small>
+                </div>
+                <div class="ficha-compliance-item ficha-compliance-disabled">
+                    <i class="bi bi-gear-wide"></i>
+                    <span class="compliance-title">IEEE</span>
+                    <small>Estándares Eléctricos</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ficha-actions mt-4">
+            <a href="/media/fichas/equipo_${equipoId}.pdf" class="ficha-btn ficha-btn-secondary" download>
+                <i class="bi bi-download"></i>
+                Descargar PDF
+            </a>
+            <a href="/equipos/editar-ficha/${equipoId}/" class="ficha-btn">
+                <i class="bi bi-pencil"></i>
+                Editar Ficha
+            </a>
+            <button class="ficha-btn ficha-btn-secondary" onclick="printFicha()">
+                <i class="bi bi-printer"></i>
+                Imprimir
+            </button>
+            <button class="ficha-btn ficha-btn-secondary" disabled>
+                <i class="bi bi-cloud-upload"></i>
+                Sincronizar
+                <small>Próximamente</small>
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('fichaModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+</script>
+{% endblock %}

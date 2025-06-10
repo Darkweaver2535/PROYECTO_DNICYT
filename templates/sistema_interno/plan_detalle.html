@@ -1,0 +1,779 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ plan.codigo_plan }} - Plan de Mantenimiento{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --detail-primary: #2563eb;
+        --detail-secondary: #1d4ed8;
+        --detail-success: #10b981;
+        --detail-warning: #f59e0b;
+        --detail-danger: #ef4444;
+        --detail-info: #0ea5e9;
+        --detail-white: #ffffff;
+        --detail-off-white: #f8fafc;
+        --detail-text: #1f2937;
+        --detail-text-light: #6b7280;
+        --detail-border: #e5e7eb;
+        --detail-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --detail-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --detail-transition: 0.3s;
+    }
+
+    .detail-header {
+        background: linear-gradient(135deg, var(--detail-primary), var(--detail-secondary));
+        color: var(--detail-white);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .detail-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .detail-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .detail-card {
+        background: var(--detail-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--detail-shadow);
+        border: 1px solid var(--detail-border);
+        transition: all var(--detail-transition) ease;
+    }
+
+    .detail-card:hover {
+        box-shadow: var(--detail-shadow-lg);
+    }
+
+    .detail-card-title {
+        color: var(--detail-primary);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 2px solid var(--detail-border);
+        padding-bottom: 1rem;
+    }
+
+    .detail-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .detail-info-label {
+        color: var(--detail-text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .detail-info-value {
+        color: var(--detail-text);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .detail-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .detail-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .badge-tipo-preventivo {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--detail-success);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-tipo-correctivo {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--detail-danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .badge-tipo-predictivo {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--detail-primary);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+    }
+
+    .badge-tipo-autonomo {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--detail-warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--detail-success);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--detail-warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--detail-danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .badge-info {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--detail-info);
+        border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+
+    .detail-status-alert {
+        padding: 1rem;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .status-alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--detail-success);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--detail-warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--detail-danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .detail-metric {
+        text-align: center;
+        padding: 1.5rem;
+        background: var(--detail-off-white);
+        border-radius: 1rem;
+        border: 1px solid var(--detail-border);
+    }
+
+    .detail-metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--detail-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-metric-label {
+        color: var(--detail-text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .tareas-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .tarea-item {
+        background: var(--detail-off-white);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 1px solid var(--detail-border);
+        transition: all var(--detail-transition) ease;
+    }
+
+    .tarea-item:hover {
+        background: var(--detail-white);
+        box-shadow: var(--detail-shadow);
+    }
+
+    .tarea-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .tarea-nombre {
+        font-weight: 600;
+        color: var(--detail-text);
+    }
+
+    .tarea-orden {
+        background: var(--detail-primary);
+        color: var(--detail-white);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .tarea-descripcion {
+        color: var(--detail-text-light);
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .tarea-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: var(--detail-text-light);
+    }
+
+    .detail-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .detail-btn {
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all var(--detail-transition) ease;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .detail-btn-primary {
+        background: var(--detail-primary);
+        color: var(--detail-white);
+    }
+
+    .detail-btn-primary:hover {
+        background: var(--detail-secondary);
+        transform: translateY(-2px);
+        box-shadow: var(--detail-shadow-lg);
+        color: var(--detail-white);
+        text-decoration: none;
+    }
+
+    .detail-btn-secondary {
+        background: var(--detail-white);
+        color: var(--detail-text);
+        border: 2px solid var(--detail-border);
+    }
+
+    .detail-btn-secondary:hover {
+        background: var(--detail-off-white);
+        border-color: var(--detail-primary);
+        color: var(--detail-primary);
+        text-decoration: none;
+    }
+
+    .detail-btn-warning {
+        background: var(--detail-warning);
+        color: var(--detail-white);
+    }
+
+    .detail-btn-warning:hover {
+        background: #d97706;
+        color: var(--detail-white);
+        text-decoration: none;
+    }
+
+    .detail-btn-success {
+        background: var(--detail-success);
+        color: var(--detail-white);
+    }
+
+    .detail-btn-success:hover {
+        background: #059669;
+        color: var(--detail-white);
+        text-decoration: none;
+    }
+
+    .detail-breadcrumb {
+        background: var(--detail-white);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--detail-border);
+    }
+
+    @media (max-width: 1024px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .detail-header {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .detail-info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .detail-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav class="detail-breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door"></i> Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="text-decoration-none">
+                    <i class="bi bi-tools"></i> Planes de Mantenimiento
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                <i class="bi bi-eye"></i> {{ plan.codigo_plan }}
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="detail-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="badge bg-light text-dark px-3 py-2 fs-6">{{ plan.codigo_plan }}</span>
+                    <h1 class="h2 mb-0 fw-bold">{{ plan.nombre }}</h1>
+                </div>
+                <p class="mb-0 opacity-75 fs-5">
+                    Plan de mantenimiento {{ plan.get_tipo_mantenimiento_display|lower }} para 
+                    <strong>{{ plan.equipo.nombre }}</strong>
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'mantenimiento:editar-plan' plan.pk %}" class="detail-btn detail-btn-warning">
+                    <i class="bi bi-pencil"></i>
+                    Editar Plan
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado del Plan -->
+    {% if plan.atrasado %}
+        <div class="detail-status-alert status-alert-danger">
+            <i class="bi bi-exclamation-triangle fs-4"></i>
+            <div>
+                <strong>Plan Atrasado</strong><br>
+                Este plan tiene {{ plan.dias_restantes|add:"-1" }} días de retraso. Se requiere atención inmediata.
+            </div>
+        </div>
+    {% elif plan.dias_restantes <= 7 %}
+        <div class="detail-status-alert status-alert-warning">
+            <i class="bi bi-clock fs-4"></i>
+            <div>
+                <strong>Próximo Mantenimiento</strong><br>
+                {% if plan.dias_restantes == 0 %}
+                    El mantenimiento está programado para hoy.
+                {% elif plan.dias_restantes == 1 %}
+                    El mantenimiento está programado para mañana.
+                {% else %}
+                    El mantenimiento está programado en {{ plan.dias_restantes }} días.
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div class="detail-status-alert status-alert-success">
+            <i class="bi bi-check-circle fs-4"></i>
+            <div>
+                <strong>Plan en Tiempo</strong><br>
+                Próximo mantenimiento en {{ plan.dias_restantes }} días.
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Grid Principal -->
+    <div class="detail-grid">
+        <!-- Contenido Principal -->
+        <div class="detail-main-content">
+            <!-- Información General -->
+            <div class="detail-card">
+                <h3 class="detail-card-title">
+                    <i class="bi bi-info-circle"></i>
+                    Información General
+                </h3>
+                
+                <div class="detail-badges">
+                    <span class="detail-badge badge-tipo-{{ plan.tipo_mantenimiento }}">
+                        {{ plan.get_tipo_mantenimiento_display }}
+                    </span>
+                    <span class="detail-badge badge-{% if plan.prioridad == 'critica' %}danger{% elif plan.prioridad == 'alta' %}warning{% elif plan.prioridad == 'media' %}info{% else %}success{% endif %}">
+                        Prioridad {{ plan.get_prioridad_display }}
+                    </span>
+                    <span class="detail-badge badge-{% if plan.estado == 'activo' %}success{% elif plan.estado == 'pausado' %}warning{% else %}info{% endif %}">
+                        {{ plan.get_estado_display }}
+                    </span>
+                    {% if plan.cumple_iso %}
+                        <span class="detail-badge badge-info">ISO Compliant</span>
+                    {% endif %}
+                </div>
+
+                <div class="detail-info-grid">
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Equipo</div>
+                        <div class="detail-info-value">
+                            <i class="bi bi-gear me-2"></i>
+                            {{ plan.equipo.codigo_interno }} - {{ plan.equipo.nombre }}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Frecuencia</div>
+                        <div class="detail-info-value">{{ plan.get_frecuencia_display }}</div>
+                    </div>
+                    
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Duración Estimada</div>
+                        <div class="detail-info-value">{{ plan.duracion_estimada }} horas</div>
+                    </div>
+                    
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Costo Estimado</div>
+                        <div class="detail-info-value">Bs. {{ plan.costo_estimado }}</div>
+                    </div>
+                    
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Responsable Principal</div>
+                        <div class="detail-info-value">
+                            {% if plan.responsable_principal %}
+                                <i class="bi bi-person me-2"></i>
+                                {{ plan.responsable_principal.get_full_name|default:plan.responsable_principal.username }}
+                            {% else %}
+                                No asignado
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Criticidad</div>
+                        <div class="detail-info-value">{{ plan.get_nivel_criticidad_display }}</div>
+                    </div>
+                </div>
+
+                {% if plan.descripcion %}
+                    <div class="mt-3">
+                        <div class="detail-info-label">Descripción</div>
+                        <div class="detail-info-value">{{ plan.descripcion }}</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Normativas y Cumplimiento -->
+            <div class="detail-card">
+                <h3 class="detail-card-title">
+                    <i class="bi bi-shield-check"></i>
+                    Normativas y Cumplimiento
+                </h3>
+                
+                <div class="detail-info-grid">
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Norma Aplicable</div>
+                        <div class="detail-info-value">{{ plan.get_norma_aplicable_display }}</div>
+                    </div>
+                    
+                    {% if plan.norma_especifica %}
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Norma Específica</div>
+                        <div class="detail-info-value">{{ plan.norma_especifica }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Cumplimiento ISO 55000</div>
+                        <div class="detail-info-value">
+                            {% if plan.cumple_iso %}
+                                <i class="bi bi-check-circle text-success"></i> Sí
+                            {% else %}
+                                <i class="bi bi-x-circle text-danger"></i> No
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Cumplimiento API 580</div>
+                        <div class="detail-info-value">
+                            {% if plan.cumple_api %}
+                                <i class="bi bi-check-circle text-success"></i> Sí
+                            {% else %}
+                                <i class="bi bi-x-circle text-danger"></i> No
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tareas del Plan -->
+            <div class="detail-card">
+                <h3 class="detail-card-title">
+                    <i class="bi bi-list-check"></i>
+                    Tareas del Plan ({{ tareas.count }})
+                </h3>
+                
+                {% if tareas %}
+                    <div class="tareas-list">
+                        {% for tarea in tareas %}
+                            <div class="tarea-item">
+                                <div class="tarea-header">
+                                    <div class="tarea-nombre">{{ tarea.nombre }}</div>
+                                    <div class="tarea-orden">{{ tarea.orden }}</div>
+                                </div>
+                                {% if tarea.descripcion %}
+                                    <div class="tarea-descripcion">{{ tarea.descripcion }}</div>
+                                {% endif %}
+                                <div class="tarea-meta">
+                                    <span><i class="bi bi-clock me-1"></i>{{ tarea.duracion_estimada }} min</span>
+                                    {% if tarea.es_critica %}
+                                        <span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Crítica</span>
+                                    {% endif %}
+                                    {% if tarea.requiere_verificacion %}
+                                        <span class="text-info"><i class="bi bi-shield-check me-1"></i>Requiere verificación</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-list-ul fs-1 mb-3 d-block opacity-50"></i>
+                        <p>No hay tareas definidas para este plan.</p>
+                        <a href="{% url 'mantenimiento:crear-tarea' plan.pk %}" class="detail-btn detail-btn-primary">
+                            <i class="bi bi-plus-circle"></i>
+                            Agregar Primera Tarea
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="detail-sidebar">
+            <!-- Métricas -->
+            <div class="detail-card">
+                <h3 class="detail-card-title">
+                    <i class="bi bi-graph-up"></i>
+                    Métricas de Rendimiento
+                </h3>
+                
+                <div class="d-grid gap-3">
+                    <div class="detail-metric">
+                        <div class="detail-metric-value">{{ plan.eficiencia_promedio }}%</div>
+                        <div class="detail-metric-label">Eficiencia</div>
+                    </div>
+                    
+                    <div class="detail-metric">
+                        <div class="detail-metric-value">{{ plan.numero_ejecuciones }}</div>
+                        <div class="detail-metric-label">Ejecuciones</div>
+                    </div>
+                    
+                    {% if plan.mtbf %}
+                    <div class="detail-metric">
+                        <div class="detail-metric-value">{{ plan.mtbf }}</div>
+                        <div class="detail-metric-label">MTBF (horas)</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="detail-metric">
+                        <div class="detail-metric-value">{{ plan.disponibilidad_objetivo }}%</div>
+                        <div class="detail-metric-label">Disponibilidad Objetivo</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fechas Importantes -->
+            <div class="detail-card">
+                <h3 class="detail-card-title">
+                    <i class="bi bi-calendar"></i>
+                    Cronograma
+                </h3>
+                
+                <div class="d-grid gap-3">
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Fecha de Inicio</div>
+                        <div class="detail-info-value">{{ plan.fecha_inicio|date:"d/m/Y" }}</div>
+                    </div>
+                    
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Última Ejecución</div>
+                        <div class="detail-info-value">
+                            {% if plan.ultima_ejecucion %}
+                                {{ plan.ultima_ejecucion|date:"d/m/Y" }}
+                            {% else %}
+                                <span class="text-muted">Sin registro</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Próxima Ejecución</div>
+                        <div class="detail-info-value {% if plan.atrasado %}text-danger{% elif plan.dias_restantes <= 7 %}text-warning{% endif %}">
+                            {% if plan.proxima_ejecucion %}
+                                {{ plan.proxima_ejecucion|date:"d/m/Y" }}
+                            {% else %}
+                                <span class="text-muted">No programada</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Repuestos Críticos -->
+            {% if plan.repuestos_criticos.exists %}
+            <div class="detail-card">
+                <h3 class="detail-card-title">
+                    <i class="bi bi-gear-wide-connected"></i>
+                    Repuestos Críticos ({{ plan.repuestos_criticos.count }})
+                </h3>
+                
+                <div class="d-grid gap-2">
+                    {% for repuesto in plan.repuestos_criticos.all %}
+                        <div class="p-2 bg-light rounded border">
+                            <div class="fw-bold">{{ repuesto.nombre }}</div>
+                            {% if repuesto.codigo_fabricante %}
+                                <small class="text-muted">Código: {{ repuesto.codigo_fabricante }}</small>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Acciones Rápidas -->
+            <div class="detail-card">
+                <h3 class="detail-card-title">
+                    <i class="bi bi-lightning"></i>
+                    Acciones Rápidas
+                </h3>
+                
+                <div class="d-grid gap-2">
+                    {% if plan.atrasado or plan.dias_restantes <= 7 %}
+                        <button class="detail-btn detail-btn-success" onclick="ejecutarMantenimiento({{ plan.pk }})">
+                            <i class="bi bi-play-circle"></i>
+                            Ejecutar Ahora
+                        </button>
+                    {% endif %}
+                    
+                    <a href="{% url 'mantenimiento:crear-tarea' plan.pk %}" class="detail-btn detail-btn-primary">
+                        <i class="bi bi-plus-circle"></i>
+                        Agregar Tarea
+                    </a>
+                    
+                    <button class="detail-btn detail-btn-secondary" onclick="generarReporte({{ plan.pk }})">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        Generar Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Principales -->
+    <div class="detail-actions">
+        <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="detail-btn detail-btn-secondary">
+            <i class="bi bi-arrow-left"></i>
+            Volver a Planes
+        </a>
+        
+        <a href="{% url 'mantenimiento:editar-plan' plan.pk %}" class="detail-btn detail-btn-warning">
+            <i class="bi bi-pencil"></i>
+            Editar Plan
+        </a>
+        
+        <a href="{% url 'mantenimiento:eliminar-plan' plan.pk %}" class="detail-btn detail-btn-secondary" 
+           onclick="return confirm('¿Está seguro de que desea eliminar este plan?')">
+            <i class="bi bi-trash"></i>
+            Eliminar Plan
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para ejecutar mantenimiento
+    window.ejecutarMantenimiento = function(planId) {
+        if (confirm('¿Está seguro de que desea ejecutar este mantenimiento?')) {
+            // Aquí iría la lógica para ejecutar el mantenimiento
+            alert('Funcionalidad de ejecución próximamente disponible');
+        }
+    };
+
+    // Función para generar reporte
+    window.generarReporte = function(planId) {
+        alert('Funcionalidad de reportes próximamente disponible');
+    };
+});
+</script>
+{% endblock %}

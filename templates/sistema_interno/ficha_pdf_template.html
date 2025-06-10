@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Ficha Técnica - {{ equipo.codigo_interno }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+        }
+        
+        .header {
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+        
+        .equipment-info {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            margin-bottom: 8px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #374151;
+        }
+        
+        .info-value {
+            color: #6b7280;
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 2cm;
+            left: 2cm;
+            right: 2cm;
+            text-align: center;
+            font-size: 10px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .completitud {
+            background: #dbeafe;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h2>LABORATORIO METAL MECÁNICA</h2>
+            <p>Sistema de Gestión de Equipos Industriales</p>
+        </div>
+        <div class="title">FICHA TÉCNICA</div>
+        <div class="equipment-info">
+            <div class="info-grid">
+                <div>
+                    <div class="info-item">
+                        <span class="info-label">Equipo:</span> {{ equipo.nombre }}
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Código Interno:</span> {{ equipo.codigo_interno }}
+                    </div>
+                </div>
+                <div>
+                    <div class="info-item">
+                        <span class="info-label">Fabricante:</span> {{ equipo.fabricante|default:"No especificado" }}
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Modelo:</span> {{ equipo.modelo|default:"No especificado" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="completitud">
+            <strong>Completitud de Documentación: {{ completitud }}%</strong>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">1. INFORMACIÓN BÁSICA</div>
+        <div class="info-grid">
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Código UDB:</span><br>
+                    EMI-{{ equipo.udb_unidad }} {{ equipo.udb_numero }} {{ equipo.fecha_ingreso.year }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Número de Serie:</span> {{ equipo.numero_serie|default:"No especificado" }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Año de Fabricación:</span> {{ equipo.año_fabricacion|default:"No especificado" }}
+                </div>
+            </div>
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Sección:</span> {{ equipo.get_seccion_display }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Ubicación:</span> {{ equipo.ubicacion_fisica }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Responsable:</span> {{ equipo.responsable|default:"No asignado" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. ESPECIFICACIONES TÉCNICAS</div>
+        <div class="info-grid">
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Potencia:</span> {{ equipo.potencia|default:"No especificada" }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Capacidad:</span> {{ equipo.capacidad|default:"No especificada" }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Peso:</span> {% if equipo.peso %}{{ equipo.peso }} kg{% else %}No especificado{% endif %}
+                </div>
+            </div>
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Estado:</span> {{ equipo.get_estado_display }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tipo:</span> {{ equipo.tipo_equipo }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. ESPECIFICACIONES ELÉCTRICAS</div>
+        <div class="info-grid">
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Voltaje:</span> {{ equipo.voltaje|default:"No especificado" }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Amperaje:</span> {{ equipo.amperaje|default:"No especificado" }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Fases:</span> {{ equipo.fases|default:"No especificado" }}
+                </div>
+            </div>
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Frecuencia:</span> {{ equipo.frecuencia|default:"No especificada" }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Consumo Eléctrico:</span> {% if equipo.consumo_electrico %}{{ equipo.consumo_electrico }} kW{% else %}No especificado{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. CONDICIONES DE OPERACIÓN</div>
+        <div class="info-grid">
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Temperatura Mín:</span> {% if equipo.temperatura_min %}{{ equipo.temperatura_min }}°C{% else %}No especificada{% endif %}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Temperatura Máx:</span> {% if equipo.temperatura_max %}{{ equipo.temperatura_max }}°C{% else %}No especificada{% endif %}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Humedad Máx:</span> {% if equipo.humedad_max %}{{ equipo.humedad_max }}%{% else %}No especificada{% endif %}
+                </div>
+            </div>
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Presión de Trabajo:</span> {% if equipo.presion_trabajo %}{{ equipo.presion_trabajo }} Bar{% else %}No especificada{% endif %}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Caudal de Aire:</span> {% if equipo.caudal_aire %}{{ equipo.caudal_aire }} L/min{% else %}No especificado{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. SEGURIDAD INDUSTRIAL</div>
+        <div class="info-item">
+            <span class="info-label">EPP Requerido:</span><br>
+            {{ equipo.epp_requerido|default:"No especificado" }}
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. MANTENIMIENTO</div>
+        <div class="info-grid">
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Frecuencia:</span> {{ equipo.get_frecuencia_mantenimiento_display|default:"No especificada" }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tiempo Estimado:</span> {% if equipo.tiempo_mantenimiento %}{{ equipo.tiempo_mantenimiento }} horas{% else %}No especificado{% endif %}
+                </div>
+            </div>
+            <div>
+                <div class="info-item">
+                    <span class="info-label">Documentos:</span><br>
+                    {% if equipo.esquema_electrico %}• Esquema Eléctrico<br>{% endif %}
+                    {% if equipo.manual_operacion %}• Manual de Operación<br>{% endif %}
+                    {% if not equipo.esquema_electrico and not equipo.manual_operacion %}Sin documentos técnicos{% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if equipo.procedimientos_mantenimiento %}
+        <div class="info-item" style="margin-top: 15px;">
+            <span class="info-label">Procedimientos:</span><br>
+            {{ equipo.procedimientos_mantenimiento }}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if equipo.observaciones %}
+    <div class="section">
+        <div class="section-title">7. OBSERVACIONES</div>
+        <div class="info-item">
+            {{ equipo.observaciones }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if equipo.qr_code %}
+    <div class="qr-code">
+        <div class="section-title">CÓDIGO QR</div>
+        <img src="{{ equipo.qr_code.path }}" alt="QR Code" style="width: 150px; height: 150px;">
+        <p>Escanee para acceso rápido</p>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Generado el {% now "d/m/Y H:i" %} | Laboratorio Metal Mecánica - Sistema de Gestión de Equipos</p>
+        <p>Documento confidencial - Solo para uso interno</p>
+    </div>
+</body>
+</html>

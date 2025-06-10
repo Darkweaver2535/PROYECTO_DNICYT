@@ -1,0 +1,1111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --form-primary: #2563eb;
+        --form-secondary: #1d4ed8;
+        --form-success: #10b981;
+        --form-warning: #f59e0b;
+        --form-danger: #ef4444;
+        --form-info: #0ea5e9;
+        --form-white: #ffffff;
+        --form-off-white: #f8fafc;
+        --form-text: #1f2937;
+        --form-text-light: #6b7280;
+        --form-border: #e5e7eb;
+        --form-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --form-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --form-transition: 0.3s;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, var(--form-primary), var(--form-secondary));
+        color: var(--form-white);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .form-progress {
+        background: var(--form-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--form-shadow);
+        border: 1px solid var(--form-border);
+    }
+
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .progress-step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--form-border);
+        color: var(--form-text-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: all var(--form-transition) ease;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-step.active .progress-step-circle {
+        background: var(--form-primary);
+        color: var(--form-white);
+    }
+
+    .progress-step.completed .progress-step-circle {
+        background: var(--form-success);
+        color: var(--form-white);
+    }
+
+    .progress-step-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--form-text-light);
+        text-align: center;
+    }
+
+    .progress-step.active .progress-step-label {
+        color: var(--form-primary);
+    }
+
+    .progress-step.completed .progress-step-label {
+        color: var(--form-success);
+    }
+
+    .progress-line {
+        position: absolute;
+        top: 25px;
+        left: 50px;
+        right: 50px;
+        height: 2px;
+        background: var(--form-border);
+        z-index: 1;
+    }
+
+    .form-container {
+        background: var(--form-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--form-shadow);
+        border: 1px solid var(--form-border);
+        margin-bottom: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--form-border);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .form-section-title {
+        color: var(--form-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-section-subtitle {
+        color: var(--form-text-light);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+        font-style: italic;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row.full-width {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--form-text);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label .required {
+        color: var(--form-danger);
+        font-weight: 700;
+    }
+
+    .form-help {
+        font-size: 0.8rem;
+        color: var(--form-text-light);
+        margin-top: 0.25rem;
+    }
+
+    .plan-form-control {
+        border: 2px solid var(--form-border);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        font-size: 0.9rem;
+        transition: all var(--form-transition) ease;
+        background: var(--form-white);
+        width: 100%;
+    }
+
+    .plan-form-control:focus {
+        border-color: var(--form-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    .plan-form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .plan-form-select-multiple {
+        min-height: 120px;
+    }
+
+    .plan-form-check {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--form-primary);
+        cursor: pointer;
+    }
+
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        background: var(--form-off-white);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--form-border);
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--form-white);
+        border-radius: 0.5rem;
+        border: 1px solid var(--form-border);
+        transition: all var(--form-transition) ease;
+    }
+
+    .checkbox-item:hover {
+        box-shadow: var(--form-shadow);
+        transform: translateY(-1px);
+    }
+
+    .checkbox-item label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .form-validation-summary {
+        background: rgba(239, 68, 68, 0.1);
+        border: 2px solid var(--form-danger);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: none;
+    }
+
+    .form-validation-summary.show {
+        display: block;
+    }
+
+    .form-validation-title {
+        color: var(--form-danger);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-validation-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .form-validation-item {
+        color: var(--form-danger);
+        font-weight: 500;
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-error {
+        color: var(--form-danger);
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 2rem;
+        border-top: 1px solid var(--form-border);
+        margin-top: 2rem;
+    }
+
+    .form-btn {
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all var(--form-transition) ease;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .form-btn-primary {
+        background: var(--form-primary);
+        color: var(--form-white);
+    }
+
+    .form-btn-primary:hover {
+        background: var(--form-secondary);
+        transform: translateY(-2px);
+        box-shadow: var(--form-shadow-lg);
+    }
+
+    .form-btn-secondary {
+        background: var(--form-white);
+        color: var(--form-text);
+        border: 2px solid var(--form-border);
+    }
+
+    .form-btn-secondary:hover {
+        background: var(--form-off-white);
+        border-color: var(--form-primary);
+        color: var(--form-primary);
+    }
+
+    .form-btn-outline {
+        background: transparent;
+        color: var(--form-primary);
+        border: 2px solid var(--form-primary);
+    }
+
+    .form-btn-outline:hover {
+        background: var(--form-primary);
+        color: var(--form-white);
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stats-card {
+        background: var(--form-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--form-shadow);
+        border: 1px solid var(--form-border);
+        text-align: center;
+    }
+
+    .stats-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--form-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+        color: var(--form-text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .form-breadcrumb {
+        background: var(--form-white);
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--form-border);
+    }
+
+    @media (max-width: 768px) {
+        .form-header {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .progress-steps {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .progress-line {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav class="form-breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door"></i> Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="text-decoration-none">
+                    <i class="bi bi-tools"></i> Planes de Mantenimiento
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                <i class="bi bi-plus-circle"></i> {{ titulo }}
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="form-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-3 fw-bold">
+                    <i class="bi bi-calendar-plus me-3"></i>
+                    {% if accion == 'crear' %}
+                        Crear Plan de Mantenimiento Industrial
+                    {% else %}
+                        Editar Plan de Mantenimiento
+                    {% endif %}
+                </h1>
+                <p class="mb-0 opacity-75 fs-5">
+                    Formulario profesional para la gestión integral de planes de mantenimiento según normativas ISO 55000
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="form-btn form-btn-secondary">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver a Planes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas (solo al crear) -->
+    {% if accion == 'crear' and stats %}
+        <div class="stats-cards">
+            <div class="stats-card">
+                <div class="stats-value">{{ stats.total_equipos }}</div>
+                <div class="stats-label">Equipos Disponibles</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-value">{{ stats.total_repuestos }}</div>
+                <div class="stats-label">Repuestos Críticos</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-value">{{ stats.planes_activos }}</div>
+                <div class="stats-label">Planes Activos</div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Progreso del formulario -->
+    <div class="form-progress">
+        <div class="progress-steps">
+            <div class="progress-line"></div>
+            <div class="progress-step active">
+                <div class="progress-step-circle">1</div>
+                <div class="progress-step-label">Información Básica</div>
+            </div>
+            <div class="progress-step">
+                <div class="progress-step-circle">2</div>
+                <div class="progress-step-label">Configuración Técnica</div>
+            </div>
+            <div class="progress-step">
+                <div class="progress-step-circle">3</div>
+                <div class="progress-step-label">Normativas y Calidad</div>
+            </div>
+            <div class="progress-step">
+                <div class="progress-step-circle">4</div>
+                <div class="progress-step-label">Análisis y Repuestos</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen de validación -->
+    <div id="validationSummary" class="form-validation-summary">
+        <div class="form-validation-title">
+            <i class="bi bi-exclamation-triangle"></i>
+            Por favor corrija los siguientes errores:
+        </div>
+        <ul id="validationList" class="form-validation-list"></ul>
+    </div>
+
+    <!-- Formulario -->
+    <form id="planForm" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-container">
+            <!-- Sección 1: Información Básica -->
+            <div class="form-section" data-section="1">
+                <h3 class="form-section-title">
+                    <i class="bi bi-info-circle"></i>
+                    Información Básica del Plan
+                </h3>
+                <p class="form-section-subtitle">
+                    Defina los datos fundamentales del plan de mantenimiento según estándares industriales
+                </p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.nombre.id_for_label }}">
+                            <i class="bi bi-tag"></i>
+                            Nombre del Plan
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.nombre }}
+                        <div class="form-help">Nombre descriptivo que identifique claramente el plan</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.equipo.id_for_label }}">
+                            <i class="bi bi-gear"></i>
+                            Equipo Asignado
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.equipo }}
+                        <div class="form-help">Seleccione el equipo que recibirá mantenimiento</div>
+                    </div>
+                </div>
+                
+                <div class="form-row full-width">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.descripcion.id_for_label }}">
+                            <i class="bi bi-file-text"></i>
+                            Descripción Detallada
+                        </label>
+                        {{ form.descripcion }}
+                        <div class="form-help">Descripción técnica completa del plan según normativas aplicables</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Configuración Técnica -->
+            <div class="form-section" data-section="2">
+                <h3 class="form-section-title">
+                    <i class="bi bi-sliders"></i>
+                    Configuración Técnica
+                </h3>
+                <p class="form-section-subtitle">
+                    Configure los parámetros técnicos y operacionales del mantenimiento
+                </p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.tipo_mantenimiento.id_for_label }}">
+                            <i class="bi bi-layers"></i>
+                            Tipo de Mantenimiento
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.tipo_mantenimiento }}
+                        <div class="form-help">Seleccione según la estrategia de mantenimiento</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.frecuencia.id_for_label }}">
+                            <i class="bi bi-clock"></i>
+                            Frecuencia de Ejecución
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.frecuencia }}
+                        <div class="form-help">Periodicidad basada en análisis de criticidad</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.duracion_estimada.id_for_label }}">
+                            <i class="bi bi-stopwatch"></i>
+                            Duración Estimada (horas)
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.duracion_estimada }}
+                        <div class="form-help">Tiempo estimado de ejecución completa</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.fecha_inicio.id_for_label }}">
+                            <i class="bi bi-calendar-event"></i>
+                            Fecha de Inicio
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.fecha_inicio }}
+                        <div class="form-help">Fecha de entrada en vigencia del plan</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.prioridad.id_for_label }}">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Nivel de Prioridad
+                        </label>
+                        {{ form.prioridad }}
+                        <div class="form-help">Prioridad basada en análisis de riesgo</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.nivel_criticidad.id_for_label }}">
+                            <i class="bi bi-shield-exclamation"></i>
+                            Criticidad del Equipo
+                        </label>
+                        {{ form.nivel_criticidad }}
+                        <div class="form-help">Nivel de criticidad según impacto operacional</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.responsable_principal.id_for_label }}">
+                            <i class="bi bi-person-badge"></i>
+                            Responsable Principal
+                        </label>
+                        {{ form.responsable_principal }}
+                        <div class="form-help">Técnico responsable del plan</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.costo_estimado.id_for_label }}">
+                            <i class="bi bi-currency-dollar"></i>
+                            Costo Estimado (Bs.)
+                        </label>
+                        {{ form.costo_estimado }}
+                        <div class="form-help">Costo total estimado por ejecución</div>
+                    </div>
+                </div>
+                
+                <div class="form-row full-width">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.responsables_secundarios.id_for_label }}">
+                            <i class="bi bi-people"></i>
+                            Responsables Secundarios
+                        </label>
+                        {{ form.responsables_secundarios }}
+                        <div class="form-help">Personal de apoyo para la ejecución del plan</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Normativas y Control de Calidad -->
+            <div class="form-section" data-section="3">
+                <h3 class="form-section-title">
+                    <i class="bi bi-shield-check"></i>
+                    Normativas y Control de Calidad
+                </h3>
+                <p class="form-section-subtitle">
+                    Configure el cumplimiento normativo y los estándares de calidad aplicables
+                </p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.norma_aplicable.id_for_label }}">
+                            <i class="bi bi-award"></i>
+                            Norma Técnica Aplicable
+                        </label>
+                        {{ form.norma_aplicable }}
+                        <div class="form-help">Seleccione la norma industrial aplicable</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.norma_especifica.id_for_label }}">
+                            <i class="bi bi-file-ruled"></i>
+                            Norma Específica
+                        </label>
+                        {{ form.norma_especifica }}
+                        <div class="form-help">Especifique si seleccionó "Otra norma específica"</div>
+                    </div>
+                </div>
+                
+                <!-- Cumplimiento Normativo -->
+                <div class="form-row full-width">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-check2-all"></i>
+                            Certificaciones de Cumplimiento
+                        </label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                {{ form.cumple_iso }}
+                                <label for="{{ form.cumple_iso.id_for_label }}">
+                                    Cumple ISO 55000
+                                </label>
+                            </div>
+                            <div class="checkbox-item">
+                                {{ form.cumple_api }}
+                                <label for="{{ form.cumple_api.id_for_label }}">
+                                    Cumple API 580
+                                </label>
+                            </div>
+                            <div class="checkbox-item">
+                                {{ form.cumple_asme }}
+                                <label for="{{ form.cumple_asme.id_for_label }}">
+                                    Cumple ASME
+                                </label>
+                            </div>
+                            <div class="checkbox-item">
+                                {{ form.certificacion_vigente }}
+                                <label for="{{ form.certificacion_vigente.id_for_label }}">
+                                    Certificación Vigente
+                                </label>
+                            </div>
+                            <div class="checkbox-item">
+                                {{ form.requiere_parada_equipo }}
+                                <label for="{{ form.requiere_parada_equipo.id_for_label }}">
+                                    Requiere Parada de Equipo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.fecha_ultima_auditoria.id_for_label }}">
+                            <i class="bi bi-calendar-check"></i>
+                            Fecha Última Auditoría
+                        </label>
+                        {{ form.fecha_ultima_auditoria }}
+                        <div class="form-help">Fecha de la última auditoría de calidad</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.estado.id_for_label }}">
+                            <i class="bi bi-activity"></i>
+                            Estado del Plan
+                        </label>
+                        {{ form.estado }}
+                        <div class="form-help">Estado actual del plan de mantenimiento</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.procedimiento_documento.id_for_label }}">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                            Documento de Procedimiento
+                        </label>
+                        {{ form.procedimiento_documento }}
+                        <div class="form-help">Adjunte el procedimiento técnico (PDF, DOC)</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.lista_verificacion.id_for_label }}">
+                            <i class="bi bi-list-check"></i>
+                            Lista de Verificación
+                        </label>
+                        {{ form.lista_verificacion }}
+                        <div class="form-help">Checklist para control de calidad</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.herramientas_especiales.id_for_label }}">
+                            <i class="bi bi-tools"></i>
+                            Herramientas Especiales
+                        </label>
+                        {{ form.herramientas_especiales }}
+                        <div class="form-help">Herramientas especializadas requeridas</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.materiales_requeridos.id_for_label }}">
+                            <i class="bi bi-box-seam"></i>
+                            Materiales Requeridos
+                        </label>
+                        {{ form.materiales_requeridos }}
+                        <div class="form-help">Materiales y consumibles necesarios</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 4: Análisis de Fallas y Repuestos -->
+            <div class="form-section" data-section="4">
+                <h3 class="form-section-title">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    Análisis de Fallas y Repuestos Críticos
+                </h3>
+                <p class="form-section-subtitle">
+                    Configure métricas de confiabilidad y gestión de repuestos críticos
+                </p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.mtbf.id_for_label }}">
+                            <i class="bi bi-speedometer2"></i>
+                            MTBF (Horas)
+                        </label>
+                        {{ form.mtbf }}
+                        <div class="form-help">Tiempo Medio Entre Fallas</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.mttr.id_for_label }}">
+                            <i class="bi bi-wrench"></i>
+                            MTTR (Horas)
+                        </label>
+                        {{ form.mttr }}
+                        <div class="form-help">Tiempo Medio de Reparación</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.disponibilidad_objetivo.id_for_label }}">
+                            <i class="bi bi-target"></i>
+                            Disponibilidad Objetivo (%)
+                        </label>
+                        {{ form.disponibilidad_objetivo }}
+                        <div class="form-help">Meta de disponibilidad operacional</div>
+                    </div>
+                </div>
+                
+                <div class="form-row full-width">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.repuestos_criticos.id_for_label }}">
+                            <i class="bi bi-gear-wide-connected"></i>
+                            Repuestos Críticos
+                        </label>
+                        {{ form.repuestos_criticos }}
+                        <div class="form-help">Seleccione los repuestos críticos necesarios para este plan</div>
+                    </div>
+                </div>
+                
+                <div class="form-row full-width">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.observaciones.id_for_label }}">
+                            <i class="bi bi-chat-square-text"></i>
+                            Observaciones Adicionales
+                        </label>
+                        {{ form.observaciones }}
+                        <div class="form-help">Comentarios, consideraciones especiales o notas técnicas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones del formulario -->
+        <div class="form-actions">
+            <button type="button" id="previewBtn" class="form-btn form-btn-outline">
+                <i class="bi bi-eye"></i>
+                Vista Previa
+            </button>
+            
+            <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="form-btn form-btn-secondary">
+                <i class="bi bi-x-circle"></i>
+                Cancelar
+            </a>
+            
+            <button type="submit" class="form-btn form-btn-primary">
+                <i class="bi bi-check-circle"></i>
+                {% if accion == 'crear' %}
+                    Crear Plan
+                {% else %}
+                    Guardar Cambios
+                {% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('planForm');
+    const validationSummary = document.getElementById('validationSummary');
+    const validationList = document.getElementById('validationList');
+    const sections = document.querySelectorAll('.form-section');
+    const progressSteps = document.querySelectorAll('.progress-step');
+    
+    // Validación en tiempo real
+    const requiredFields = form.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', validateField);
+        field.addEventListener('input', clearFieldError);
+    });
+    
+    function validateField(event) {
+        const field = event.target;
+        const formGroup = field.closest('.form-group');
+        const existingError = formGroup.querySelector('.form-error');
+        
+        if (!field.value.trim() && field.hasAttribute('required')) {
+            if (!existingError) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'form-error';
+                errorDiv.innerHTML = '<i class="bi bi-exclamation-circle"></i> Este campo es obligatorio';
+                field.parentNode.insertBefore(errorDiv, field.nextSibling);
+            }
+            field.style.borderColor = 'var(--form-danger)';
+        }
+    }
+    
+    function clearFieldError(event) {
+        const field = event.target;
+        const formGroup = field.closest('.form-group');
+        const existingError = formGroup.querySelector('.form-error');
+        
+        if (field.value.trim() && existingError) {
+            existingError.remove();
+            field.style.borderColor = 'var(--form-border)';
+        }
+    }
+    
+    // Progreso del formulario
+    function updateProgress() {
+        sections.forEach((section, index) => {
+            const sectionInputs = section.querySelectorAll('input, select, textarea');
+            const filledInputs = Array.from(sectionInputs).filter(input => {
+                if (input.type === 'checkbox') return true; // Los checkboxes siempre cuentan como llenos
+                return input.value.trim() !== '';
+            });
+            
+            const progressPercent = (filledInputs.length / sectionInputs.length) * 100;
+            const progressStep = progressSteps[index];
+            
+            if (progressPercent >= 50) {
+                progressStep.classList.add('active');
+            }
+            if (progressPercent === 100) {
+                progressStep.classList.add('completed');
+            }
+        });
+    }
+    
+    // Actualizar progreso en tiempo real
+    form.addEventListener('input', updateProgress);
+    form.addEventListener('change', updateProgress);
+    
+    // Vista previa del plan
+    document.getElementById('previewBtn').addEventListener('click', function() {
+        const formData = new FormData(form);
+        const previewData = {
+            nombre: formData.get('nombre') || 'Sin especificar',
+            equipo: form.querySelector('[name="equipo"] option:checked')?.text || 'Sin especificar',
+            tipo: form.querySelector('[name="tipo_mantenimiento"] option:checked')?.text || 'Sin especificar',
+            frecuencia: form.querySelector('[name="frecuencia"] option:checked')?.text || 'Sin especificar',
+            duracion: formData.get('duracion_estimada') || '0',
+            costo: formData.get('costo_estimado') || '0',
+            prioridad: form.querySelector('[name="prioridad"] option:checked')?.text || 'Sin especificar'
+        };
+        
+        const previewHtml = `
+            <div style="background: white; padding: 2rem; border-radius: 1rem; max-width: 600px;">
+                <h3 style="color: var(--form-primary); margin-bottom: 1rem;">
+                    <i class="bi bi-eye"></i> Vista Previa del Plan
+                </h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div><strong>Nombre:</strong> ${previewData.nombre}</div>
+                    <div><strong>Equipo:</strong> ${previewData.equipo}</div>
+                    <div><strong>Tipo:</strong> ${previewData.tipo}</div>
+                    <div><strong>Frecuencia:</strong> ${previewData.frecuencia}</div>
+                    <div><strong>Duración:</strong> ${previewData.duracion} horas</div>
+                    <div><strong>Costo estimado:</strong> Bs. ${previewData.costo}</div>
+                    <div><strong>Prioridad:</strong> ${previewData.prioridad}</div>
+                </div>
+            </div>
+        `;
+        
+        // Crear modal de vista previa
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); display: flex; align-items: center; 
+            justify-content: center; z-index: 9999;
+        `;
+        modal.innerHTML = previewHtml;
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+        
+        document.body.appendChild(modal);
+    });
+    
+    // Validación del formulario al enviar
+    form.addEventListener('submit', function(event) {
+        const errors = [];
+        
+        // Validar campos requeridos
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                errors.push(`${field.closest('.form-group').querySelector('label').textContent.replace('*', '').trim()} es obligatorio`);
+            }
+        });
+        
+        // Validación específica de MTTR vs MTBF
+        const mtbf = parseFloat(form.querySelector('[name="mtbf"]').value) || 0;
+        const mttr = parseFloat(form.querySelector('[name="mttr"]').value) || 0;
+        
+        if (mtbf > 0 && mttr > 0 && mttr >= mtbf) {
+            errors.push('El MTTR debe ser menor que el MTBF');
+        }
+        
+        if (errors.length > 0) {
+            event.preventDefault();
+            
+            validationList.innerHTML = errors.map(error => 
+                `<li class="form-validation-item">
+                    <i class="bi bi-x-circle"></i> ${error}
+                </li>`
+            ).join('');
+            
+            validationSummary.classList.add('show');
+            validationSummary.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            validationSummary.classList.remove('show');
+        }
+    });
+    
+    // Inicializar progreso
+    updateProgress();
+    
+    // Animación de entrada para las secciones
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(section);
+    });
+    
+    // Ayuda contextual para normativas
+    const normaSelect = form.querySelector('[name="norma_aplicable"]');
+    const normaEspecifica = form.querySelector('[name="norma_especifica"]');
+    
+    if (normaSelect && normaEspecifica) {
+        normaSelect.addEventListener('change', function() {
+            if (this.value === 'otra') {
+                normaEspecifica.style.display = 'block';
+                normaEspecifica.required = true;
+            } else {
+                normaEspecifica.style.display = 'none';
+                normaEspecifica.required = false;
+            }
+        });
+        
+        // Inicializar estado
+        if (normaSelect.value !== 'otra') {
+            normaEspecifica.style.display = 'none';
+        }
+    }
+    
+    // Auto-cálculo de disponibilidad basada en MTBF y MTTR
+    const mtbfField = form.querySelector('[name="mtbf"]');
+    const mttrField = form.querySelector('[name="mttr"]');
+    const disponibilidadField = form.querySelector('[name="disponibilidad_objetivo"]');
+    
+    function calcularDisponibilidad() {
+        const mtbf = parseFloat(mtbfField.value) || 0;
+        const mttr = parseFloat(mttrField.value) || 0;
+        
+        if (mtbf > 0 && mttr > 0 && mttr < mtbf) {
+            const disponibilidad = (mtbf / (mtbf + mttr)) * 100;
+            disponibilidadField.value = disponibilidad.toFixed(1);
+        }
+    }
+    
+    if (mtbfField && mttrField && disponibilidadField) {
+        mtbfField.addEventListener('blur', calcularDisponibilidad);
+        mttrField.addEventListener('blur', calcularDisponibilidad);
+    }
+});
+</script>
+{% endblock %}

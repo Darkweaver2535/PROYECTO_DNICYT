@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tareas de Mantenimiento - Sistema de Inventario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2>Tareas de Mantenimiento</h2>
+            <p class="text-muted">Gestión de tareas de mantenimiento por plan</p>
+        </div>
+    </div>
+    
+    <!-- Filtros básicos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <form method="get" class="d-flex gap-3">
+                <select name="plan" class="form-select">
+                    <option value="">Todos los planes</option>
+                    {% for plan in planes %}
+                        <option value="{{ plan.pk }}" {% if plan.pk|stringformat:"s" == plan_filtro %}selected{% endif %}>
+                            {{ plan.codigo_plan }} - {{ plan.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <select name="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    {% for key, value in estados_tarea %}
+                        <option value="{{ key }}" {% if key == estado_filtro %}selected{% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Lista de tareas -->
+    <div class="row">
+        <div class="col-12">
+            {% if tareas %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Plan</th>
+                                <th>Tarea</th>
+                                <th>Orden</th>
+                                <th>Duración</th>
+                                <th>Estado</th>
+                                <th>Crítica</th>
+                                <th>Responsable</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tarea in tareas %}
+                                <tr>
+                                    <td>
+                                        <small class="text-muted">{{ tarea.plan.codigo_plan }}</small><br>
+                                        {{ tarea.plan.nombre }}
+                                    </td>
+                                    <td>{{ tarea.nombre }}</td>
+                                    <td>{{ tarea.orden }}</td>
+                                    <td>{{ tarea.duracion_estimada }} min</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ tarea.get_estado_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if tarea.es_critica %}
+                                            <i class="bi bi-exclamation-triangle text-danger"></i>
+                                        {% else %}
+                                            <i class="bi bi-dash text-muted"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if tarea.responsable %}
+                                            {{ tarea.responsable.get_full_name|default:tarea.responsable.username }}
+                                        {% else %}
+                                            <span class="text-muted">No asignado</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Paginación -->
+                {% if page_obj.has_other_pages %}
+                    <div class="d-flex justify-content-center">
+                        <nav aria-label="Paginación de tareas">
+                            <ul class="pagination">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                                    </li>
+                                {% endif %}
+                                
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_obj.number }}</span>
+                                </li>
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-list-ul fs-1 text-muted mb-3"></i>
+                    <h4>No hay tareas disponibles</h4>
+                    <p class="text-muted">No se encontraron tareas que coincidan con los filtros aplicados.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
