@@ -1,0 +1,1208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Equipo - Lab Metal Mecánica{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Variables CSS específicas para editar equipo - sin conflictos con sidebar */
+    .edit-equipment-container {
+        /* Variables CSS locales */
+        --edit-primary-blue: #3b82f6;
+        --edit-secondary-blue: #1e40af;
+        --edit-light-blue: #dbeafe;
+        --edit-light-yellow: #fef3c7;
+        --edit-pure-white: #ffffff;
+        --edit-off-white: #f8fafc;
+        --edit-text-dark: #1f2937;
+        --edit-text-light: #6b7280;
+        --edit-border-color: #e5e7eb;
+        --edit-success-green: #10b981;
+        --edit-warning-orange: #f59e0b;
+        --edit-danger-red: #ef4444;
+        --edit-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --edit-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --edit-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --edit-transition-speed: 0.3s;
+    }
+
+    /* Estilos específicos para editar equipo - con prefijo para evitar conflictos */
+    .edit-form-container {
+        background: var(--edit-pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--edit-shadow-md);
+        transition: all var(--edit-transition-speed) ease;
+        border: 1px solid var(--edit-border-color);
+        overflow: hidden;
+    }
+
+    .edit-form-container:hover {
+        box-shadow: var(--edit-shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .edit-section-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--edit-text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .edit-section-title::before {
+        content: '';
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--edit-primary-blue), var(--edit-secondary-blue));
+        border-radius: 2px;
+    }
+
+    .edit-form-header {
+        background: linear-gradient(135deg, var(--edit-light-blue), var(--edit-light-yellow));
+        padding: 2rem;
+        margin: -1px -1px 0 -1px;
+        border-radius: 1rem 1rem 0 0;
+        border-bottom: 2px solid var(--edit-primary-blue);
+    }
+
+    .edit-form-body {
+        padding: 2rem;
+    }
+
+    .edit-form-section {
+        background: linear-gradient(135deg, var(--edit-pure-white) 0%, var(--edit-off-white) 100%);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--edit-border-color);
+        position: relative;
+    }
+
+    .edit-form-section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--edit-primary-blue);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 2px solid var(--edit-border-color);
+        padding-bottom: 0.75rem;
+    }
+
+    .edit-form-section-title i {
+        font-size: 1.5rem;
+        color: var(--edit-primary-blue);
+    }
+
+    .edit-form-label {
+        font-weight: 600;
+        color: var(--edit-text-dark);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .edit-form-label .edit-required {
+        color: var(--edit-danger-red);
+        font-weight: 700;
+    }
+
+    .edit-equipment-container .form-control,
+    .edit-equipment-container .form-select {
+        border: 2px solid var(--edit-border-color);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--edit-pure-white);
+        transition: all var(--edit-transition-speed) ease;
+        font-size: 1rem;
+    }
+
+    .edit-equipment-container .form-control:focus,
+    .edit-equipment-container .form-select:focus {
+        outline: none;
+        border-color: var(--edit-primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        background: var(--edit-pure-white);
+    }
+
+    .edit-equipment-container .form-control:hover,
+    .edit-equipment-container .form-select:hover {
+        border-color: var(--edit-secondary-blue);
+    }
+
+    .edit-form-text {
+        color: var(--edit-text-light);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .edit-input-group {
+        position: relative;
+    }
+
+    .edit-input-group-text {
+        background: var(--edit-light-blue);
+        border: 2px solid var(--edit-border-color);
+        border-right: none;
+        border-radius: 0.75rem 0 0 0.75rem;
+        color: var(--edit-primary-blue);
+        font-weight: 600;
+    }
+
+    .edit-input-group .form-control {
+        border-left: none;
+        border-radius: 0 0.75rem 0.75rem 0;
+    }
+
+    .edit-input-group:focus-within .edit-input-group-text {
+        border-color: var(--edit-primary-blue);
+        background: var(--edit-primary-blue);
+        color: white;
+    }
+
+    .edit-btn-group-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 2rem;
+        border-top: 2px solid var(--edit-border-color);
+        margin-top: 2rem;
+    }
+
+    .edit-btn-save {
+        background: linear-gradient(135deg, var(--edit-success-green), #059669);
+        border: none;
+        color: white;
+        padding: 0.875rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--edit-transition-speed) ease;
+        font-size: 1rem;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .edit-btn-save:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: translateY(-2px);
+        box-shadow: var(--edit-shadow-lg);
+        color: white;
+    }
+
+    .edit-btn-cancel {
+        background: var(--edit-pure-white);
+        border: 2px solid var(--edit-border-color);
+        color: var(--edit-text-dark);
+        padding: 0.875rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--edit-transition-speed) ease;
+        text-decoration: none;
+        font-size: 1rem;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .edit-btn-cancel:hover {
+        background: linear-gradient(135deg, var(--edit-light-blue), var(--edit-light-yellow));
+        border-color: var(--edit-primary-blue);
+        color: var(--edit-primary-blue);
+        transform: translateY(-2px);
+        box-shadow: var(--edit-shadow-md);
+        text-decoration: none;
+    }
+
+    .edit-btn-delete {
+        background: linear-gradient(135deg, var(--edit-danger-red), #dc2626);
+        border: none;
+        color: white;
+        padding: 0.875rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--edit-transition-speed) ease;
+        font-size: 1rem;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .edit-btn-delete:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        transform: translateY(-2px);
+        box-shadow: var(--edit-shadow-lg);
+        color: white;
+    }
+
+    .edit-status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 1.5rem;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 2px solid;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .edit-status-operativo {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--edit-success-green);
+        border-color: var(--edit-success-green);
+    }
+
+    .edit-status-mantenimiento {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--edit-warning-orange);
+        border-color: var(--edit-warning-orange);
+    }
+
+    .edit-status-fuera-servicio {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--edit-danger-red);
+        border-color: var(--edit-danger-red);
+    }
+
+    .edit-alert-custom {
+        background: linear-gradient(135deg, var(--edit-light-blue), rgba(59, 130, 246, 0.05));
+        border: 2px solid var(--edit-primary-blue);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: var(--edit-text-dark);
+    }
+
+    .edit-alert-custom .edit-alert-icon {
+        font-size: 1.5rem;
+        color: var(--edit-primary-blue);
+        margin-right: 1rem;
+    }
+
+    .edit-equipment-container .invalid-feedback {
+        color: var(--edit-danger-red);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .edit-equipment-container .is-invalid {
+        border-color: var(--edit-danger-red) !important;
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .edit-equipment-container .is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    }
+
+    .edit-equipment-preview {
+        background: linear-gradient(135deg, var(--edit-light-blue), var(--edit-light-yellow));
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 2px solid var(--edit-primary-blue);
+    }
+
+    .edit-equipment-code-display {
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        color: var(--edit-primary-blue);
+        background: var(--edit-pure-white);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 1.2rem;
+        display: inline-block;
+        border: 2px solid var(--edit-primary-blue);
+    }
+
+    /* Breadcrumb específico - sin interferir con el sidebar */
+    .edit-equipment-container .breadcrumb {
+        background: linear-gradient(135deg, var(--edit-light-blue), var(--edit-light-yellow));
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 0;
+        border: 1px solid var(--edit-border-color);
+    }
+
+    .edit-equipment-container .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+        color: var(--edit-primary-blue);
+        font-weight: 600;
+    }
+
+    .edit-equipment-container .breadcrumb-item.active {
+        color: var(--edit-text-dark);
+        font-weight: 600;
+    }
+
+    .edit-equipment-container .breadcrumb a {
+        color: var(--edit-primary-blue);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all var(--edit-transition-speed) ease;
+    }
+
+    .edit-equipment-container .breadcrumb a:hover {
+        color: var(--edit-secondary-blue);
+        text-decoration: underline;
+    }
+
+    .edit-tooltip-icon {
+        color: var(--edit-text-light);
+        cursor: help;
+        margin-left: 0.25rem;
+        transition: color var(--edit-transition-speed) ease;
+    }
+
+    .edit-tooltip-icon:hover {
+        color: var(--edit-primary-blue);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .edit-form-header {
+            padding: 1.5rem;
+        }
+        
+        .edit-form-body {
+            padding: 1.5rem;
+        }
+        
+        .edit-form-section {
+            padding: 1rem;
+        }
+        
+        .edit-btn-group-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .edit-btn-save, .edit-btn-cancel, .edit-btn-delete {
+            width: 100%;
+        }
+        
+        .edit-section-title {
+            font-size: 1.5rem;
+        }
+
+        .edit-equipment-preview {
+            padding: 1rem;
+        }
+
+        .edit-equipment-code-display {
+            font-size: 1rem;
+            padding: 0.375rem 0.75rem;
+        }
+    }
+
+    /* Animaciones específicas */
+    @keyframes editSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .edit-form-container {
+        animation: editSlideIn 0.5s ease;
+    }
+
+    .edit-form-section {
+        animation: editSlideIn 0.6s ease;
+    }
+
+    .edit-equipment-preview {
+        animation: editSlideIn 0.4s ease;
+    }
+
+    .edit-alert-custom {
+        animation: editSlideIn 0.3s ease;
+    }
+
+    /* Estados del formulario específicos */
+    .edit-loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    .edit-loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 2rem;
+        height: 2rem;
+        border: 3px solid var(--edit-border-color);
+        border-top: 3px solid var(--edit-primary-blue);
+        border-radius: 50%;
+        animation: editSpin 1s linear infinite;
+    }
+
+    @keyframes editSpin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Corrección para campos select - evitar iconos de validación */
+    .edit-equipment-container .form-select.is-valid,
+    .edit-equipment-container .form-select.is-invalid {
+        background-image: none !important;
+        padding-right: 1rem !important;
+    }
+
+    /* Estilos específicos para validación sin iconos de fondo */
+    .edit-equipment-container .form-select:focus {
+        outline: none;
+        border-color: var(--edit-primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        background: var(--edit-pure-white);
+        background-image: none !important;
+    }
+
+    .edit-equipment-container .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.75rem center !important;
+        background-size: 16px 12px !important;
+        padding-right: 2.5rem !important;
+    }
+
+    /* Validación visual alternativa para selects */
+    .edit-equipment-container .form-select.is-valid {
+        border-color: var(--edit-success-green) !important;
+        background-color: rgba(16, 185, 129, 0.05) !important;
+    }
+
+    .edit-equipment-container .form-select.is-invalid {
+        border-color: var(--edit-danger-red) !important;
+        background-color: rgba(239, 68, 68, 0.05) !important;
+    }
+
+    /* Indicador visual de validación personalizado */
+    .validation-indicator {
+        position: absolute;
+        right: 2.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .validation-indicator.valid {
+        color: var(--edit-success-green);
+    }
+
+    .validation-indicator.invalid {
+        color: var(--edit-danger-red);
+    }
+
+    /* Contenedor relativo para campos con validación visual */
+    .field-with-validation {
+        position: relative;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-equipment-container">
+    <!-- Header con breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+        <div>
+            <h1 class="edit-section-title">
+                <i class="bi bi-pencil-square"></i>
+                Editar Equipo
+            </h1>
+        </div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                        <i class="bi bi-house-door"></i> Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'equipos:equipo-lista' %}" class="text-decoration-none">
+                        <i class="bi bi-list-ul"></i> Inventario
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Editar Equipo</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Vista previa del equipo actual -->
+    <div class="edit-equipment-preview">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="mb-2 fw-bold text-primary">
+                    <i class="bi bi-gear me-2"></i>
+                    {{ equipo.nombre }}
+                </h4>
+                <p class="mb-2">
+                    <strong>Código:</strong> 
+                    <span class="edit-equipment-code-display">{{ equipo.codigo_interno }}</span>
+                </p>
+                <p class="mb-0">
+                    <strong>Sección:</strong> {{ equipo.get_seccion_display }} |
+                    <strong>Estado actual:</strong> 
+                    <span class="edit-status-badge 
+                        {% if equipo.estado == 'OPERATIVO' %}edit-status-operativo
+                        {% elif equipo.estado == 'MANTENIMIENTO' %}edit-status-mantenimiento
+                        {% else %}edit-status-fuera-servicio{% endif %}">
+                        {% if equipo.estado == 'OPERATIVO' %}
+                            <i class="bi bi-check-circle-fill"></i>
+                        {% elif equipo.estado == 'MANTENIMIENTO' %}
+                            <i class="bi bi-tools"></i>
+                        {% else %}
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        {% endif %}
+                        {{ equipo.get_estado_display }}
+                    </span>
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <small class="text-muted d-block">Registrado: {{ equipo.fecha_ingreso|date:"d/m/Y" }}</small>
+                <small class="text-muted d-block">Última actualización: {{ equipo.fecha_actualizacion|date:"d/m/Y H:i" }}</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas informativas -->
+    <div class="edit-alert-custom d-flex align-items-center">
+        <i class="bi bi-info-circle-fill edit-alert-icon"></i>
+        <div>
+            <strong>Información importante:</strong> Los cambios realizados se aplicarán inmediatamente y se registrarán en el historial del equipo. Asegúrate de verificar todos los datos antes de guardar.
+        </div>
+    </div>
+
+    <!-- Formulario de edición -->
+    <div class="edit-form-container">
+        <div class="edit-form-header">
+            <h2 class="h4 mb-2 fw-bold text-primary">
+                <i class="bi bi-pencil-square me-2"></i>
+                Formulario de Edición
+            </h2>
+            <p class="mb-0 text-muted">
+                Modifica los datos del equipo según sea necesario. Los campos marcados con <span class="text-danger">*</span> son obligatorios.
+            </p>
+        </div>
+
+        <div class="edit-form-body">
+            <form method="post" id="editEquipoForm">
+                {% csrf_token %}
+                
+                <!-- Información Básica -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">
+                        <i class="bi bi-info-circle"></i>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_codigo_interno" class="edit-form-label">
+                                <i class="bi bi-hash"></i>
+                                Código Interno <span class="edit-required">*</span>
+                                <i class="bi bi-question-circle edit-tooltip-icon" title="Código único del equipo en el sistema"></i>
+                            </label>
+                            <div class="edit-input-group">
+                                <span class="edit-input-group-text">
+                                    <i class="bi bi-tag"></i>
+                                </span>
+                                {{ form.codigo_interno }}
+                            </div>
+                            {% if form.codigo_interno.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.codigo_interno.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="edit-form-text">
+                                <i class="bi bi-lightbulb"></i>
+                                Ejemplo: EQ-001, TOR-002, SOL-015
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="id_nombre" class="edit-form-label">
+                                <i class="bi bi-gear"></i>
+                                Nombre del Equipo <span class="edit-required">*</span>
+                            </label>
+                            <div class="edit-input-group">
+                                <span class="edit-input-group-text">
+                                    <i class="bi bi-wrench"></i>
+                                </span>
+                                {{ form.nombre }}
+                            </div>
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_observaciones" class="edit-form-label">
+                            <i class="bi bi-file-text"></i>
+                            Observaciones
+                        </label>
+                        {{ form.observaciones }}
+                        {% if form.observaciones.errors %}
+                            <div class="invalid-feedback d-block">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                {{ form.observaciones.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <div class="edit-form-text">
+                            <i class="bi bi-info-circle"></i>
+                            Observaciones adicionales sobre el equipo
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="id_fabricante" class="edit-form-label">
+                                <i class="bi bi-building"></i>
+                                Fabricante
+                            </label>
+                            {{ form.fabricante }}
+                            {% if form.fabricante.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.fabricante.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="id_modelo" class="edit-form-label">
+                                <i class="bi bi-layers"></i>
+                                Modelo
+                            </label>
+                            {{ form.modelo }}
+                            {% if form.modelo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.modelo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="id_serie" class="edit-form-label">
+                                <i class="bi bi-upc"></i>
+                                Número de Serie
+                            </label>
+                            {{ form.serie }}
+                            {% if form.serie.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.serie.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clasificación y Estado -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">
+                        <i class="bi bi-diagram-3"></i>
+                        Clasificación y Estado
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="id_seccion" class="edit-form-label">
+                                <i class="bi bi-grid-fill"></i>
+                                Sección <span class="edit-required">*</span>
+                            </label>
+                            {{ form.seccion }}
+                            {% if form.seccion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.seccion.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="id_estado" class="edit-form-label">
+                                <i class="bi bi-activity"></i>
+                                Estado del Equipo <span class="edit-required">*</span>
+                            </label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.estado.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="id_tipo_equipo" class="edit-form-label">
+                                <i class="bi bi-gear"></i>
+                                Tipo de Equipo
+                            </label>
+                            {{ form.tipo_equipo }}
+                            {% if form.tipo_equipo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.tipo_equipo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_responsable" class="edit-form-label">
+                                <i class="bi bi-person"></i>
+                                Responsable
+                            </label>
+                            {{ form.responsable }}
+                            {% if form.responsable.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.responsable.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="edit-form-text">
+                                <i class="bi bi-info-circle"></i>
+                                Persona encargada del mantenimiento y operación
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="id_ubicacion_fisica" class="edit-form-label">
+                                <i class="bi bi-geo-alt"></i>
+                                Ubicación Física
+                            </label>
+                            {{ form.ubicacion_fisica }}
+                            {% if form.ubicacion_fisica.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.ubicacion_fisica.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="edit-form-text">
+                                <i class="bi bi-info-circle"></i>
+                                Laboratorio, mesa, pasillo, etc.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Técnica -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">
+                        <i class="bi bi-cpu"></i>
+                        Información Técnica
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="id_potencia" class="edit-form-label">
+                                <i class="bi bi-lightning"></i>
+                                Potencia
+                            </label>
+                            {{ form.potencia }}
+                            {% if form.potencia.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.potencia.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="edit-form-text">
+                                <i class="bi bi-info-circle"></i>
+                                Ej: 220V, 1.5kW
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="id_capacidad" class="edit-form-label">
+                                <i class="bi bi-speedometer2"></i>
+                                Capacidad
+                            </label>
+                            {{ form.capacidad }}
+                            {% if form.capacidad.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.capacidad.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="id_año_fabricacion" class="edit-form-label">
+                                <i class="bi bi-calendar-plus"></i>
+                                Año de Fabricación
+                            </label>
+                            {{ form.año_fabricacion }}
+                            {% if form.año_fabricacion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.año_fabricacion.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información UDB -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">
+                        <i class="bi bi-file-earmark-code"></i>
+                        Código UDB (Unidad de Disposición de Bienes)
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_udb_unidad" class="edit-form-label">
+                                <i class="bi bi-building"></i>
+                                Unidad EMI
+                            </label>
+                            <div class="field-with-validation">
+                                {{ form.udb_unidad }}
+                                <span class="validation-indicator" id="udb-unidad-indicator"></span>
+                            </div>
+                            {% if form.udb_unidad.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.udb_unidad.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="id_udb_numero" class="edit-form-label">
+                                <i class="bi bi-hash"></i>
+                                Número de Disposición
+                            </label>
+                            <div class="field-with-validation">
+                                {{ form.udb_numero }}
+                                <span class="validation-indicator" id="udb-numero-indicator"></span>
+                            </div>
+                            {% if form.udb_numero.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.udb_numero.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="edit-form-text">
+                                <i class="bi bi-info-circle"></i>
+                                Formato: 1-22386 (un dígito, guion, cinco dígitos)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="edit-btn-group-actions">
+                    <button type="submit" class="edit-btn-save">
+                        <i class="bi bi-check-circle"></i>
+                        Guardar Cambios
+                    </button>
+                    <a href="{% url 'equipos:equipo-detalle' equipo.pk %}" class="edit-btn-cancel">
+                        <i class="bi bi-x-circle"></i>
+                        Cancelar
+                    </a>
+                    <button type="button" class="edit-btn-delete" onclick="confirmDelete()">
+                        <i class="bi bi-trash"></i>
+                        Eliminar Equipo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3 mb-3">¿Estás seguro?</h4>
+                    <p class="mb-3">
+                        Esta acción eliminará permanentemente el equipo <strong>"{{ equipo.nombre }}"</strong> 
+                        con código <strong>"{{ equipo.codigo_interno }}"</strong> del sistema.
+                    </p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Advertencia:</strong> Esta acción no se puede deshacer.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Cancelar
+                </button>
+                <a href="{% url 'equipos:equipo-eliminar' equipo.pk %}" class="btn btn-danger">
+                    <i class="bi bi-trash me-2"></i>
+                    Sí, Eliminar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Función para confirmar eliminación
+    function confirmDelete() {
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+
+    // Validación en tiempo real mejorada
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('editEquipoForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                validateField(this);
+            });
+
+            input.addEventListener('blur', function() {
+                validateField(this);
+            });
+
+            input.addEventListener('change', function() {
+                validateField(this);
+            });
+        });
+
+        // Función de validación individual mejorada
+        function validateField(field) {
+            const value = field.value.trim();
+            
+            // Remover clases de validación previas
+            field.classList.remove('is-valid', 'is-invalid');
+            
+            // Obtener indicador de validación si existe
+            const indicator = field.parentElement.querySelector('.validation-indicator');
+            
+            // Validaciones específicas
+            let isValid = true;
+            let errorMessage = '';
+
+            if (field.hasAttribute('required') && !value) {
+                isValid = false;
+                errorMessage = 'Este campo es obligatorio.';
+            }
+            
+            if (field.type === 'email' && value && !isValidEmail(value)) {
+                isValid = false;
+                errorMessage = 'Email no válido.';
+            }
+
+            // Validación específica para el número UDB
+            if (field.id === 'id_udb_numero' && value) {
+                const udbPattern = /^\d-\d{5}$/;
+                if (!udbPattern.test(value)) {
+                    isValid = false;
+                    errorMessage = 'Formato debe ser: 1-22386 (un dígito, guion, cinco dígitos)';
+                }
+            }
+            
+            // Aplicar estilos de validación
+            if (isValid && value) {
+                field.classList.add('is-valid');
+                if (indicator) {
+                    indicator.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+                    indicator.className = 'validation-indicator valid';
+                }
+            } else if (!isValid) {
+                field.classList.add('is-invalid');
+                if (indicator) {
+                    indicator.innerHTML = '<i class="bi bi-exclamation-circle-fill"></i>';
+                    indicator.className = 'validation-indicator invalid';
+                }
+                
+                // Mostrar mensaje de error personalizado
+                let feedbackElement = field.parentElement.parentElement.querySelector('.invalid-feedback');
+                if (feedbackElement && errorMessage) {
+                    feedbackElement.innerHTML = `<i class="bi bi-exclamation-triangle"></i> ${errorMessage}`;
+                }
+            } else {
+                // Campo vacío pero no requerido
+                if (indicator) {
+                    indicator.innerHTML = '';
+                    indicator.className = 'validation-indicator';
+                }
+            }
+            
+            return isValid;
+        }
+
+        // Validación de email
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Formateo automático para el campo UDB número
+        const udbNumeroField = document.getElementById('id_udb_numero');
+        if (udbNumeroField) {
+            udbNumeroField.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^\d-]/g, ''); // Solo números y guión
+                
+                // Auto-formatear: agregar guión después del primer dígito
+                if (value.length === 1 && /^\d$/.test(value)) {
+                    value = value + '-';
+                }
+                
+                // Limitar longitud
+                if (value.length > 7) {
+                    value = value.substring(0, 7);
+                }
+                
+                e.target.value = value;
+            });
+
+            udbNumeroField.addEventListener('keypress', function(e) {
+                // Permitir solo números, guión, backspace, delete, tab, escape, enter
+                if (![8, 9, 27, 13, 46, 45].includes(e.keyCode) && 
+                    (e.keyCode < 48 || e.keyCode > 57)) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Manejo especial para campos select
+        const selectFields = form.querySelectorAll('select');
+        selectFields.forEach(select => {
+            select.addEventListener('change', function() {
+                // Remover clases de validación de Bootstrap que causan problemas
+                this.classList.remove('is-valid', 'is-invalid');
+                
+                // Aplicar validación personalizada
+                setTimeout(() => {
+                    validateField(this);
+                }, 50);
+            });
+        });
+
+        // Envío del formulario con loading
+        form.addEventListener('submit', function(e) {
+            // Validar todos los campos antes del envío
+            let hasErrors = false;
+            inputs.forEach(input => {
+                if (!validateField(input)) {
+                    hasErrors = true;
+                }
+            });
+
+            if (hasErrors) {
+                e.preventDefault();
+                
+                // Mostrar mensaje de error
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger mt-3';
+                alertDiv.innerHTML = `
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Error:</strong> Por favor, corrige los errores en el formulario antes de continuar.
+                `;
+                
+                // Insertar alerta después del formulario
+                form.parentElement.insertBefore(alertDiv, form.nextSibling);
+                
+                // Remover alerta después de 5 segundos
+                setTimeout(() => {
+                    if (alertDiv.parentElement) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+                
+                return;
+            }
+
+            // Mostrar estado de carga
+            const submitBtn = form.querySelector('.edit-btn-save');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Guardando...';
+            submitBtn.disabled = true;
+            
+            // Si hay errores, restaurar el botón
+            setTimeout(() => {
+                if (form.querySelector('.is-invalid')) {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }, 100);
+        });
+
+        // Auto-resize para textareas
+        const textareas = form.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+
+        // Tooltips de Bootstrap
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+
+    // Prevenir pérdida de datos
+    let formChanged = false;
+    document.getElementById('editEquipoForm').addEventListener('input', function() {
+        formChanged = true;
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = '¿Estás seguro de que quieres salir? Los cambios no guardados se perderán.';
+        }
+    });
+
+    // Limpiar flag al enviar el formulario
+    document.getElementById('editEquipoForm').addEventListener('submit', function() {
+        formChanged = false;
+    });
+</script>
+
+{% endblock %}

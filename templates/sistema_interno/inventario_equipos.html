@@ -277,37 +277,38 @@
 
     /* Contenedor de acciones */
     .actions-container {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
         gap: 0.3rem;
-        justify-content: flex-start;
-        align-items: center;
+        width: 70px;
+        height: 70px;
+        margin: 0 auto;
     }
 
-    /* Botones de acción rediseñados */
+    /* Botones de acción cuadrados */
     .action-btn {
-        background: var(--pure-white);
-        border: 1.5px solid var(--border-color);
-        color: var(--text-dark);
-        padding: 0.4rem 0.7rem;
-        border-radius: 0.6rem;
-        text-decoration: none;
-        transition: all var(--transition-speed) ease;
-        font-weight: 500;
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 0.3rem;
-        font-size: 0.75rem;
-        white-space: nowrap;
-        min-width: fit-content;
-        text-align: center;
         justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 0.5rem;
+        background: var(--pure-white);
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
     }
 
     .action-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transform: scale(1.1);
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
         text-decoration: none;
+        z-index: 2;
     }
 
     /* Colores específicos para cada acción */
@@ -582,6 +583,215 @@
             font-size: 0.92rem;
         }
     }
+
+    /* Modal de confirmación personalizado */
+    .delete-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: modalFadeIn 0.3s ease-out;
+    }
+
+    .delete-modal.show {
+        display: flex;
+    }
+
+    .delete-modal-content {
+        background: var(--pure-white);
+        border-radius: 1.5rem;
+        padding: 2.5rem 2rem;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .delete-modal-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--danger-red), #dc2626, var(--danger-red));
+    }
+
+    .delete-modal-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .delete-modal-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        animation: pulseWarning 2s infinite;
+    }
+
+    .delete-modal-icon i {
+        font-size: 2.5rem;
+        color: var(--danger-red);
+    }
+
+    .delete-modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .delete-modal-subtitle {
+        color: var(--text-light);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .delete-modal-equipment {
+        background: linear-gradient(135deg, var(--light-blue), rgba(37, 99, 235, 0.1));
+        border-radius: 1rem;
+        padding: 1rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        border: 2px solid var(--primary-blue);
+    }
+
+    .delete-modal-equipment-name {
+        font-weight: 700;
+        color: var(--primary-blue);
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .delete-modal-equipment-code {
+        font-family: 'Courier New', monospace;
+        background: var(--pure-white);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        display: inline-block;
+    }
+
+    .delete-modal-warning {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        border: 2px solid var(--danger-red);
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .delete-modal-warning i {
+        color: var(--danger-red);
+        font-size: 1.2rem;
+    }
+
+    .delete-modal-warning-text {
+        color: var(--danger-red);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .delete-modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .delete-modal-btn {
+        padding: 0.875rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        min-width: 120px;
+        justify-content: center;
+    }
+
+    .delete-modal-btn-cancel {
+        background: var(--pure-white);
+        color: var(--text-dark);
+        border: 2px solid var(--border-color);
+    }
+
+    .delete-modal-btn-cancel:hover {
+        background: var(--off-white);
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        transform: translateY(-2px);
+    }
+
+    .delete-modal-btn-delete {
+        background: linear-gradient(135deg, var(--danger-red), #dc2626);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .delete-modal-btn-delete:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    @keyframes modalFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes modalSlideIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(-50px) scale(0.9); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+        }
+    }
+
+    @keyframes pulseWarning {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* Responsive para el modal */
+    @media (max-width: 768px) {
+        .delete-modal-content {
+            padding: 2rem 1.5rem;
+            margin: 1rem;
+        }
+        
+        .delete-modal-actions {
+            flex-direction: column;
+        }
+        
+        .delete-modal-btn {
+            width: 100%;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -604,19 +814,19 @@
     <!-- Estadísticas rápidas -->
     <div class="stats-container">
         <div class="stat-card">
-            <div class="stat-number">{{ equipos.count|default:0 }}</div>
+            <div class="stat-number">{{ total_equipos|default:0 }}</div>
             <div class="stat-label-inventario">Total Equipos</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">9</div>
+            <div class="stat-number">{{ equipos_operativos|default:0 }}</div>
             <div class="stat-label-inventario">Operativos</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">2</div>
+            <div class="stat-number">{{ equipos_mantenimiento|default:0 }}</div>
             <div class="stat-label-inventario">En Mantenimiento</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">1</div>
+            <div class="stat-number">{{ equipos_fuera_servicio|default:0 }}</div>
             <div class="stat-label-inventario">Fuera de Servicio</div>
         </div>
     </div>
@@ -627,8 +837,20 @@
             <div class="row">
                 <div class="col-lg-8">
                     <h5 class="mb-3 fw-bold text-primary">
-                        <i class="bi bi-funnel me-2"></i>
                         Filtrar por Sección
+                        {% if seccion_actual %}
+                            <span class="badge bg-secondary ms-2">
+                                {% if seccion_actual == 'SOLDADURA' %}Soldadura
+                                {% elif seccion_actual == 'MAQUINADO' %}Maquinado
+                                {% elif seccion_actual == 'PROTOTIPADO' %}Prototipado
+                                {% elif seccion_actual == 'PLASTICOS' %}Plásticos
+                                {% elif seccion_actual == 'FUNDICION' %}Fundición
+                                {% elif seccion_actual == 'SUJECION' %}Sujeción
+                                {% elif seccion_actual == 'TRANSPORTE' %}Transporte
+                                {% else %}{{ seccion_actual }}
+                                {% endif %}
+                            </span>
+                        {% endif %}
                     </h5>
                     <div class="filter-buttons">
                         <a href="{% url 'equipos:equipo-lista' %}" 
@@ -636,18 +858,45 @@
                             <i class="bi bi-grid-3x3-gap"></i>
                             Todas las Secciones
                         </a>
-                        {% for key, value in equipos.model.SECCION_CHOICES %}
-                            <a href="?seccion={{ key }}" 
-                               class="filter-btn {% if request.GET.seccion == key %}active{% endif %}">
-                                <i class="bi bi-tools"></i>
-                                {{ value }}
-                            </a>
-                        {% endfor %}
+                        <a href="?seccion=SOLDADURA" 
+                           class="filter-btn {% if request.GET.seccion == 'SOLDADURA' %}active{% endif %}">
+                            <i class="bi bi-tools"></i>
+                            Soldadura
+                        </a>
+                        <a href="?seccion=MAQUINADO" 
+                           class="filter-btn {% if request.GET.seccion == 'MAQUINADO' %}active{% endif %}">
+                            <i class="bi bi-tools"></i>
+                            Maquinado
+                        </a>
+                        <a href="?seccion=PROTOTIPADO" 
+                           class="filter-btn {% if request.GET.seccion == 'PROTOTIPADO' %}active{% endif %}">
+                            <i class="bi bi-tools"></i>
+                            Prototipado
+                        </a>
+                        <a href="?seccion=PLASTICOS" 
+                           class="filter-btn {% if request.GET.seccion == 'PLASTICOS' %}active{% endif %}">
+                            <i class="bi bi-tools"></i>
+                            Plásticos
+                        </a>
+                        <a href="?seccion=FUNDICION" 
+                           class="filter-btn {% if request.GET.seccion == 'FUNDICION' %}active{% endif %}">
+                            <i class="bi bi-tools"></i>
+                            Fundición
+                        </a>
+                        <a href="?seccion=SUJECION" 
+                           class="filter-btn {% if request.GET.seccion == 'SUJECION' %}active{% endif %}">
+                            <i class="bi bi-tools"></i>
+                            Sujeción
+                        </a>
+                        <a href="?seccion=TRANSPORTE" 
+                           class="filter-btn {% if request.GET.seccion == 'TRANSPORTE' %}active{% endif %}">
+                            <i class="bi bi-tools"></i>
+                            Transporte
+                        </a>
                     </div>
                 </div>
                 <div class="col-lg-4">
                     <h5 class="mb-3 fw-bold text-primary">
-                        <i class="bi bi-search me-2"></i>
                         Buscar Equipo
                     </h5>
                     <div class="search-container">
@@ -712,30 +961,28 @@
                             </td>
                             <td>
                                 <div class="actions-container">
-                                    <a href="{% url 'equipos:equipo-detalle' equipo.pk %}" 
-                                       class="action-btn btn-view" 
-                                       title="Ver Detalles">
-                                        <i class="bi bi-eye"></i>
-                                        <span>Ver</span>
-                                    </a>
-                                    <a href="{% url 'equipos:generar-qr' equipo.pk %}" 
+                                    <a href="{% url 'equipos:equipo-detalle' equipo.pk %}?view=qr" 
                                        class="action-btn btn-qr" 
                                        title="Generar Código QR">
                                         <i class="bi bi-qr-code"></i>
-                                        <span>QR</span>
                                     </a>
+
+                                    <a href="{% url 'equipos:equipo-detalle' equipo.pk %}?view=detail" 
+                                       class="action-btn btn-view" 
+                                       title="Ver Detalles">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
                                     <a href="{% url 'equipos:equipo-editar' equipo.pk %}" 
                                        class="action-btn btn-edit" 
                                        title="Editar Equipo">
                                         <i class="bi bi-pencil-square"></i>
-                                        <span>Editar</span>
                                     </a>
-                                    <a href="{% url 'equipos:equipo-eliminar' equipo.pk %}" 
+                                    <a href="#" 
                                        class="action-btn btn-delete" 
                                        title="Eliminar Equipo"
-                                       onclick="return confirm('¿Estás seguro de que deseas eliminar este equipo?')">
+                                       onclick="openDeleteModal(event, '{{ equipo.pk }}', '{{ equipo.nombre|escapejs }}', '{{ equipo.codigo_interno|escapejs }}')">
                                         <i class="bi bi-trash"></i>
-                                        <span>Eliminar</span>
                                     </a>
                                 </div>
                             </td>
@@ -806,6 +1053,42 @@
         </nav>
     </div>
     {% endif %}
+
+    <!-- Modal de confirmación de eliminación -->
+    <div class="delete-modal" id="deleteModal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <div class="delete-modal-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <h3 class="delete-modal-title">¿Eliminar Equipo?</h3>
+                <p class="delete-modal-subtitle">Esta acción no se puede deshacer</p>
+            </div>
+            
+            <div class="delete-modal-equipment">
+                <div class="delete-modal-equipment-name" id="equipmentName"></div>
+                <div class="delete-modal-equipment-code" id="equipmentCode"></div>
+            </div>
+            
+            <div class="delete-modal-warning">
+                <i class="bi bi-shield-exclamation"></i>
+                <div class="delete-modal-warning-text">
+                    Se eliminará permanentemente del inventario
+                </div>
+            </div>
+            
+            <div class="delete-modal-actions">
+                <button type="button" class="delete-modal-btn delete-modal-btn-cancel" onclick="closeDeleteModal()">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
+                </button>
+                <a href="#" class="delete-modal-btn delete-modal-btn-delete" id="confirmDeleteBtn">
+                    <i class="bi bi-trash-fill"></i>
+                    Eliminar
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -849,6 +1132,37 @@
         card.addEventListener('mouseleave', function() {
             this.style.transform = 'translateY(0) scale(1)';
         });
+    });
+
+    // Funciones para el modal de eliminación
+    function openDeleteModal(event, equipoId, equipoNombre, equipoCodigo) {
+        event.preventDefault();
+        
+        document.getElementById('equipmentName').textContent = equipoNombre;
+        document.getElementById('equipmentCode').textContent = equipoCodigo;
+        document.getElementById('confirmDeleteBtn').href = `/equipos/eliminar/${equipoId}/`;
+        
+        document.getElementById('deleteModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+
+    // Cerrar modal con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('deleteModal').classList.contains('show')) {
+            closeDeleteModal();
+        }
     });
 </script>
 

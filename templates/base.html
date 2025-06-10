@@ -1125,7 +1125,8 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled coming-soon" href="#">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'codigo-qr' %}active{% endif %}" 
+                       href="{% url 'equipos:codigo-qr' %}">
                         <i class="nav-icon bi bi-qr-code"></i>
                         <span class="nav-text">Códigos QR</span>
                     </a>

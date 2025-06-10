@@ -7,6 +7,7 @@ from .views import (
     EquipoDeleteView,      # <-- Agrega esta importación
     generar_qr_view,
 )
+from . import views
 
 app_name = 'equipos'
 
@@ -17,4 +18,5 @@ urlpatterns = [
     path('editar/<int:pk>/', EquipoUpdateView.as_view(), name='equipo-editar'),      # <-- Agrega esta línea
     path('eliminar/<int:pk>/', EquipoDeleteView.as_view(), name='equipo-eliminar'),  # <-- Agrega esta línea
     path('generar-qr/<int:pk>/', generar_qr_view, name='generar-qr'),
+    path('codigos-qr/', views.codigo_qr_view, name='codigo-qr'),
 ]

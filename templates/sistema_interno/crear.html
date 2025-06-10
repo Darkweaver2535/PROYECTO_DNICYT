@@ -6,42 +6,10 @@
 
 {% block extra_css %}
 <style>
-    /* Estilos heredados del dashboard */
-    .dashboard-card {
-        background: var(--pure-white);
-        border-radius: 1rem;
-        box-shadow: var(--shadow-md);
-        transition: all var(--transition-speed) ease;
-        border: 1px solid var(--border-color);
-        overflow: hidden;
-    }
-
-    .dashboard-card:hover {
-        box-shadow: var(--shadow-lg);
-    }
-
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .section-title::before {
-        content: '';
-        width: 4px;
-        height: 30px;
-        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-        border-radius: 2px;
-    }
-
-    /* Estilos específicos del formulario */
+    /* Estilos específicos del formulario - usando variables del base.html */
     .form-container {
         background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
-        border-radius: 1rem;
+        border-radius: 1.5rem;
         position: relative;
         overflow: hidden;
     }
@@ -49,7 +17,7 @@
     .form-header {
         background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
         color: white;
-        padding: 2rem;
+        padding: 2.5rem 2rem;
         position: relative;
         overflow: hidden;
     }
@@ -59,132 +27,333 @@
         position: absolute;
         top: -50%;
         right: -20%;
-        width: 200px;
-        height: 200px;
-        background: rgba(255, 255, 255, 0.1);
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
         border-radius: 50%;
-        transform: rotate(45deg);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
     }
 
     .form-header h1 {
-        font-size: 1.75rem;
-        font-weight: 700;
+        font-size: 2rem;
+        font-weight: 800;
         margin: 0;
         position: relative;
         z-index: 2;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .form-header p {
         margin: 0.5rem 0 0 0;
-        opacity: 0.9;
+        opacity: 0.95;
         position: relative;
         z-index: 2;
+        font-size: 1.1rem;
     }
 
     .form-section {
-        background: var(--pure-white);
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(37, 99, 235, 0.02) 100%);
+        border-radius: 1.25rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
         border: 1px solid var(--border-color);
         transition: all var(--transition-speed) ease;
         position: relative;
+        backdrop-filter: blur(5px);
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue), var(--success-green));
+        border-radius: 1.25rem 1.25rem 0 0;
     }
 
     .form-section:hover {
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--shadow-lg);
         transform: translateY(-2px);
+        border-color: var(--primary-blue);
     }
 
     .form-section-title {
-        font-size: 1.1rem;
-        font-weight: 600;
+        font-size: 1.25rem;
+        font-weight: 700;
         color: var(--primary-blue);
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding-bottom: 0.5rem;
+        gap: 0.75rem;
+        padding-bottom: 1rem;
         border-bottom: 2px solid var(--light-blue);
+        position: relative;
     }
 
+    .form-section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 60px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
+        border-radius: 1px;
+    }
+
+    .form-section-title i {
+        font-size: 1.5rem;
+        padding: 0.5rem;
+        background: linear-gradient(135deg, var(--light-blue), rgba(37, 99, 235, 0.1));
+        border-radius: 0.75rem;
+        color: var(--primary-blue);
+    }
+
+    /* Campos de formulario */
     .form-group {
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
         position: relative;
     }
 
     .form-label {
         font-weight: 600;
         color: var(--text-dark);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-label i {
+        font-size: 1.1rem;
+        color: var(--primary-blue);
+        padding: 0.25rem;
+        background: linear-gradient(135deg, var(--light-blue), rgba(37, 99, 235, 0.1));
+        border-radius: 0.5rem;
     }
 
     .form-label .required {
         color: var(--danger-red);
         font-weight: 700;
+        margin-left: 0.25rem;
     }
 
-    .form-control, .form-select {
+    /* Estilos de campos de entrada mejorados */
+    .crear-form-control, 
+    .crear-form-select {
         border: 2px solid var(--border-color);
-        border-radius: 0.5rem;
-        padding: 0.75rem 1rem;
-        font-size: 0.95rem;
-        transition: all var(--transition-speed) ease;
-        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(248, 250, 252, 0.8) 100%);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
     }
 
-    .form-control:focus, .form-select:focus {
+    .crear-form-control:hover, 
+    .crear-form-select:hover {
         border-color: var(--primary-blue);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        outline: none;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
         transform: translateY(-1px);
     }
 
-    .form-control.is-invalid {
+    .crear-form-control:focus, 
+    .crear-form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 
+            0 0 0 4px rgba(37, 99, 235, 0.2),
+            0 8px 25px rgba(37, 99, 235, 0.2),
+            inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        outline: none;
+        transform: translateY(-2px);
+        background: var(--pure-white);
+    }
+
+    /* Estados de validación */
+    .crear-form-control.is-invalid {
         border-color: var(--danger-red);
-        background: rgba(239, 68, 68, 0.05);
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(239, 68, 68, 0.05) 100%);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        animation: shake 0.5s ease-in-out;
     }
 
-    .form-control.is-valid {
+    .crear-form-control.is-valid {
         border-color: var(--success-green);
-        background: rgba(16, 185, 129, 0.05);
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(16, 185, 129, 0.05) 100%);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
     }
 
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Select específico */
+    .crear-form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23374151' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px 12px;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+
+    .crear-form-select:focus {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%232563eb' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+    }
+
+    /* Textarea específico */
+    textarea.crear-form-control {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    /* Texto de ayuda */
     .form-text {
-        font-size: 0.8rem;
+        font-size: 0.875rem;
         color: var(--text-light);
-        margin-top: 0.25rem;
+        margin-top: 0.5rem;
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(248, 250, 252, 0.8) 100%);
+        border-radius: 0.5rem;
+        border-left: 3px solid var(--primary-blue);
     }
 
     .form-text i {
         color: var(--primary-blue);
+        font-size: 1rem;
     }
 
-    /* Botones mejorados */
+    /* Campos UDB */
+    .udb-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--light-blue), rgba(37, 99, 235, 0.1));
+        border-radius: 0.75rem;
+        border: 2px solid var(--primary-blue);
+        position: relative;
+    }
+
+    .udb-part {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .udb-readonly {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 700;
+        min-width: 70px;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .udb-separator {
+        font-weight: 900;
+        font-size: 1.5rem;
+        color: var(--primary-blue);
+    }
+
+    .udb-year {
+        background: linear-gradient(135deg, var(--success-green), #059669);
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 700;
+        min-width: 60px;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Validación UDB */
+    .udb-validation-indicator {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+        z-index: 10;
+    }
+
+    .udb-validation-indicator.valid {
+        background: var(--success-green);
+        display: flex;
+    }
+
+    .udb-validation-indicator.invalid {
+        background: var(--danger-red);
+        display: flex;
+    }
+
+    /* Botones */
     .btn-industrial {
         background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
         border: none;
         color: white;
-        padding: 0.75rem 2rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        transition: all var(--transition-speed) ease;
+        padding: 1rem 2.5rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+        transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
         text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-industrial::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-industrial:hover::before {
+        left: 100%;
     }
 
     .btn-industrial:hover {
         background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-xl);
         color: white;
     }
 
@@ -192,14 +361,18 @@
         background: linear-gradient(135deg, var(--pure-white), var(--off-white));
         border: 2px solid var(--border-color);
         color: var(--text-dark);
-        padding: 0.75rem 2rem;
-        border-radius: 0.5rem;
+        padding: 1rem 2.5rem;
+        border-radius: 0.75rem;
         font-weight: 600;
-        transition: all var(--transition-speed) ease;
+        font-size: 1.05rem;
+        transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
         text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: var(--shadow-sm);
     }
 
     .btn-secondary:hover {
@@ -207,16 +380,26 @@
         border-color: var(--primary-blue);
         color: var(--primary-blue);
         transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--shadow-lg);
     }
 
-    /* Indicadores de progreso del formulario */
-    .form-progress {
-        background: var(--off-white);
-        border-radius: 1rem;
-        padding: 1rem;
-        margin-bottom: 2rem;
-        border: 1px solid var(--border-color);
+    /* Progreso sticky */
+    .form-progress-sticky {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(37, 99, 235, 0.1);
+        box-shadow: 0 8px 32px rgba(37, 99, 235, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .form-progress-sticky.scrolled {
+        transform: scale(0.9);
+        margin-bottom: 1rem;
+        border-color: var(--primary-blue);
+        box-shadow: 0 12px 40px rgba(37, 99, 235, 0.25);
     }
 
     .progress-steps {
@@ -224,122 +407,174 @@
         justify-content: space-between;
         align-items: center;
         position: relative;
+        margin-bottom: 1rem;
     }
 
     .progress-steps::before {
         content: '';
         position: absolute;
         top: 50%;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: var(--border-color);
+        left: 10%;
+        right: 10%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue), var(--success-green), var(--warning-orange));
+        border-radius: 2px;
         z-index: 1;
+        opacity: 0.3;
     }
 
     .progress-step {
-        background: var(--primary-blue);
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
         color: white;
-        width: 2rem;
-        height: 2rem;
+        width: 3rem;
+        height: 3rem;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.8rem;
-        font-weight: 600;
+        font-size: 1rem;
+        font-weight: 700;
         position: relative;
         z-index: 2;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
     }
 
     .progress-step.inactive {
-        background: var(--border-color);
+        background: linear-gradient(135deg, var(--border-color), #d1d5db);
         color: var(--text-light);
+        transform: scale(0.9);
     }
 
-    /* Sección de vista previa de imagen */
+    .progress-step:not(.inactive) {
+        animation: pulse 2s infinite;
+    }
+
+    .progress-step-mini {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 0.9rem;
+    }
+
+    @keyframes pulse {
+        0%, 100% { box-shadow: var(--shadow-md); }
+        50% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.2), var(--shadow-lg); }
+    }
+
+    /* Vista previa de imagen */
     .image-preview {
-        border: 2px dashed var(--border-color);
-        border-radius: 0.5rem;
+        border: 3px dashed var(--border-color);
+        border-radius: 0.75rem;
         padding: 2rem;
         text-align: center;
-        background: var(--off-white);
+        background: linear-gradient(135deg, var(--off-white), rgba(37, 99, 235, 0.05));
         transition: all var(--transition-speed) ease;
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
 
     .image-preview:hover {
         border-color: var(--primary-blue);
-        background: rgba(59, 130, 246, 0.05);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), var(--light-blue));
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
     }
 
     .image-preview img {
         max-width: 200px;
         max-height: 200px;
-        border-radius: 0.5rem;
-        box-shadow: var(--shadow-sm);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .image-preview:hover img {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
     }
 
     /* Alertas de validación */
     .validation-alert {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        border: 2px solid var(--danger-red);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
         color: var(--danger-red);
         display: none;
+        box-shadow: var(--shadow-md);
     }
 
     .validation-alert.show {
         display: block;
-        animation: slideIn 0.3s ease;
+        animation: slideInBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
 
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
+    @keyframes slideInBounce {
+        0% { 
+            opacity: 0; 
+            transform: translateY(-30px) scale(0.9); 
+        }
+        50% { 
+            opacity: 0.8; 
+            transform: translateY(5px) scale(1.02); 
+        }
+        100% { 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+        }
     }
 
     /* Responsive */
     @media (max-width: 768px) {
         .form-header {
-            padding: 1.5rem;
+            padding: 2rem 1.5rem;
         }
         
         .form-header h1 {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
         }
         
         .form-section {
-            padding: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .crear-form-control, 
+        .crear-form-select {
+            padding: 0.875rem 1rem;
         }
         
         .btn-industrial,
         .btn-secondary {
-            padding: 0.6rem 1.5rem;
-            font-size: 0.9rem;
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
         }
-    }
 
-    /* Variables CSS personalizadas */
-    :root {
-        --primary-blue: #2563eb;
-        --secondary-blue: #1d4ed8;
-        --light-blue: #dbeafe;
-        --light-yellow: #fef3c7;
-        --success-green: #10b981;
-        --warning-orange: #f59e0b;
-        --danger-red: #ef4444;
-        --pure-white: #ffffff;
-        --off-white: #f8fafc;
-        --text-dark: #1f2937;
-        --text-light: #6b7280;
-        --border-color: #e5e7eb;
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        --transition-speed: 0.2s;
+        .udb-container {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .udb-part {
+            justify-content: center;
+        }
+
+        .form-progress-sticky {
+            top: 10px;
+            padding: 1rem;
+        }
+        
+        .form-progress-sticky.scrolled {
+            transform: scale(0.85);
+        }
+        
+        .progress-step-mini {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.8rem;
+        }
     }
 </style>
 {% endblock %}
@@ -361,15 +596,15 @@
     <!-- Progreso del formulario -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="form-progress">
+            <div class="form-progress form-progress-sticky" id="progressIndicator">
                 <div class="progress-steps">
-                    <div class="progress-step">1</div>
-                    <div class="progress-step inactive">2</div>
-                    <div class="progress-step inactive">3</div>
-                    <div class="progress-step inactive">4</div>
+                    <div class="progress-step" id="step1">1</div>
+                    <div class="progress-step inactive" id="step2">2</div>
+                    <div class="progress-step inactive" id="step3">3</div>
+                    <div class="progress-step inactive" id="step4">4</div>
                 </div>
                 <div class="text-center mt-2">
-                    <small class="text-muted">Información Básica → Especificaciones → Ubicación → Confirmación</small>
+                    <small class="text-muted fw-medium">Información Básica → Especificaciones → Ubicación → Confirmación</small>
                 </div>
             </div>
         </div>
@@ -398,43 +633,51 @@
                                 Información Básica del Equipo
                             </div>
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="form-group">
                                         <label class="form-label">
                                             <i class="bi bi-upc-scan"></i>
                                             Código Unidad de Disposición de Bienes <span class="required">*</span>
                                         </label>
-                                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                                            <!-- EMI: constante -->
-                                            <input type="text" class="form-control" value="EMI" readonly style="max-width:70px; background-color: #f8f9fa;">
-                                            <!-- Guion -->
-                                            <span class="fw-bold">-</span>
-                                            <!-- Unidad: select -->
-                                            <select name="udb_unidad" id="id_udb_unidad" class="form-select" style="max-width:100px;" required>
-                                                <option value="">Seleccione</option>
-                                                <option value="LPZ" {% if form.udb_unidad.value == 'LPZ' %}selected{% endif %}>LPZ</option>
-                                                <option value="SCZ" {% if form.udb_unidad.value == 'SCZ' %}selected{% endif %}>SCZ</option>
-                                                <option value="CBAA" {% if form.udb_unidad.value == 'CBAA' %}selected{% endif %}>CBAA</option>
-                                                <option value="RIB" {% if form.udb_unidad.value == 'RIB' %}selected{% endif %}>RIB</option>
-                                                <option value="TROP" {% if form.udb_unidad.value == 'TROP' %}selected{% endif %}>TROP</option>
-                                            </select>
-                                            <!-- Número -->
-                                            <input type="text" name="udb_numero" id="id_udb_numero" class="form-control"
-                                                placeholder="1-22386"
-                                                style="max-width:120px;"
-                                                value="{{ form.udb_numero.value|default:'' }}"
-                                                pattern="^\d-\d{5}$"
-                                                title="Debe tener el formato 1-12345 (un dígito, guion, cinco dígitos)"
-                                                required>
-                                            <!-- Año actual: solo texto, no input -->
-                                            <span class="fw-bold" style="min-width:60px; color: #000000;">{{ current_year }}</span>
+                                        <div class="udb-container">
+                                            <!-- Indicador de validación personalizado -->
+                                            <div class="udb-validation-indicator" id="udbValidation">
+                                                <i class="bi bi-check"></i>
+                                            </div>
+                                            
+                                            <div class="udb-part">
+                                                <div class="udb-readonly">EMI</div>
+                                                <span class="udb-separator">-</span>
+                                            </div>
+                                            <div class="udb-part">
+                                                <select name="udb_unidad" id="id_udb_unidad" class="crear-form-select" style="max-width:120px;" required>
+                                                    <option value="">Seleccione</option>
+                                                    <option value="LPZ" {% if form.udb_unidad.value == 'LPZ' %}selected{% endif %}>LPZ</option>
+                                                    <option value="SCZ" {% if form.udb_unidad.value == 'SCZ' %}selected{% endif %}>SCZ</option>
+                                                    <option value="CBAA" {% if form.udb_unidad.value == 'CBAA' %}selected{% endif %}>CBAA</option>
+                                                    <option value="RIB" {% if form.udb_unidad.value == 'RIB' %}selected{% endif %}>RIB</option>
+                                                    <option value="TROP" {% if form.udb_unidad.value == 'TROP' %}selected{% endif %}>TROP</option>
+                                                </select>
+                                            </div>
+                                            <div class="udb-part">
+                                                <input type="text" name="udb_numero" id="id_udb_numero" class="crear-form-control"
+                                                    placeholder="1-22386"
+                                                    style="max-width:140px;"
+                                                    value="{{ form.udb_numero.value|default:'' }}"
+                                                    pattern="^\d-\d{5}$"
+                                                    title="Debe tener el formato 1-12345 (un dígito, guion, cinco dígitos)"
+                                                    required>
+                                            </div>
+                                            <div class="udb-part">
+                                                <div class="udb-year>{{ current_year }}</div>
+                                            </div>
                                         </div>
                                         <div class="form-text">
                                             <i class="bi bi-info-circle"></i>
                                             Formato: <strong>EMI - [UNIDAD] [NÚMERO] [AÑO]</strong>
                                             <br>
                                             <small class="text-muted">
-                                                El número debe tener el formato 1-12345 (cinco dígitos después del guion)<br>
+                                                El número debe tener el formato 1-12345 (cinco dígitos después del guion)
                                             </small>
                                         </div>
                                         {% if form.udb_unidad.errors %}
@@ -445,55 +688,74 @@
                                         {% endif %}
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="id_codigo_interno" class="form-label">
-                                            <i class="bi bi-hash"></i>
-                                            Código Interno <span class="required">*</span>
-                                        </label>
-                                        {{ form.codigo_interno }}
-                                        <div class="form-text">
-                                            <i class="bi bi-info-circle"></i>
-                                            Código único para identificar el equipo
-                                        </div>
+                                <div class="row">
+                                    <!-- Campo UDB ocupa toda la fila -->
+                                    <div class="col-md-12">
+                                        <!-- UDB field aquí -->
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="id_nombre" class="form-label">
-                                            <i class="bi bi-tag"></i>
-                                            Nombre del Equipo <span class="required">*</span>
-                                        </label>
-                                        {{ form.nombre }}
-                                        <div class="form-text">
-                                            <i class="bi bi-info-circle"></i>
-                                            Nombre descriptivo del equipo
+
+                                <div class="row">
+                                    <!-- Los demás campos en columnas normales -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="id_codigo_interno" class="form-label">
+                                                <i class="bi bi-hash"></i>
+                                                Código Interno <span class="required">*</span>
+                                            </label>
+                                            <input type="text" name="codigo_interno" id="id_codigo_interno" 
+                                                   class="crear-form-control" 
+                                                   placeholder="Código único para identificar el equipo"
+                                                   value="{{ form.codigo_interno.value|default:'' }}" required>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle"></i>
+                                                Código único para identificar el equipo
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="id_modelo" class="form-label">
-                                            <i class="bi bi-cpu"></i>
-                                            Modelo <span class="required">*</span>
-                                        </label>
-                                        {{ form.modelo }}
-                                        <div class="form-text">
-                                            <i class="bi bi-info-circle"></i>
-                                            Modelo específico del fabricante
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="id_nombre" class="form-label">
+                                                <i class="bi bi-tag"></i>
+                                                Nombre del Equipo <span class="required">*</span>
+                                            </label>
+                                            <input type="text" name="nombre" id="id_nombre" class="crear-form-control"
+                                                   placeholder="Nombre del equipo"
+                                                   value="{{ form.nombre.value|default:'' }}" required>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle"></i>
+                                                Nombre descriptivo del equipo
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="id_serie" class="form-label">
-                                            <i class="bi bi-upc"></i>
-                                            Número de Serie <span class="required">*</span>
-                                        </label>
-                                        {{ form.serie }}
-                                        <div class="form-text">
-                                            <i class="bi bi-info-circle"></i>
-                                            Número de serie único del fabricante
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="id_modelo" class="form-label">
+                                                <i class="bi bi-cpu"></i>
+                                                Modelo <span class="required">*</span>
+                                            </label>
+                                            <input type="text" name="modelo" id="id_modelo" class="crear-form-control"
+                                                   placeholder="Modelo del equipo"
+                                                   value="{{ form.modelo.value|default:'' }}" required>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle"></i>
+                                                Modelo específico del fabricante
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="id_serie" class="form-label">
+                                                <i class="bi bi-upc"></i>
+                                                Número de Serie <span class="required">*</span>
+                                            </label>
+                                            <input type="text" name="serie" id="id_serie" class="crear-form-control"
+                                                   placeholder="Número de serie"
+                                                   value="{{ form.serie.value|default:'' }}" required>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle"></i>
+                                                Número de serie único del fabricante
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -653,7 +915,7 @@
                                         <div class="image-preview" id="imagePreview">
                                             <div class="upload-placeholder">
                                                 <i class="bi bi-cloud-upload display-4 text-muted"></i>
-                                                <p class="mt-2 mb-0">Haga clic para seleccionar una imagen</p>
+                                                <p class="mt-2 mb-0 fw-medium">Haga clic para seleccionar una imagen</p>
                                                 <small class="text-muted">JPG, PNG - Max 5MB</small>
                                             </div>
                                         </div>
@@ -681,7 +943,7 @@
                         </div>
 
                         <!-- Botones de acción -->
-                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div class="d-flex justify-content-between align-items-center pt-4 border-top">
                             <a href="{% url 'equipos:equipo-lista' %}" class="btn-secondary">
                                 <i class="bi bi-arrow-left"></i>
                                 Cancelar
@@ -704,18 +966,95 @@ document.addEventListener('DOMContentLoaded', function() {
     const validationAlert = document.getElementById('validationAlert');
     const imageInput = document.getElementById('id_foto');
     const imagePreview = document.getElementById('imagePreview');
+    const udbValidation = document.getElementById('udbValidation');
     
     // Campos requeridos
     const requiredFields = [
-        'id_codigo_udb', 'id_codigo_interno', 'id_nombre', 'id_modelo', 'id_serie', 
+        'id_udb_unidad', 'id_udb_numero', 'id_codigo_interno', 'id_nombre', 'id_modelo', 'id_serie', 
         'id_fabricante', 'id_ubicacion_fisica', 'id_seccion', 
         'id_tipo_equipo', 'id_estado', 'id_responsable'
     ];
 
-    // Validación en tiempo real
+    // Formateo automático para el campo UDB número
+    const udbNumeroField = document.getElementById('id_udb_numero');
+    const udbUnidadField = document.getElementById('id_udb_unidad');
+    
+    if (udbNumeroField) {
+        udbNumeroField.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^\d-]/g, '');
+            
+            // Auto-formatear: agregar guión después del primer dígito
+            if (value.length === 1 && /^\d$/.test(value)) {
+                value = value + '-';
+            }
+            
+            // Limitar longitud
+            if (value.length > 7) {
+                value = value.substring(0, 7);
+            }
+            
+            e.target.value = value;
+            
+            // Validar UDB completo
+            validateUDB();
+        });
+
+        udbNumeroField.addEventListener('keypress', function(e) {
+            // Permitir solo números, guión, backspace, delete, tab, escape, enter
+            if (![8, 9, 27, 13, 46, 45].includes(e.keyCode) && 
+                (e.keyCode < 48 || e.keyCode > 57)) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    if (udbUnidadField) {
+        udbUnidadField.addEventListener('change', function() {
+            // Remover clases de validación automática de Bootstrap
+            this.classList.remove('is-valid', 'is-invalid');
+            
+            // Validar UDB completo
+            setTimeout(() => {
+                validateUDB();
+            }, 50);
+        });
+    }
+
+    // Función para validar campos UDB sin mostrar iconos automáticos
+    function validateUDB() {
+        const unidadValue = udbUnidadField ? udbUnidadField.value.trim() : '';
+        const numeroValue = udbNumeroField ? udbNumeroField.value.trim() : '';
+        const numeroPattern = /^\d-\d{5}$/;
+        
+        const isUnidadValid = unidadValue !== '';
+        const isNumeroValid = numeroValue !== '' && numeroPattern.test(numeroValue);
+        const isUDBComplete = isUnidadValid && isNumeroValid;
+        
+        // Remover todas las clases de validación automática
+        if (udbUnidadField) {
+            udbUnidadField.classList.remove('is-valid', 'is-invalid');
+        }
+        if (udbNumeroField) {
+            udbNumeroField.classList.remove('is-valid', 'is-invalid');
+        }
+        
+        // Mostrar indicador personalizado
+        if (isUDBComplete) {
+            udbValidation.className = 'udb-validation-indicator valid';
+            udbValidation.innerHTML = '<i class="bi bi-check"></i>';
+        } else if (unidadValue || numeroValue) {
+            udbValidation.className = 'udb-validation-indicator invalid';
+            udbValidation.innerHTML = '<i class="bi bi-x"></i>';
+        } else {
+            udbValidation.className = 'udb-validation-indicator';
+            udbValidation.innerHTML = '';
+        }
+    }
+
+    // Validación en tiempo real mejorada para otros campos
     requiredFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
-        if (field) {
+        if (field && !field.id.startsWith('id_udb_')) {
             field.addEventListener('blur', function() {
                 validateField(this);
             });
@@ -743,9 +1082,19 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         let isValid = true;
         
+        // Validar campos UDB por separado
+        const unidadValue = udbUnidadField ? udbUnidadField.value.trim() : '';
+        const numeroValue = udbNumeroField ? udbNumeroField.value.trim() : '';
+        const numeroPattern = /^\d-\d{5}$/;
+        
+        if (!unidadValue || !numeroValue || !numeroPattern.test(numeroValue)) {
+            isValid = false;
+        }
+        
+        // Validar otros campos requeridos
         requiredFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
-            if (field && !field.value.trim()) {
+            if (field && !field.id.startsWith('id_udb_') && !field.value.trim()) {
                 field.classList.add('is-invalid');
                 isValid = false;
             }
@@ -765,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Preview de imagen
+    // Preview de imagen mejorado
     if (imageInput) {
         imageInput.style.display = 'none';
         
@@ -780,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = function(e) {
                     imagePreview.innerHTML = `
                         <img src="${e.target.result}" alt="Vista previa" class="img-fluid">
-                        <p class="mt-2 mb-0 small text-success">
+                        <p class="mt-3 mb-0 small text-success fw-medium">
                             <i class="bi bi-check-circle"></i> ${file.name}
                         </p>
                         <small class="text-muted">Haga clic para cambiar la imagen</small>
@@ -791,11 +1140,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Animación de progreso simulada
+    // Animación de progreso mejorada
     let currentStep = 1;
     const steps = document.querySelectorAll('.progress-step');
     
-    // Simulación de progreso basada en campos completados
     function updateProgress() {
         const filledFields = requiredFields.filter(fieldId => {
             const field = document.getElementById(fieldId);
@@ -822,11 +1170,96 @@ document.addEventListener('DOMContentLoaded', function() {
         const field = document.getElementById(fieldId);
         if (field) {
             field.addEventListener('input', updateProgress);
+            field.addEventListener('change', updateProgress);
         }
     });
 
+    // Manejo del indicador de progreso sticky
+    const progressIndicator = document.getElementById('progressIndicator');
+    const progressSteps = document.querySelectorAll('.progress-step');
+
+    // Detectar scroll para activar efectos del sticky
+    let isScrolled = false;
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > 200 && !isScrolled) {
+            isScrolled = true;
+            progressIndicator.classList.add('scrolled');
+            // Hacer los pasos más pequeños cuando está sticky
+            progressSteps.forEach(step => {
+                step.classList.add('progress-step-mini');
+            });
+        } else if (scrollTop <= 200 && isScrolled) {
+            isScrolled = false;
+            progressIndicator.classList.remove('scrolled');
+            // Restaurar tamaño normal
+            progressSteps.forEach(step => {
+                step.classList.remove('progress-step-mini');
+            });
+        }
+    });
+
+    // Actualizar progreso basado en la sección visible
+    const sections = document.querySelectorAll('.form-section');
+    const progressStepElements = document.querySelectorAll('.progress-step');
+
+    function updateProgressByScroll() {
+        const scrollPosition = window.scrollY + window.innerHeight / 2;
+        
+        sections.forEach((section, index) => {
+            const sectionTop = section.offsetTop;
+            const sectionBottom = sectionTop + section.offsetHeight;
+            
+            if (scrollPosition >= sectionTop && scrollPosition <= sectionBottom) {
+                // Activar el paso correspondiente
+                progressStepElements.forEach((step, stepIndex) => {
+                    if (stepIndex <= index) {
+                        step.classList.remove('inactive');
+                    } else {
+                        step.classList.add('inactive');
+                    }
+                });
+            }
+        });
+    }
+
+    // Escuchar scroll para actualizar progreso automáticamente
+    window.addEventListener('scroll', debounce(updateProgressByScroll, 100));
+
+    // Función debounce para optimizar performance
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Inicializar validación UDB
+    validateUDB();
+    
     // Inicializar progreso
     updateProgress();
+
+    // Efecto de typing para placeholders
+    const inputs = document.querySelectorAll('.form-control[placeholder]');
+    inputs.forEach(input => {
+        const originalPlaceholder = input.getAttribute('placeholder');
+        input.addEventListener('focus', function() {
+            this.setAttribute('placeholder', '');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.setAttribute('placeholder', originalPlaceholder);
+            }
+        });
+    });
 });
 </script>
 {% endblock %}
