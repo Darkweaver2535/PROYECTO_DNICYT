@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.db.models import Q, Count, Avg, Sum
 from django.core.paginator import Paginator
 from datetime import date, timedelta
-from .models import PlanMantenimiento, TareaMantenimiento, RepuestoCritico
-from .forms import PlanMantenimientoForm, TareaMantenimientoForm
+from .models import PlanMantenimiento, TareaMantenimiento, RepuestoCritico, OrdenTrabajo
+from .forms import PlanMantenimientoForm, TareaMantenimientoForm, OrdenTrabajoForm, OrdenTrabajoUpdateForm
 from apps.equipos.models import Equipo
 
 @login_required
@@ -454,3 +454,196 @@ def crear_tarea_view(request, plan_pk):
     }
     
     return render(request, 'sistema_interno/crear_tarea.html', context)
+
+@login_required
+def ordenes_trabajo_view(request):
+    """Vista principal de órdenes de trabajo"""
+    
+    # Filtros
+    estado_filtro = request.GET.get('estado', '')
+    prioridad_filtro = request.GET.get('prioridad', '')
+    tipo_filtro = request.GET.get('tipo', '')
+    asignado_filtro = request.GET.get('asignado', '')
+    search = request.GET.get('search', '')
+    
+    # Query base
+    ordenes = OrdenTrabajo.objects.select_related(
+        'equipo', 'solicitante', 'asignado_a', 'supervisado_por', 'plan_mantenimiento'
+    ).all()
+    
+    # Aplicar filtros
+    if estado_filtro:
+        ordenes = ordenes.filter(estado=estado_filtro)
+    
+    if prioridad_filtro:
+        ordenes = ordenes.filter(prioridad=prioridad_filtro)
+    
+    if tipo_filtro:
+        ordenes = ordenes.filter(tipo_orden=tipo_filtro)
+    
+    if asignado_filtro:
+        ordenes = ordenes.filter(asignado_a_id=asignado_filtro)
+    
+    if search:
+        ordenes = ordenes.filter(
+            Q(numero_orden__icontains=search) |
+            Q(titulo__icontains=search) |
+            Q(equipo__nombre__icontains=search) |
+            Q(equipo__codigo_interno__icontains=search)
+        )
+    
+    # Estadísticas
+    total_ordenes = ordenes.count()
+    ordenes_pendientes = ordenes.filter(estado='pendiente').count()
+    ordenes_en_progreso = ordenes.filter(estado='en_progreso').count()
+    ordenes_completadas = ordenes.filter(estado='completada').count()
+    ordenes_atrasadas = sum(1 for orden in ordenes if orden.esta_atrasada())
+    
+    # Cálculos de eficiencia
+    ordenes_con_tiempos = ordenes.filter(horas_estimadas__gt=0, horas_reales__gt=0)
+    if ordenes_con_tiempos.exists():
+        eficiencia_promedio = ordenes_con_tiempos.aggregate(
+            avg_eficiencia=Avg(
+                models.Case(
+                    models.When(horas_reales__gt=0, then=models.F('horas_estimadas') * 100.0 / models.F('horas_reales')),
+                    default=0,
+                    output_field=models.DecimalField()
+                )
+            )
+        )['avg_eficiencia'] or 0
+    else:
+        eficiencia_promedio = 0
+    
+    # Paginación
+    paginator = Paginator(ordenes, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Calcular datos adicionales para cada orden
+    for orden in page_obj:
+        orden.atrasada = orden.esta_atrasada()
+        orden.eficiencia = orden.get_eficiencia()
+    
+    context = {
+        'page_obj': page_obj,
+        'ordenes': page_obj,
+        'total_ordenes': total_ordenes,
+        'ordenes_pendientes': ordenes_pendientes,
+        'ordenes_en_progreso': ordenes_en_progreso,
+        'ordenes_completadas': ordenes_completadas,
+        'ordenes_atrasadas': ordenes_atrasadas,
+        'eficiencia_promedio': round(eficiencia_promedio, 1),
+        'estado_filtro': estado_filtro,
+        'prioridad_filtro': prioridad_filtro,
+        'tipo_filtro': tipo_filtro,
+        'asignado_filtro': asignado_filtro,
+        'search': search,
+        'estados': OrdenTrabajo.ESTADO_CHOICES,
+        'prioridades': OrdenTrabajo.PRIORIDAD_CHOICES,
+        'tipos': OrdenTrabajo.TIPO_ORDEN_CHOICES,
+        'usuarios': User.objects.filter(is_active=True),
+    }
+    
+    return render(request, 'sistema_interno/ordenes_de_trabajo.html', context)
+
+@login_required
+def crear_orden_view(request):
+    """Vista para crear nueva orden de trabajo"""
+    
+    if request.method == 'POST':
+        form = OrdenTrabajoForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                orden = form.save(commit=False)
+                orden.solicitante = request.user
+                orden.save()
+                
+                messages.success(
+                    request, 
+                    f'✅ Orden de trabajo "{orden.numero_orden}" creada exitosamente.'
+                )
+                
+                return redirect('mantenimiento:orden-detalle', pk=orden.pk)
+                
+            except Exception as e:
+                messages.error(
+                    request, 
+                    f'❌ Error al crear la orden: {str(e)}'
+                )
+        else:
+            messages.error(
+                request, 
+                '❌ Error en el formulario. Por favor revise los campos marcados.'
+            )
+    else:
+        form = OrdenTrabajoForm()
+    
+    context = {
+        'form': form,
+        'titulo': 'Crear Orden de Trabajo',
+        'accion': 'crear',
+    }
+    
+    return render(request, 'sistema_interno/crear_orden.html', context)
+
+@login_required
+def detalle_orden_view(request, pk):
+    """Vista detallada de la orden de trabajo"""
+    
+    orden = get_object_or_404(OrdenTrabajo, pk=pk)
+    
+    # Calcular métricas
+    orden.atrasada = orden.esta_atrasada()
+    orden.eficiencia = orden.get_eficiencia()
+    orden.duracion = orden.calcular_duracion()
+    
+    context = {
+        'orden': orden,
+    }
+    
+    return render(request, 'sistema_interno/orden_detalle.html', context)
+
+@login_required
+def actualizar_orden_view(request, pk):
+    """Vista para actualizar el progreso de una orden de trabajo"""
+    
+    orden = get_object_or_404(OrdenTrabajo, pk=pk)
+    
+    if request.method == 'POST':
+        form = OrdenTrabajoUpdateForm(request.POST, request.FILES, instance=orden)
+        if form.is_valid():
+            try:
+                # Si se marca como completada, asignar fecha de completación
+                if form.cleaned_data.get('estado') == 'completada' and not orden.fecha_completada:
+                    orden.fecha_completada = timezone.now()
+                
+                orden = form.save()
+                
+                messages.success(
+                    request, 
+                    f'✅ Orden "{orden.numero_orden}" actualizada exitosamente.'
+                )
+                
+                return redirect('mantenimiento:orden-detalle', pk=orden.pk)
+                
+            except Exception as e:
+                messages.error(
+                    request, 
+                    f'❌ Error al actualizar la orden: {str(e)}'
+                )
+        else:
+            messages.error(
+                request, 
+                '❌ Error en el formulario. Por favor revise los campos.'
+            )
+    else:
+        form = OrdenTrabajoUpdateForm(instance=orden)
+    
+    context = {
+        'form': form,
+        'orden': orden,
+        'titulo': f'Actualizar Orden - {orden.numero_orden}',
+        'accion': 'actualizar',
+    }
+    
+    return render(request, 'sistema_interno/actualizar_orden.html', context)

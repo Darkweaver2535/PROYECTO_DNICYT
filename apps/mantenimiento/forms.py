@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import PlanMantenimiento, TareaMantenimiento, RepuestoCritico
+from .models import PlanMantenimiento, TareaMantenimiento, RepuestoCritico, OrdenTrabajo
 from apps.equipos.models import Equipo
 
 class PlanMantenimientoForm(forms.ModelForm):
@@ -292,3 +292,189 @@ class TareaMantenimientoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['responsable'].queryset = User.objects.filter(is_active=True)
+
+
+class OrdenTrabajoForm(forms.ModelForm):
+    class Meta:
+        model = OrdenTrabajo
+        fields = [
+            'titulo', 'descripcion', 'equipo', 'plan_mantenimiento',
+            'tipo_orden', 'prioridad', 'asignado_a', 'supervisado_por',
+            'fecha_programada', 'fecha_fin_programada', 'horas_estimadas',
+            'costo_estimado', 'materiales_necesarios', 'herramientas_necesarias',
+            'procedimientos_seguir', 'observaciones_iniciales', 'requiere_pruebas',
+            'documentos_adjuntos', 'fotos_antes'
+        ]
+        
+        widgets = {
+            'titulo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Título descriptivo de la orden de trabajo'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Descripción detallada del trabajo a realizar'
+            }),
+            'equipo': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'plan_mantenimiento': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'tipo_orden': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'prioridad': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'asignado_a': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'supervisado_por': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'fecha_programada': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'fecha_fin_programada': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'horas_estimadas': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.5',
+                'min': '0'
+            }),
+            'costo_estimado': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'materiales_necesarios': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Lista de materiales necesarios'
+            }),
+            'herramientas_necesarias': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Herramientas requeridas para el trabajo'
+            }),
+            'procedimientos_seguir': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Procedimientos y pasos a seguir'
+            }),
+            'observaciones_iniciales': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Observaciones iniciales importantes'
+            }),
+            'requiere_pruebas': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'documentos_adjuntos': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf,.doc,.docx,.txt'
+            }),
+            'fotos_antes': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Filtrar equipos operativos
+        self.fields['equipo'].queryset = Equipo.objects.exclude(estado='FUERA_SERVICIO')
+        
+        # Filtrar planes activos
+        self.fields['plan_mantenimiento'].queryset = PlanMantenimiento.objects.filter(estado='activo')
+        self.fields['plan_mantenimiento'].required = False
+        
+        # Filtrar usuarios activos para asignación
+        self.fields['asignado_a'].queryset = User.objects.filter(is_active=True)
+        self.fields['supervisado_por'].queryset = User.objects.filter(is_active=True)
+        
+        # Campos no requeridos
+        self.fields['asignado_a'].required = False
+        self.fields['supervisado_por'].required = False
+
+
+class OrdenTrabajoUpdateForm(forms.ModelForm):
+    """Formulario para actualizar el progreso de una orden de trabajo"""
+    
+    class Meta:
+        model = OrdenTrabajo
+        fields = [
+            'estado', 'fecha_inicio_real', 'horas_reales', 'costo_real',
+            'trabajo_realizado', 'observaciones_finales', 'repuestos_utilizados',
+            'pruebas_realizadas', 'resultado_satisfactorio', 'fotos_despues',
+            'comentarios_adicionales', 'requiere_seguimiento', 'fecha_proximo_seguimiento',
+            'calificacion_trabajo'
+        ]
+        
+        widgets = {
+            'estado': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'fecha_inicio_real': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'horas_reales': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.5',
+                'min': '0'
+            }),
+            'costo_real': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'trabajo_realizado': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Descripción detallada del trabajo realizado'
+            }),
+            'observaciones_finales': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Observaciones finales y recomendaciones'
+            }),
+            'repuestos_utilizados': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Lista de repuestos utilizados'
+            }),
+            'pruebas_realizadas': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Descripción de las pruebas realizadas'
+            }),
+            'resultado_satisfactorio': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'fotos_despues': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'comentarios_adicionales': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Comentarios adicionales'
+            }),
+            'requiere_seguimiento': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'fecha_proximo_seguimiento': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'calificacion_trabajo': forms.Select(attrs={
+                'class': 'form-select'
+            }, choices=[(i, f'{i} estrella{"s" if i > 1 else ""}') for i in range(1, 6)]),
+        }

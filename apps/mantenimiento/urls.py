@@ -14,4 +14,10 @@ urlpatterns = [
     # Tareas de mantenimiento
     path('tareas/', views.tareas_view, name='tareas'),
     path('plan/<int:plan_pk>/crear-tarea/', views.crear_tarea_view, name='crear-tarea'),
+
+    # Órdenes de trabajo
+    path('ordenes/', views.ordenes_trabajo_view, name='ordenes-trabajo'),
+    path('ordenes/crear/', views.crear_orden_view, name='crear-orden'),
+    path('ordenes/<int:pk>/', views.detalle_orden_view, name='orden-detalle'),
+    path('ordenes/<int:pk>/actualizar/', views.actualizar_orden_view, name='actualizar-orden'),
 ]

@@ -1,0 +1,600 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Órdenes de Trabajo - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trabajo-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .trabajo-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-4px);
+    }
+
+    .trabajo-header {
+        background: linear-gradient(135deg, var(--light-blue) 0%, var(--light-yellow) 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .trabajo-numero {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin: 0;
+    }
+
+    .trabajo-titulo {
+        font-size: 1rem;
+        color: var(--text-dark);
+        margin: 0.25rem 0 0 0;
+        font-weight: 500;
+    }
+
+    .trabajo-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .trabajo-body {
+        padding: 1.5rem;
+    }
+
+    .trabajo-equipo {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .trabajo-equipo-codigo {
+        font-weight: 700;
+        color: var(--primary-blue);
+        font-size: 0.9rem;
+    }
+
+    .trabajo-equipo-nombre {
+        color: var(--text-dark);
+        margin-top: 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .trabajo-descripcion {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .trabajo-fechas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+    }
+
+    .fecha-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fecha-label {
+        color: var(--text-light);
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+    }
+
+    .fecha-valor {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+
+    .trabajo-footer {
+        background: var(--off-white);
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .trabajo-asignado {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .avatar-small {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--primary-blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .trabajo-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-sm-custom {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+    }
+
+    .orden-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card-orden {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card-orden::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    }
+
+    .stat-card-orden:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .stat-icon-orden {
+        width: 48px;
+        height: 48px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon-total { background: var(--primary-blue); }
+    .stat-icon-pendientes { background: var(--warning-orange); }
+    .stat-icon-progreso { background: var(--secondary-blue); }
+    .stat-icon-completadas { background: var(--success-green); }
+    .stat-icon-atrasadas { background: var(--danger-red); }
+    .stat-icon-eficiencia { background: var(--primary-yellow); color: var(--text-dark); }
+
+    .stat-value-orden {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label-orden {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .filtros-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .ordenes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .badge-estado {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.375rem 0.75rem;
+        border-radius: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .badge-prioridad {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+    }
+
+    .atrasada-indicator {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 12px;
+        height: 12px;
+        background: var(--danger-red);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.2); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-light);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    @media (max-width: 768px) {
+        .ordenes-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .orden-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .trabajo-meta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .trabajo-fechas {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="bi bi-clipboard-check me-2"></i>
+                Órdenes de Trabajo
+            </h1>
+            <p class="text-muted mb-0">Gestión y seguimiento de órdenes de trabajo</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'mantenimiento:crear-orden' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>
+                Nueva Orden
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="orden-stats-grid">
+        <div class="stat-card-orden">
+            <div class="stat-icon-orden stat-icon-total">
+                <i class="bi bi-clipboard-data"></i>
+            </div>
+            <div class="stat-value-orden">{{ total_ordenes }}</div>
+            <div class="stat-label-orden">Total Órdenes</div>
+        </div>
+
+        <div class="stat-card-orden">
+            <div class="stat-icon-orden stat-icon-pendientes">
+                <i class="bi bi-clock"></i>
+            </div>
+            <div class="stat-value-orden">{{ ordenes_pendientes }}</div>
+            <div class="stat-label-orden">Pendientes</div>
+        </div>
+
+        <div class="stat-card-orden">
+            <div class="stat-icon-orden stat-icon-progreso">
+                <i class="bi bi-play-circle"></i>
+            </div>
+            <div class="stat-value-orden">{{ ordenes_en_progreso }}</div>
+            <div class="stat-label-orden">En Progreso</div>
+        </div>
+
+        <div class="stat-card-orden">
+            <div class="stat-icon-orden stat-icon-completadas">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="stat-value-orden">{{ ordenes_completadas }}</div>
+            <div class="stat-label-orden">Completadas</div>
+        </div>
+
+        <div class="stat-card-orden">
+            <div class="stat-icon-orden stat-icon-atrasadas">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div class="stat-value-orden">{{ ordenes_atrasadas }}</div>
+            <div class="stat-label-orden">Atrasadas</div>
+        </div>
+
+        <div class="stat-card-orden">
+            <div class="stat-icon-orden stat-icon-eficiencia">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <div class="stat-value-orden">{{ eficiencia_promedio }}%</div>
+            <div class="stat-label-orden">Eficiencia</div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-container">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Buscar</label>
+                <input type="text" class="form-control" name="search" value="{{ search }}" 
+                       placeholder="Número, título o equipo...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Estado</label>
+                <select class="form-select" name="estado">
+                    <option value="">Todos</option>
+                    {% for value, label in estados %}
+                        <option value="{{ value }}" {% if value == estado_filtro %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Prioridad</label>
+                <select class="form-select" name="prioridad">
+                    <option value="">Todas</option>
+                    {% for value, label in prioridades %}
+                        <option value="{{ value }}" {% if value == prioridad_filtro %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Tipo</label>
+                <select class="form-select" name="tipo">
+                    <option value="">Todos</option>
+                    {% for value, label in tipos %}
+                        <option value="{{ value }}" {% if value == tipo_filtro %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Asignado a</label>
+                <select class="form-select" name="asignado">
+                    <option value="">Todos</option>
+                    {% for usuario in usuarios %}
+                        <option value="{{ usuario.id }}" {% if usuario.id|stringformat:"s" == asignado_filtro %}selected{% endif %}>
+                            {{ usuario.get_full_name|default:usuario.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary d-block w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Órdenes -->
+    {% if ordenes %}
+        <div class="ordenes-grid">
+            {% for orden in ordenes %}
+                <div class="trabajo-card position-relative">
+                    {% if orden.atrasada %}
+                        <div class="atrasada-indicator" title="Orden atrasada"></div>
+                    {% endif %}
+
+                    <div class="trabajo-header">
+                        <h5 class="trabajo-numero">{{ orden.numero_orden }}</h5>
+                        <p class="trabajo-titulo">{{ orden.titulo }}</p>
+                        
+                        <div class="trabajo-meta">
+                            <span class="badge {{ orden.get_estado_badge_class }} badge-estado">
+                                {{ orden.get_estado_display }}
+                            </span>
+                            <span class="badge {{ orden.get_prioridad_badge_class }} badge-prioridad">
+                                {{ orden.get_prioridad_display }}
+                            </span>
+                            <small class="text-muted">
+                                <i class="bi bi-tag me-1"></i>
+                                {{ orden.get_tipo_orden_display }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="trabajo-body">
+                        <div class="trabajo-equipo">
+                            <div class="trabajo-equipo-codigo">{{ orden.equipo.codigo_interno }}</div>
+                            <div class="trabajo-equipo-nombre">{{ orden.equipo.nombre }}</div>
+                        </div>
+
+                        <p class="trabajo-descripcion">{{ orden.descripcion }}</p>
+
+                        <div class="trabajo-fechas">
+                            <div class="fecha-item">
+                                <span class="fecha-label">Creada</span>
+                                <span class="fecha-valor">{{ orden.fecha_creacion|date:"d/m/Y" }}</span>
+                            </div>
+                            <div class="fecha-item">
+                                <span class="fecha-label">Programada</span>
+                                <span class="fecha-valor">
+                                    {% if orden.fecha_programada %}
+                                        {{ orden.fecha_programada|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        Sin programar
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        {% if orden.horas_estimadas > 0 %}
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between text-muted small">
+                                    <span>Progreso estimado</span>
+                                    {% if orden.eficiencia > 0 %}
+                                        <span>{{ orden.eficiencia|floatformat:1 }}% eficiencia</span>
+                                    {% endif %}
+                                </div>
+                                <div class="progress mt-1" style="height: 6px;">
+                                    {% if orden.horas_reales > 0 %}
+                                        {% widthratio orden.horas_reales orden.horas_estimadas 100 as progress_percent %}
+                                        <div class="progress-bar" style="width: {{ progress_percent|add:0 }}%"></div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="trabajo-footer">
+                        <div class="trabajo-asignado">
+                            {% if orden.asignado_a %}
+                                <div class="avatar-small">
+                                    {{ orden.asignado_a.first_name.0|default:orden.asignado_a.username.0|upper }}
+                                </div>
+                                <span>{{ orden.asignado_a.get_full_name|default:orden.asignado_a.username }}</span>
+                            {% else %}
+                                <span class="text-muted">Sin asignar</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="trabajo-actions">
+                            <a href="{% url 'mantenimiento:orden-detalle' orden.pk %}" 
+                               class="btn btn-outline-primary btn-sm-custom">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if orden.estado != 'completada' and orden.estado != 'cancelada' %}
+                                <a href="{% url 'mantenimiento:actualizar-orden' orden.pk %}" 
+                                   class="btn btn-outline-warning btn-sm-custom">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Primera</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Anterior</a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Siguiente</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">Última</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-clipboard-x"></i>
+            </div>
+            <h4>No se encontraron órdenes de trabajo</h4>
+            <p>No hay órdenes que coincidan con los filtros seleccionados.</p>
+            <a href="{% url 'mantenimiento:crear-orden' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>
+                Crear Primera Orden
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit del formulario de filtros cuando cambian los select
+        const selects = document.querySelectorAll('.filtros-container select');
+        selects.forEach(select => {
+            select.addEventListener('change', function() {
+                this.form.submit();
+            });
+        });
+
+        // Animación de las tarjetas al cargar
+        const cards = document.querySelectorAll('.trabajo-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.4s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}
