@@ -1,15 +1,272 @@
+# ===== ENTORNO VIRTUAL =====
 /.venv
-# Ignora archivos del sistema Mac 
-.DS_store
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
 
-# Ignora la carpeta node_modules
-node_modules
+# ===== PYTHON =====
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 
-# Ignora todos los archivos de texto
-*.txt
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Ignora los archivos relacionados a API keys
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# ===== DJANGO =====
+# Base de datos
+*.sqlite3
+*.db
+db.sqlite3
+db.sqlite3-journal
+
+# Archivos de migración generados (opcional, comentar si quieres versionar)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# Archivos de configuración locales
+local_settings.py
+settings_local.py
+
+# Archivos de log
+*.log
+logs/
+
+# Archivos de sesión Django
+django_session/
+
+# Archivos estáticos compilados
+/static/
+staticfiles/
+/media/
+
+# ===== ARCHIVOS DE MEDIA GRANDES =====
+# Documentos grandes
+media/documentos/**/*.pptx
+media/documentos/**/*.pdf
+media/documentos/**/*.docx
+media/documentos/**/*.xlsx
+media/documentos/**/*.zip
+media/documentos/**/*.rar
+media/documentos/**/*.7z
+
+# Imágenes grandes
+media/images/**/*.png
+media/images/**/*.jpg
+media/images/**/*.jpeg
+media/images/**/*.gif
+media/images/**/*.bmp
+media/images/**/*.tiff
+media/images/**/*.webp
+
+# Videos
+media/videos/**/*.mp4
+media/videos/**/*.avi
+media/videos/**/*.mov
+media/videos/**/*.wmv
+media/videos/**/*.mkv
+media/videos/**/*.flv
+
+# Audio
+media/audio/**/*.mp3
+media/audio/**/*.wav
+media/audio/**/*.flac
+media/audio/**/*.aac
+
+# ===== SISTEMA OPERATIVO =====
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===== IDEs y EDITORES =====
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ===== CONFIGURACIÓN Y SECRETOS =====
+# Variables de entorno
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.envrc
 
-# Ignora archivos de configuración SASS
-.sass-cache
+# Archivos de configuración sensibles
+*.pem
+*.key
+*.crt
+*.csr
+config.json
+secrets.json
+
+# ===== NODE.JS (si usas frontend con npm/yarn) =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== SASS/CSS =====
+.sass-cache/
+*.css.map
+*.sass.map
+*.scss.map
+
+# ===== RESPALDOS Y TEMPORALES =====
+# Respaldos
+*.bak
+*.backup
+*.tmp
+*.temp
+*~
+
+# Carpetas temporales del proyecto
+temp/
+tmp/
+cache/
+
+# ===== ESPECÍFICO DEL PROYECTO =====
+# Archivos de datos locales
+data/
+fixtures/local_*.json
+
+# Documentación generada
+docs/_build/
+site/
+
+# Reportes
+reports/
+*.report
+
+# ===== VARIOS =====
+# Archivos comprimidos grandes
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.tbz2
+*.tar.xz
+*.txz
+
+# Archivos de texto grandes (comentar si necesitas algunos .txt)
+# *.txt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
