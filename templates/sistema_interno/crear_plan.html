@@ -535,338 +535,422 @@
                 </p>
                 
                 <div class="form-row">
+                    <!-- Verificar y corregir estos campos específicos -->
                     <div class="form-group">
-                        <label class="form-label" for="{{ form.nombre.id_for_label }}">
-                            <i class="bi bi-tag"></i>
-                            Nombre del Plan
-                            <span class="required">*</span>
+                        <label for="id_nombre" class="form-label">
+                            <i class="bi bi-file-text"></i>
+                            Nombre del Plan <span class="required">*</span>
                         </label>
                         {{ form.nombre }}
-                        <div class="form-help">Nombre descriptivo que identifique claramente el plan</div>
+                        {% if form.nombre.errors %}
+                            <div class="form-error">
+                                <i class="bi bi-exclamation-circle"></i>
+                                {{ form.nombre.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">
+                            Nombre descriptivo del plan de mantenimiento
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="{{ form.equipo.id_for_label }}">
-                            <i class="bi bi-gear"></i>
-                            Equipo Asignado
-                            <span class="required">*</span>
+                        <label for="id_equipo" class="form-label">
+                            <i class="bi bi-gear-wide-connected"></i>
+                            Equipo <span class="required">*</span>
                         </label>
                         {{ form.equipo }}
-                        <div class="form-help">Seleccione el equipo que recibirá mantenimiento</div>
-                    </div>
-                </div>
-                
-                <div class="form-row full-width">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.descripcion.id_for_label }}">
-                            <i class="bi bi-file-text"></i>
-                            Descripción Detallada
-                        </label>
-                        {{ form.descripcion }}
-                        <div class="form-help">Descripción técnica completa del plan según normativas aplicables</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sección 2: Configuración Técnica -->
-            <div class="form-section" data-section="2">
-                <h3 class="form-section-title">
-                    <i class="bi bi-sliders"></i>
-                    Configuración Técnica
-                </h3>
-                <p class="form-section-subtitle">
-                    Configure los parámetros técnicos y operacionales del mantenimiento
-                </p>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.tipo_mantenimiento.id_for_label }}">
-                            <i class="bi bi-layers"></i>
-                            Tipo de Mantenimiento
-                            <span class="required">*</span>
-                        </label>
-                        {{ form.tipo_mantenimiento }}
-                        <div class="form-help">Seleccione según la estrategia de mantenimiento</div>
+                        {% if form.equipo.errors %}
+                            <div class="form-error">
+                                <i class="bi bi-exclamation-circle"></i>
+                                {{ form.equipo.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">
+                            Equipo al que se aplicará el plan de mantenimiento
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="{{ form.frecuencia.id_for_label }}">
-                            <i class="bi bi-clock"></i>
-                            Frecuencia de Ejecución
-                            <span class="required">*</span>
+                        <label for="id_estado" class="form-label">
+                            <i class="bi bi-check-circle"></i>
+                            Estado del Plan <span class="required">*</span>
                         </label>
-                        {{ form.frecuencia }}
-                        <div class="form-help">Periodicidad basada en análisis de criticidad</div>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.duracion_estimada.id_for_label }}">
-                            <i class="bi bi-stopwatch"></i>
-                            Duración Estimada (horas)
-                            <span class="required">*</span>
-                        </label>
-                        {{ form.duracion_estimada }}
-                        <div class="form-help">Tiempo estimado de ejecución completa</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.fecha_inicio.id_for_label }}">
-                            <i class="bi bi-calendar-event"></i>
-                            Fecha de Inicio
-                            <span class="required">*</span>
-                        </label>
-                        {{ form.fecha_inicio }}
-                        <div class="form-help">Fecha de entrada en vigencia del plan</div>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.prioridad.id_for_label }}">
-                            <i class="bi bi-exclamation-triangle"></i>
-                            Nivel de Prioridad
-                        </label>
-                        {{ form.prioridad }}
-                        <div class="form-help">Prioridad basada en análisis de riesgo</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.nivel_criticidad.id_for_label }}">
-                            <i class="bi bi-shield-exclamation"></i>
-                            Criticidad del Equipo
-                        </label>
-                        {{ form.nivel_criticidad }}
-                        <div class="form-help">Nivel de criticidad según impacto operacional</div>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.responsable_principal.id_for_label }}">
-                            <i class="bi bi-person-badge"></i>
-                            Responsable Principal
-                        </label>
-                        {{ form.responsable_principal }}
-                        <div class="form-help">Técnico responsable del plan</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.costo_estimado.id_for_label }}">
-                            <i class="bi bi-currency-dollar"></i>
-                            Costo Estimado (Bs.)
-                        </label>
-                        {{ form.costo_estimado }}
-                        <div class="form-help">Costo total estimado por ejecución</div>
-                    </div>
-                </div>
-                
-                <div class="form-row full-width">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.responsables_secundarios.id_for_label }}">
-                            <i class="bi bi-people"></i>
-                            Responsables Secundarios
-                        </label>
-                        {{ form.responsables_secundarios }}
-                        <div class="form-help">Personal de apoyo para la ejecución del plan</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sección 3: Normativas y Control de Calidad -->
-            <div class="form-section" data-section="3">
-                <h3 class="form-section-title">
-                    <i class="bi bi-shield-check"></i>
-                    Normativas y Control de Calidad
-                </h3>
-                <p class="form-section-subtitle">
-                    Configure el cumplimiento normativo y los estándares de calidad aplicables
-                </p>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.norma_aplicable.id_for_label }}">
-                            <i class="bi bi-award"></i>
-                            Norma Técnica Aplicable
-                        </label>
-                        {{ form.norma_aplicable }}
-                        <div class="form-help">Seleccione la norma industrial aplicable</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.norma_especifica.id_for_label }}">
-                            <i class="bi bi-file-ruled"></i>
-                            Norma Específica
-                        </label>
-                        {{ form.norma_especifica }}
-                        <div class="form-help">Especifique si seleccionó "Otra norma específica"</div>
-                    </div>
-                </div>
-                
-                <!-- Cumplimiento Normativo -->
-                <div class="form-row full-width">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="bi bi-check2-all"></i>
-                            Certificaciones de Cumplimiento
-                        </label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                {{ form.cumple_iso }}
-                                <label for="{{ form.cumple_iso.id_for_label }}">
-                                    Cumple ISO 55000
-                                </label>
+                        {{ form.estado }}
+                        {% if form.estado.errors %}
+                            <div class="form-error">
+                                <i class="bi bi-exclamation-circle"></i>
+                                {{ form.estado.errors.0 }}
                             </div>
-                            <div class="checkbox-item">
-                                {{ form.cumple_api }}
-                                <label for="{{ form.cumple_api.id_for_label }}">
-                                    Cumple API 580
-                                </label>
-                            </div>
-                            <div class="checkbox-item">
-                                {{ form.cumple_asme }}
-                                <label for="{{ form.cumple_asme.id_for_label }}">
-                                    Cumple ASME
-                                </label>
-                            </div>
-                            <div class="checkbox-item">
-                                {{ form.certificacion_vigente }}
-                                <label for="{{ form.certificacion_vigente.id_for_label }}">
-                                    Certificación Vigente
-                                </label>
-                            </div>
-                            <div class="checkbox-item">
-                                {{ form.requiere_parada_equipo }}
-                                <label for="{{ form.requiere_parada_equipo.id_for_label }}">
-                                    Requiere Parada de Equipo
-                                </label>
-                            </div>
+                        {% endif %}
+                        <div class="form-help">
+                            Estado actual del plan de mantenimiento
                         </div>
                     </div>
                 </div>
                 
-                <div class="form-row">
+                <div class="form-row full-width">
                     <div class="form-group">
-                        <label class="form-label" for="{{ form.fecha_ultima_auditoria.id_for_label }}">
-                            <i class="bi bi-calendar-check"></i>
-                            Fecha Última Auditoría
+                        <label for="id_descripcion" class="form-label">
+                            <i class="bi bi-card-text"></i>
+                            Descripción
                         </label>
-                        {{ form.fecha_ultima_auditoria }}
-                        <div class="form-help">Fecha de la última auditoría de calidad</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.estado.id_for_label }}">
-                            <i class="bi bi-activity"></i>
-                            Estado del Plan
-                        </label>
-                        {{ form.estado }}
-                        <div class="form-help">Estado actual del plan de mantenimiento</div>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.procedimiento_documento.id_for_label }}">
-                            <i class="bi bi-file-earmark-pdf"></i>
-                            Documento de Procedimiento
-                        </label>
-                        {{ form.procedimiento_documento }}
-                        <div class="form-help">Adjunte el procedimiento técnico (PDF, DOC)</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.lista_verificacion.id_for_label }}">
-                            <i class="bi bi-list-check"></i>
-                            Lista de Verificación
-                        </label>
-                        {{ form.lista_verificacion }}
-                        <div class="form-help">Checklist para control de calidad</div>
+                        {{ form.descripcion }}
+                        {% if form.descripcion.errors %}
+                            <div class="form-error">
+                                <i class="bi bi-exclamation-circle"></i>
+                                {{ form.descripcion.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">
+                            Descripción detallada del plan según normativas ISO 55000
+                        </div>
                     </div>
                 </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.herramientas_especiales.id_for_label }}">
-                            <i class="bi bi-tools"></i>
-                            Herramientas Especiales
-                        </label>
-                        {{ form.herramientas_especiales }}
-                        <div class="form-help">Herramientas especializadas requeridas</div>
+
+            <!-- Sección 2: Configuración Técnica -->
+                <div class="form-section" data-section="2">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-sliders"></i>
+                        Configuración Técnica
+                    </h3>
+                    <p class="form-section-subtitle">
+                        Configure los parámetros técnicos y operacionales del mantenimiento
+                    </p>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_tipo_mantenimiento" class="form-label">
+                                <i class="bi bi-tools"></i>
+                                Tipo de Mantenimiento <span class="required">*</span>
+                            </label>
+                            {{ form.tipo_mantenimiento }}
+                            {% if form.tipo_mantenimiento.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.tipo_mantenimiento.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_frecuencia" class="form-label">
+                                <i class="bi bi-calendar-week"></i>
+                                Frecuencia <span class="required">*</span>
+                            </label>
+                            {{ form.frecuencia }}
+                            {% if form.frecuencia.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.frecuencia.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.materiales_requeridos.id_for_label }}">
-                            <i class="bi bi-box-seam"></i>
-                            Materiales Requeridos
-                        </label>
-                        {{ form.materiales_requeridos }}
-                        <div class="form-help">Materiales y consumibles necesarios</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_duracion_estimada" class="form-label">
+                                <i class="bi bi-clock"></i>
+                                Duración Estimada (horas) <span class="required">*</span>
+                            </label>
+                            {{ form.duracion_estimada }}
+                            {% if form.duracion_estimada.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.duracion_estimada.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_prioridad" class="form-label">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Prioridad
+                            </label>
+                            {{ form.prioridad }}
+                            {% if form.prioridad.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.prioridad.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_responsable_principal" class="form-label">
+                                <i class="bi bi-person-badge"></i>
+                                Responsable Principal
+                            </label>
+                            {{ form.responsable_principal }}
+                            {% if form.responsable_principal.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.responsable_principal.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_fecha_inicio" class="form-label">
+                                <i class="bi bi-calendar-plus"></i>
+                                Fecha de Inicio <span class="required">*</span>
+                            </label>
+                            {{ form.fecha_inicio }}
+                            {% if form.fecha_inicio.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.fecha_inicio.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_costo_estimado" class="form-label">
+                                <i class="bi bi-currency-dollar"></i>
+                                Costo Estimado (Bs.)
+                            </label>
+                            {{ form.costo_estimado }}
+                            {% if form.costo_estimado.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.costo_estimado.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_nivel_criticidad" class="form-label">
+                                <i class="bi bi-shield-check"></i>
+                                Nivel de Criticidad
+                            </label>
+                            {{ form.nivel_criticidad }}
+                            {% if form.nivel_criticidad.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.nivel_criticidad.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row full-width">
+                        <div class="form-group">
+                            <label for="id_herramientas_especiales" class="form-label">
+                                <i class="bi bi-wrench-adjustable"></i>
+                                Herramientas Especiales
+                            </label>
+                            {{ form.herramientas_especiales }}
+                            {% if form.herramientas_especiales.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.herramientas_especiales.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-help">
+                                Herramientas específicas requeridas para este plan
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+            <!-- Sección 3: Normativas y Control de Calidad -->
+                <div class="form-section" data-section="3">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-shield-check"></i>
+                        Normativas y Control de Calidad
+                    </h3>
+                    <p class="form-section-subtitle">
+                        Configure el cumplimiento normativo y los estándares de calidad aplicables
+                    </p>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_norma_aplicable" class="form-label">
+                                <i class="bi bi-award"></i>
+                                Norma Técnica Aplicable
+                            </label>
+                            {{ form.norma_aplicable }}
+                            {% if form.norma_aplicable.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.norma_aplicable.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_norma_especifica" class="form-label">
+                                <i class="bi bi-file-earmark-text"></i>
+                                Norma Específica
+                            </label>
+                            {{ form.norma_especifica }}
+                            {% if form.norma_especifica.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.norma_especifica.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-help">
+                                Especificar si seleccionó "Otra norma específica"
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cumplimiento Normativo -->
+                    <div class="form-row full-width">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-check2-square"></i>
+                                Cumplimiento Normativo
+                            </label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    {{ form.cumple_iso }}
+                                    <label for="id_cumple_iso">ISO 55000 - Gestión de Activos</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    {{ form.cumple_api }}
+                                    <label for="id_cumple_api">API 580 - Inspección Basada en Riesgo</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    {{ form.cumple_asme }}
+                                    <label for="id_cumple_asme">ASME - Códigos de Construcción</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    {{ form.certificacion_vigente }}
+                                    <label for="id_certificacion_vigente">Certificación Vigente</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_requiere_parada_equipo" class="form-label">
+                                <i class="bi bi-pause-circle"></i>
+                                Requiere Parada de Equipo
+                            </label>
+                            <div class="checkbox-item">
+                                {{ form.requiere_parada_equipo }}
+                                <label for="id_requiere_parada_equipo">Sí, requiere parada completa del equipo</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_fecha_ultima_auditoria" class="form-label">
+                                <i class="bi bi-calendar-check"></i>
+                                Última Auditoría
+                            </label>
+                            {{ form.fecha_ultima_auditoria }}
+                            {% if form.fecha_ultima_auditoria.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.fecha_ultima_auditoria.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
 
             <!-- Sección 4: Análisis de Fallas y Repuestos -->
-            <div class="form-section" data-section="4">
-                <h3 class="form-section-title">
-                    <i class="bi bi-graph-up-arrow"></i>
-                    Análisis de Fallas y Repuestos Críticos
-                </h3>
-                <p class="form-section-subtitle">
-                    Configure métricas de confiabilidad y gestión de repuestos críticos
-                </p>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.mtbf.id_for_label }}">
-                            <i class="bi bi-speedometer2"></i>
-                            MTBF (Horas)
-                        </label>
-                        {{ form.mtbf }}
-                        <div class="form-help">Tiempo Medio Entre Fallas</div>
+                <div class="form-section" data-section="4">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Análisis de Fallas y Repuestos Críticos
+                    </h3>
+                    <p class="form-section-subtitle">
+                        Configure métricas de confiabilidad y gestión de repuestos críticos
+                    </p>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_mtbf" class="form-label">
+                                <i class="bi bi-graph-up-arrow"></i>
+                                MTBF (Tiempo Medio Entre Fallas)
+                            </label>
+                            {{ form.mtbf }}
+                            {% if form.mtbf.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.mtbf.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-help">
+                                Tiempo promedio entre fallas en horas
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_mttr" class="form-label">
+                                <i class="bi bi-graph-down-arrow"></i>
+                                MTTR (Tiempo Medio de Reparación)
+                            </label>
+                            {{ form.mttr }}
+                            {% if form.mttr.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.mttr.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-help">
+                                Tiempo promedio de reparación en horas
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.mttr.id_for_label }}">
-                            <i class="bi bi-wrench"></i>
-                            MTTR (Horas)
-                        </label>
-                        {{ form.mttr }}
-                        <div class="form-help">Tiempo Medio de Reparación</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_disponibilidad_objetivo" class="form-label">
+                                <i class="bi bi-speedometer2"></i>
+                                Disponibilidad Objetivo (%)
+                            </label>
+                            {{ form.disponibilidad_objetivo }}
+                            {% if form.disponibilidad_objetivo.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.disponibilidad_objetivo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.disponibilidad_objetivo.id_for_label }}">
-                            <i class="bi bi-target"></i>
-                            Disponibilidad Objetivo (%)
-                        </label>
-                        {{ form.disponibilidad_objetivo }}
-                        <div class="form-help">Meta de disponibilidad operacional</div>
+                    
+                    <div class="form-row full-width">
+                        <div class="form-group">
+                            <label for="id_repuestos_criticos" class="form-label">
+                                <i class="bi bi-gear-wide"></i>
+                                Repuestos Críticos
+                            </label>
+                            {{ form.repuestos_criticos }}
+                            {% if form.repuestos_criticos.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.repuestos_criticos.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-help">
+                                Mantenga presionado Ctrl (Cmd en Mac) para seleccionar múltiples repuestos
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="form-row full-width">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.repuestos_criticos.id_for_label }}">
-                            <i class="bi bi-gear-wide-connected"></i>
-                            Repuestos Críticos
-                        </label>
-                        {{ form.repuestos_criticos }}
-                        <div class="form-help">Seleccione los repuestos críticos necesarios para este plan</div>
-                    </div>
-                </div>
-                
-                <div class="form-row full-width">
-                    <div class="form-group">
-                        <label class="form-label" for="{{ form.observaciones.id_for_label }}">
-                            <i class="bi bi-chat-square-text"></i>
-                            Observaciones Adicionales
-                        </label>
-                        {{ form.observaciones }}
-                        <div class="form-help">Comentarios, consideraciones especiales o notas técnicas</div>
+                    
+                    <div class="form-row full-width">
+                        <div class="form-group">
+                            <label for="id_observaciones" class="form-label">
+                                <i class="bi bi-chat-left-text"></i>
+                                Observaciones
+                            </label>
+                            {{ form.observaciones }}
+                            {% if form.observaciones.errors %}
+                                <div class="form-error">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {{ form.observaciones.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1044,6 +1128,41 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             validationSummary.classList.remove('show');
         }
+    });
+    
+    // Debug adicional para el envío del formulario
+    form.addEventListener('submit', function(event) {
+        console.log('🚀 Enviando formulario...');
+        
+        // Mostrar todos los datos del formulario
+        const formData = new FormData(form);
+        console.log('📋 Datos del formulario:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+        
+        // Verificar campos requeridos
+        const camposRequeridos = ['nombre', 'equipo', 'estado', 'tipo_mantenimiento', 'frecuencia', 'duracion_estimada', 'fecha_inicio'];  // <-- Agregar 'estado'
+        let camposFaltantes = [];
+        
+        camposRequeridos.forEach(campo => {
+            const valor = formData.get(campo);
+            if (!valor || valor.trim() === '') {
+                camposFaltantes.push(campo);
+            }
+        });
+        
+        if (camposFaltantes.length > 0) {
+            console.error('❌ Campos requeridos faltantes:', camposFaltantes);
+            event.preventDefault();
+            alert(`Faltan los siguientes campos requeridos: ${camposFaltantes.join(', ')}`);
+            return false;
+        }
+        
+        console.log('✅ Formulario válido, enviando...');
+        
+        // Continuar con el envío normal del formulario
+        // No hacer preventDefault() aquí
     });
     
     // Inicializar progreso

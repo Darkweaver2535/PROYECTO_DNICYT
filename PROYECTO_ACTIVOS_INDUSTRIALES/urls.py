@@ -21,7 +21,8 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from views import landing  # Ajusta el import según tu estructura
 from django.views.generic import TemplateView
-from apps.equipos.views import EquipoListView  # Agrega este import
+from apps.dashboard.views import dashboard_view  # ← CORREGIDO: Importar desde dashboard
+from apps.equipos.views import EquipoListView  # ← Solo el EquipoListView desde equipos
 
 urlpatterns = [
     path('', landing, name='landing'),
@@ -37,7 +38,7 @@ urlpatterns = [
     path('laboratorio/', TemplateView.as_view(template_name="secciones/laboratorio.html"), name='laboratorio'),
     path('documentos/', TemplateView.as_view(template_name="secciones/documentos.html"), name='documentos'),
     path('contacto/', TemplateView.as_view(template_name="secciones/contacto.html"), name='contacto'),
-    path('inventario/', EquipoListView.as_view(), name='inventario_equipos'),  # Cambia aquí
-    path('dashboard/', TemplateView.as_view(template_name="sistema_interno/dashboard.html"), name='dashboard'),
+    path('inventario/', EquipoListView.as_view(), name='inventario_equipos'),
+    path('dashboard/', dashboard_view, name='dashboard'),  # ← CORREGIDO: Usar dashboard_view importado correctamente
     path('mantenimiento/', include('apps.mantenimiento.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

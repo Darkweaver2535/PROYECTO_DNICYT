@@ -48,10 +48,11 @@ class PlanMantenimiento(models.Model):
     ]
     
     ESTADO_CHOICES = [
+        ('borrador', 'Borrador'),
         ('activo', 'Activo'),
         ('pausado', 'Pausado'),
-        ('inactivo', 'Inactivo'),
-        ('revision', 'En Revisión'),
+        ('completado', 'Completado'),
+        ('cancelado', 'Cancelado'),
     ]
 
     NORMAS_APLICABLES_CHOICES = [
@@ -80,7 +81,13 @@ class PlanMantenimiento(models.Model):
     
     # Prioridad y estado
     prioridad = models.CharField("Prioridad", max_length=10, choices=PRIORIDAD_CHOICES, default='media')
-    estado = models.CharField("Estado", max_length=15, choices=ESTADO_CHOICES, default='activo')
+    estado = models.CharField(
+        "Estado",
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='borrador',  # Asegurar que tenga un default
+        help_text="Estado actual del plan de mantenimiento"
+    )
     
     # Responsables
     responsable_principal = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
@@ -179,8 +186,8 @@ class PlanMantenimiento(models.Model):
         """Calcula la fecha del próximo mantenimiento basado en la frecuencia"""
         from datetime import timedelta
         
-        if not self.ultima_ejecucion:
-            return self.fecha_inicio
+        # Usar última ejecución como base, o fecha de inicio si no hay
+        fecha_base = self.ultima_ejecucion or self.fecha_inicio
         
         dias_frecuencia = {
             'diario': 1,
@@ -194,7 +201,7 @@ class PlanMantenimiento(models.Model):
         }
         
         dias = dias_frecuencia.get(self.frecuencia, 30)
-        return self.ultima_ejecucion + timedelta(days=dias)
+        return fecha_base + timedelta(days=dias)
 
     def esta_atrasado(self):
         """Verifica si el mantenimiento está atrasado"""
@@ -260,6 +267,8 @@ class PlanMantenimiento(models.Model):
         return min(eficiencia, 100)
 
     def save(self, *args, **kwargs):
+        print(f"🔧 DEBUG: Guardando plan {self.nombre}")
+        
         # Generar código automático si no existe
         if not self.codigo_plan:
             last_plan = PlanMantenimiento.objects.filter(
@@ -274,14 +283,39 @@ class PlanMantenimiento(models.Model):
             
             self.codigo_plan = f"PM{new_number:04d}"
         
-        # Calcular próxima ejecución si no existe
+        # MEJORAR: Calcular próxima ejecución
         if not self.proxima_ejecucion:
-            self.proxima_ejecucion = self.calcular_siguiente_mantenimiento()
+            if self.ultima_ejecucion:
+                self.proxima_ejecucion = self.calcular_siguiente_mantenimiento()
+                print(f"🔧 DEBUG: Próxima ejecución calculada desde última: {self.proxima_ejecucion}")
+            elif self.fecha_inicio:
+                # Si es un plan nuevo, la próxima ejecución es la fecha de inicio
+                self.proxima_ejecucion = self.fecha_inicio
+                print(f"🔧 DEBUG: Próxima ejecución asignada como fecha inicio: {self.proxima_ejecucion}")
         
         # Actualizar eficiencia promedio
         self.eficiencia_promedio = self.calcular_eficiencia_actual()
         
+        print(f"🔧 DEBUG: Plan guardado - Código: {self.codigo_plan}, Próxima: {self.proxima_ejecucion}")
+        
         super().save(*args, **kwargs)
+
+    def get_equipo_info(self):
+        """Retorna información completa del equipo asociado"""
+        if self.equipo:
+            return {
+                'codigo': self.equipo.codigo_interno,
+                'nombre': self.equipo.nombre,
+                'seccion': self.equipo.get_seccion_display(),
+                'estado': self.equipo.get_estado_display(),
+                'ubicacion': self.equipo.ubicacion_fisica,
+                'responsable': self.equipo.responsable,
+            }
+        return None
+
+    def puede_ejecutarse(self):
+        """Verifica si el plan puede ejecutarse (equipo operativo)"""
+        return self.equipo and self.equipo.estado == 'OPERATIVO' and self.estado == 'activo'
 
 
 class TareaMantenimiento(models.Model):

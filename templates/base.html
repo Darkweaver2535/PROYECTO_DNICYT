@@ -1147,7 +1147,7 @@
                     Mantenimiento
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.namespace == 'mantenimiento' %}{% if 'plan' in request.resolver_match.url_name %}active{% endif %}{% endif %}" 
+                    <a class="nav-link {% if request.resolver_match.url_name == 'inventario_equipos' %}active{% endif %}" 
                        href="{% url 'mantenimiento:planes-mantenimiento' %}">
                         <i class="nav-icon bi bi-calendar-check"></i>
                         <span class="nav-text">Planes de Mantenimiento</span>

@@ -14,6 +14,8 @@ from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
 from django.conf import settings
 import os
+from django.db.models import Count, Q, Avg
+from datetime import datetime, timedelta
 
 class EquipoListView(ListView):
     model = Equipo
@@ -73,14 +75,34 @@ class EquipoUpdateView(UpdateView):
     form_class = EquipoForm
     template_name = 'sistema_interno/editar_equipo.html'
     context_object_name = 'equipo'
-    success_url = reverse_lazy('equipos:equipo-lista')
+    
+    def get_success_url(self):
+        return reverse('equipos:equipo-detalle', kwargs={'pk': self.object.pk})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_year'] = datetime.now().year
+        return context
     
     def form_valid(self, form):
+        print(f"DEBUG: Formulario válido - {form.cleaned_data}")  # Debug
         messages.success(
             self.request, 
             f'El equipo "{form.instance.nombre}" ha sido actualizado exitosamente.'
         )
         return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        print(f"DEBUG: Formulario inválido - {form.errors}")  # Debug
+        messages.error(
+            self.request, 
+            'Error al actualizar el equipo. Por favor revise los campos marcados.'
+        )
+        return super().form_invalid(form)
+
+    def post(self, request, *args, **kwargs):
+        print(f"DEBUG: POST data recibido - {request.POST}")  # Debug
+        return super().post(request, *args, **kwargs)
 
 class EquipoDeleteView(DeleteView):
     model = Equipo

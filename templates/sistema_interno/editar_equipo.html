@@ -112,60 +112,68 @@
         font-weight: 700;
     }
 
+    /* Corregir estilos de formulario para que sean compatibles */
     .edit-equipment-container .form-control,
     .edit-equipment-container .form-select {
-        border: 2px solid var(--edit-border-color);
-        border-radius: 0.75rem;
-        padding: 0.75rem 1rem;
-        background: var(--edit-pure-white);
-        transition: all var(--edit-transition-speed) ease;
-        font-size: 1rem;
+        border: 2px solid var(--edit-border-color) !important;
+        border-radius: 0.75rem !important;
+        padding: 0.75rem 1rem !important;
+        background: var(--edit-pure-white) !important;
+        transition: all var(--edit-transition-speed) ease !important;
+        font-size: 1rem !important;
+        width: 100% !important;
     }
 
-    .edit-equipment-container .form-control:focus,
-    .edit-equipment-container .form-select:focus {
-        outline: none;
-        border-color: var(--edit-primary-blue);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        background: var(--edit-pure-white);
+    .form-control.edit-equipment-container:focus,
+    .form-select.edit-equipment-container:focus {
+        outline: none !important;
+        border-color: var(--edit-primary-blue) !important;
+        box-shadow: 0 0 0 3px rgba(0, 130, 246, 0.1) !important;
+        background: var(--edit-pure-white) !important;
     }
 
-    .edit-equipment-container .form-control:hover,
-    .edit-equipment-container .form-select:hover {
-        border-color: var(--edit-secondary-blue);
+    .form-control.edit-equipment-container:hover,
+    .form-select.edit-equipment-container:hover {
+        border-color: var(--edit-secondary-blue) !important;
     }
 
-    .edit-form-text {
-        color: var(--edit-text-light);
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
+    /* Asegurar que los selects funcionen correctamente */
+    .form-select.edit-equipment-container {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.75rem center !important;
+        background-size: 16px 12px !important;
+        padding-right: 2.5rem !important;
     }
 
+    /* Corregir input groups */
     .edit-input-group {
-        position: relative;
+        display: flex !important;
+        position: relative !important;
     }
 
     .edit-input-group-text {
-        background: var(--edit-light-blue);
-        border: 2px solid var(--edit-border-color);
-        border-right: none;
-        border-radius: 0.75rem 0 0 0.75rem;
-        color: var(--edit-primary-blue);
-        font-weight: 600;
+        background: var(--edit-light-blue) !important;
+        border: 2px solid var(--edit-border-color) !important;
+        border-right: none !important;
+        border-radius: 0.75rem 0 0 0.75rem !important;
+        color: var(--edit-primary-blue) !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 1rem !important;
+        display: flex !important;
+        align-items: center !important;
     }
 
     .edit-input-group .form-control {
-        border-left: none;
-        border-radius: 0 0.75rem 0.75rem 0;
+        border-left: none !important;
+        border-radius: 0 0.75rem 0.75rem 0 !important;
+        flex: 1 !important;
     }
 
     .edit-input-group:focus-within .edit-input-group-text {
-        border-color: var(--edit-primary-blue);
-        background: var(--edit-primary-blue);
-        color: white;
+        border-color: var(--edit-primary-blue) !important;
+        background: var(--edit-primary-blue) !important;
+        color: white !important;
     }
 
     .edit-btn-group-actions {
@@ -494,8 +502,26 @@
     .edit-equipment-container .form-select.is-valid {
         border-color: var(--edit-success-green) !important;
         background-color: rgba(16, 185, 129, 0.05) !important;
-    }
-
+    }    # Verificar que el EquipoUpdateView esté correcto
+    
+    class EquipoUpdateView(UpdateView):
+        model = Equipo
+        form_class = EquipoForm
+        template_name = 'sistema_interno/editar_equipo.html'
+        context_object_name = 'equipo'
+        success_url = reverse_lazy('equipos:equipo-lista')
+        
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['current_year'] = datetime.now().year
+            return context
+        
+        def form_valid(self, form):
+            messages.success(
+                self.request, 
+                f'El equipo "{form.instance.nombre}" ha sido actualizado exitosamente.'
+            )
+            return super().form_valid(form)
     .edit-equipment-container .form-select.is-invalid {
         border-color: var(--edit-danger-red) !important;
         background-color: rgba(239, 68, 68, 0.05) !important;
@@ -524,6 +550,105 @@
     .field-with-validation {
         position: relative;
     }
+
+    /* Estilos específicos para los campos del formulario Django */
+    .edit-equipment-container input[type="text"],
+    .edit-equipment-container input[type="number"],
+    .edit-equipment-container select,
+    .edit-equipment-container textarea {
+        border: 2px solid var(--edit-border-color) !important;
+        border-radius: 0.75rem !important;
+        padding: 0.75rem 1rem !important;
+        background: var(--edit-pure-white) !important;
+        transition: all var(--edit-transition-speed) ease !important;
+        font-size: 1rem !important;
+        width: 100% !important;
+        font-family: inherit !important;
+    }
+
+    .edit-equipment-container input[type="text"]:focus,
+    .edit-equipment-container input[type="number"]:focus,
+    .edit-equipment-container select:focus,
+    .edit-equipment-container textarea:focus {
+        outline: none !important;
+        border-color: var(--edit-primary-blue) !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        background: var(--edit-pure-white) !important;
+    }
+
+    .edit-equipment-container select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.75rem center !important;
+        background-size: 16px 12px !important;
+        padding-right: 2.5rem !important;
+        appearance: none !important;
+    }
+
+    .edit-equipment-container textarea {
+        resize: vertical !important;
+        min-height: 100px !important;
+    }
+
+    /* Fix para input groups */
+    .edit-input-group .edit-equipment-container {
+        border-left: none !important;
+        border-radius: 0 0.75rem 0.75rem 0 !important;
+    }
+
+    /* Estilos para la sección de imagen */
+    .image-preview {
+        border: 3px dashed var(--edit-border-color);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, var(--edit-off-white), rgba(37, 99, 235, 0.05));
+        transition: all var(--edit-transition-speed) ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .image-preview:hover {
+        border-color: var(--edit-primary-blue);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), var(--edit-light-blue));
+        transform: translateY(-2px);
+        box-shadow: var(--edit-shadow-lg);
+    }
+
+    .upload-placeholder {
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 0.75rem;
+        box-shadow: var(--edit-shadow-md);
+        transition: all var(--edit-transition-speed) ease;
+    }
+
+    .image-preview:hover img {
+        transform: scale(1.02);
+        box-shadow: var(--edit-shadow-lg);
+    }
+
+    /* Botón de eliminar imagen mejorado */
+    .image-preview .btn-danger {
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    .image-preview .btn-danger:hover {
+        transform: scale(1.1);
+        background-color: #dc2626 !important;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
 </style>
 {% endblock %}
 
@@ -537,19 +662,22 @@
                 Editar Equipo
             </h1>
         </div>
+        <!-- Reemplazar el breadcrumb -->
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{% url 'dashboard' %}" class="text-decoration-none">
-                        <i class="bi bi-house-door"></i> Dashboard
+                        <i class="bi bi-house"></i> Dashboard
                     </a>
                 </li>
                 <li class="breadcrumb-item">
                     <a href="{% url 'equipos:equipo-lista' %}" class="text-decoration-none">
-                        <i class="bi bi-list-ul"></i> Inventario
+                        <i class="bi bi-list"></i> Inventario
                     </a>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">Editar Equipo</li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="bi bi-pencil"></i> Editar Equipo
+                </li>
             </ol>
         </nav>
     </div>
@@ -572,21 +700,16 @@
                     <span class="edit-status-badge 
                         {% if equipo.estado == 'OPERATIVO' %}edit-status-operativo
                         {% elif equipo.estado == 'MANTENIMIENTO' %}edit-status-mantenimiento
-                        {% else %}edit-status-fuera-servicio{% endif %}">
-                        {% if equipo.estado == 'OPERATIVO' %}
-                            <i class="bi bi-check-circle-fill"></i>
-                        {% elif equipo.estado == 'MANTENIMIENTO' %}
-                            <i class="bi bi-tools"></i>
-                        {% else %}
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                        {% endif %}
+                        {% elif equipo.estado == 'FUERA_SERVICIO' %}edit-status-fuera-servicio
+                        {% endif %}">
+                        <i class="bi bi-circle-fill me-1"></i>
                         {{ equipo.get_estado_display }}
                     </span>
                 </p>
             </div>
             <div class="col-md-4 text-end">
                 <small class="text-muted d-block">Registrado: {{ equipo.fecha_ingreso|date:"d/m/Y" }}</small>
-                <small class="text-muted d-block">Última actualización: {{ equipo.fecha_actualizacion|date:"d/m/Y H:i" }}</small>
+                <small class="text-muted d-block">Última actualización: {{ equipo.fecha_actualizacion_ficha|date:"d/m/Y H:i" }}</small>
             </div>
         </div>
     </div>
@@ -612,10 +735,10 @@
         </div>
 
         <div class="edit-form-body">
-            <form method="post" id="editEquipoForm">
+            <form method="post" enctype="multipart/form-data" id="editEquipoForm">
                 {% csrf_token %}
                 
-                <!-- Información Básica -->
+                <!-- Sección 1: Información Básica -->
                 <div class="edit-form-section">
                     <h3 class="edit-form-section-title">
                         <i class="bi bi-info-circle"></i>
@@ -627,7 +750,6 @@
                             <label for="id_codigo_interno" class="edit-form-label">
                                 <i class="bi bi-hash"></i>
                                 Código Interno <span class="edit-required">*</span>
-                                <i class="bi bi-question-circle edit-tooltip-icon" title="Código único del equipo en el sistema"></i>
                             </label>
                             <div class="edit-input-group">
                                 <span class="edit-input-group-text">
@@ -641,10 +763,6 @@
                                     {{ form.codigo_interno.errors.0 }}
                                 </div>
                             {% endif %}
-                            <div class="edit-form-text">
-                                <i class="bi bi-lightbulb"></i>
-                                Ejemplo: EQ-001, TOR-002, SOL-015
-                            </div>
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -679,10 +797,6 @@
                                 {{ form.observaciones.errors.0 }}
                             </div>
                         {% endif %}
-                        <div class="edit-form-text">
-                            <i class="bi bi-info-circle"></i>
-                            Observaciones adicionales sobre el equipo
-                        </div>
                     </div>
 
                     <div class="row">
@@ -730,7 +844,7 @@
                     </div>
                 </div>
 
-                <!-- Clasificación y Estado -->
+                <!-- Sección 2: Clasificación y Estado -->
                 <div class="edit-form-section">
                     <h3 class="edit-form-section-title">
                         <i class="bi bi-diagram-3"></i>
@@ -794,10 +908,6 @@
                                     {{ form.responsable.errors.0 }}
                                 </div>
                             {% endif %}
-                            <div class="edit-form-text">
-                                <i class="bi bi-info-circle"></i>
-                                Persona encargada del mantenimiento y operación
-                            </div>
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -812,15 +922,11 @@
                                     {{ form.ubicacion_fisica.errors.0 }}
                                 </div>
                             {% endif %}
-                            <div class="edit-form-text">
-                                <i class="bi bi-info-circle"></i>
-                                Laboratorio, mesa, pasillo, etc.
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Información Técnica -->
+                <!-- Sección 3: Información Técnica -->
                 <div class="edit-form-section">
                     <h3 class="edit-form-section-title">
                         <i class="bi bi-cpu"></i>
@@ -840,10 +946,6 @@
                                     {{ form.potencia.errors.0 }}
                                 </div>
                             {% endif %}
-                            <div class="edit-form-text">
-                                <i class="bi bi-info-circle"></i>
-                                Ej: 220V, 1.5kW
-                            </div>
                         </div>
 
                         <div class="col-md-4 mb-3">
@@ -876,7 +978,7 @@
                     </div>
                 </div>
 
-                <!-- Información UDB -->
+                <!-- Sección 4: Información UDB -->
                 <div class="edit-form-section">
                     <h3 class="edit-form-section-title">
                         <i class="bi bi-file-earmark-code"></i>
@@ -889,10 +991,7 @@
                                 <i class="bi bi-building"></i>
                                 Unidad EMI
                             </label>
-                            <div class="field-with-validation">
-                                {{ form.udb_unidad }}
-                                <span class="validation-indicator" id="udb-unidad-indicator"></span>
-                            </div>
+                            {{ form.udb_unidad }}
                             {% if form.udb_unidad.errors %}
                                 <div class="invalid-feedback d-block">
                                     <i class="bi bi-exclamation-triangle"></i>
@@ -906,10 +1005,7 @@
                                 <i class="bi bi-hash"></i>
                                 Número de Disposición
                             </label>
-                            <div class="field-with-validation">
-                                {{ form.udb_numero }}
-                                <span class="validation-indicator" id="udb-numero-indicator"></span>
-                            </div>
+                            {{ form.udb_numero }}
                             {% if form.udb_numero.errors %}
                                 <div class="invalid-feedback d-block">
                                     <i class="bi bi-exclamation-triangle"></i>
@@ -919,6 +1015,91 @@
                             <div class="edit-form-text">
                                 <i class="bi bi-info-circle"></i>
                                 Formato: 1-22386 (un dígito, guion, cinco dígitos)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 5: Imagen del Equipo -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">
+                        <i class="bi bi-camera"></i>
+                        Imagen del Equipo
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_foto" class="edit-form-label">
+                                <i class="bi bi-camera"></i>
+                                Fotografía del Equipo
+                            </label>
+                            <div class="image-preview" id="imagePreview" role="button" tabindex="0">
+                                {% if equipo.foto %}
+                                    <div class="position-relative" style="display: inline-block;">
+                                        <img src="{{ equipo.foto.url }}" alt="Vista previa" class="img-fluid rounded" style="max-height: 200px; max-width: 100%;">
+                                        <button type="button" class="btn btn-danger btn-sm position-absolute" 
+                                                onclick="removeImage()" 
+                                                style="top: 8px; right: 8px; border-radius: 50%; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 10;"
+                                                title="Eliminar imagen">
+                                            <i class="bi bi-x-lg" style="font-size: 14px;"></i>
+                                        </button>
+                                    </div>
+                                    <p class="mt-3 mb-0 small text-success fw-medium text-center">
+                                        <i class="bi bi-check-circle"></i> Imagen actual
+                                    </p>
+                                    <small class="text-muted d-block text-center">Haga clic para cambiar la imagen</small>
+                                {% else %}
+                                    <div class="upload-placeholder">
+                                        <i class="bi bi-cloud-upload display-4 text-muted"></i>
+                                        <p class="mt-2 mb-0 fw-medium">Haga clic para seleccionar una imagen</p>
+                                        <small class="text-muted">JPG, PNG, GIF - Max 5MB</small>
+                                        <br>
+                                        <small class="text-muted"><i class="bi bi-mouse"></i> O arrastre y suelte aquí</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <input type="file" name="foto" id="id_foto" class="d-none" accept="image/*" aria-label="Seleccionar fotografía del equipo">
+                            <div class="edit-form-text mt-2">
+                                <i class="bi bi-info-circle"></i>
+                                Imagen del equipo para identificación visual
+                            </div>
+                            {% if form.foto.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    {{ form.foto.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="edit-form-label">
+                                <i class="bi bi-info-circle"></i>
+                                Información de la Imagen
+                            </div>
+                            <div class="info-card">
+                                {% if equipo.foto %}
+                                    <div class="info-label">Archivo Actual</div>
+                                    <div class="info-value">{{ equipo.foto.name|default:"Sin imagen" }}</div>
+                                    
+                                    <div class="info-label">Última Actualización</div>
+                                    <div class="info-value">{{ equipo.fecha_actualizacion_ficha|date:"d/m/Y H:i" }}</div>
+                                {% else %}
+                                    <div class="text-center text-muted py-4">
+                                        <i class="bi bi-camera fs-1 mb-2"></i>
+                                        <p class="mb-0">Sin imagen registrada</p>
+                                        <small>Agregue una fotografía para mejor identificación</small>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="info-label">Formatos Aceptados</div>
+                                <div class="info-value">
+                                    <span class="badge bg-secondary me-1">JPG</span>
+                                    <span class="badge bg-secondary me-1">PNG</span>
+                                    <span class="badge bg-secondary me-1">GIF</span>
+                                </div>
+                                
+                                <div class="info-label">Tamaño Máximo</div>
+                                <div class="info-value">5 MB</div>
                             </div>
                         </div>
                     </div>
@@ -984,225 +1165,145 @@
 </div>
 
 <script>
-    // Función para confirmar eliminación
-    function confirmDelete() {
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        deleteModal.show();
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 Inicializando formulario...');
+    
+    // Debug: Verificar elementos
+    const imageInput = document.getElementById('id_foto');
+    const imagePreview = document.getElementById('imagePreview');
+    
+    console.log('📸 Input de imagen:', imageInput ? 'Encontrado' : 'NO ENCONTRADO');
+    console.log('🖼️ Preview de imagen:', imagePreview ? 'Encontrado' : 'NO ENCONTRADO');
+    
+    if (imageInput) {
+        console.log('📁 Tipo de input:', imageInput.type);
+        console.log('✅ Accept:', imageInput.accept);
     }
-
-    // Validación en tiempo real mejorada
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('editEquipoForm');
-        const inputs = form.querySelectorAll('input, select, textarea');
-
-        inputs.forEach(input => {
-            input.addEventListener('input', function() {
-                validateField(this);
-            });
-
-            input.addEventListener('blur', function() {
-                validateField(this);
-            });
-
-            input.addEventListener('change', function() {
-                validateField(this);
-            });
-        });
-
-        // Función de validación individual mejorada
-        function validateField(field) {
-            const value = field.value.trim();
-            
-            // Remover clases de validación previas
-            field.classList.remove('is-valid', 'is-invalid');
-            
-            // Obtener indicador de validación si existe
-            const indicator = field.parentElement.querySelector('.validation-indicator');
-            
-            // Validaciones específicas
-            let isValid = true;
-            let errorMessage = '';
-
-            if (field.hasAttribute('required') && !value) {
-                isValid = false;
-                errorMessage = 'Este campo es obligatorio.';
-            }
-            
-            if (field.type === 'email' && value && !isValidEmail(value)) {
-                isValid = false;
-                errorMessage = 'Email no válido.';
-            }
-
-            // Validación específica para el número UDB
-            if (field.id === 'id_udb_numero' && value) {
-                const udbPattern = /^\d-\d{5}$/;
-                if (!udbPattern.test(value)) {
-                    isValid = false;
-                    errorMessage = 'Formato debe ser: 1-22386 (un dígito, guion, cinco dígitos)';
-                }
-            }
-            
-            // Aplicar estilos de validación
-            if (isValid && value) {
-                field.classList.add('is-valid');
-                if (indicator) {
-                    indicator.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
-                    indicator.className = 'validation-indicator valid';
-                }
-            } else if (!isValid) {
-                field.classList.add('is-invalid');
-                if (indicator) {
-                    indicator.innerHTML = '<i class="bi bi-exclamation-circle-fill"></i>';
-                    indicator.className = 'validation-indicator invalid';
-                }
-                
-                // Mostrar mensaje de error personalizado
-                let feedbackElement = field.parentElement.parentElement.querySelector('.invalid-feedback');
-                if (feedbackElement && errorMessage) {
-                    feedbackElement.innerHTML = `<i class="bi bi-exclamation-triangle"></i> ${errorMessage}`;
-                }
-            } else {
-                // Campo vacío pero no requerido
-                if (indicator) {
-                    indicator.innerHTML = '';
-                    indicator.className = 'validation-indicator';
-                }
-            }
-            
-            return isValid;
+    
+    const form = document.getElementById('editEquipoForm');
+    
+    if (!form) {
+        console.error('❌ Formulario no encontrado');
+        return;
+    }
+    
+    // Debug: Verificar campos del formulario
+    const formData = new FormData(form);
+    console.log('📋 Campos del formulario:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+    }
+    
+    // Envío del formulario con debug
+    form.addEventListener('submit', function(e) {
+        console.log('📤 Enviando formulario...');
+        
+        // Mostrar loading en el botón
+        const submitBtn = form.querySelector('.edit-btn-save');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Guardando...';
+        submitBtn.disabled = true;
+        
+        // Debug: Mostrar datos que se van a enviar
+        const formData = new FormData(form);
+        console.log('📋 Datos enviándose:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
         }
+        
+        // Permitir envío normal del formulario
+        // No preventDefault aquí - dejamos que Django maneje el formulario
+    });
+    
+    console.log('✅ Formulario configurado correctamente');
+});
 
-        // Validación de email
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
+function confirmDelete() {
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
 
-        // Formateo automático para el campo UDB número
-        const udbNumeroField = document.getElementById('id_udb_numero');
-        if (udbNumeroField) {
-            udbNumeroField.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/[^\d-]/g, ''); // Solo números y guión
-                
-                // Auto-formatear: agregar guión después del primer dígito
-                if (value.length === 1 && /^\d$/.test(value)) {
-                    value = value + '-';
-                }
-                
-                // Limitar longitud
-                if (value.length > 7) {
-                    value = value.substring(0, 7);
-                }
-                
-                e.target.value = value;
-            });
+// Funcionalidad de imagen mejorada
+const imageInput = document.getElementById('id_foto');
+const imagePreview = document.getElementById('imagePreview');
 
-            udbNumeroField.addEventListener('keypress', function(e) {
-                // Permitir solo números, guión, backspace, delete, tab, escape, enter
-                if (![8, 9, 27, 13, 46, 45].includes(e.keyCode) && 
-                    (e.keyCode < 48 || e.keyCode > 57)) {
-                    e.preventDefault();
-                }
-            });
-        }
-
-        // Manejo especial para campos select
-        const selectFields = form.querySelectorAll('select');
-        selectFields.forEach(select => {
-            select.addEventListener('change', function() {
-                // Remover clases de validación de Bootstrap que causan problemas
-                this.classList.remove('is-valid', 'is-invalid');
-                
-                // Aplicar validación personalizada
-                setTimeout(() => {
-                    validateField(this);
-                }, 50);
-            });
-        });
-
-        // Envío del formulario con loading
-        form.addEventListener('submit', function(e) {
-            // Validar todos los campos antes del envío
-            let hasErrors = false;
-            inputs.forEach(input => {
-                if (!validateField(input)) {
-                    hasErrors = true;
-                }
-            });
-
-            if (hasErrors) {
-                e.preventDefault();
-                
-                // Mostrar mensaje de error
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-danger mt-3';
-                alertDiv.innerHTML = `
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    <strong>Error:</strong> Por favor, corrige los errores en el formulario antes de continuar.
-                `;
-                
-                // Insertar alerta después del formulario
-                form.parentElement.insertBefore(alertDiv, form.nextSibling);
-                
-                // Remover alerta después de 5 segundos
-                setTimeout(() => {
-                    if (alertDiv.parentElement) {
-                        alertDiv.remove();
-                    }
-                }, 5000);
-                
+if (imageInput && imagePreview) {
+    // Ocultar input original
+    imageInput.style.display = 'none';
+    imageInput.style.position = 'absolute';
+    imageInput.style.left = '-9999px';
+    
+    // Hacer clickeable
+    imagePreview.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('🖼️ Abriendo selector de archivos...');
+        imageInput.click();
+    });
+    
+    // Manejar cambio de archivo
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validar tipo de archivo
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                alert('Por favor seleccione un archivo de imagen válido (JPG, PNG, GIF)');
+                e.target.value = '';
                 return;
             }
-
-            // Mostrar estado de carga
-            const submitBtn = form.querySelector('.edit-btn-save');
-            const originalText = submitBtn.innerHTML;
             
-            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Guardando...';
-            submitBtn.disabled = true;
+            // Validar tamaño (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('El archivo es demasiado grande. Máximo 5MB permitido.');
+                e.target.value = '';
+                return;
+            }
             
-            // Si hay errores, restaurar el botón
-            setTimeout(() => {
-                if (form.querySelector('.is-invalid')) {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }
-            }, 100);
-        });
-
-        // Auto-resize para textareas
-        const textareas = form.querySelectorAll('textarea');
-        textareas.forEach(textarea => {
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = this.scrollHeight + 'px';
-            });
-        });
-
-        // Tooltips de Bootstrap
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-
-    // Prevenir pérdida de datos
-    let formChanged = false;
-    document.getElementById('editEquipoForm').addEventListener('input', function() {
-        formChanged = true;
-    });
-
-    window.addEventListener('beforeunload', function(e) {
-        if (formChanged) {
-            e.preventDefault();
-            e.returnValue = '¿Estás seguro de que quieres salir? Los cambios no guardados se perderán.';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.innerHTML = `
+                    <div class="position-relative" style="display: inline-block;">
+                        <img src="${e.target.result}" alt="Vista previa" class="img-fluid rounded" style="max-height: 200px; max-width: 100%;">
+                        <button type="button" class="btn btn-danger btn-sm position-absolute" 
+                                onclick="removeImage()" 
+                                style="top: 8px; right: 8px; border-radius: 50%; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 10;"
+                                title="Eliminar imagen">
+                            <i class="bi bi-x-lg" style="font-size: 14px;"></i>
+                        </button>
+                    </div>
+                    <p class="mt-3 mb-0 small text-success fw-medium text-center">
+                        <i class="bi bi-check-circle"></i> ${file.name}
+                    </p>
+                    <small class="text-muted d-block text-center">Haga clic para cambiar la imagen</small>
+                `;
+            };
+            reader.readAsDataURL(file);
         }
     });
+}
 
-    // Limpiar flag al enviar el formulario
-    document.getElementById('editEquipoForm').addEventListener('submit', function() {
-        formChanged = false;
-    });
+// Función global para remover imagen
+window.removeImage = function() {
+    const imageInput = document.getElementById('id_foto');
+    const imagePreview = document.getElementById('imagePreview');
+    
+    if (imageInput) {
+        imageInput.value = '';
+    }
+    
+    if (imagePreview) {
+        imagePreview.innerHTML = `
+            <div class="upload-placeholder">
+                <i class="bi bi-cloud-upload display-4 text-muted"></i>
+                <p class="mt-2 mb-0 fw-medium">Haga clic para seleccionar una imagen</p>
+                <small class="text-muted">JPG, PNG, GIF - Max 5MB</small>
+                <br>
+                <small class="text-muted"><i class="bi bi-mouse"></i> O arrastre y suelte aquí</small>
+            </div>
+        `;
+    }
+};
 </script>
 
 {% endblock %}

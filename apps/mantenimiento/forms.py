@@ -190,10 +190,17 @@ class PlanMantenimientoForm(forms.ModelForm):
         # Filtrar usuarios activos para responsables
         self.fields['responsable_principal'].queryset = User.objects.filter(is_active=True)
         self.fields['responsables_secundarios'].queryset = User.objects.filter(is_active=True)
-        # Filtrar equipos activos
-        self.fields['equipo'].queryset = Equipo.objects.exclude(estado='FUERA_SERVICIO')
+        
+        # *** CORRECCIÓN: Filtrar equipos correctamente ***
+        from apps.equipos.models import Equipo
+        # Mostrar todos los equipos excepto los fuera de servicio
+        self.fields['equipo'].queryset = Equipo.objects.exclude(estado='FUERA_SERVICIO').order_by('codigo_interno')
+        
+        # Mejorar el display del equipo en el select
+        self.fields['equipo'].empty_label = "Seleccione un equipo..."
+        
         # Cargar repuestos críticos
-        self.fields['repuestos_criticos'].queryset = RepuestoCritico.objects.all()
+        self.fields['repuestos_criticos'].queryset = RepuestoCritico.objects.all().order_by('nombre')
         
         # Configurar campos requeridos
         self.fields['nombre'].required = True
@@ -202,6 +209,12 @@ class PlanMantenimientoForm(forms.ModelForm):
         self.fields['frecuencia'].required = True
         self.fields['duracion_estimada'].required = True
         self.fields['fecha_inicio'].required = True
+        
+        # *** MEJORAR LOS WIDGETS PARA MEJOR EXPERIENCIA ***
+        self.fields['equipo'].widget.attrs.update({
+            'class': 'plan-form-control plan-form-select',
+            'data-placeholder': 'Buscar equipo por código o nombre...'
+        })
 
     def clean(self):
         cleaned_data = super().clean()

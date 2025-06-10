@@ -5,207 +5,189 @@ class EquipoForm(forms.ModelForm):
     class Meta:
         model = Equipo
         fields = [
-            # Campos básicos - solo incluir los necesarios para fichas técnicas
-            'numero_serie', 'peso', 'voltaje', 'amperaje', 'fases', 
-            'frecuencia', 'consumo_electrico', 'temperatura_min', 
-            'temperatura_max', 'humedad_max', 'presion_trabajo', 
-            'caudal_aire', 'epp_requerido', 'esquema_electrico', 
-            'manual_operacion', 'frecuencia_mantenimiento', 
-            'tiempo_mantenimiento', 'procedimientos_mantenimiento', 
-            'ubicacion_especifica'
+            'codigo_interno', 'nombre', 'modelo', 'serie', 'fabricante',
+            'año_fabricacion', 'potencia', 'capacidad', 'ubicacion_fisica',
+            'seccion', 'tipo_equipo', 'estado', 'responsable', 'observaciones',
+            'udb_unidad', 'udb_numero', 'foto'  # <-- Agregar este campo
         ]
         
         widgets = {
-            'numero_serie': forms.TextInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Número de serie del fabricante'
+            'codigo_interno': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Ej: EQ-001'
             }),
-            'peso': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Peso en kg',
-                'min': '0',
-                'step': '0.01'
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Nombre del equipo'
             }),
-            'voltaje': forms.Select(attrs={
-                'class': 'ficha-form-control ficha-form-select'
+            'modelo': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Modelo del equipo'
             }),
-            'amperaje': forms.TextInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Amperaje de operación'
+            'serie': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Número de serie'
             }),
-            'fases': forms.Select(attrs={
-                'class': 'ficha-form-control ficha-form-select'
+            'fabricante': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Fabricante'
             }),
-            'frecuencia': forms.Select(attrs={
-                'class': 'ficha-form-control ficha-form-select'
+            'año_fabricacion': forms.NumberInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'min': '1900',
+                'max': '2030'
             }),
-            'consumo_electrico': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Consumo eléctrico en kW',
-                'min': '0',
-                'step': '0.01'
+            'potencia': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Ej: 220V, 1.5kW'
             }),
-            'temperatura_min': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Temperatura mínima de operación',
-                'min': '-50',
-                'max': '100'
+            'capacidad': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Capacidad del equipo'
             }),
-            'temperatura_max': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Temperatura máxima de operación',
-                'min': '-50',
-                'max': '100'
+            'ubicacion_fisica': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Ubicación física'
             }),
-            'humedad_max': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Humedad máxima permitida',
-                'min': '0',
-                'max': '100'
+            'seccion': forms.Select(attrs={
+                'class': 'form-select edit-equipment-container'
             }),
-            'presion_trabajo': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Presión de trabajo en Bar',
-                'min': '0',
-                'step': '0.01'
+            'tipo_equipo': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Tipo de equipo'
             }),
-            'caudal_aire': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Caudal de aire en L/min',
-                'min': '0'
+            'estado': forms.Select(attrs={
+                'class': 'form-select edit-equipment-container'
             }),
-            'epp_requerido': forms.Textarea(attrs={
-                'class': 'ficha-form-control ficha-form-textarea',
+            'responsable': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Responsable del equipo'
+            }),
+            'observaciones': forms.Textarea(attrs={
+                'class': 'form-control edit-equipment-container',
                 'rows': 3,
-                'placeholder': 'Equipos de protección personal requeridos'
+                'placeholder': 'Observaciones adicionales'
             }),
-            'esquema_electrico': forms.FileInput(attrs={
-                'class': 'ficha-form-control'
+            'udb_unidad': forms.Select(attrs={
+                'class': 'form-select edit-equipment-container'
             }),
-            'manual_operacion': forms.FileInput(attrs={
-                'class': 'ficha-form-control'
+            'udb_numero': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Ej: 1-22386'
             }),
-            'frecuencia_mantenimiento': forms.Select(attrs={
-                'class': 'ficha-form-control ficha-form-select'
-            }),
-            'tiempo_mantenimiento': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Tiempo estimado en horas',
-                'min': '0',
-                'step': '0.5'
-            }),
-            'procedimientos_mantenimiento': forms.Textarea(attrs={
-                'class': 'ficha-form-control ficha-form-textarea',
-                'rows': 4,
-                'placeholder': 'Procedimientos detallados de mantenimiento'
-            }),
-            'ubicacion_especifica': forms.TextInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Ubicación específica del equipo'
+            'foto': forms.FileInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'accept': 'image/*'
             }),
         }
 
-# Crear un formulario específico para fichas técnicas
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacer obligatorios los campos esenciales
+        self.fields['codigo_interno'].required = True
+        self.fields['nombre'].required = True
+        self.fields['seccion'].required = True
+        self.fields['estado'].required = True
+
 class FichaTecnicaForm(forms.ModelForm):
     class Meta:
         model = Equipo
         fields = [
-            # Solo campos de ficha técnica
-            'numero_serie', 'peso', 'voltaje', 'amperaje', 'fases', 
-            'frecuencia', 'consumo_electrico', 'temperatura_min', 
-            'temperatura_max', 'humedad_max', 'presion_trabajo', 
-            'caudal_aire', 'epp_requerido', 'esquema_electrico', 
-            'manual_operacion', 'frecuencia_mantenimiento', 
-            'tiempo_mantenimiento', 'procedimientos_mantenimiento', 
-            'ubicacion_especifica'
+            # Información técnica básica
+            'numero_serie', 'peso',
+            # Especificaciones eléctricas
+            'voltaje', 'amperaje', 'fases', 'frecuencia', 'consumo_electrico',
+            # Condiciones de operación
+            'temperatura_min', 'temperatura_max', 'humedad_max', 'presion_trabajo', 'caudal_aire',
+            # Seguridad
+            'epp_requerido',
+            # Documentos
+            'esquema_electrico', 'manual_operacion',
+            # Mantenimiento
+            'frecuencia_mantenimiento', 'tiempo_mantenimiento', 'procedimientos_mantenimiento',
+            # Ubicación
+            'ubicacion_especifica',
         ]
         
         widgets = {
             'numero_serie': forms.TextInput(attrs={
-                'class': 'ficha-form-control',
+                'class': 'form-control',
                 'placeholder': 'Número de serie del fabricante'
             }),
             'peso': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Peso en kg',
-                'min': '0',
-                'step': '0.01'
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Peso en kilogramos'
             }),
             'voltaje': forms.Select(attrs={
-                'class': 'ficha-form-control ficha-form-select'
+                'class': 'form-select'
             }),
             'amperaje': forms.TextInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Amperaje de operación'
+                'class': 'form-control',
+                'placeholder': 'Ej: 10A, 15-20A'
             }),
             'fases': forms.Select(attrs={
-                'class': 'ficha-form-control ficha-form-select'
+                'class': 'form-select'
             }),
             'frecuencia': forms.Select(attrs={
-                'class': 'ficha-form-control ficha-form-select'
+                'class': 'form-select'
             }),
             'consumo_electrico': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Consumo eléctrico en kW',
-                'min': '0',
-                'step': '0.01'
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Consumo en kW'
             }),
             'temperatura_min': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Temperatura mínima de operación',
-                'min': '-50',
-                'max': '100'
+                'class': 'form-control',
+                'placeholder': 'Temperatura mínima en °C'
             }),
             'temperatura_max': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Temperatura máxima de operación',
-                'min': '-50',
-                'max': '100'
+                'class': 'form-control',
+                'placeholder': 'Temperatura máxima en °C'
             }),
             'humedad_max': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Humedad máxima permitida',
+                'class': 'form-control',
                 'min': '0',
-                'max': '100'
+                'max': '100',
+                'placeholder': 'Humedad máxima en %'
             }),
             'presion_trabajo': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Presión de trabajo en Bar',
-                'min': '0',
-                'step': '0.01'
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Presión en Bar'
             }),
             'caudal_aire': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Caudal de aire en L/min',
-                'min': '0'
+                'class': 'form-control',
+                'placeholder': 'Caudal en L/min'
             }),
             'epp_requerido': forms.Textarea(attrs={
-                'class': 'ficha-form-control ficha-form-textarea',
+                'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Equipos de protección personal requeridos'
             }),
             'esquema_electrico': forms.FileInput(attrs={
-                'class': 'ficha-form-control'
+                'class': 'form-control',
+                'accept': '.pdf,.jpg,.jpeg,.png'
             }),
             'manual_operacion': forms.FileInput(attrs={
-                'class': 'ficha-form-control'
+                'class': 'form-control',
+                'accept': '.pdf,.doc,.docx'
             }),
             'frecuencia_mantenimiento': forms.Select(attrs={
-                'class': 'ficha-form-control ficha-form-select'
+                'class': 'form-select'
             }),
             'tiempo_mantenimiento': forms.NumberInput(attrs={
-                'class': 'ficha-form-control',
-                'placeholder': 'Tiempo estimado en horas',
-                'min': '0',
-                'step': '0.5'
+                'class': 'form-control',
+                'step': '0.1',
+                'placeholder': 'Tiempo en horas'
             }),
             'procedimientos_mantenimiento': forms.Textarea(attrs={
-                'class': 'ficha-form-control ficha-form-textarea',
+                'class': 'form-control',
                 'rows': 4,
-                'placeholder': 'Procedimientos detallados de mantenimiento'
+                'placeholder': 'Procedimientos específicos de mantenimiento'
             }),
             'ubicacion_especifica': forms.TextInput(attrs={
-                'class': 'ficha-form-control',
+                'class': 'form-control',
                 'placeholder': 'Ubicación específica del equipo'
             }),
         }

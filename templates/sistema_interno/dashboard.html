@@ -309,10 +309,10 @@
             <div class="dashboard-card metric-card p-4">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <div class="metric-value">12</div>
+                        <div class="metric-value">{{ total_equipos }}</div>
                         <div class="metric-label">Total Equipos</div>
-                        <div class="metric-trend trend-up">
-                            <i class="bi bi-arrow-up me-1"></i>+3 este mes
+                        <div class="metric-trend {% if equipos_este_mes > 0 %}trend-up{% endif %}">
+                            <i class="bi bi-arrow-up me-1"></i>+{{ equipos_este_mes }} este mes
                         </div>
                     </div>
                     <div class="ms-3">
@@ -326,10 +326,10 @@
             <div class="dashboard-card metric-card p-4">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <div class="metric-value">9</div>
+                        <div class="metric-value">{{ equipos_activos }}</div>
                         <div class="metric-label">Equipos Activos</div>
                         <div class="metric-trend trend-up">
-                            <i class="bi bi-check-circle me-1"></i>90.5% operativo
+                            <i class="bi bi-check-circle me-1"></i>{{ porcentaje_operativo }}% operativo
                         </div>
                     </div>
                     <div class="ms-3">
@@ -343,9 +343,9 @@
             <div class="dashboard-card metric-card p-4">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <div class="metric-value">2</div>
+                        <div class="metric-value">{{ equipos_mantenimiento }}</div>
                         <div class="metric-label">En Mantenimiento</div>
-                        <div class="metric-trend trend-down">
+                        <div class="metric-trend">
                             <i class="bi bi-tools me-1"></i>Programado
                         </div>
                     </div>
@@ -360,14 +360,15 @@
             <div class="dashboard-card metric-card p-4">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <div class="metric-value">1</div>
+                        <div class="metric-value">{{ equipos_fuera_servicio }}</div>
                         <div class="metric-label">Fuera de Servicio</div>
-                        <div class="metric-trend trend-down">
-                            <i class="bi bi-exclamation-triangle me-1"></i>Requiere atención
+                        <div class="metric-trend {% if equipos_fuera_servicio > 0 %}trend-down{% endif %}">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            {% if equipos_fuera_servicio > 0 %}Requiere atención{% else %}Todo OK{% endif %}
                         </div>
                     </div>
                     <div class="ms-3">
-                        <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-exclamation-triangle {% if equipos_fuera_servicio > 0 %}text-danger{% else %}text-success{% endif %}" style="font-size: 2.5rem;"></i>
                     </div>
                 </div>
             </div>
@@ -380,10 +381,10 @@
             <div class="dashboard-card metric-card p-4">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <div class="metric-value">5</div>
+                        <div class="metric-value">{{ secciones_activas }}</div>
                         <div class="metric-label">Secciones Activas</div>
                         <div class="metric-trend">
-                            <i class="bi bi-diagram-3 me-1"></i>100% cobertura
+                            <i class="bi bi-diagram-3 me-1"></i>{{ porcentaje_cobertura_secciones }}% cobertura
                         </div>
                     </div>
                     <div class="ms-3">
@@ -397,7 +398,7 @@
             <div class="dashboard-card metric-card p-4">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <div class="metric-value">12</div>
+                        <div class="metric-value">{{ mantenimientos_este_mes }}</div>
                         <div class="metric-label">Mantenimientos</div>
                         <div class="metric-trend trend-up">
                             <i class="bi bi-calendar-check me-1"></i>Este mes
@@ -414,10 +415,11 @@
             <div class="dashboard-card metric-card p-4">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <div class="metric-value">85%</div>
+                        <div class="metric-value">{{ eficiencia_promedio }}%</div>
                         <div class="metric-label">Eficiencia</div>
-                        <div class="metric-trend trend-up">
-                            <i class="bi bi-graph-up me-1"></i>+5% vs mes anterior
+                        <div class="metric-trend {% if cambio_eficiencia >= 0 %}trend-up{% else %}trend-down{% endif %}">
+                            <i class="bi bi-graph-{% if cambio_eficiencia >= 0 %}up{% else %}down{% endif %} me-1"></i>
+                            {% if cambio_eficiencia > 0 %}+{% endif %}{{ cambio_eficiencia }}% vs mes anterior
                         </div>
                     </div>
                     <div class="ms-3">
@@ -431,14 +433,15 @@
             <div class="dashboard-card metric-card p-4">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <div class="metric-value">7</div>
+                        <div class="metric-value">{{ alertas_count }}</div>
                         <div class="metric-label">Alertas Activas</div>
-                        <div class="metric-trend trend-down">
-                            <i class="bi bi-bell me-1"></i>Requieren revisión
+                        <div class="metric-trend {% if alertas_count > 0 %}trend-down{% endif %}">
+                            <i class="bi bi-bell me-1"></i>
+                            {% if alertas_count > 0 %}Requieren revisión{% else %}Todo bajo control{% endif %}
                         </div>
                     </div>
                     <div class="ms-3">
-                        <i class="bi bi-bell text-warning" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-bell {% if alertas_count > 0 %}text-warning{% else %}text-success{% endif %}" style="font-size: 2.5rem;"></i>
                     </div>
                 </div>
             </div>
@@ -466,10 +469,10 @@
             </a>
         </div>
         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
-            <div class="quick-action-btn" style="opacity: 0.6; cursor: not-allowed;">
+            <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="quick-action-btn">
                 <i class="bi bi-tools quick-action-icon"></i>
-                <span class="quick-action-text">Programar Mantenimiento</span>
-            </div>
+                <span class="quick-action-text">Ver Mantenimientos</span>
+            </a>
         </div>
         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
             <a href="{% url 'equipos:codigo-qr' %}" class="quick-action-btn">
@@ -500,57 +503,36 @@
                     Alertas y Notificaciones
                 </h3>
                 
-                <div class="alert-item critical">
-                    <div class="d-flex align-items-start">
-                        <div class="me-3">
-                            <i class="bi bi-exclamation-triangle-fill text-danger fs-4"></i>
+                {% if alertas_detalle %}
+                    {% for alerta in alertas_detalle %}
+                        <div class="alert-item {{ alerta.tipo }}">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3">
+                                    {% if alerta.tipo == 'critica' %}
+                                        <i class="bi bi-exclamation-triangle-fill text-danger fs-4"></i>
+                                    {% elif alerta.tipo == 'warning' %}
+                                        <i class="bi bi-clock-fill text-warning fs-4"></i>
+                                    {% else %}
+                                        <i class="bi bi-info-circle-fill text-primary fs-4"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold {% if alerta.tipo == 'critica' %}text-danger{% elif alerta.tipo == 'warning' %}text-warning{% else %}text-primary{% endif %}">
+                                        {{ alerta.titulo }}
+                                    </h6>
+                                    <p class="mb-1 small">{{ alerta.descripcion }}</p>
+                                    <small class="text-muted">{{ alerta.tiempo }}</small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1 fw-bold text-danger">Equipo Fuera de Servicio</h6>
-                            <p class="mb-1 small">Torno CNC T-001 requiere reparación urgente</p>
-                            <small class="text-muted">Hace 2 horas - Sección: Mecanizado</small>
-                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-check-circle-fill text-success fs-1 mb-3"></i>
+                        <h5 class="text-success">¡Todo funcionando correctamente!</h5>
+                        <p class="text-muted">No hay alertas activas en este momento.</p>
                     </div>
-                </div>
-
-                <div class="alert-item warning">
-                    <div class="d-flex align-items-start">
-                        <div class="me-3">
-                            <i class="bi bi-clock-fill text-warning fs-4"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1 fw-bold text-warning">Mantenimiento Programado</h6>
-                            <p class="mb-1 small">3 equipos requieren mantenimiento esta semana</p>
-                            <small class="text-muted">Programado para mañana - Múltiples secciones</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="alert-item info">
-                    <div class="d-flex align-items-start">
-                        <div class="me-3">
-                            <i class="bi bi-info-circle-fill text-primary fs-4"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1 fw-bold text-primary">Nuevo Equipo Registrado</h6>
-                            <p class="mb-1 small">Fresadora FM-015 agregada al inventario</p>
-                            <small class="text-muted">Ayer - Sección: Fresado</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="alert-item warning">
-                    <div class="d-flex align-items-start">
-                        <div class="me-3">
-                            <i class="bi bi-tools text-warning fs-4"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1 fw-bold text-warning">Stock Bajo de Repuestos</h6>
-                            <p class="mb-1 small">Filtros de aceite y bandas transportadoras</p>
-                            <small class="text-muted">Actualizado hace 1 hora</small>
-                        </div>
-                    </div>
-                </div>
+                {% endif %}
             </div>
         </div>
         
@@ -561,60 +543,18 @@
                     Estado por Sección
                 </h3>
                 
-                <div class="mb-3">
-                    <div class="equipment-status">
-                        <span class="status-indicator status-active"></span>
-                        <strong>Mecanizado</strong>
-                        <span class="ms-auto badge bg-success">8/9 Activos</span>
+                {% for seccion in estado_secciones %}
+                    <div class="mb-3">
+                        <div class="equipment-status">
+                            <span class="status-indicator status-{{ seccion.estado }}"></span>
+                            <strong>{{ seccion.nombre }}</strong>
+                            <span class="ms-auto badge bg-{{ seccion.estado }}">{{ seccion.activos }}/{{ seccion.total }} Activos</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: {{ seccion.porcentaje }}%;"></div>
+                        </div>
                     </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: 89%;"></div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="equipment-status">
-                        <span class="status-indicator status-active"></span>
-                        <strong>Soldadura</strong>
-                        <span class="ms-auto badge bg-success">12/12 Activos</span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: 100%;"></div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="equipment-status">
-                        <span class="status-indicator status-maintenance"></span>
-                        <strong>Fresado</strong>
-                        <span class="ms-auto badge bg-warning">5/7 Activos</span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: 71%;"></div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="equipment-status">
-                        <span class="status-indicator status-active"></span>
-                        <strong>Medición</strong>
-                        <span class="ms-auto badge bg-success">8/8 Activos</span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: 100%;"></div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="equipment-status">
-                        <span class="status-indicator status-active"></span>
-                        <strong>Fundición</strong>
-                        <span class="ms-auto badge bg-success">5/6 Activos</span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: 83%;"></div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -694,45 +634,56 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <div class="fw-semibold">T-002</div>
-                                    <small class="text-muted">Torno Convencional</small>
-                                </td>
-                                <td><span class="badge bg-warning">Preventivo</span></td>
-                                <td>Mañana</td>
-                                <td><span class="badge bg-danger">Alta</span></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="fw-semibold">FM-005</div>
-                                    <small class="text-muted">Fresadora Universal</small>
-                                </td>
-                                <td><span class="badge bg-info">Inspección</span></td>
-                                <td>En 3 días</td>
-                                <td><span class="badge bg-warning">Media</span></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="fw-semibold">WS-008</div>
-                                    <small class="text-muted">Soldadora MIG</small>
-                                </td>
-                                <td><span class="badge bg-warning">Preventivo</span></td>
-                                <td>En 5 días</td>
-                                <td><span class="badge bg-success">Baja</span></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="fw-semibold">C-003</div>
-                                    <small class="text-muted">Compresor</small>
-                                </td>
-                                <td><span class="badge bg-info">Inspección</span></td>
-                                <td>En 1 semana</td>
-                                <td><span class="badge bg-warning">Media</span></td>
-                            </tr>
+                            {% for plan in proximos_mantenimientos %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">{{ plan.equipo.codigo_interno }}</div>
+                                        <small class="text-muted">{{ plan.equipo.nombre|truncatechars:30 }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if plan.tipo_mantenimiento == 'preventivo' %}success{% elif plan.tipo_mantenimiento == 'correctivo' %}danger{% elif plan.tipo_mantenimiento == 'predictivo' %}info{% else %}secondary{% endif %}">
+                                            {{ plan.get_tipo_mantenimiento_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">{{ plan.fecha_formateada }}</div>
+                                        <small class="text-{% if plan.clase_urgencia == 'danger' %}danger{% elif plan.clase_urgencia == 'warning' %}warning{% elif plan.clase_urgencia == 'info' %}info{% else %}muted{% endif %}">
+                                            {{ plan.estado_temporal }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if plan.prioridad == 'critica' %}danger{% elif plan.prioridad == 'alta' %}warning{% elif plan.prioridad == 'media' %}info{% else %}secondary{% endif %}">
+                                            {{ plan.get_prioridad_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">
+                                        <i class="bi bi-calendar-x me-2"></i>
+                                        No hay mantenimientos programados
+                                    </td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                
+                {% if proximos_mantenimientos %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye me-1"></i>
+                            Ver Todos los Planes
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'mantenimiento:crear-plan' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Crear Primer Plan
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

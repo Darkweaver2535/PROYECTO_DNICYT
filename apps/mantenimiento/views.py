@@ -108,14 +108,29 @@ def crear_plan_view(request):
     """Vista para crear nuevo plan de mantenimiento industrial"""
     
     if request.method == 'POST':
+        print(f"DEBUG: POST recibido con datos: {request.POST}")  # Debug
+        
         form = PlanMantenimientoForm(request.POST, request.FILES)
+        
+        print(f"DEBUG: Form errors: {form.errors}")  # Debug
+        print(f"DEBUG: Form is valid: {form.is_valid()}")  # Debug
+        
         if form.is_valid():
             try:
                 plan = form.save(commit=False)
-                # Asignar el usuario actual como responsable si no se especificó otro
+                print(f"📦 DEBUG: Plan creado (sin guardar): {plan}")
+                
+                # Asignar valores por defecto
                 if not plan.responsable_principal:
                     plan.responsable_principal = request.user
+                    print(f"👤 DEBUG: Responsable asignado: {request.user}")
                 
+                # AGREGAR: Asignar estado por defecto si no está
+                if not plan.estado:
+                    plan.estado = 'borrador'  # o 'activo', según tu modelo
+                    print(f"📊 DEBUG: Estado asignado por defecto: {plan.estado}")
+                
+                # Guardar en la base de datos
                 plan.save()
                 form.save_m2m()  # Guardar relaciones many-to-many
                 
@@ -135,11 +150,13 @@ def crear_plan_view(request):
                 return redirect('mantenimiento:plan-detalle', pk=plan.pk)
                 
             except Exception as e:
+                print(f"DEBUG: Error al guardar: {str(e)}")  # Debug
                 messages.error(
                     request, 
                     f'❌ Error al crear el plan: {str(e)}'
                 )
         else:
+            print(f"DEBUG: Errores del formulario: {form.errors}")  # Debug
             messages.error(
                 request, 
                 '❌ Error en el formulario. Por favor revise los campos marcados en rojo.'
