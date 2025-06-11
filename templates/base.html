@@ -1,6 +1,4 @@
 {% load static %}
-<!-- TEMPORALMENTE COMENTAR ESTA LÍNEA HASTA QUE FUNCIONE TODO -->
-<!-- {% load sidebar_tags %} -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1206,14 +1204,15 @@
                 </div>
             </div>
 
-            <!-- Inventario -->
+            <!-- Inventario - SECCIÓN ACTUALIZADA -->
             <div class="nav-section">
                 <div class="nav-section-title">
                     <i class="bi bi-boxes"></i>
                     Inventario
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a href="{% url 'inventario:repuestos' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'inventario' and 'repuestos' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="nav-icon bi bi-box-seam"></i>
                         <span class="nav-text">Repuestos</span>
                     </a>

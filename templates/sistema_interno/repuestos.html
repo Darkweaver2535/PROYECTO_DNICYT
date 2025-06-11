@@ -1,0 +1,752 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* IMPORTANTE: Encapsular todos los estilos dentro de .repuestos-page para evitar afectar el sidebar */
+    .repuestos-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .repuestos-page .repuestos-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+
+    .repuestos-page .repuestos-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .repuestos-page .repuestos-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .repuestos-page .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .repuestos-page .stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--primary-blue);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .repuestos-page .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .repuestos-page .stat-card.danger { border-left-color: var(--danger-red); }
+    .repuestos-page .stat-card.warning { border-left-color: var(--warning-orange); }
+    .repuestos-page .stat-card.success { border-left-color: var(--success-green); }
+    .repuestos-page .stat-card.info { border-left-color: var(--primary-blue); }
+
+    .repuestos-page .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, rgba(30, 64, 175, 0.1), transparent);
+        border-radius: 50%;
+        transform: translate(25px, -25px);
+    }
+
+    .repuestos-page .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .repuestos-page .stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .repuestos-page .stat-icon {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 2rem;
+        color: var(--primary-blue);
+        opacity: 0.3;
+    }
+
+    .repuestos-page .filters-section {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .repuestos-page .filters-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .repuestos-page .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .repuestos-page .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .repuestos-page .filter-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .repuestos-page .repuestos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .repuestos-page .repuesto-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .repuestos-page .repuesto-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--primary-blue);
+    }
+
+    .repuestos-page .repuesto-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .repuestos-page .repuesto-codigo {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        background: var(--light-blue);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        display: inline-block;
+        margin-bottom: 0.75rem;
+    }
+
+    .repuestos-page .repuesto-nombre {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .repuestos-page .repuesto-descripcion {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .repuestos-page .repuesto-badges {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-end;
+    }
+
+    .repuestos-page .repuesto-body {
+        padding: 1.5rem;
+    }
+
+    .repuestos-page .repuesto-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .repuestos-page .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .repuestos-page .detail-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 500;
+    }
+
+    .repuestos-page .detail-value {
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .repuestos-page .stock-info {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .repuestos-page .stock-display {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .repuestos-page .stock-actual {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+
+    .repuestos-page .stock-minimo {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .repuestos-page .stock-progress {
+        height: 6px;
+        background: var(--border-color);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .repuestos-page .stock-bar {
+        height: 100%;
+        background: linear-gradient(135deg, var(--success-green), var(--primary-blue));
+        transition: width 0.8s ease;
+    }
+
+    .repuestos-page .stock-bar.low {
+        background: linear-gradient(135deg, var(--warning-orange), var(--danger-red));
+    }
+
+    .repuestos-page .repuesto-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .repuestos-page .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .repuestos-page .btn-view {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        border: 1px solid var(--primary-blue);
+    }
+
+    .repuestos-page .btn-view:hover {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .repuestos-page .btn-edit {
+        background: var(--light-yellow);
+        color: var(--warning-orange);
+        border: 1px solid var(--warning-orange);
+    }
+
+    .repuestos-page .btn-edit:hover {
+        background: var(--warning-orange);
+        color: white;
+    }
+
+    .repuestos-page .alertas-section {
+        margin-bottom: 2rem;
+    }
+
+    .repuestos-page .alerta-item {
+        background: var(--pure-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: var(--shadow-sm);
+        border-left: 4px solid var(--primary-blue);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .repuestos-page .alerta-item:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateX(4px);
+    }
+
+    .repuestos-page .alerta-item.danger { border-left-color: var(--danger-red); }
+    .repuestos-page .alerta-item.warning { border-left-color: var(--warning-orange); }
+    .repuestos-page .alerta-item.info { border-left-color: var(--primary-blue); }
+
+    .repuestos-page .alerta-icon {
+        font-size: 1.5rem;
+        width: 40px;
+        text-align: center;
+    }
+
+    .repuestos-page .alerta-content {
+        flex: 1;
+    }
+
+    .repuestos-page .alerta-titulo {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .repuestos-page .alerta-descripcion {
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .repuestos-page .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .repuestos-page .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-light);
+    }
+
+    .repuestos-page .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .repuestos-page .repuestos-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .repuestos-page .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .repuestos-page .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .repuestos-page .repuesto-details {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .repuestos-page .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .repuestos-page .repuesto-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- IMPORTANTE: Envolver todo el contenido en .repuestos-page -->
+<div class="repuestos-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="repuestos-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="repuestos-title">
+                        <i class="bi bi-boxes"></i>
+                        {{ titulo }}
+                    </h1>
+                    <p class="repuestos-subtitle">
+                        Gestión integral de repuestos e insumos del laboratorio
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'inventario:crear-repuesto' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        Nuevo Repuesto
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-warning dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download"></i>
+                            Exportar
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                            <li><a class="dropdown-item" href="{% url 'inventario:exportar-repuestos' %}?formato=excel">
+                                <i class="bi bi-file-earmark-excel"></i> Excel
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:exportar-repuestos' %}?formato=csv">
+                                <i class="bi bi-file-earmark-text"></i> CSV
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="bi bi-boxes"></i>
+                </div>
+                <div class="stat-value">{{ total_repuestos }}</div>
+                <div class="stat-label">Total Repuestos</div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-value">{{ repuestos_disponibles }}</div>
+                <div class="stat-label">Disponibles</div>
+            </div>
+            
+            <div class="stat-card danger">
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div class="stat-value">{{ repuestos_agotados }}</div>
+                <div class="stat-label">Agotados</div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="bi bi-arrow-down-circle"></i>
+                </div>
+                <div class="stat-value">{{ repuestos_bajo_stock }}</div>
+                <div class="stat-label">Bajo Stock</div>
+            </div>
+            
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-diamond"></i>
+                </div>
+                <div class="stat-value">{{ repuestos_criticos }}</div>
+                <div class="stat-label">Críticos</div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="stat-value">${{ valor_total_inventario|floatformat:0 }}</div>
+                <div class="stat-label">Valor Inventario</div>
+            </div>
+        </div>
+
+        <!-- Alertas -->
+        {% if alertas %}
+        <div class="alertas-section">
+            {% for alerta in alertas %}
+            <div class="alerta-item {{ alerta.tipo }}">
+                <div class="alerta-icon text-{{ alerta.tipo }}">
+                    <i class="{{ alerta.icono }}"></i>
+                </div>
+                <div class="alerta-content">
+                    <div class="alerta-titulo">{{ alerta.titulo }}</div>
+                    <div class="alerta-descripcion">{{ alerta.descripcion }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <div class="filters-title">
+                <i class="bi bi-funnel"></i>
+                Filtros de Búsqueda
+            </div>
+            
+            <form method="get" class="filters-form">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Buscar</label>
+                        <input type="text" name="search" value="{{ search_query }}" 
+                               class="form-control" placeholder="Buscar repuestos...">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Categoría</label>
+                        <select name="categoria" class="form-select">
+                            <option value="">Todas las categorías</option>
+                            {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}" {% if categoria_filtro == categoria.id|stringformat:"s" %}selected{% endif %}>
+                                {{ categoria.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">Todos los estados</option>
+                            {% for value, label in estados %}
+                            <option value="{{ value }}" {% if estado_filtro == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Criticidad</label>
+                        <select name="criticidad" class="form-select">
+                            <option value="">Todas las criticidades</option>
+                            {% for value, label in criticidades %}
+                            <option value="{{ value }}" {% if criticidad_filtro == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Stock</label>
+                        <select name="stock" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="agotado" {% if stock_filtro == 'agotado' %}selected{% endif %}>Agotado</option>
+                            <option value="bajo" {% if stock_filtro == 'bajo' %}selected{% endif %}>Bajo Stock</option>
+                            <option value="normal" {% if stock_filtro == 'normal' %}selected{% endif %}>Normal</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-search"></i> Filtrar
+                            </button>
+                            <a href="{% url 'inventario:repuestos' %}" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-x"></i> Limpiar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Grid de Repuestos -->
+        {% if repuestos %}
+        <div class="repuestos-grid">
+            {% for repuesto in repuestos %}
+            <div class="repuesto-card">
+                <div class="repuesto-header">
+                    <div class="repuesto-codigo">{{ repuesto.codigo }}</div>
+                    <h3 class="repuesto-nombre">{{ repuesto.nombre }}</h3>
+                    <p class="repuesto-descripcion">{{ repuesto.descripcion }}</p>
+                    
+                    <div class="repuesto-badges">
+                        <span class="badge {{ repuesto.get_estado_badge_class }}">
+                            {{ repuesto.get_estado_display }}
+                        </span>
+                        <span class="badge {{ repuesto.get_criticidad_badge_class }}">
+                            {{ repuesto.get_criticidad_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="repuesto-body">
+                    <div class="repuesto-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Categoría</div>
+                            <div class="detail-value">{{ repuesto.categoria.nombre|default:"Sin categoría" }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Fabricante</div>
+                            <div class="detail-value">{{ repuesto.fabricante|default:"No especificado" }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Precio Unitario</div>
+                            <div class="detail-value">${{ repuesto.precio_unitario|floatformat:2 }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Proveedor</div>
+                            <div class="detail-value">{{ repuesto.proveedor_principal.nombre|default:"Sin proveedor" }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stock-info">
+                        <div class="stock-display">
+                            <div class="stock-actual">{{ repuesto.stock_actual }}</div>
+                            <div class="stock-minimo">Mín: {{ repuesto.stock_minimo }}</div>
+                        </div>
+                        
+                        <div class="stock-progress">
+                            {% if repuesto.stock_maximo > 0 %}
+                            <div class="stock-bar {% if repuesto.necesita_reorden %}low{% endif %}" 
+                                 style="width: {{ repuesto.stock_actual|floatformat:0 }}%; max-width: 100%;"></div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if repuesto.necesita_reorden %}
+                        <div class="text-warning mt-2">
+                            <i class="bi bi-exclamation-triangle"></i> Requiere reposición
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="repuesto-actions">
+                        <a href="{% url 'inventario:repuesto-detalle' repuesto.pk %}" 
+                           class="btn-action btn-view">
+                            <i class="bi bi-eye"></i> Ver
+                        </a>
+                        <a href="{% url 'inventario:editar-repuesto' repuesto.pk %}" class="btn-action btn-edit">
+                            <i class="bi bi-pencil"></i> Editar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Navegación de repuestos">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if criticidad_filtro %}&criticidad={{ criticidad_filtro }}{% endif %}{% if stock_filtro %}&stock={{ stock_filtro }}{% endif %}">Anterior</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if criticidad_filtro %}&criticidad={{ criticidad_filtro }}{% endif %}{% if stock_filtro %}&stock={{ stock_filtro }}{% endif %}">1</a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }}</span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if criticidad_filtro %}&criticidad={{ criticidad_filtro }}{% endif %}{% if stock_filtro %}&stock={{ stock_filtro }}{% endif %}">{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if criticidad_filtro %}&criticidad={{ criticidad_filtro }}{% endif %}{% if stock_filtro %}&stock={{ stock_filtro }}{% endif %}">Siguiente</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Estado vacío -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="bi bi-inbox"></i>
+            </div>
+            <h3>No se encontraron repuestos</h3>
+            <p>No hay repuestos que coincidan con los filtros seleccionados.</p>
+            <a href="{% url 'inventario:repuestos' %}" class="btn btn-primary">
+                <i class="bi bi-arrow-clockwise"></i>
+                Limpiar filtros
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit en cambio de filtros
+    const filterSelects = document.querySelectorAll('.repuestos-page .filters-form select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+    
+    // Animación de las tarjetas al cargar
+    const cards = document.querySelectorAll('.repuestos-page .repuesto-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

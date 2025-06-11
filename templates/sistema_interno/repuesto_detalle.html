@@ -1,0 +1,521 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ repuesto.codigo }} - {{ repuesto.nombre }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detalle-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .detalle-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .info-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: var(--text-dark);
+        text-align: right;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.375rem 0.75rem;
+        border-radius: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .movimientos-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .movimientos-table th,
+    .movimientos-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .movimientos-table th {
+        background: var(--off-white);
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-right: 0.5rem;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-warning {
+        background: var(--warning-orange);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: var(--text-light);
+        color: white;
+    }
+
+    .stock-visual {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+
+    .stock-bar-container {
+        position: relative;
+        height: 20px;
+        background: var(--border-color);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+
+    .stock-bar {
+        height: 100%;
+        background: linear-gradient(135deg, var(--success-green), var(--primary-blue));
+        transition: width 0.8s ease;
+        position: relative;
+    }
+
+    .stock-bar.low {
+        background: linear-gradient(135deg, var(--warning-orange), var(--danger-red));
+    }
+
+    .stock-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-top: 0.5rem;
+    }
+
+    .alert-card {
+        background: var(--pure-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--warning-orange);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .alert-card.danger {
+        border-left-color: var(--danger-red);
+    }
+
+    .alert-card.info {
+        border-left-color: var(--primary-blue);
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+        
+        .detail-value {
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detalle-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="detalle-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <span class="badge bg-primary">{{ repuesto.codigo }}</span>
+                        <span class="badge {{ repuesto.get_estado_badge_class }}">
+                            {{ repuesto.get_estado_display }}
+                        </span>
+                        <span class="badge {{ repuesto.get_criticidad_badge_class }}">
+                            {{ repuesto.get_criticidad_display }}
+                        </span>
+                    </div>
+                    <h1 style="font-size: 1.8rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 0.5rem;">
+                        {{ repuesto.nombre }}
+                    </h1>
+                    <p style="color: var(--text-light); font-size: 1rem; margin: 0;">
+                        {{ repuesto.descripcion }}
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'inventario:editar-repuesto' repuesto.pk %}" class="btn-action btn-warning">
+                        <i class="bi bi-pencil"></i>
+                        Editar
+                    </a>
+                    <a href="{% url 'inventario:repuestos' %}" class="btn-action btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas -->
+        {% if repuesto.necesita_reorden %}
+        <div class="alert-card warning">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 1.25rem;"></i>
+                <div>
+                    <strong>Stock bajo</strong> - Este repuesto necesita reposición
+                    <div class="text-muted small">Stock actual ({{ repuesto.stock_actual }}) por debajo del punto de reorden ({{ repuesto.punto_reorden }})</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if repuesto.dias_vencimiento and repuesto.dias_vencimiento <= 30 %}
+        <div class="alert-card {% if repuesto.dias_vencimiento <= 0 %}danger{% else %}info{% endif %}">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-clock text-{% if repuesto.dias_vencimiento <= 0 %}danger{% else %}info{% endif %}" style="font-size: 1.25rem;"></i>
+                <div>
+                    <strong>
+                        {% if repuesto.dias_vencimiento <= 0 %}
+                            Producto vencido
+                        {% else %}
+                            Próximo a vencer
+                        {% endif %}
+                    </strong>
+                    <div class="text-muted small">
+                        {% if repuesto.dias_vencimiento <= 0 %}
+                            Vencido hace {{ repuesto.dias_vencimiento|add:"-1" }} días
+                        {% else %}
+                            Vence en {{ repuesto.dias_vencimiento }} días
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Grid de información -->
+        <div class="info-grid">
+            <!-- Información General -->
+            <div class="info-card">
+                <div class="info-title">
+                    <i class="bi bi-info-circle"></i>
+                    Información General
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Código</span>
+                    <span class="detail-value">{{ repuesto.codigo }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Categoría</span>
+                    <span class="detail-value">{{ repuesto.categoria.nombre }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Fabricante</span>
+                    <span class="detail-value">{{ repuesto.fabricante|default:"No especificado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Modelo</span>
+                    <span class="detail-value">{{ repuesto.modelo|default:"No especificado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Número de Parte</span>
+                    <span class="detail-value">{{ repuesto.numero_parte|default:"No especificado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Es Consumible</span>
+                    <span class="detail-value">
+                        {% if repuesto.es_consumible %}
+                            <i class="bi bi-check-circle text-success"></i> Sí
+                        {% else %}
+                            <i class="bi bi-x-circle text-danger"></i> No
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stock e Inventario -->
+            <div class="info-card">
+                <div class="info-title">
+                    <i class="bi bi-boxes"></i>
+                    Stock e Inventario
+                </div>
+                
+                <div class="stock-visual">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--primary-blue);">
+                            {{ repuesto.stock_actual }} {{ repuesto.get_unidad_medida_display }}
+                        </span>
+                        <span class="text-muted">Stock Actual</span>
+                    </div>
+                    
+                    <div class="stock-bar-container">
+                        {% widthratio repuesto.stock_actual repuesto.stock_maximo 100 as stock_percentage %}
+                        <div class="stock-bar {% if repuesto.necesita_reorden %}low{% endif %}" 
+                             style="width: {{ stock_percentage }}%"></div>
+                    </div>
+                    
+                    <div class="stock-labels">
+                        <span>0</span>
+                        <span>Mín: {{ repuesto.stock_minimo }}</span>
+                        <span>Reorden: {{ repuesto.punto_reorden }}</span>
+                        <span>Máx: {{ repuesto.stock_maximo }}</span>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Unidad de Medida</span>
+                    <span class="detail-value">{{ repuesto.get_unidad_medida_display }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Valor Total</span>
+                    <span class="detail-value">${{ repuesto.valor_total|floatformat:2 }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Precio Unitario</span>
+                    <span class="detail-value">${{ repuesto.precio_unitario }}</span>
+                </div>
+            </div>
+
+            <!-- Ubicación -->
+            <div class="info-card">
+                <div class="info-title">
+                    <i class="bi bi-geo-alt"></i>
+                    Ubicación
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Almacén</span>
+                    <span class="detail-value">{{ repuesto.ubicacion_almacen|default:"No especificado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Pasillo</span>
+                    <span class="detail-value">{{ repuesto.pasillo|default:"No especificado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Estante</span>
+                    <span class="detail-value">{{ repuesto.estante|default:"No especificado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Nivel</span>
+                    <span class="detail-value">{{ repuesto.nivel|default:"No especificado" }}</span>
+                </div>
+            </div>
+
+            <!-- Proveedor -->
+            <div class="info-card">
+                <div class="info-title">
+                    <i class="bi bi-truck"></i>
+                    Proveedor
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Proveedor Principal</span>
+                    <span class="detail-value">
+                        {% if repuesto.proveedor_principal %}
+                            {{ repuesto.proveedor_principal.nombre }}
+                        {% else %}
+                            No asignado
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tiempo de Entrega</span>
+                    <span class="detail-value">{{ repuesto.tiempo_entrega }} días</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Código Proveedor</span>
+                    <span class="detail-value">{{ repuesto.codigo_proveedor|default:"No especificado" }}</span>
+                </div>
+            </div>
+
+            <!-- Fechas -->
+            <div class="info-card">
+                <div class="info-title">
+                    <i class="bi bi-calendar"></i>
+                    Fechas Importantes
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Fecha de Creación</span>
+                    <span class="detail-value">{{ repuesto.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Última Actualización</span>
+                    <span class="detail-value">{{ repuesto.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Fecha de Vencimiento</span>
+                    <span class="detail-value">
+                        {% if repuesto.fecha_vencimiento %}
+                            {{ repuesto.fecha_vencimiento|date:"d/m/Y" }}
+                        {% else %}
+                            No aplica
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Última Compra</span>
+                    <span class="detail-value">
+                        {% if repuesto.fecha_ultima_compra %}
+                            {{ repuesto.fecha_ultima_compra|date:"d/m/Y" }}
+                        {% else %}
+                            No registrada
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Movimientos Recientes -->
+            <div class="info-card" style="grid-column: 1 / -1;">
+                <div class="info-title">
+                    <i class="bi bi-arrow-left-right"></i>
+                    Movimientos Recientes
+                </div>
+                
+                {% if movimientos_recientes %}
+                <table class="movimientos-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Cantidad</th>
+                            <th>Stock Anterior</th>
+                            <th>Stock Nuevo</th>
+                            <th>Motivo</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movimiento in movimientos_recientes %}
+                        <tr>
+                            <td>{{ movimiento.fecha_movimiento|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <span class="badge bg-{% if movimiento.tipo_movimiento == 'entrada' %}success{% elif movimiento.tipo_movimiento == 'salida' %}warning{% else %}info{% endif %}">
+                                    {{ movimiento.get_tipo_movimiento_display }}
+                                </span>
+                            </td>
+                            <td>{{ movimiento.cantidad }}</td>
+                            <td>{{ movimiento.stock_anterior }}</td>
+                            <td>{{ movimiento.stock_nuevo }}</td>
+                            <td>{{ movimiento.motivo }}</td>
+                            <td>{{ movimiento.usuario.get_full_name|default:movimiento.usuario.username }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p>No hay movimientos registrados para este repuesto</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Observaciones -->
+        {% if repuesto.observaciones %}
+        <div class="info-card">
+            <div class="info-title">
+                <i class="bi bi-chat-text"></i>
+                Observaciones
+            </div>
+            <p style="margin: 0; color: var(--text-dark); line-height: 1.6;">
+                {{ repuesto.observaciones }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de las tarjetas al cargar
+    const cards = document.querySelectorAll('.info-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* IMPORTANTE: Encapsular todos los estilos dentro de .crear-repuesto-page para evitar afectar el sidebar */
+    .crear-repuesto-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .crear-repuesto-page .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .crear-repuesto-page .stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--primary-blue);
+        transition: all 0.3s ease;
+    }
+
+    .crear-repuesto-page .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .crear-repuesto-page .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+    }
+
+    .crear-repuesto-page .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .crear-repuesto-page .form-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .crear-repuesto-page .form-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #1e40af 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .crear-repuesto-page .form-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .crear-repuesto-page .form-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .crear-repuesto-page .form-body {
+        padding: 2rem;
+    }
+
+    .crear-repuesto-page .form-section {
+        margin-bottom: 2.5rem;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        background: var(--off-white);
+    }
+
+    .crear-repuesto-page .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .crear-repuesto-page .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .crear-repuesto-page .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .crear-repuesto-page .form-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .crear-repuesto-page .form-label.required::after {
+        content: ' *';
+        color: var(--danger-red);
+        font-weight: 700;
+    }
+
+    .crear-repuesto-page .form-control,
+    .crear-repuesto-page .form-select {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        background: var(--pure-white);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .crear-repuesto-page .form-control:focus,
+    .crear-repuesto-page .form-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .crear-repuesto-page .help-text {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+        font-style: italic;
+    }
+
+    .crear-repuesto-page .error-list {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .crear-repuesto-page .error-list li {
+        color: var(--danger-red);
+        font-size: 0.75rem;
+        padding: 0.25rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .crear-repuesto-page .error-list li::before {
+        content: '⚠';
+        font-size: 0.875rem;
+    }
+
+    .crear-repuesto-page .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-right: 0.5rem;
+    }
+
+    .crear-repuesto-page .form-actions {
+        background: var(--off-white);
+        padding: 2rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .crear-repuesto-page .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .crear-repuesto-page .btn-primary {
+        background: var(--primary-blue);
+        color: white;
+        border-color: var(--primary-blue);
+    }
+
+    .crear-repuesto-page .btn-primary:hover {
+        background: #1e40af;
+        border-color: #1e40af;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .crear-repuesto-page .btn-secondary {
+        background: var(--pure-white);
+        color: var(--text-dark);
+        border-color: var(--border-color);
+    }
+
+    .crear-repuesto-page .btn-secondary:hover {
+        background: var(--off-white);
+        border-color: var(--text-light);
+    }
+
+    /* Características específicas */
+    .crear-repuesto-page .caracteristicas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .crear-repuesto-page .caracteristica-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--pure-white);
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .crear-repuesto-page .caracteristica-item:hover {
+        background: var(--light-blue);
+        border-color: var(--primary-blue);
+    }
+
+    /* Archivos */
+    .crear-repuesto-page .file-upload-info {
+        background: var(--light-blue);
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--primary-blue);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .crear-repuesto-page .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .crear-repuesto-page .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .crear-repuesto-page .form-body {
+            padding: 1rem;
+        }
+        
+        .crear-repuesto-page .form-actions {
+            flex-direction: column;
+        }
+        
+        .crear-repuesto-page .caracteristicas-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .crear-repuesto-page .form-title {
+            font-size: 1.5rem;
+        }
+        
+        .crear-repuesto-page .form-header {
+            padding: 1.5rem;
+        }
+        
+        .crear-repuesto-page .form-section {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- IMPORTANTE: Envolver todo el contenido en .crear-repuesto-page -->
+<div class="crear-repuesto-page">
+    <div class="container-fluid">
+        <!-- Estadísticas rápidas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_repuestos }}</div>
+                <div class="stat-label">Total Repuestos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_categorias }}</div>
+                <div class="stat-label">Categorías</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_proveedores }}</div>
+                <div class="stat-label">Proveedores</div>
+            </div>
+        </div>
+
+        <!-- Formulario principal -->
+        <div class="form-card">
+            <div class="form-header">
+                <h1 class="form-title">
+                    <i class="bi bi-plus-circle"></i>
+                    {{ titulo }}
+                </h1>
+                <p class="form-subtitle">
+                    Complete la información del repuesto para agregarlo al inventario del laboratorio
+                </p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-body">
+                    <!-- Información Básica -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-info-circle"></i>
+                            Información Básica
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">{{ form.nombre.label }}</label>
+                                {{ form.nombre }}
+                                {% if form.nombre.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.nombre.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label required">{{ form.categoria.label }}</label>
+                                {{ form.categoria }}
+                                {% if form.categoria.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.categoria.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label required">{{ form.descripcion.label }}</label>
+                                {{ form.descripcion }}
+                                {% if form.descripcion.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.descripcion.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Activo Industrial -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-building-gear"></i>
+                            Información de Activo Industrial
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.codigo_activo_iso.label }}</label>
+                                {{ form.codigo_activo_iso }}
+                                <div class="help-text">Código según norma ISO 14224 para activos industriales</div>
+                                {% if form.codigo_activo_iso.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.codigo_activo_iso.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.seccion_trabajo.label }}</label>
+                                {{ form.seccion_trabajo }}
+                                <div class="help-text">Sección del laboratorio donde se utiliza</div>
+                                {% if form.seccion_trabajo.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.seccion_trabajo.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">{{ form.aplicacion_principal.label }}</label>
+                                {{ form.aplicacion_principal }}
+                                <div class="help-text">Descripción de la aplicación principal en el laboratorio</div>
+                                {% if form.aplicacion_principal.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.aplicacion_principal.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Especificaciones Técnicas -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-gear"></i>
+                            Especificaciones Técnicas
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fabricante.label }}</label>
+                                {{ form.fabricante }}
+                                {% if form.fabricante.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.fabricante.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.modelo.label }}</label>
+                                {{ form.modelo }}
+                                {% if form.modelo.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.modelo.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.codigo_fabricante.label }}</label>
+                                {{ form.codigo_fabricante }}
+                                {% if form.codigo_fabricante.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.codigo_fabricante.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.numero_parte.label }}</label>
+                                {{ form.numero_parte }}
+                                {% if form.numero_parte.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.numero_parte.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.material_construccion.label }}</label>
+                                {{ form.material_construccion }}
+                                <div class="help-text">Ej: Acero inoxidable 316, Aluminio 6061, etc.</div>
+                                {% if form.material_construccion.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.material_construccion.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.dimensiones.label }}</label>
+                                {{ form.dimensiones }}
+                                <div class="help-text">Ej: 100x50x25 mm</div>
+                                {% if form.dimensiones.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.dimensiones.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.peso_unitario.label }}</label>
+                                {{ form.peso_unitario }}
+                                <div class="help-text">Peso en kilogramos</div>
+                                {% if form.peso_unitario.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.peso_unitario.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">{{ form.especificaciones.label }}</label>
+                                {{ form.especificaciones }}
+                                <div class="help-text">Especificaciones técnicas detalladas</div>
+                                {% if form.especificaciones.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.especificaciones.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gestión de Stock -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-boxes"></i>
+                            Gestión de Stock
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">{{ form.stock_actual.label }}</label>
+                                {{ form.stock_actual }}
+                                {% if form.stock_actual.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.stock_actual.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label required">{{ form.stock_minimo.label }}</label>
+                                {{ form.stock_minimo }}
+                                {% if form.stock_minimo.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.stock_minimo.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.stock_maximo.label }}</label>
+                                {{ form.stock_maximo }}
+                                {% if form.stock_maximo.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.stock_maximo.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.punto_reorden.label }}</label>
+                                {{ form.punto_reorden }}
+                                <div class="help-text">Se calcula automáticamente basado en el stock mínimo</div>
+                                {% if form.punto_reorden.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.punto_reorden.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.unidad_medida.label }}</label>
+                                {{ form.unidad_medida }}
+                                {% if form.unidad_medida.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.unidad_medida.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.criticidad.label }}</label>
+                                {{ form.criticidad }}
+                                <div class="help-text">Nivel de criticidad para la operación del laboratorio</div>
+                                {% if form.criticidad.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.criticidad.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.estado.label }}</label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.estado.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Costos y Proveedores -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-currency-dollar"></i>
+                            Costos y Proveedores
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">{{ form.precio_unitario.label }}</label>
+                                {{ form.precio_unitario }}
+                                {% if form.precio_unitario.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.precio_unitario.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.proveedor_principal.label }}</label>
+                                {{ form.proveedor_principal }}
+                                {% if form.proveedor_principal.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.proveedor_principal.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.tiempo_entrega.label }}</label>
+                                {{ form.tiempo_entrega }}
+                                <div class="help-text">Días de entrega estimados</div>
+                                {% if form.tiempo_entrega.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.tiempo_entrega.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.stock_seguridad.label }}</label>
+                                {{ form.stock_seguridad }}
+                                <div class="help-text">Stock de seguridad adicional</div>
+                                {% if form.stock_seguridad.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.stock_seguridad.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.costo_almacenamiento.label }}</label>
+                                {{ form.costo_almacenamiento }}
+                                <div class="help-text">Costo anual de almacenamiento</div>
+                                {% if form.costo_almacenamiento.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.costo_almacenamiento.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Responsables Técnicos -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-people"></i>
+                            Responsables Técnicos
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.responsable_tecnico.label }}</label>
+                                {{ form.responsable_tecnico }}
+                                <div class="help-text">Responsable técnico del repuesto</div>
+                                {% if form.responsable_tecnico.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.responsable_tecnico.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.responsable_almacen.label }}</label>
+                                {{ form.responsable_almacen }}
+                                <div class="help-text">Responsable de almacén</div>
+                                {% if form.responsable_almacen.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.responsable_almacen.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ubicación en Almacén -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-geo-alt"></i>
+                            Ubicación en Almacén
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.ubicacion_almacen.label }}</label>
+                                {{ form.ubicacion_almacen }}
+                                {% if form.ubicacion_almacen.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.ubicacion_almacen.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.pasillo.label }}</label>
+                                {{ form.pasillo }}
+                                {% if form.pasillo.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.pasillo.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.estante.label }}</label>
+                                {{ form.estante }}
+                                {% if form.estante.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.estante.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.nivel.label }}</label>
+                                {{ form.nivel }}
+                                {% if form.nivel.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.nivel.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.bin_location.label }}</label>
+                                {{ form.bin_location }}
+                                <div class="help-text">Ubicación específica tipo bin (ej: A1-B2-C3)</div>
+                                {% if form.bin_location.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.bin_location.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Normativas y Certificaciones -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-shield-check"></i>
+                            Normativas y Certificaciones
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.normas_aplicables.label }}</label>
+                                {{ form.normas_aplicables }}
+                                <div class="help-text">Seleccione la norma técnica aplicable</div>
+                                {% if form.normas_aplicables.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.normas_aplicables.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">{{ form.certificaciones_requeridas.label }}</label>
+                                {{ form.certificaciones_requeridas }}
+                                <div class="help-text">Certificaciones requeridas para el repuesto</div>
+                                {% if form.certificaciones_requeridas.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.certificaciones_requeridas.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Características -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-check2-square"></i>
+                            Características Especiales
+                        </div>
+                        
+                        <div class="caracteristicas-grid">
+                            <div class="caracteristica-item">
+                                {{ form.es_consumible }}
+                                <label for="{{ form.es_consumible.id_for_label }}">{{ form.es_consumible.label }}</label>
+                            </div>
+                            
+                            <div class="caracteristica-item">
+                                {{ form.es_activo_critico }}
+                                <label for="{{ form.es_activo_critico.id_for_label }}">{{ form.es_activo_critico.label }}</label>
+                            </div>
+                            
+                            <div class="caracteristica-item">
+                                {{ form.requiere_refrigeracion }}
+                                <label for="{{ form.requiere_refrigeracion.id_for_label }}">{{ form.requiere_refrigeracion.label }}</label>
+                            </div>
+                            
+                            <div class="caracteristica-item">
+                                {{ form.requiere_manejo_especial }}
+                                <label for="{{ form.requiere_manejo_especial.id_for_label }}">{{ form.requiere_manejo_especial.label }}</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vida Útil y Frecuencia -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-clock-history"></i>
+                            Vida Útil y Frecuencia
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.vida_util_estimada.label }}</label>
+                                {{ form.vida_util_estimada }}
+                                <div class="help-text">Días de vida útil estimada</div>
+                                {% if form.vida_util_estimada.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.vida_util_estimada.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.frecuencia_uso.label }}</label>
+                                {{ form.frecuencia_uso }}
+                                <div class="help-text">Frecuencia de uso esperada</div>
+                                {% if form.frecuencia_uso.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.frecuencia_uso.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">{{ form.condiciones_almacenamiento.label }}</label>
+                                {{ form.condiciones_almacenamiento }}
+                                <div class="help-text">Condiciones especiales de almacenamiento</div>
+                                {% if form.condiciones_almacenamiento.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.condiciones_almacenamiento.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fechas Importantes -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-calendar3"></i>
+                            Fechas Importantes
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fecha_vencimiento.label }}</label>
+                                {{ form.fecha_vencimiento }}
+                                {% if form.fecha_vencimiento.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.fecha_vencimiento.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fecha_ultima_compra.label }}</label>
+                                {{ form.fecha_ultima_compra }}
+                                {% if form.fecha_ultima_compra.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.fecha_ultima_compra.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fecha_ultimo_uso.label }}</label>
+                                {{ form.fecha_ultimo_uso }}
+                                {% if form.fecha_ultimo_uso.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.fecha_ultimo_uso.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documentos -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                            Documentos y Archivos
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.foto.label }}</label>
+                                {{ form.foto }}
+                                <div class="file-upload-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    Formatos aceptados: JPG, PNG, GIF. Tamaño máximo: 5MB
+                                </div>
+                                {% if form.foto.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.foto.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.ficha_tecnica.label }}</label>
+                                {{ form.ficha_tecnica }}
+                                <div class="file-upload-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    Formatos aceptados: PDF, DOC, DOCX. Tamaño máximo: 10MB
+                                </div>
+                                {% if form.ficha_tecnica.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.ficha_tecnica.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.certificado_calidad.label }}</label>
+                                {{ form.certificado_calidad }}
+                                <div class="file-upload-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    Formatos aceptados: PDF, JPG, PNG. Tamaño máximo: 5MB
+                                </div>
+                                {% if form.certificado_calidad.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.certificado_calidad.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">{{ form.msds.label }}</label>
+                                {{ form.msds }}
+                                <div class="file-upload-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    Hoja de Datos de Seguridad (MSDS) en formato PDF
+                                </div>
+                                {% if form.msds.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.msds.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-chat-text"></i>
+                            Observaciones y Notas
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">{{ form.observaciones.label }}</label>
+                                {{ form.observaciones }}
+                                <div class="help-text">Observaciones generales del repuesto</div>
+                                {% if form.observaciones.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.observaciones.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label class="form-label">{{ form.notas_tecnicas.label }}</label>
+                                {{ form.notas_tecnicas }}
+                                <div class="help-text">Notas técnicas específicas para el personal técnico</div>
+                                {% if form.notas_tecnicas.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.notas_tecnicas.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones del formulario -->
+                <div class="form-actions">
+                    <a href="{% url 'inventario:repuestos' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-lg"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i>
+                        {% if accion == 'editar' %}Actualizar Repuesto{% else %}Crear Repuesto{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación en tiempo real
+    const form = document.querySelector('form');
+    const requiredFields = form.querySelectorAll('[required]');
+    
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            validateField(this);
+        });
+    });
+    
+    function validateField(field) {
+        const errorList = field.parentNode.querySelector('.error-list');
+        if (errorList) {
+            errorList.remove();
+        }
+        
+        if (field.hasAttribute('required') && !field.value.trim()) {
+            showFieldError(field, 'Este campo es obligatorio');
+        }
+    }
+    
+    function showFieldError(field, message) {
+        const errorList = document.createElement('ul');
+        errorList.className = 'error-list';
+        const errorItem = document.createElement('li');
+        errorItem.textContent = message;
+        errorList.appendChild(errorItem);
+        field.parentNode.appendChild(errorList);
+    }
+    
+    // Animación de scroll suave a errores
+    const errorFields = document.querySelectorAll('.error-list');
+    if (errorFields.length > 0) {
+        errorFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Auto-guardado en localStorage (opcional)
+    const formData = new FormData(form);
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        const savedValue = localStorage.getItem(`repuesto_${input.name}`);
+        if (savedValue && !input.value) {
+            input.value = savedValue;
+        }
+        
+        input.addEventListener('change', function() {
+            localStorage.setItem(`repuesto_${this.name}`, this.value);
+        });
+    });
+    
+    // Limpiar localStorage al enviar el formulario
+    form.addEventListener('submit', function() {
+        inputs.forEach(input => {
+            localStorage.removeItem(`repuesto_${input.name}`);
+        });
+    });
+});
+</script>
+{% endblock %}
