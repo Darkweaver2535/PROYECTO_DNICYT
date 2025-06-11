@@ -1,0 +1,871 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle Proveedor {{ proveedor.codigo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .proveedor-detalle-page {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .proveedor-detalle-page .header-section {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .proveedor-detalle-page .header-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(30, 64, 175, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .proveedor-detalle-page .proveedor-header {
+        display: flex;
+        justify-content: between;
+        align-items: flex-start;
+        gap: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .proveedor-detalle-page .proveedor-info {
+        flex: 1;
+    }
+
+    .proveedor-detalle-page .proveedor-codigo {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        background: var(--light-blue);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .proveedor-detalle-page .proveedor-nombre {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+    }
+
+    .proveedor-detalle-page .proveedor-comercial {
+        font-size: 1.2rem;
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        font-style: italic;
+    }
+
+    .proveedor-detalle-page .proveedor-badges {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .proveedor-detalle-page .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .proveedor-detalle-page .badge.estado {
+        background: var(--success-green);
+        color: white;
+    }
+
+    .proveedor-detalle-page .badge.categoria {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .proveedor-detalle-page .badge.tipo {
+        background: var(--warning-orange);
+        color: white;
+    }
+
+    .proveedor-detalle-page .badge.confiable {
+        background: var(--light-green);
+        color: var(--success-green);
+        border: 1px solid var(--success-green);
+    }
+
+    .proveedor-detalle-page .proveedor-actions {
+        display: flex;
+        gap: 1rem;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .proveedor-detalle-page .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .proveedor-detalle-page .stars {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .proveedor-detalle-page .star {
+        font-size: 1.5rem;
+        color: var(--warning-orange);
+    }
+
+    .proveedor-detalle-page .star.empty {
+        color: var(--border-color);
+    }
+
+    .proveedor-detalle-page .rating-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .proveedor-detalle-page .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .proveedor-detalle-page .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .proveedor-detalle-page .sidebar-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .proveedor-detalle-page .info-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .proveedor-detalle-page .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary-blue);
+    }
+
+    .proveedor-detalle-page .card-title i {
+        color: var(--primary-blue);
+        font-size: 1.5rem;
+    }
+
+    .proveedor-detalle-page .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .proveedor-detalle-page .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .proveedor-detalle-page .info-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .proveedor-detalle-page .info-value {
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .proveedor-detalle-page .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+    }
+
+    .proveedor-detalle-page .contact-item:hover {
+        background: var(--light-blue);
+        transform: translateX(4px);
+    }
+
+    .proveedor-detalle-page .contact-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-blue);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .proveedor-detalle-page .contact-info {
+        flex: 1;
+    }
+
+    .proveedor-detalle-page .contact-label {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .proveedor-detalle-page .contact-value {
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: 500;
+        margin-top: 0.25rem;
+    }
+
+    .proveedor-detalle-page .metric-card {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .proveedor-detalle-page .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+    }
+
+    .proveedor-detalle-page .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .proveedor-detalle-page .metric-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    .proveedor-detalle-page .progress-item {
+        margin-bottom: 1.5rem;
+    }
+
+    .proveedor-detalle-page .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .proveedor-detalle-page .progress-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .proveedor-detalle-page .progress-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+    }
+
+    .proveedor-detalle-page .progress-bar {
+        height: 8px;
+        background: var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .proveedor-detalle-page .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        transition: width 0.8s ease;
+    }
+
+    .proveedor-detalle-page .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .proveedor-detalle-page .alert-success {
+        background: var(--light-green);
+        border: 1px solid var(--success-green);
+        color: var(--success-green);
+    }
+
+    .proveedor-detalle-page .alert-warning {
+        background: var(--light-yellow);
+        border: 1px solid var(--warning-orange);
+        color: var(--warning-orange);
+    }
+
+    .proveedor-detalle-page .alert-info {
+        background: var(--light-blue);
+        border: 1px solid var(--primary-blue);
+        color: var(--primary-blue);
+    }
+
+    .proveedor-detalle-page .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .proveedor-detalle-page .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+    }
+
+    .proveedor-detalle-page .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+    }
+
+    .proveedor-detalle-page .btn-secondary {
+        background: var(--border-color);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .proveedor-detalle-page .btn-secondary:hover {
+        background: var(--text-light);
+        color: white;
+    }
+
+    .proveedor-detalle-page .btn-warning {
+        background: var(--warning-orange);
+        color: white;
+    }
+
+    .proveedor-detalle-page .btn-warning:hover {
+        background: #e67e22;
+        color: white;
+    }
+
+    .proveedor-detalle-page .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-light);
+    }
+
+    .proveedor-detalle-page .empty-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .proveedor-detalle-page .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .proveedor-detalle-page .proveedor-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .proveedor-detalle-page .proveedor-actions {
+            align-items: center;
+        }
+        
+        .proveedor-detalle-page .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .proveedor-detalle-page .proveedor-nombre {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="proveedor-detalle-page">
+    <div class="container-fluid">
+        <!-- Header del Proveedor -->
+        <div class="header-section">
+            <div class="proveedor-header">
+                <div class="proveedor-info">
+                    <div class="proveedor-codigo">{{ proveedor.codigo }}</div>
+                    <h1 class="proveedor-nombre">{{ proveedor.nombre }}</h1>
+                    {% if proveedor.nombre_comercial %}
+                    <p class="proveedor-comercial">{{ proveedor.nombre_comercial }}</p>
+                    {% endif %}
+                    
+                    <div class="proveedor-badges">
+                        <span class="badge estado">
+                            <i class="bi bi-check-circle"></i>
+                            {{ proveedor.get_estado_display }}
+                        </span>
+                        <span class="badge categoria">
+                            <i class="bi bi-tag"></i>
+                            {{ proveedor.get_categoria_display }}
+                        </span>
+                        <span class="badge tipo">
+                            <i class="bi bi-building"></i>
+                            {{ proveedor.get_tipo_proveedor_display }}
+                        </span>
+                        {% if proveedor.es_confiable %}
+                        <span class="badge confiable">
+                            <i class="bi bi-shield-check"></i>
+                            Proveedor Confiable
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if proveedor.calificacion %}
+                    <div class="rating-display">
+                        <div class="stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= proveedor.get_calificacion_estrellas %}
+                                    <span class="star">★</span>
+                                {% else %}
+                                    <span class="star empty">★</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="rating-text">{{ proveedor.calificacion }}/5.0</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="proveedor-actions">
+                    <a href="{% url 'inventario:editar-proveedor' proveedor.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i>
+                        Editar
+                    </a>
+                    <a href="{% url 'inventario:proveedores' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de Contenido -->
+        <div class="content-grid">
+            <!-- Contenido Principal -->
+            <div class="main-content">
+                <!-- Información Básica -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="bi bi-info-circle"></i>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">NIT</span>
+                            <span class="info-value">{{ proveedor.nit|default:"No especificado" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Registro Comercio</span>
+                            <span class="info-value">{{ proveedor.registro_comercio|default:"No especificado" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Licencia Funcionamiento</span>
+                            <span class="info-value">{{ proveedor.licencia_funcionamiento|default:"No especificado" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Fecha Registro</span>
+                            <span class="info-value">{{ proveedor.fecha_registro|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">País</span>
+                            <span class="info-value">{{ proveedor.pais }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Ciudad</span>
+                            <span class="info-value">{{ proveedor.ciudad }}, {{ proveedor.departamento }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Comercial -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="bi bi-cash-coin"></i>
+                        Información Comercial
+                    </h3>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Condiciones de Pago</span>
+                            <span class="info-value">{{ proveedor.condiciones_pago|default:"No especificado" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Días de Crédito</span>
+                            <span class="info-value">{{ proveedor.dias_credito }} días</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Descuento General</span>
+                            <span class="info-value">{{ proveedor.descuento_general }}%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Moneda Principal</span>
+                            <span class="info-value">{{ proveedor.moneda_principal }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Límite de Crédito</span>
+                            <span class="info-value">${{ proveedor.limite_credito|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tiempo Entrega Promedio</span>
+                            <span class="info-value">{{ proveedor.tiempo_entrega_promedio }} días</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dirección -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="bi bi-geo-alt"></i>
+                        Dirección
+                    </h3>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Dirección Completa</span>
+                        <span class="info-value">{{ proveedor.direccion }}</span>
+                    </div>
+                    
+                    {% if proveedor.codigo_postal %}
+                    <div class="info-item" style="margin-top: 1rem;">
+                        <span class="info-label">Código Postal</span>
+                        <span class="info-value">{{ proveedor.codigo_postal }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Certificaciones y Observaciones -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="bi bi-award"></i>
+                        Certificaciones y Observaciones
+                    </h3>
+                    
+                    {% if proveedor.certificaciones %}
+                    <div class="info-item">
+                        <span class="info-label">Certificaciones</span>
+                        <span class="info-value">{{ proveedor.certificaciones }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if proveedor.observaciones %}
+                    <div class="info-item" style="margin-top: 1rem;">
+                        <span class="info-label">Observaciones</span>
+                        <span class="info-value">{{ proveedor.observaciones }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if proveedor.notas_internas %}
+                    <div class="info-item" style="margin-top: 1rem;">
+                        <span class="info-label">Notas Internas</span>
+                        <span class="info-value">{{ proveedor.notas_internas }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar-content">
+                <!-- Información de Contacto -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="bi bi-person-lines-fill"></i>
+                        Contacto
+                    </h3>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Contacto Principal</div>
+                            <div class="contact-value">{{ proveedor.contacto_principal }}</div>
+                            {% if proveedor.cargo_contacto %}
+                            <div class="contact-label" style="margin-top: 0.25rem;">{{ proveedor.cargo_contacto }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-telephone"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Teléfono Principal</div>
+                            <div class="contact-value">{{ proveedor.telefono }}</div>
+                        </div>
+                    </div>
+                    
+                    {% if proveedor.telefono_secundario %}
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-telephone-plus"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Teléfono Secundario</div>
+                            <div class="contact-value">{{ proveedor.telefono_secundario }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Email Principal</div>
+                            <div class="contact-value">{{ proveedor.email }}</div>
+                        </div>
+                    </div>
+                    
+                    {% if proveedor.email_secundario %}
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-envelope-plus"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Email Secundario</div>
+                            <div class="contact-value">{{ proveedor.email_secundario }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if proveedor.sitio_web %}
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="bi bi-globe"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Sitio Web</div>
+                            <div class="contact-value">
+                                <a href="{{ proveedor.sitio_web }}" target="_blank" style="color: var(--primary-blue);">
+                                    {{ proveedor.sitio_web }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Métricas Comerciales -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Métricas Comerciales
+                    </h3>
+                    
+                    <div class="metric-card" style="margin-bottom: 1rem;">
+                        <div class="metric-value">${{ proveedor.total_comprado|floatformat:0 }}</div>
+                        <div class="metric-label">Total Comprado</div>
+                    </div>
+                    
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span class="progress-label">Cumplimiento</span>
+                            <span class="progress-value">{{ proveedor.porcentaje_cumplimiento }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ proveedor.porcentaje_cumplimiento }}%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Total de Órdenes</span>
+                        <span class="info-value">{{ proveedor.total_ordenes }}</span>
+                    </div>
+                    
+                    {% if proveedor.fecha_ultima_compra %}
+                    <div class="info-item">
+                        <span class="info-label">Última Compra</span>
+                        <span class="info-value">{{ proveedor.fecha_ultima_compra|date:"d/m/Y" }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if proveedor.dias_sin_compras %}
+                    <div class="info-item">
+                        <span class="info-label">Días sin Comprar</span>
+                        <span class="info-value">{{ proveedor.dias_sin_compras }} días</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Evaluación -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="bi bi-clipboard-check"></i>
+                        Evaluación
+                    </h3>
+                    
+                    {% if proveedor.necesita_eval %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>Requiere evaluación de desempeño</span>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Evaluación al día</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if proveedor.fecha_ultima_evaluacion %}
+                    <div class="info-item">
+                        <span class="info-label">Última Evaluación</span>
+                        <span class="info-value">{{ proveedor.fecha_ultima_evaluacion|date:"d/m/Y" }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="info-item">
+                        <span class="info-label">Categoría Entrega</span>
+                        <span class="info-value">{{ proveedor.tiempo_entrega_info.texto }}</span>
+                    </div>
+                </div>
+
+                <!-- Repuestos Asociados -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="bi bi-boxes"></i>
+                        Repuestos Asociados
+                    </h3>
+                    
+                    {% if repuestos_principales %}
+                    <div style="margin-bottom: 1.5rem;">
+                        <h5 style="color: var(--text-dark); margin-bottom: 1rem;">Repuestos Principales ({{ repuestos_principales.count }})</h5>
+                        {% for repuesto in repuestos_principales %}
+                        <div style="padding: 0.75rem; background: var(--off-white); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600; color: var(--text-dark);">{{ repuesto.nombre }}</div>
+                            <div style="font-size: 0.875rem; color: var(--text-light);">{{ repuesto.codigo }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if repuestos_alternativos %}
+                    <div>
+                        <h5 style="color: var(--text-dark); margin-bottom: 1rem;">Repuestos Alternativos ({{ repuestos_alternativos.count }})</h5>
+                        {% for repuesto in repuestos_alternativos %}
+                        <div style="padding: 0.75rem; background: var(--light-blue); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+                            <div style="font-weight: 600; color: var(--primary-blue);">{{ repuesto.nombre }}</div>
+                            <div style="font-size: 0.875rem; color: var(--text-light);">{{ repuesto.codigo }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if not repuestos_principales and not repuestos_alternativos %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <p>No hay repuestos asociados</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de barras de progreso
+    const progressBars = document.querySelectorAll('.proveedor-detalle-page .progress-fill');
+    
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
+    });
+    
+    // Animación de entrada para las tarjetas
+    const cards = document.querySelectorAll('.proveedor-detalle-page .info-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    console.log('Detalle de proveedor cargado correctamente');
+});
+</script>
+{% endblock %}

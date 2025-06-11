@@ -1,7 +1,7 @@
 from django import forms
 from .models import Repuesto, CategoriaRepuesto, Proveedor, MovimientoStock
-from apps.equipos.models import Equipo
 from django.contrib.auth.models import User
+from datetime import date
 
 class RepuestoForm(forms.ModelForm):
     class Meta:
@@ -367,136 +367,138 @@ class CategoriaRepuestoForm(forms.ModelForm):
 class ProveedorForm(forms.ModelForm):
     class Meta:
         model = Proveedor
-        fields = '__all__'
+        exclude = ['codigo', 'fecha_registro', 'fecha_actualizacion', 'total_ordenes', 
+                  'total_comprado', 'porcentaje_cumplimiento']
+        
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Nombre del proveedor'
+                'placeholder': 'Razón social completa'
             }),
-            'codigo': forms.TextInput(attrs={
+            'nombre_comercial': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Código único'
+                'placeholder': 'Nombre comercial (opcional)'
+            }),
+            'tipo_proveedor': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'categoria': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'nit': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'NIT del proveedor'
+            }),
+            'registro_comercio': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Número de registro comercial'
+            }),
+            'licencia_funcionamiento': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Número de licencia'
             }),
             'contacto_principal': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Nombre del contacto'
+                'placeholder': 'Nombre del contacto principal'
+            }),
+            'cargo_contacto': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Cargo del contacto'
             }),
             'telefono': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Número de teléfono'
+                'placeholder': '+591 2 1234567'
+            }),
+            'telefono_secundario': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Teléfono alternativo'
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'correo@ejemplo.com'
+                'placeholder': 'correo@proveedor.com'
+            }),
+            'email_secundario': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'correo.alternativo@proveedor.com'
+            }),
+            'sitio_web': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://www.proveedor.com'
             }),
             'direccion': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 2
+                'rows': 3,
+                'placeholder': 'Dirección completa'
             }),
             'ciudad': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ciudad'
+            }),
+            'departamento': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Departamento'
             }),
             'pais': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'value': 'Bolivia'
             }),
-            'nit': forms.TextInput(attrs={
-                'class': 'form-control'
+            'codigo_postal': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Código postal'
+            }),
+            'condiciones_pago': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 30 días, Contado, etc.'
+            }),
+            'dias_credito': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'max': '365'
+            }),
+            'descuento_general': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'max': '100',
+                'step': '0.01'
+            }),
+            'moneda_principal': forms.Select(attrs={
+                'class': 'form-select'
+            }, choices=[
+                ('BOB', 'Bolivianos (BOB)'),
+                ('USD', 'Dólares (USD)'),
+                ('EUR', 'Euros (EUR)'),
+            ]),
+            'limite_credito': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '0.01'
             }),
             'calificacion': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'min': '1',
-                'max': '5'
+                'min': '0',
+                'max': '5',
+                'step': '0.1'
             }),
             'tiempo_entrega_promedio': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'min': '1'
-            }),
-            'es_proveedor_critico': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
+                'min': '1',
+                'max': '365'
             }),
             'certificaciones': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 2
-            }),
-            'activo': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
-        }
-
-class MovimientoStockForm(forms.ModelForm):
-    class Meta:
-        model = MovimientoStock
-        exclude = [
-            'numero_movimiento', 'stock_anterior', 'stock_nuevo', 'fecha_procesamiento',
-            'aprobado_por', 'fecha_aprobacion', 'fecha_creacion', 'fecha_actualizacion', 'activo'
-        ]
-        
-        widgets = {
-            'repuesto': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
-            }),
-            'tipo_movimiento': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
-            }),
-            'motivo': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
-            }),
-            'motivo_detalle': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 2,
-                'placeholder': 'Detalles adicionales del motivo (opcional)'
-            }),
-            'cantidad': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '0.01',
-                'step': '0.01',
-                'placeholder': 'Cantidad del movimiento',
-                'required': True
-            }),
-            'costo_unitario': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '0',
-                'step': '0.01',
-                'placeholder': 'Costo unitario (opcional)'
-            }),
-            'usuario': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'fecha_movimiento': forms.DateTimeInput(attrs={
-                'class': 'form-control',
-                'type': 'datetime-local'
-            }),
-            'documento_referencia': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Documento de referencia (opcional)'
-            }),
-            'numero_factura': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Número de factura (opcional)'
-            }),
-            'numero_orden': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Número de orden (opcional)'
-            }),
-            'ubicacion_origen': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ubicación de origen'
-            }),
-            'ubicacion_destino': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ubicación de destino'
-            }),
-            'proveedor': forms.Select(attrs={
-                'class': 'form-select'
+                'rows': 3,
+                'placeholder': 'ISO 9001, API, ASME, etc.'
             }),
             'estado': forms.Select(attrs={
                 'class': 'form-select'
             }),
-            'requiere_aprobacion': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
+            'fecha_ultima_compra': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'fecha_ultima_evaluacion': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
             }),
             'observaciones': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -505,65 +507,74 @@ class MovimientoStockForm(forms.ModelForm):
             }),
             'notas_internas': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 2,
-                'placeholder': 'Notas internas (opcional)'
+                'rows': 3,
+                'placeholder': 'Notas internas (no visibles para el proveedor)'
+            }),
+            'activo': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
             }),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Configurar opciones
-        self.fields['repuesto'].queryset = Repuesto.objects.filter(activo=True).order_by('nombre')
-        self.fields['repuesto'].empty_label = "Seleccionar repuesto..."
-        
-        self.fields['proveedor'].queryset = Proveedor.objects.filter(activo=True).order_by('nombre')
-        self.fields['proveedor'].empty_label = "Seleccionar proveedor (opcional)..."
-        
-        self.fields['usuario'].queryset = User.objects.filter(is_active=True).order_by('first_name', 'last_name')
-        self.fields['usuario'].empty_label = "Seleccionar responsable..."
-        
-        # Campos obligatorios
-        self.fields['repuesto'].required = True
-        self.fields['tipo_movimiento'].required = True
-        self.fields['motivo'].required = True
-        self.fields['cantidad'].required = True
-        self.fields['usuario'].required = True
-        
-        # Valor por defecto para fecha
-        if not self.instance.pk:
-            self.fields['fecha_movimiento'].initial = timezone.now().strftime('%Y-%m-%dT%H:%M')
-    
-    def clean_cantidad(self):
-        cantidad = self.cleaned_data.get('cantidad')
-        if cantidad is None or cantidad <= 0:
-            raise forms.ValidationError('La cantidad debe ser mayor a 0.')
-        return cantidad
-    
-    def clean_costo_unitario(self):
-        costo = self.cleaned_data.get('costo_unitario')
-        if costo is not None and costo < 0:
-            raise forms.ValidationError('El costo unitario no puede ser negativo.')
-        return costo or 0
-    
+        # Hacer obligatorios los campos esenciales
+        self.fields['nombre'].required = True
+        self.fields['tipo_proveedor'].required = True
+        self.fields['categoria'].required = True
+        self.fields['contacto_principal'].required = True
+        self.fields['telefono'].required = True
+        self.fields['email'].required = True
+        self.fields['direccion'].required = True
+        self.fields['ciudad'].required = True
+        self.fields['departamento'].required = True
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            # Verificar que no existe otro proveedor con el mismo email
+            queryset = Proveedor.objects.filter(email=email)
+            if self.instance and self.instance.pk:
+                queryset = queryset.exclude(pk=self.instance.pk)
+            
+            if queryset.exists():
+                raise forms.ValidationError('Ya existe un proveedor con este email.')
+        return email
+
+    def clean_nit(self):
+        nit = self.cleaned_data.get('nit')
+        if nit:
+            # Verificar que no existe otro proveedor con el mismo NIT
+            queryset = Proveedor.objects.filter(nit=nit)
+            if self.instance and self.instance.pk:
+                queryset = queryset.exclude(pk=self.instance.pk)
+            
+            if queryset.exists():
+                raise forms.ValidationError('Ya existe un proveedor con este NIT.')
+        return nit
+
+    def clean_calificacion(self):
+        calificacion = self.cleaned_data.get('calificacion')
+        if calificacion is not None:
+            if calificacion < 0 or calificacion > 5:
+                raise forms.ValidationError('La calificación debe estar entre 0 y 5.')
+        return calificacion
+
     def clean(self):
         cleaned_data = super().clean()
-        repuesto = cleaned_data.get('repuesto')
-        tipo_movimiento = cleaned_data.get('tipo_movimiento')
-        cantidad = cleaned_data.get('cantidad')
-        motivo = cleaned_data.get('motivo')
         
-        # Validar coherencia entre tipo y motivo
-        if tipo_movimiento and motivo:
-            entradas_validas = ['entrada', 'ajuste_positivo', 'transferencia_entrada', 'devolucion']
-            motivos_entrada = ['compra', 'produccion', 'devolucion_cliente', 'conteo_fisico', 'correccion_error', 'transferencia_interna']
-            
-            if tipo_movimiento in entradas_validas and motivo not in motivos_entrada + ['otro']:
-                self.add_error('motivo', 'El motivo seleccionado no es válido para este tipo de movimiento.')
+        # Validar fechas
+        fecha_ultima_compra = cleaned_data.get('fecha_ultima_compra')
+        fecha_ultima_evaluacion = cleaned_data.get('fecha_ultima_evaluacion')
         
-        # Validar stock disponible para salidas
-        if repuesto and tipo_movimiento in ['salida', 'ajuste_negativo', 'transferencia_salida', 'merma'] and cantidad:
-            if cantidad > repuesto.stock_actual:
-                self.add_error('cantidad', f'No hay stock suficiente. Stock actual: {repuesto.stock_actual} {repuesto.unidad_medida}')
+        if fecha_ultima_compra and fecha_ultima_compra > date.today():
+            raise forms.ValidationError({
+                'fecha_ultima_compra': 'La fecha de última compra no puede ser futura.'
+            })
+        
+        if fecha_ultima_evaluacion and fecha_ultima_evaluacion > date.today():
+            raise forms.ValidationError({
+                'fecha_ultima_evaluacion': 'La fecha de última evaluación no puede ser futura.'
+            })
         
         return cleaned_data

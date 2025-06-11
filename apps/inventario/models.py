@@ -34,34 +34,225 @@ class CategoriaRepuesto(models.Model):
         return f"{self.codigo} - {self.nombre}"
 
 class Proveedor(models.Model):
-    """Proveedores de repuestos"""
-    nombre = models.CharField("Nombre del Proveedor", max_length=200)
-    codigo = models.CharField("Código", max_length=20, unique=True)
-    contacto_principal = models.CharField("Contacto Principal", max_length=100, blank=True)
-    telefono = models.CharField("Teléfono", max_length=20, blank=True)
-    email = models.EmailField("Email", blank=True)
-    direccion = models.TextField("Dirección", blank=True)
-    ciudad = models.CharField("Ciudad", max_length=100, blank=True)
-    pais = models.CharField("País", max_length=100, default="Bolivia")
-    nit = models.CharField("NIT", max_length=20, blank=True)
-    calificacion = models.IntegerField(
-        "Calificación (1-5)", 
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
-        default=3
-    )
-    tiempo_entrega_promedio = models.IntegerField("Tiempo Entrega Promedio (días)", default=30)
-    es_proveedor_critico = models.BooleanField("Proveedor Crítico", default=False)
-    certificaciones = models.TextField("Certificaciones", blank=True, help_text="ISO, API, ASME, etc.")
-    activo = models.BooleanField("Activo", default=True)
-    fecha_registro = models.DateTimeField("Fecha de Registro", auto_now_add=True)
+    """Modelo para gestión de proveedores de repuestos"""
     
+    TIPO_PROVEEDOR_CHOICES = [
+        ('nacional', 'Nacional'),
+        ('internacional', 'Internacional'),
+        ('local', 'Local'),
+        ('distribuidor', 'Distribuidor'),
+        ('fabricante', 'Fabricante'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('activo', 'Activo'),
+        ('inactivo', 'Inactivo'),
+        ('evaluacion', 'En Evaluación'),
+        ('suspendido', 'Suspendido'),
+        ('bloqueado', 'Bloqueado'),
+    ]
+    
+    CATEGORIA_CHOICES = [
+        ('repuestos_mecanicos', 'Repuestos Mecánicos'),
+        ('componentes_electronicos', 'Componentes Electrónicos'),
+        ('herramientas', 'Herramientas'),
+        ('materiales_soldadura', 'Materiales de Soldadura'),
+        ('lubricantes', 'Lubricantes y Aceites'),
+        ('elementos_seguridad', 'Elementos de Seguridad'),
+        ('consumibles', 'Consumibles Generales'),
+        ('servicios_especializados', 'Servicios Especializados'),
+    ]
+    
+    # Información básica
+    codigo = models.CharField("Código de Proveedor", max_length=20, unique=True)
+    nombre = models.CharField("Nombre/Razón Social", max_length=200)
+    nombre_comercial = models.CharField("Nombre Comercial", max_length=200, blank=True)
+    tipo_proveedor = models.CharField("Tipo de Proveedor", max_length=20, choices=TIPO_PROVEEDOR_CHOICES)
+    categoria = models.CharField("Categoría Principal", max_length=30, choices=CATEGORIA_CHOICES)
+    
+    # Información legal
+    nit = models.CharField("NIT", max_length=20, blank=True)
+    registro_comercio = models.CharField("Registro de Comercio", max_length=50, blank=True)
+    licencia_funcionamiento = models.CharField("Licencia de Funcionamiento", max_length=50, blank=True)
+    
+    # Contacto principal
+    contacto_principal = models.CharField("Contacto Principal", max_length=100)
+    cargo_contacto = models.CharField("Cargo", max_length=100, blank=True)
+    telefono = models.CharField("Teléfono", max_length=20)
+    telefono_secundario = models.CharField("Teléfono Secundario", max_length=20, blank=True)
+    email = models.EmailField("Email Principal")
+    email_secundario = models.EmailField("Email Secundario", blank=True)
+    sitio_web = models.URLField("Sitio Web", blank=True)
+    
+    # Dirección
+    direccion = models.TextField("Dirección")
+    ciudad = models.CharField("Ciudad", max_length=100)
+    departamento = models.CharField("Departamento", max_length=100)
+    pais = models.CharField("País", max_length=100, default="Bolivia")
+    codigo_postal = models.CharField("Código Postal", max_length=10, blank=True)
+    
+    # Información comercial
+    condiciones_pago = models.CharField("Condiciones de Pago", max_length=100, blank=True)
+    dias_credito = models.PositiveIntegerField("Días de Crédito", default=0)
+    descuento_general = models.DecimalField("Descuento General (%)", max_digits=5, decimal_places=2, default=0)
+    moneda_principal = models.CharField("Moneda Principal", max_length=20, default="BOB")
+    limite_credito = models.DecimalField("Límite de Crédito", max_digits=12, decimal_places=2, default=0)
+    
+    # Evaluación y calificación
+    calificacion = models.DecimalField("Calificación (1-5)", max_digits=3, decimal_places=2, default=0,
+                                     validators=[MinValueValidator(0), MaxValueValidator(5)])
+    tiempo_entrega_promedio = models.PositiveIntegerField("Tiempo Entrega Promedio (días)", default=15)
+    certificaciones = models.TextField("Certificaciones", blank=True,
+                                     help_text="ISO, API, ASME, etc.")
+    
+    # Estado y seguimiento
+    estado = models.CharField("Estado", max_length=15, choices=ESTADO_CHOICES, default='evaluacion')
+    fecha_registro = models.DateTimeField("Fecha de Registro", auto_now_add=True)
+    fecha_ultima_compra = models.DateField("Última Compra", null=True, blank=True)
+    fecha_ultima_evaluacion = models.DateField("Última Evaluación", null=True, blank=True)
+    
+    # Métricas comerciales
+    total_ordenes = models.PositiveIntegerField("Total de Órdenes", default=0)
+    total_comprado = models.DecimalField("Total Comprado", max_digits=15, decimal_places=2, default=0)
+    porcentaje_cumplimiento = models.DecimalField("% Cumplimiento", max_digits=5, decimal_places=2, default=0)
+    
+    # Observaciones y notas
+    observaciones = models.TextField("Observaciones", blank=True)
+    notas_internas = models.TextField("Notas Internas", blank=True)
+    
+    # Control
+    activo = models.BooleanField("Activo", default=True)
+    fecha_actualizacion = models.DateTimeField("Última Actualización", auto_now=True)
+
     class Meta:
         verbose_name = "Proveedor"
         verbose_name_plural = "Proveedores"
         ordering = ['nombre']
-    
+
     def __str__(self):
         return f"{self.codigo} - {self.nombre}"
+
+    def save(self, *args, **kwargs):
+        # Generar código automático si no existe
+        if not self.codigo:
+            ultimo_proveedor = Proveedor.objects.filter(
+                codigo__startswith='PROV'
+            ).order_by('codigo').last()
+            
+            if ultimo_proveedor:
+                try:
+                    ultimo_numero = int(ultimo_proveedor.codigo.split('-')[1])
+                    nuevo_numero = ultimo_numero + 1
+                except (ValueError, IndexError):
+                    nuevo_numero = 1
+            else:
+                nuevo_numero = 1
+            
+            self.codigo = f"PROV-{nuevo_numero:04d}"
+        
+        super().save(*args, **kwargs)
+
+    def get_estado_badge_class(self):
+        """Retorna la clase CSS para el badge de estado"""
+        clases = {
+            'activo': 'bg-success',
+            'inactivo': 'bg-secondary',
+            'evaluacion': 'bg-warning',
+            'suspendido': 'bg-danger',
+            'bloqueado': 'bg-dark',
+        }
+        return clases.get(self.estado, 'bg-secondary')
+
+    def get_calificacion_estrellas(self):
+        """Retorna el número de estrellas basado en la calificación"""
+        return int(self.calificacion) if self.calificacion else 0
+
+    def get_tiempo_entrega_categoria(self):
+        """Categoriza el tiempo de entrega"""
+        if self.tiempo_entrega_promedio <= 5:
+            return {'texto': 'Rápido', 'color': 'bg-success'}
+        elif self.tiempo_entrega_promedio <= 10:
+            return {'texto': 'Normal', 'color': 'bg-info'}
+        elif self.tiempo_entrega_promedio <= 20:
+            return {'texto': 'Lento', 'color': 'bg-warning'}
+        else:
+            return {'texto': 'Muy Lento', 'color': 'bg-danger'}
+
+    def dias_sin_comprar(self):
+        """Calcula los días sin realizar compras"""
+        if self.fecha_ultima_compra:
+            return (date.today() - self.fecha_ultima_compra).days
+        return None
+
+    def get_calificacion_display(self):
+        """Retorna la calificación en formato de estrellas"""
+        if self.calificacion:
+            return "★" * int(self.calificacion) + "☆" * (5 - int(self.calificacion))
+        return "Sin calificar"
+
+    def get_estado_color(self):
+        """Retorna el color del estado para mostrar en el frontend"""
+        colores = {
+            'activo': '#28a745',      # Verde
+            'inactivo': '#6c757d',    # Gris
+            'evaluacion': '#ffc107',  # Amarillo
+            'suspendido': '#dc3545',  # Rojo
+            'bloqueado': '#343a40',   # Negro
+        }
+        return colores.get(self.estado, '#6c757d')
+
+    def es_proveedor_confiable(self):
+        """Determina si es un proveedor confiable basado en métricas"""
+        criterios_cumplidos = 0
+        
+        # Calificación >= 4.0
+        if self.calificacion >= 4.0:
+            criterios_cumplidos += 1
+        
+        # Cumplimiento >= 90%
+        if self.porcentaje_cumplimiento >= 90:
+            criterios_cumplidos += 1
+        
+        # Tiempo de entrega <= 15 días
+        if self.tiempo_entrega_promedio <= 15:
+            criterios_cumplidos += 1
+        
+        # Al menos 5 órdenes completadas
+        if self.total_ordenes >= 5:
+            criterios_cumplidos += 1
+        
+        # Estado activo
+        if self.estado == 'activo':
+            criterios_cumplidos += 1
+        
+        # Debe cumplir al menos 4 de 5 criterios
+        return criterios_cumplidos >= 4
+
+    def necesita_evaluacion(self):
+        """Verifica si el proveedor necesita ser evaluado"""
+        if not self.fecha_ultima_evaluacion:
+            return True
+        
+        # Evaluación cada 6 meses
+        fecha_limite = self.fecha_ultima_evaluacion + timedelta(days=180)
+        return date.today() > fecha_limite
+
+    def get_resumen_comercial(self):
+        """Retorna un resumen de la relación comercial"""
+        return {
+            'total_comprado': self.total_comprado,
+            'promedio_por_orden': self.total_comprado / max(self.total_ordenes, 1),
+            'dias_sin_comprar': self.dias_sin_comprar(),
+            'es_confiable': self.es_proveedor_confiable(),
+            'necesita_evaluacion': self.necesita_evaluacion(),
+        }
+
+    def actualizar_metricas(self):
+        """Actualiza las métricas comerciales del proveedor"""
+        # Este método se puede llamar cuando se complete una orden
+        # Por ahora solo actualiza la fecha de última evaluación
+        self.fecha_ultima_evaluacion = date.today()
+        self.save()
 
 class Repuesto(models.Model):
     """Modelo principal para repuestos e insumos industriales"""
@@ -244,45 +435,42 @@ class Repuesto(models.Model):
             ).order_by('codigo').last()
             
             if ultimo_repuesto:
-                ultimo_numero = int(ultimo_repuesto.codigo[3:])
-                nuevo_numero = ultimo_numero + 1
+                try:
+                    ultimo_numero = int(ultimo_repuesto.codigo.split('-')[1])
+                    nuevo_numero = ultimo_numero + 1
+                except (ValueError, IndexError):
+                    nuevo_numero = 1
             else:
                 nuevo_numero = 1
             
-            self.codigo = f"REP{nuevo_numero:05d}"
+            self.codigo = f"REP-{nuevo_numero:05d}"
         
-        # Generar código de activo ISO si no existe y es crítico
-        if not self.codigo_activo_iso and self.es_activo_critico:
-            seccion_code = self.seccion_trabajo or 'GEN'
-            categoria_code = self.categoria.codigo if self.categoria else 'REP'
-            self.codigo_activo_iso = f"{seccion_code}-{categoria_code}-{self.codigo}"
-        
-        # Actualizar estado según stock
+        # Actualizar estado basado en stock
         self.actualizar_estado_stock()
         
         super().save(*args, **kwargs)
     
     def actualizar_estado_stock(self):
-        """Actualiza el estado basado en el stock actual"""
+        """Actualiza el estado basado en el nivel de stock"""
         if self.stock_actual <= 0:
             self.estado = 'agotado'
-        elif self.stock_actual <= self.punto_reorden:
-            self.estado = 'en_pedido'
-        elif self.fecha_vencimiento and self.fecha_vencimiento <= date.today() + timedelta(days=30):
+        elif self.esta_vencido():
             self.estado = 'por_vencer'
+        elif self.stock_actual <= self.punto_reorden:
+            self.estado = 'disponible'  # Pero necesita reposición
         else:
             self.estado = 'disponible'
     
     def necesita_reposicion(self):
-        """Verifica si necesita reposición"""
+        """Verifica si el repuesto necesita reposición"""
         return self.stock_actual <= self.punto_reorden
     
     def es_stock_critico(self):
-        """Verifica si está en stock crítico"""
+        """Verifica si está en nivel crítico"""
         return self.stock_actual <= self.stock_minimo
     
     def dias_hasta_vencimiento(self):
-        """Calcula días hasta vencimiento"""
+        """Calcula los días hasta vencimiento"""
         if self.fecha_vencimiento:
             diferencia = self.fecha_vencimiento - date.today()
             return diferencia.days
@@ -295,11 +483,11 @@ class Repuesto(models.Model):
         return False
     
     def valor_stock_actual(self):
-        """Calcula el valor del stock actual"""
+        """Calcula el valor total del stock actual"""
         return self.stock_actual * self.precio_unitario
     
     def get_estado_badge_class(self):
-        """Retorna clase CSS para el badge de estado"""
+        """Retorna la clase CSS para el badge de estado"""
         clases = {
             'disponible': 'bg-success',
             'agotado': 'bg-danger',
@@ -312,18 +500,37 @@ class Repuesto(models.Model):
         return clases.get(self.estado, 'bg-secondary')
     
     def get_criticidad_badge_class(self):
-        """Retorna clase CSS para el badge de criticidad"""
+        """Retorna la clase CSS para el badge de criticidad"""
         clases = {
-            'BAJA': 'bg-light text-dark',
-            'MODERADA': 'bg-info',
-            'IMPORTANTE': 'bg-warning',
             'CRITICA': 'bg-danger',
+            'IMPORTANTE': 'bg-warning',
+            'MODERADA': 'bg-info',
+            'BAJA': 'bg-secondary',
         }
         return clases.get(self.criticidad, 'bg-secondary')
     
     def get_seccion_display_completo(self):
-        """Retorna el display completo de la sección"""
-        return dict(self.SECCION_TRABAJO_CHOICES).get(self.seccion_trabajo, 'No asignado')
+        """Retorna el nombre completo de la sección"""
+        secciones = {
+            'S1': 'S1 - Soldadura, Corte y Perforación',
+            'S2': 'S2 - Maquinado y Mecanizado',
+            'S3': 'S3 - Prototipado',
+            'S4': 'S4 - Plásticos',
+            'S5': 'S5 - Fundición',
+            'S6': 'S6 - Sujeción y Doblado',
+            'S7': 'S7 - Transporte y Elevación',
+            'A9': 'A9 - Tecnología de la Información',
+            'ALM': 'Almacén General',
+            'MAN': 'Mantenimiento',
+            'CAL': 'Control de Calidad',
+            'SEG': 'Seguridad Industrial',
+        }
+        return secciones.get(self.seccion_trabajo, self.seccion_trabajo)
+
+    class Meta:
+        verbose_name = "Repuesto"
+        verbose_name_plural = "Repuestos"
+        ordering = ['-fecha_creacion']
 
 class MovimientoStock(models.Model):
     """Modelo para registrar movimientos de stock de repuestos"""
@@ -406,7 +613,7 @@ class MovimientoStock(models.Model):
     numero_factura = models.CharField("Número de Factura", max_length=50, blank=True, null=True)
     numero_orden = models.CharField("Número de Orden", max_length=50, blank=True, null=True)
     
-    # Ubicación
+    # Ubicaciones y referencias adicionales
     ubicacion_origen = models.CharField("Ubicación Origen", max_length=100, blank=True, null=True)
     ubicacion_destino = models.CharField("Ubicación Destino", max_length=100, blank=True, null=True)
     
@@ -416,71 +623,33 @@ class MovimientoStock(models.Model):
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True,
-        verbose_name="Proveedor"
+        verbose_name="Proveedor",
+        help_text="Proveedor para movimientos de entrada"
     )
     
-    # Control y seguimiento
+    # Estado y control
     estado = models.CharField("Estado", max_length=15, choices=ESTADO_CHOICES, default='procesado')
-    requiere_aprobacion = models.BooleanField("Requiere Aprobación", default=False)
-    aprobado_por = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
-        related_name='movimientos_aprobados',
-        verbose_name="Aprobado Por"
-    )
-    fecha_aprobacion = models.DateTimeField("Fecha de Aprobación", null=True, blank=True)
-    
-    # Observaciones
-    observaciones = models.TextField("Observaciones", blank=True, null=True)
-    notas_internas = models.TextField("Notas Internas", blank=True, null=True)
     
     # Metadatos
     fecha_creacion = models.DateTimeField("Fecha de Creación", auto_now_add=True)
     fecha_actualizacion = models.DateTimeField("Última Actualización", auto_now=True)
-    activo = models.BooleanField("Activo", default=True)
     
     class Meta:
         verbose_name = "Movimiento de Stock"
         verbose_name_plural = "Movimientos de Stock"
-        ordering = ['-fecha_movimiento', '-fecha_creacion']
-        indexes = [
-            models.Index(fields=['repuesto', 'tipo_movimiento']),
-            models.Index(fields=['fecha_movimiento']),
-            models.Index(fields=['usuario']),
-            models.Index(fields=['estado']),
-        ]
-    
+        ordering = ['-fecha_movimiento']
+
     def __str__(self):
-        return f"{self.numero_movimiento} - {self.repuesto.nombre} ({self.get_tipo_movimiento_display()})"
+        return f"{self.numero_movimiento} - {self.repuesto.nombre}"
     
     def save(self, *args, **kwargs):
-        # Generar número de movimiento automático
-        if not self.numero_movimiento:
-            ultimo_numero = MovimientoStock.objects.filter(
-                numero_movimiento__startswith='MOV'
-            ).order_by('numero_movimiento').last()
-            
-            if ultimo_numero:
-                numero = int(ultimo_numero.numero_movimiento[3:]) + 1
-            else:
-                numero = 1
-            
-            self.numero_movimiento = f"MOV{numero:06d}"
-        
         # Calcular costo total
-        if self.cantidad and self.costo_unitario:
-            self.costo_total = self.cantidad * self.costo_unitario
-        
-        # Si no tiene fecha de procesamiento y está procesado, asignarla
-        if self.estado == 'procesado' and not self.fecha_procesamiento:
-            self.fecha_procesamiento = timezone.now()
+        self.costo_total = self.cantidad * self.costo_unitario
         
         super().save(*args, **kwargs)
     
     def get_tipo_display_color(self):
-        """Retorna el color para mostrar el tipo de movimiento"""
+        """Retorna el color para el tipo de movimiento"""
         colores = {
             'entrada': 'success',
             'salida': 'danger',
@@ -489,13 +658,13 @@ class MovimientoStock(models.Model):
             'transferencia_entrada': 'primary',
             'transferencia_salida': 'primary',
             'devolucion': 'secondary',
-            'merma': 'dark',
-            'inventario_inicial': 'light',
+            'merma': 'danger',
+            'inventario_inicial': 'dark',
         }
         return colores.get(self.tipo_movimiento, 'secondary')
     
     def get_estado_display_color(self):
-        """Retorna el color para mostrar el estado"""
+        """Retorna el color para el estado"""
         colores = {
             'pendiente': 'warning',
             'procesado': 'success',
@@ -506,17 +675,19 @@ class MovimientoStock(models.Model):
     
     def is_entrada(self):
         """Verifica si es un movimiento de entrada"""
-        return self.tipo_movimiento in ['entrada', 'ajuste_positivo', 'transferencia_entrada', 'devolucion']
+        tipos_entrada = ['entrada', 'ajuste_positivo', 'transferencia_entrada', 'devolucion']
+        return self.tipo_movimiento in tipos_entrada
     
     def is_salida(self):
         """Verifica si es un movimiento de salida"""
-        return self.tipo_movimiento in ['salida', 'ajuste_negativo', 'transferencia_salida', 'merma']
+        tipos_salida = ['salida', 'ajuste_negativo', 'transferencia_salida', 'merma']
+        return self.tipo_movimiento in tipos_salida
     
     def get_impacto_stock(self):
-        """Calcula el impacto en el stock (positivo o negativo)"""
+        """Retorna el impacto en el stock (+, - o =)"""
         if self.is_entrada():
-            return self.cantidad
+            return f"+{self.cantidad}"
         elif self.is_salida():
-            return -self.cantidad
+            return f"-{self.cantidad}"
         else:
-            return 0
+            return f"±{self.cantidad}"
