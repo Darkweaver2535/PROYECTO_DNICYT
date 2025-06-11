@@ -1228,11 +1228,12 @@
                     </a>
                 </div>
                 
-                <!-- HABILITAR MOVIMIENTOS -->
+                    <!-- NUEVO ENLACE UNIFICADO -->
                 <div class="nav-item">
-                    <a href="{% url 'inventario:movimientos' %}" class="nav-link">
-                        <span class="nav-icon"><i class="bi bi-arrow-left-right"></i></span>
-                        <span class="nav-text">Movimientos</span>
+                    <a href="{% url 'operaciones:movimientos-unificados' %}" class="nav-link {% if request.resolver_match.url_name == 'movimientos-unificados' %}active{% endif %}">
+                    <i class="nav-icon bi bi-arrow-repeat"></i>
+                    <span class="nav-text">Movimientos</span>
+                    <span class="nav-badge beta">Unificado</span>
                     </a>
                 </div>
                 
@@ -1244,10 +1245,9 @@
                 </div>
                 
                 <div class="nav-item">
-                    <a href="#" class="nav-link disabled">
-                        <span class="nav-icon"><i class="bi bi-bar-chart"></i></span>
+                    <a href="{% url 'inventario:reportes-inventario' %}" class="nav-link {% if 'reportes-inventario' in request.path %}active{% endif %}">
+                        <i class="nav-icon bi bi-graph-up"></i>
                         <span class="nav-text">Reportes</span>
-                        <span class="nav-badge soon">Pronto</span>
                     </a>
                 </div>
             </div>
@@ -1259,11 +1259,13 @@
                     Materiales y Herramientas
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-box"></i>
-                        <span class="nav-text">Materiales</span>
+            <!-- CAMBIAR ESTA LÍNEA - Quitar 'disabled' y agregar la URL correcta -->
+                    <a href="{% url 'materiales:materiales' %}" class="nav-link {% if 'materiales' in request.resolver_match.app_names %}active{% endif %}">
+                    <i class="nav-icon bi bi-box-seam"></i>
+                    <span class="nav-text">Materiales</span>
                     </a>
                 </div>
+            
                 <div class="nav-item">
                     <a class="nav-link disabled" href="#">
                         <i class="nav-icon bi bi-tools"></i>
@@ -1290,13 +1292,7 @@
                         <span class="nav-text">Análisis de Fallas</span>
                     </a>
                 </div>
-                <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-speedometer2"></i>
-                        <span class="nav-text">Dashboard</span>
-                        <span class="nav-badge pulse">Nuevo</span>
-                    </a>
-                </div>
+           
             </div>
 
             <!-- Administración -->
@@ -1445,6 +1441,13 @@
             <span>&copy; {{ year|default:2025 }} Lab Metal Mecánica - EMI. Todos los derechos reservados.</span>
         </div>
     </footer>
+
+    <!-- Botón flotante de retroceso (solo mostrar si NO estamos en dashboard) -->
+    {% if request.resolver_match.url_name != 'dashboard' %}
+    <button onclick="window.history.back()" class="btn-fab-back" title="Regresar">
+        <i class="bi bi-arrow-left"></i>
+    </button>
+    {% endif %}
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>

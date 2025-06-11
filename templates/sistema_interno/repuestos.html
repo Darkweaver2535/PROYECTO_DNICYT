@@ -662,12 +662,14 @@
                     </div>
                     
                     <div class="repuesto-actions">
-                        <a href="{% url 'inventario:repuesto-detalle' repuesto.pk %}" 
-                           class="btn-action btn-view">
+                        <a href="{% url 'inventario:repuesto-detalle' repuesto.pk %}" class="btn-action btn-view">
                             <i class="bi bi-eye"></i> Ver
                         </a>
                         <a href="{% url 'inventario:editar-repuesto' repuesto.pk %}" class="btn-action btn-edit">
                             <i class="bi bi-pencil"></i> Editar
+                        </a>
+                        <a href="{% url 'inventario:crear-movimiento' %}?repuesto={{ repuesto.pk }}" class="btn-action btn-move">
+                            <i class="bi bi-arrow-left-right"></i> Movimiento
                         </a>
                     </div>
                 </div>

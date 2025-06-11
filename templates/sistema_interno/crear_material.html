@@ -1,0 +1,933 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .crear-material-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .crear-material-page .form-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .crear-material-page .form-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .crear-material-page .form-container {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .crear-material-page .form-section {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .crear-material-page .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .crear-material-page .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 2px solid var(--primary-blue);
+        padding-bottom: 0.5rem;
+    }
+
+    .crear-material-page .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .crear-material-page .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .crear-material-page .form-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .crear-material-page .form-label.required::after {
+        content: " *";
+        color: var(--danger-red);
+        font-weight: 700;
+    }
+
+    .crear-material-page .form-control,
+    .crear-material-page .form-select {
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        background: var(--pure-white);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .crear-material-page .form-control:focus,
+    .crear-material-page .form-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .crear-material-page .form-help {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+    }
+
+    .crear-material-page .form-actions {
+        background: var(--off-white);
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .crear-material-page .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .crear-material-page .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: var(--pure-white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .crear-material-page .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: var(--pure-white);
+    }
+
+    .crear-material-page .btn-secondary {
+        background: var(--border-color);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .crear-material-page .btn-secondary:hover {
+        background: var(--text-light);
+        color: var(--pure-white);
+    }
+
+    .crear-material-page .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .crear-material-page .form-check-input {
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--border-color);
+        border-radius: 0.25rem;
+    }
+
+    .crear-material-page .form-check-input:checked {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+
+    .crear-material-page .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .crear-material-page .stat-card {
+        background: var(--pure-white);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        text-align: center;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .crear-material-page .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+
+    .crear-material-page .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+    }
+
+    /* NUEVA REGLA: Desactivar iconos de validación en selects */
+    .crear-material-page .form-select.is-valid,
+    .crear-material-page .form-select.is-invalid {
+        background-image: none !important;
+        padding-right: 0.75rem !important;
+    }
+    
+    /* Desactivar todos los iconos de validación de Bootstrap */
+    .was-validated .form-select:valid,
+    .form-select.is-valid {
+        background-image: none !important;
+    }
+    
+    .was-validated .form-select:invalid,
+    .form-select.is-invalid {
+        background-image: none !important;
+    }
+    
+    /* Mantener solo el color del borde para indicar estado */
+    .crear-material-page .form-select.is-valid {
+        border-color: #198754;
+    }
+    
+    .crear-material-page .form-select.is-invalid {
+        border-color: #dc3545;
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .crear-material-page .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .crear-material-page .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .crear-material-page .btn {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="crear-material-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="form-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="form-title">
+                        <i class="bi bi-{% if accion == 'crear' %}plus-lg{% else %}pencil{% endif %}"></i>
+                        {{ titulo }}
+                    </h1>
+                    <p class="text-muted">
+                        {% if accion == 'crear' %}
+                            Complete los campos para registrar un nuevo material o herramienta
+                        {% else %}
+                            Modifique los campos necesarios para actualizar el material
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'materiales:materiales' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver al listado
+                </a>
+            </div>
+            
+            <!-- Stats rápidas -->
+            {% if stats %}
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-value">{{ stats.total_materiales }}</div>
+                    <div class="stat-label">Total Materiales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ stats.total_categorias }}</div>
+                    <div class="stat-label">Categorías</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ stats.total_proveedores }}</div>
+                    <div class="stat-label">Proveedores</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Formulario -->
+        <form method="post" enctype="multipart/form-data" class="material-form">
+            {% csrf_token %}
+            
+            <div class="form-container">
+                <!-- Información Básica -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-info-circle"></i>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.nombre.label }}</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger small">{{ form.nombre.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Nombre descriptivo y claro del material</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.tipo.label }}</label>
+                            {{ form.tipo }}
+                            {% if form.tipo.errors %}
+                                <div class="text-danger small">{{ form.tipo.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Clasificación principal del material</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.categoria.label }}</label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}
+                                <div class="text-danger small">{{ form.categoria.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Categoría específica del material</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.estado.label }}</label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                                <div class="text-danger small">{{ form.estado.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Estado actual del material en inventario</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.criticidad.label }}</label>
+                            {{ form.criticidad }}
+                            {% if form.criticidad.errors %}
+                                <div class="text-danger small">{{ form.criticidad.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Nivel de criticidad del material para las operaciones</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <!-- Campo vacío para mantener la estructura del grid -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label required">{{ form.descripcion.label }}</label>
+                        {{ form.descripcion }}
+                        {% if form.descripcion.errors %}
+                            <div class="text-danger small">{{ form.descripcion.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-help">Descripción detallada del material, características, usos, etc.</div>
+                    </div>
+                </div>
+
+                <!-- Identificación -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-qr-code"></i>
+                        Identificación
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.marca.label }}</label>
+                            {{ form.marca }}
+                            {% if form.marca.errors %}
+                                <div class="text-danger small">{{ form.marca.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.modelo.label }}</label>
+                            {{ form.modelo }}
+                            {% if form.modelo.errors %}
+                                <div class="text-danger small">{{ form.modelo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.numero_parte.label }}</label>
+                            {{ form.numero_parte }}
+                            {% if form.numero_parte.errors %}
+                                <div class="text-danger small">{{ form.numero_parte.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.codigo_barras.label }}</label>
+                            {{ form.codigo_barras }}
+                            {% if form.codigo_barras.errors %}
+                                <div class="text-danger small">{{ form.codigo_barras.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventario -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-boxes"></i>
+                        Control de Inventario
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.stock_actual.label }}</label>
+                            {{ form.stock_actual }}
+                            {% if form.stock_actual.errors %}
+                                <div class="text-danger small">{{ form.stock_actual.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.stock_minimo.label }}</label>
+                            {{ form.stock_minimo }}
+                            {% if form.stock_minimo.errors %}
+                                <div class="text-danger small">{{ form.stock_minimo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.stock_maximo.label }}</label>
+                            {{ form.stock_maximo }}
+                            {% if form.stock_maximo.errors %}
+                                <div class="text-danger small">{{ form.stock_maximo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.punto_reorden.label }}</label>
+                            {{ form.punto_reorden }}
+                            {% if form.punto_reorden.errors %}
+                                <div class="text-danger small">{{ form.punto_reorden.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.unidad_medida.label }}</label>
+                            {{ form.unidad_medida }}
+                            {% if form.unidad_medida.errors %}
+                                <div class="text-danger small">{{ form.unidad_medida.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.precio_unitario.label }}</label>
+                            {{ form.precio_unitario }}
+                            {% if form.precio_unitario.errors %}
+                                <div class="text-danger small">{{ form.precio_unitario.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ubicación y Proveedor -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-geo-alt"></i>
+                        Ubicación y Proveedor
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.ubicacion.label }}</label>
+                            {{ form.ubicacion }}
+                            {% if form.ubicacion.errors %}
+                                <div class="text-danger small">{{ form.ubicacion.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Ubicación específica en el almacén (ej: Estante A-3, Nivel 2)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.proveedor_principal.label }}</label>
+                            {{ form.proveedor_principal }}
+                            {% if form.proveedor_principal.errors %}
+                                <div class="text-danger small">{{ form.proveedor_principal.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Proveedor principal para este material</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fechas Importantes -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-calendar"></i>
+                        Fechas Importantes
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.fecha_vencimiento.label }}</label>
+                            {{ form.fecha_vencimiento }}
+                            {% if form.fecha_vencimiento.errors %}
+                                <div class="text-danger small">{{ form.fecha_vencimiento.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Fecha de vencimiento del material (si aplica)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.fecha_ultima_compra.label }}</label>
+                            {{ form.fecha_ultima_compra }}
+                            {% if form.fecha_ultima_compra.errors %}
+                                <div class="text-danger small">{{ form.fecha_ultima_compra.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Fecha de la última compra realizada</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Características Especiales -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-gear"></i>
+                        Características Especiales
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.requiere_refrigeracion }}
+                                <label class="form-check-label" for="{{ form.requiere_refrigeracion.id_for_label }}">
+                                    {{ form.requiere_refrigeracion.label }}
+                                </label>
+                            </div>
+                            {% if form.requiere_refrigeracion.errors %}
+                                <div class="text-danger small">{{ form.requiere_refrigeracion.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Marcar si el material requiere almacenamiento en refrigeración</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.requiere_manejo_especial }}
+                                <label class="form-check-label" for="{{ form.requiere_manejo_especial.id_for_label }}">
+                                    {{ form.requiere_manejo_especial.label }}
+                                </label>
+                            </div>
+                            {% if form.requiere_manejo_especial.errors %}
+                                <div class="text-danger small">{{ form.requiere_manejo_especial.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Marcar si requiere manejo especial (químicos peligrosos, gases, etc.)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documentos -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-file-earmark"></i>
+                        Documentos y Archivos
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.foto.label }}</label>
+                            {{ form.foto }}
+                            {% if form.foto.errors %}
+                                <div class="text-danger small">{{ form.foto.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Fotografía del material (formatos: jpg, png, gif)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.ficha_tecnica.label }}</label>
+                            {{ form.ficha_tecnica }}
+                            {% if form.ficha_tecnica.errors %}
+                                <div class="text-danger small">{{ form.ficha_tecnica.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Ficha técnica o especificaciones (PDF, DOC)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones del formulario -->
+                <div class="form-actions">
+                    <a href="{% url 'operaciones:movimientos-unificados' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Cancelar
+                    </a>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" name="action" value="save" class="btn btn-primary">
+                            <i class="bi bi-{% if accion == 'crear' %}plus-lg{% else %}check-lg{% endif %}"></i>
+                            {% if accion == 'crear' %}Crear Material{% else %}Actualizar Material{% endif %}
+                        </button>
+                        
+                        {% if accion == 'crear' %}
+                        <button type="submit" name="action" value="save_and_new" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i>
+                            Guardar y Crear Otro
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variable global para evitar múltiples inicializaciones
+let formInitialized = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Prevenir múltiples inicializaciones
+    if (formInitialized) {
+        return;
+    }
+    formInitialized = true;
+    
+    console.log('📦 Formulario de Material - Sistema cargado correctamente');
+    
+    // Inicializar funcionalidades del formulario
+    initializeMaterialForm();
+    
+    // Configurar validaciones en tiempo real (SOLO UNA VEZ)
+    setupRealTimeValidation();
+    
+    // Configurar calculadora de stock
+    setupStockCalculations();
+});
+
+function initializeMaterialForm() {
+    // Auto-focus en el primer campo
+    const firstField = document.querySelector('input[name="nombre"]');
+    if (firstField) {
+        firstField.focus();
+    }
+    
+    // Configurar campos numéricos
+    const numericFields = document.querySelectorAll('input[type="number"]');
+    numericFields.forEach(field => {
+        field.addEventListener('wheel', function(e) {
+            e.preventDefault(); // Evitar cambio accidental con scroll
+        });
+        
+        // Formatear valores al perder el foco
+        field.addEventListener('blur', function() {
+            if (this.value && !isNaN(this.value)) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+    });
+    
+    // Configurar campos de fecha
+    const dateFields = document.querySelectorAll('input[type="date"]');
+    dateFields.forEach(field => {
+        // Configurar fecha mínima como hoy para fecha de vencimiento
+        if (field.name === 'fecha_vencimiento') {
+            const today = new Date().toISOString().split('T')[0];
+            field.min = today;
+        }
+        
+        // Configurar fecha máxima como hoy para fecha de última compra
+        if (field.name === 'fecha_ultima_compra') {
+            const today = new Date().toISOString().split('T')[0];
+            field.max = today;
+        }
+    });
+}
+
+function setupRealTimeValidation() {
+    console.log('🔧 Configurando validación en tiempo real...');
+    
+    // SOLO VALIDACIÓN VISUAL PARA CAMPOS DE TEXTO - NO SELECTS
+    const camposTexto = ['nombre', 'descripcion'];
+    
+    camposTexto.forEach(fieldName => {
+        const field = document.querySelector(`input[name="${fieldName}"], textarea[name="${fieldName}"]`);
+        if (field) {
+            // Limpiar cualquier validación previa
+            cleanFieldValidation(field);
+            
+            field.addEventListener('blur', function() {
+                validateSingleField(this, this.value.trim().length >= 3, 'Este campo debe tener al menos 3 caracteres');
+            });
+            
+            field.addEventListener('input', function() {
+                if (this.value.trim().length >= 3) {
+                    validateSingleField(this, true, '');
+                }
+            });
+        }
+    });
+    
+    // PARA SELECTS: SOLO LIMPIAR CUALQUIER VALIDACIÓN PREVIA - NO AGREGAR NUEVA
+    const selectsObligatorios = ['tipo', 'categoria', 'estado', 'unidad_medida'];
+    
+    selectsObligatorios.forEach(fieldName => {
+        const field = document.querySelector(`select[name="${fieldName}"]`);
+        if (field) {
+            // LIMPIAR COMPLETAMENTE cualquier validación
+            field.classList.remove('is-valid', 'is-invalid');
+            
+            // NO agregar event listeners de validación visual
+            // Los selects solo se validarán en el submit
+        }
+    });
+    
+    // Validación de stocks (solo bordes, sin iconos)
+    const stockFields = ['stock_actual', 'stock_minimo', 'stock_maximo', 'punto_reorden'];
+    stockFields.forEach(fieldName => {
+        const field = document.querySelector(`input[name="${fieldName}"]`);
+        if (field) {
+            cleanFieldValidation(field);
+            
+            field.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                const isValid = !isNaN(value) && value >= 0;
+                validateSingleField(this, isValid, 'Debe ser un número mayor o igual a 0');
+                
+                // Validaciones específicas
+                if (fieldName === 'stock_minimo' && isValid && value <= 0) {
+                    validateSingleField(this, false, 'El stock mínimo debe ser mayor a 0');
+                }
+            });
+        }
+    });
+}
+
+function cleanFieldValidation(field) {
+    // Limpiar clases de validación
+    field.classList.remove('is-valid', 'is-invalid');
+    
+    // Remover cualquier icono de validación existente
+    const parent = field.parentNode;
+    const existingIcons = parent.querySelectorAll('.validation-icon');
+    existingIcons.forEach(icon => icon.remove());
+    
+    // Remover mensajes de error personalizados
+    const existingErrors = parent.querySelectorAll('.custom-error');
+    existingErrors.forEach(error => error.remove());
+}
+
+function validateSingleField(field, isValid, errorMessage) {
+    // SOLO PARA CAMPOS INPUT Y TEXTAREA - NO SELECTS
+    if (field.tagName.toLowerCase() === 'select') {
+        return; // No aplicar validación visual a selects
+    }
+    
+    // Limpiar validación previa
+    cleanFieldValidation(field);
+    
+    if (isValid) {
+        field.classList.add('is-valid');
+        field.classList.remove('is-invalid');
+    } else {
+        field.classList.add('is-invalid');
+        field.classList.remove('is-valid');
+        
+        // Agregar mensaje de error personalizado si no existe uno del servidor
+        const existingError = field.parentNode.querySelector('.text-danger');
+        if (!existingError && errorMessage) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'text-danger small custom-error mt-1';
+            errorDiv.textContent = errorMessage;
+            field.parentNode.appendChild(errorDiv);
+        }
+    }
+}
+
+function setupStockCalculations() {
+    const stockActual = document.querySelector('input[name="stock_actual"]');
+    const stockMinimo = document.querySelector('input[name="stock_minimo"]');
+    const stockMaximo = document.querySelector('input[name="stock_maximo"]');
+    const puntoReorden = document.querySelector('input[name="punto_reorden"]');
+    
+    function calculateStockStatus() {
+        const actual = parseFloat(stockActual?.value || 0);
+        const minimo = parseFloat(stockMinimo?.value || 0);
+        const maximo = parseFloat(stockMaximo?.value || 0);
+        const reorden = parseFloat(puntoReorden?.value || 0);
+        
+        // Actualizar punto de reorden automáticamente si está vacío
+        if (puntoReorden && !puntoReorden.value && minimo > 0) {
+            puntoReorden.value = Math.max(1, Math.floor(minimo * 0.5)).toFixed(2);
+        }
+        
+        // Mostrar indicadores visuales
+        showStockIndicators(actual, minimo, maximo, reorden);
+    }
+    
+    [stockActual, stockMinimo, stockMaximo, puntoReorden].forEach(field => {
+        if (field) {
+            field.addEventListener('input', calculateStockStatus);
+            field.addEventListener('blur', calculateStockStatus);
+        }
+    });
+    
+    // Calcular al cargar la página
+    calculateStockStatus();
+}
+
+function showStockIndicators(actual, minimo, maximo, reorden) {
+    // Crear o actualizar indicador de estado de stock
+    let indicator = document.querySelector('.stock-status-indicator');
+    
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.className = 'stock-status-indicator alert mt-3';
+        
+        const stockSection = document.querySelector('input[name="stock_actual"]').closest('.form-section');
+        if (stockSection) {
+            stockSection.appendChild(indicator);
+        }
+    }
+    
+    let status = '';
+    let className = 'alert alert-info';
+    
+    if (actual <= 0) {
+        status = '🚫 Stock agotado';
+        className = 'alert alert-danger';
+    } else if (actual <= reorden) {
+        status = '⚠️ Se debe realizar pedido (por debajo del punto de reorden)';
+        className = 'alert alert-warning';
+    } else if (actual <= minimo) {
+        status = '📉 Stock bajo (por debajo del mínimo)';
+        className = 'alert alert-warning';
+    } else if (maximo > 0 && actual >= maximo) {
+        status = '📈 Stock alto (en el máximo o superior)';
+        className = 'alert alert-info';
+    } else {
+        status = '✅ Stock en nivel óptimo';
+        className = 'alert alert-success';
+    }
+    
+    indicator.className = className;
+    indicator.innerHTML = `
+        <div class="d-flex align-items-center">
+            <span>${status}</span>
+            <small class="ms-auto">
+                Actual: ${actual} | Mín: ${minimo} | Reorden: ${reorden}
+            </small>
+        </div>
+    `;
+}
+
+// Mejorar la experiencia del usuario con los campos de archivo
+document.addEventListener('change', function(e) {
+    if (e.target.type === 'file') {
+        const file = e.target.files[0];
+        if (file) {
+            const fileInfo = document.createElement('small');
+            fileInfo.className = 'text-muted mt-1';
+            fileInfo.textContent = `Archivo seleccionado: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+            
+            // Remover info anterior si existe
+            const existingInfo = e.target.parentNode.querySelector('.file-info');
+            if (existingInfo) {
+                existingInfo.remove();
+            }
+            
+            fileInfo.classList.add('file-info');
+            e.target.parentNode.appendChild(fileInfo);
+        }
+    }
+});
+
+// Validación final antes de enviar (SIMPLE - SIN VALIDACIÓN VISUAL)
+document.addEventListener('submit', function(e) {
+    if (!e.target.classList.contains('material-form')) {
+        return; // Solo procesar el formulario de materiales
+    }
+    
+    console.log('📝 Enviando formulario...');
+    
+    // Verificar campos obligatorios SIN AGREGAR CLASES VISUALES
+    let hasErrors = false;
+    const camposObligatorios = ['nombre', 'descripcion', 'tipo', 'categoria', 'estado'];
+    
+    camposObligatorios.forEach(fieldName => {
+        const field = document.querySelector(`[name="${fieldName}"]`);
+        if (field && !field.value.trim()) {
+            hasErrors = true;
+            console.log(`❌ Campo ${fieldName} está vacío`);
+        }
+    });
+    
+    if (hasErrors) {
+        e.preventDefault();
+        mostrarNotificacion('Por favor complete todos los campos obligatorios', 'error');
+        return false;
+    }
+});
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    // Crear notificación simple
+    const notificacion = document.createElement('div');
+    notificacion.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: ${tipo === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    `;
+    
+    notificacion.textContent = mensaje;
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        notificacion.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

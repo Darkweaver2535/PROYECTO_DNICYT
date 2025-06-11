@@ -43,4 +43,5 @@ urlpatterns = [
     path('mantenimiento/', include('apps.mantenimiento.urls')),
     path('operaciones/', include('apps.operaciones.urls')),
     path('inventario/', include('apps.inventario.urls')),  # <- AGREGAR ESTA LÍNEA
+    path('materiales/', include('apps.materiales.urls')),  # <- AGREGAR ESTA LÍNEA
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,707 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .movimientos-page {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .movimientos-page .dashboard-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .movimientos-page .dashboard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .movimientos-page .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .movimientos-page .stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--primary-blue);
+        transition: all 0.3s ease;
+    }
+
+    .movimientos-page .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .movimientos-page .stat-card.entrada { border-left-color: var(--success-green); }
+    .movimientos-page .stat-card.salida { border-left-color: var(--danger-red); }
+    .movimientos-page .stat-card.transferencia { border-left-color: var(--primary-blue); }
+    .movimientos-page .stat-card.valor { border-left-color: var(--warning-orange); }
+
+    .movimientos-page .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+
+    .movimientos-page .stat-card.entrada .stat-value { color: var(--success-green); }
+    .movimientos-page .stat-card.salida .stat-value { color: var(--danger-red); }
+    .movimientos-page .stat-card.valor .stat-value { color: var(--warning-orange); }
+
+    .movimientos-page .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .movimientos-page .filters-section {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .movimientos-page .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .movimientos-page .form-control,
+    .movimientos-page .form-select {
+        padding: 0.625rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        background: var(--pure-white);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .movimientos-page .form-control:focus,
+    .movimientos-page .form-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .movimientos-page .movimientos-table-section {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .movimientos-page .table-header {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: var(--pure-white);
+        padding: 1.5rem;
+    }
+
+    .movimientos-page .movimientos-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+    }
+
+    .movimientos-page .movimientos-table th {
+        background: var(--off-white);
+        color: var(--text-dark);
+        font-weight: 600;
+        padding: 1rem 0.75rem;
+        text-align: left;
+        border-bottom: 2px solid var(--border-color);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .movimientos-page .movimientos-table td {
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+        font-size: 0.875rem;
+    }
+
+    .movimientos-page .movimientos-table tbody tr:hover {
+        background: var(--light-blue);
+        transform: translateX(2px);
+    }
+
+    .movimientos-page .badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .movimientos-page .badge-tipo-material { background: #e0f2fe; color: #0277bd; }
+    .movimientos-page .badge-tipo-repuesto { background: #f3e5f5; color: #7b1fa2; }
+
+    .movimientos-page .badge-entrada { background: var(--success-green); color: var(--pure-white); }
+    .movimientos-page .badge-salida { background: var(--danger-red); color: var,--pure-white); }
+    .movimientos-page .badge-ajuste_positivo { background: var(--primary-blue); color: var,--pure-white); }
+    .movimientos-page .badge-ajuste_negativo { background: var(--warning-orange); color: var,--pure-white); }
+    .movimientos-page .badge-transferencia { background: var(--primary-blue); color: var,--pure-white); }
+
+    .movimientos-page .cantidad-display {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .movimientos-page .cantidad-entrada { color: var(--success-green); }
+    .movimientos-page .cantidad-salida { color: var(--danger-red); }
+
+    .movimientos-page .stock-change {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .movimientos-page .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: all 0.2s ease;
+    }
+
+    .movimientos-page .btn-primary {
+        background: var(--primary-blue);
+        color: var,--pure-white);
+        border: 1px solid var(--primary-blue);
+    }
+
+    .movimientos-page .btn-primary:hover {
+        background: var(--secondary-blue);
+        color: var,--pure-white);
+        transform: translateY(-1px);
+    }
+
+    .movimientos-page .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-light);
+    }
+
+    .movimientos-page .empty-state-icon {
+        font-size: 4rem;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+    }
+
+    /* NUEVOS ESTILOS PARA LOS BOTONES DE ACCIÓN */
+    .movimientos-page .acciones-rapidas {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+    
+    .movimientos-page .acciones-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .movimientos-page .accion-card {
+        background: linear-gradient(135deg, var(--light-blue), var(--off-white));
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .movimientos-page .accion-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-blue);
+    }
+    
+    .movimientos-page .accion-card.materiales {
+        background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+        border-color: #0277bd;
+    }
+    
+    .movimientos-page .accion-card.repuestos {
+        background: linear-gradient(135deg, #f3e5f5, #f8fafc);
+        border-color: #7b1fa2;
+    }
+    
+    .movimientos-page .accion-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--primary-blue);
+    }
+    
+    .movimientos-page .accion-card.materiales .accion-icon {
+        color: #0277bd;
+    }
+    
+    .movimientos-page .accion-card.repuestos .accion-icon {
+        color: #7b1fa2;
+    }
+    
+    .movimientos-page .accion-titulo {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.75rem;
+    }
+    
+    .movimientos-page .accion-descripcion {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+    
+    .movimientos-page .btn-accion-principal {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: var(--pure-white);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .movimientos-page .btn-accion-principal:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: var(--pure-white);
+    }
+    
+    .movimientos-page .accion-card.materiales .btn-accion-principal {
+        background: linear-gradient(135deg, #0277bd, #0288d1);
+    }
+    
+    .movimientos-page .accion-card.repuestos .btn-accion-principal {
+        background: linear-gradient(135deg, #7b1fa2, #8e24aa);
+    }
+    
+    .movimientos-page .btn-secondary-action {
+        background: transparent;
+        color: var(--text-light);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        text-decoration: none;
+        margin-left: 0.75rem;
+        transition: all 0.2s ease;
+    }
+    
+    .movimientos-page .btn-secondary-action:hover {
+        background: var(--border-color);
+        color: var(--text-dark);
+    }
+
+    @media (max-width: 768px) {
+        .movimientos-page .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .movimientos-page .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .movimientos-page .movimientos-table {
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="movimientos-page">
+    <div class="container-fluid">
+        <!-- Header del Dashboard -->
+        <div class="dashboard-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="dashboard-title">
+                        <i class="bi bi-arrow-repeat"></i>
+                        {{ titulo }}
+                    </h1>
+                    <p class="text-muted">
+                        Control y seguimiento de movimientos de materiales y repuestos
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'operaciones:procedimientos-pop' %}">Operaciones</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Movimientos Unificados</li>
+            </ol>
+        </nav>
+
+        <!-- SECCIÓN DE ACCIONES RÁPIDAS ACTUALIZADA -->
+        <div class="acciones-rapidas">
+            <h3 class="mb-3">
+                <i class="bi bi-plus-circle"></i>
+                Crear Nuevos Movimientos
+            </h3>
+            
+            <div class="acciones-grid">
+                <!-- Card para Materiales -->
+                <div class="accion-card materiales">
+                    <div class="accion-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h4 class="accion-titulo">Movimientos de Materiales</h4>
+                    <p class="accion-descripcion">
+                        Crea movimientos para materiales de construcción, soldadura, químicos y consumibles del laboratorio.
+                    </p>
+                    <a href="{% url 'materiales:materiales' %}" class="btn-accion-principal">
+                        <i class="bi bi-box-seam"></i>
+                        Ir a Materiales
+                    </a>
+                    <small class="d-block mt-2 text-muted">
+                        Selecciona un material para crear su movimiento
+                    </small>
+                </div>
+
+                <!-- Card para Repuestos -->
+                <div class="accion-card repuestos">
+                    <div class="accion-icon">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <h4 class="accion-titulo">Movimientos de Repuestos</h4>
+                    <p class="accion-descripcion">
+                        Registra entradas, salidas, ajustes y transferencias de repuestos e insumos industriales.
+                    </p>
+                    <a href="{% url 'inventario:crear-movimiento' %}" class="btn-accion-principal">
+                        <i class="bi bi-plus-lg"></i>
+                        Crear Movimiento de Repuestos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_movimientos }}</div>
+                <div class="stat-label">Total Movimientos</div>
+            </div>
+            
+            <div class="stat-card entrada">
+                <div class="stat-value">{{ entradas }}</div>
+                <div class="stat-label">Entradas</div>
+            </div>
+            
+            <div class="stat-card salida">
+                <div class="stat-value">{{ salidas }}</div>
+                <div class="stat-label">Salidas</div>
+            </div>
+            
+            <div class="stat-card transferencia">
+                <div class="stat-value">{{ transferencias }}</div>
+                <div class="stat-label">Transferencias</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">{{ movimientos_materiales }}</div>
+                <div class="stat-label">Movimientos Materiales</div>
+            </div>
+            
+            <div class="stat-card valor">
+                <div class="stat-value>${{ valor_total|floatformat:2 }}</div>
+                <div class="stat-label">Valor Total</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <h3 class="mb-3">
+                <i class="bi bi-funnel"></i>
+                Filtros de Búsqueda
+            </h3>
+            
+            <form method="get" class="filters-form">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label class="form-label">Buscar</label>
+                        <input type="text" name="search" class="form-control" 
+                               value="{{ search }}" placeholder="Código, nombre, número...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Item</label>
+                        <select name="tipo" class="form-select">
+                            <option value="">Todos los tipos</option>
+                            <option value="material" {% if tipo_filtro == 'material' %}selected{% endif %}>Materiales</option>
+                            <option value="repuesto" {% if tipo_filtro == 'repuesto' %}selected{% endif %}>Repuestos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Movimiento</label>
+                        <select name="movimiento" class="form-select">
+                            <option value="">Todos los movimientos</option>
+                            {% for codigo, nombre in tipos_movimiento %}
+                            <option value="{{ codigo }}" {% if movimiento_filtro == codigo %}selected{% endif %}>{{ nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Fecha Desde</label>
+                        <input type="date" name="fecha_desde" class="form-control" value="{{ fecha_desde }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Fecha Hasta</label>
+                        <input type="date" name="fecha_hasta" class="form-control" value="{{ fecha_hasta }}">
+                    </div>
+                    
+                    <div class="form-group d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i>
+                            Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de Movimientos -->
+        <div class="movimientos-table-section">
+            <div class="table-header">
+                <h3 class="table-title">
+                    <i class="bi bi-table"></i>
+                    Historial de Movimientos
+                </h3>
+                <p class="table-subtitle mb-0">
+                    Registro completo de movimientos de inventario
+                </p>
+            </div>
+            
+            {% if movimientos %}
+            <div class="table-responsive">
+                <table class="movimientos-table">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Tipo</th>
+                            <th>Item</th>
+                            <th>Movimiento</th>
+                            <th>Cantidad</th>
+                            <th>Stock</th>
+                            <th>Costo</th>
+                            <th>Usuario</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movimiento in movimientos %}
+                        <tr>
+                            <td>
+                                <code class="text-primary">{{ movimiento.numero }}</code>
+                            </td>
+                            <td>
+                                <span class="badge badge-tipo-{{ movimiento.origen }}">
+                                    {{ movimiento.tipo_item }}
+                                </span>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ movimiento.item_codigo }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ movimiento.item_nombre|truncatechars:30 }}</small>
+                                    <br>
+                                    <small class="text-info">{{ movimiento.item_categoria }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ movimiento.tipo_movimiento }}">
+                                    {% if movimiento.tipo_movimiento == 'entrada' %}
+                                        <i class="bi bi-arrow-down"></i>
+                                    {% elif movimiento.tipo_movimiento == 'salida' %}
+                                        <i class="bi bi-arrow-up"></i>
+                                    {% else %}
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    {% endif %}
+                                    {{ movimiento.tipo_movimiento_display }}
+                                </span>
+                                <br>
+                                <small class="text-muted">{{ movimiento.motivo }}</small>
+                            </td>
+                            <td>
+                                <span class="cantidad-display {% if movimiento.tipo_movimiento == 'entrada' %}cantidad-entrada{% elif movimiento.tipo_movimiento == 'salida' %}cantidad-salida{% endif %}">
+                                    {% if movimiento.tipo_movimiento == 'entrada' %}+{% elif movimiento.tipo_movimiento == 'salida' %}-{% endif %}{{ movimiento.cantidad }}
+                                </span>
+                                <br>
+                                <small class="text-muted">{{ movimiento.unidad }}</small>
+                            </td>
+                            <td>
+                                <div class="stock-change">
+                                    {{ movimiento.stock_anterior }} → {{ movimiento.stock_nuevo }}
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    ${{ movimiento.costo_unitario|floatformat:2 }}
+                                    <br>
+                                    <small class="text-success">Total: ${{ movimiento.costo_total|floatformat:2 }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <small>{{ movimiento.usuario }}</small>
+                            </td>
+                            <td>
+                                <div>
+                                    {{ movimiento.fecha_movimiento|date:"d/m/Y" }}
+                                    <br>
+                                    <small class="text-muted">{{ movimiento.fecha_movimiento|time:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="{{ movimiento.detalle_url }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i>
+                                    Ver
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginación -->
+            {% if page_obj.has_other_pages %}
+            <div class="d-flex justify-content-center p-3">
+                <nav aria-label="Navegación de movimientos">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if movimiento_filtro %}&movimiento={{ movimiento_filtro }}{% endif %}">Anterior</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if movimiento_filtro %}&movimiento={{ movimiento_filtro }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if movimiento_filtro %}&movimiento={{ movimiento_filtro }}{% endif %}">Siguiente</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <!-- Estado vacío -->
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <h4>No se encontraron movimientos</h4>
+                <p>No hay movimientos que coincidan con los filtros seleccionados.</p>
+                <div class="mt-3">
+                    <a href="{% url 'materiales:materiales' %}" class="btn btn-primary me-2">
+                        <i class="bi bi-box-seam"></i>
+                        Ir a Materiales
+                    </a>
+                    <a href="{% url 'inventario:crear-movimiento' %}" class="btn btn-success me-2">
+                        <i class="bi bi-plus-lg"></i>
+                        Crear Movimiento de Repuestos
+                    </a>
+                    <a href="{% url 'inventario:repuestos' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-gear"></i>
+                        Ver Repuestos
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit en cambio de filtros
+    const filterSelects = document.querySelectorAll('.movimientos-page .filters-form select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+    
+    // Animación para las cards de acciones
+    const accionCards = document.querySelectorAll('.movimientos-page .accion-card');
+    accionCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+    
+    console.log('Movimientos Unificados - JavaScript cargado correctamente');
+});
+</script>
+{% endblock %}

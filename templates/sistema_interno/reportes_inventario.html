@@ -1,0 +1,1359 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reportes de Inventario - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Mantener todos los estilos existentes... */
+    .reportes-inventario-page {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .reportes-inventario-page .dashboard-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .reportes-inventario-page .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(30, 64, 175, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .reportes-inventario-page .dashboard-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .reportes-inventario-page .dashboard-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    .reportes-inventario-page .filters-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .reportes-inventario-page .filters-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .reportes-inventario-page .filters-title i {
+        color: var(--primary-blue);
+        font-size: 1.5rem;
+    }
+
+    .reportes-inventario-page .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .reportes-inventario-page .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .reportes-inventario-page .filter-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .reportes-inventario-page .form-control,
+    .reportes-inventario-page .form-select {
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        background: var(--pure-white);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .reportes-inventario-page .form-control:focus,
+    .reportes-inventario-page .form-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .reportes-inventario-page .report-types-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .reportes-inventario-page .report-type-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .reportes-inventario-page .report-type-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--primary-blue);
+    }
+
+    .reportes-inventario-page .report-type-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    }
+
+    .reportes-inventario-page .report-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--light-blue), rgba(59, 130, 246, 0.1));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        color: var(--primary-blue);
+        font-size: 1.75rem;
+    }
+
+    .reportes-inventario-page .report-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.75rem;
+    }
+
+    .reportes-inventario-page .report-description {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .reportes-inventario-page .report-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .reportes-inventario-page .btn {
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    .reportes-inventario-page .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: var(--pure-white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .reportes-inventario-page .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: var(--pure-white);
+    }
+
+    .reportes-inventario-page .btn-outline {
+        background: transparent;
+        color: var(--primary-blue);
+        border: 2px solid var(--primary-blue);
+    }
+
+    .reportes-inventario-page .btn-outline:hover {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+        transform: translateY(-1px);
+    }
+
+    .reportes-inventario-page .btn-success {
+        background: var(--success-green);
+        color: var(--pure-white);
+    }
+
+    .reportes-inventario-page .btn-success:hover {
+        background: #059669;
+        color: var(--pure-white);
+        transform: translateY(-2px);
+    }
+
+    .reportes-inventario-page .charts-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .reportes-inventario-page .charts-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .reportes-inventario-page .charts-title i {
+        color: var(--primary-blue);
+        font-size: 1.75rem;
+    }
+
+    .reportes-inventario-page .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+    }
+
+    .reportes-inventario-page .chart-container {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .reportes-inventario-page .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .reportes-inventario-page .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .reportes-inventario-page .stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--primary-blue);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .reportes-inventario-page .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .reportes-inventario-page .stat-card.success {
+        border-left-color: var(--success-green);
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(16, 185, 129, 0.02) 100%);
+    }
+
+    .reportes-inventario-page .stat-card.warning {
+        border-left-color: var(--warning-orange);
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(245, 158, 11, 0.02) 100%);
+    }
+
+    .reportes-inventario-page .stat-card.danger {
+        border-left-color: var(--danger-red);
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(239, 68, 68, 0.02) 100%);
+    }
+
+    .reportes-inventario-page .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, rgba(30, 64, 175, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(25px, -25px);
+    }
+
+    .reportes-inventario-page .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+
+    .reportes-inventario-page .stat-card.success .stat-value {
+        color: var(--success-green);
+    }
+
+    .reportes-inventario-page .stat-card.warning .stat-value {
+        color: var(--warning-orange);
+    }
+
+    .reportes-inventario-page .stat-card.danger .stat-value {
+        color: var(--danger-red);
+    }
+
+    .reportes-inventario-page .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .reportes-inventario-page .stat-description {
+        color: var(--text-dark);
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .reportes-inventario-page .recent-reports {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .reportes-inventario-page .recent-reports-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .reportes-inventario-page .recent-reports-title i {
+        color: var(--primary-blue);
+        font-size: 1.5rem;
+    }
+
+    .reportes-inventario-page .report-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+        border-left: 3px solid var(--primary-blue);
+    }
+
+    .reportes-inventario-page .report-item:hover {
+        background: var(--light-blue);
+        transform: translateX(4px);
+    }
+
+    .reportes-inventario-page .report-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .reportes-inventario-page .report-info {
+        flex: 1;
+    }
+
+    .reportes-inventario-page .report-name {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .reportes-inventario-page .report-date {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .reportes-inventario-page .report-download {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .reportes-inventario-page .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 0.375rem;
+    }
+
+    .reportes-inventario-page .quick-actions {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .reportes-inventario-page .quick-actions-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .reportes-inventario-page .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .reportes-inventario-page .quick-action-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--pure-white);
+        padding: 1rem;
+        border-radius: 0.75rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .reportes-inventario-page .quick-action-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        color: var(--pure-white);
+    }
+
+    .reportes-inventario-page .quick-action-icon {
+        font-size: 1.5rem;
+    }
+
+    .reportes-inventario-page .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-light);
+    }
+
+    .reportes-inventario-page .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .reportes-inventario-page .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--pure-white);
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .reportes-inventario-page .dashboard-title {
+            font-size: 1.75rem;
+        }
+        
+        .reportes-inventario-page .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .reportes-inventario-page .report-types-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .reportes-inventario-page .charts-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .reportes-inventario-page .stats-overview {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .reportes-inventario-page .quick-actions-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .reportes-inventario-page .report-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .reportes-inventario-page .report-download {
+            align-self: stretch;
+            justify-content: flex-end;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .reportes-inventario-page .dashboard-header {
+            padding: 1.5rem;
+        }
+        
+        .reportes-inventario-page .filters-section,
+        .reportes-inventario-page .charts-section,
+        .reportes-inventario-page .recent-reports {
+            padding: 1.5rem;
+        }
+        
+        .reportes-inventario-page .stats-overview {
+            grid-template-columns: 1fr;
+        }
+        
+        .reportes-inventario-page .stat-value {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- IMPORTANTE: Envolver todo el contenido en .reportes-inventario-page -->
+<div class="reportes-inventario-page">
+    <div class="container-fluid">
+        <!-- Header del Dashboard -->
+        <div class="dashboard-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="dashboard-title">
+                        <i class="bi bi-graph-up"></i>
+                        Reportes de Inventario
+                    </h1>
+                    <p class="dashboard-subtitle">
+                        Análisis completo y reportes detallados del sistema de inventario
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="generarReporteCompleto()">
+                        <i class="bi bi-download"></i>
+                        Reporte Completo
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-outline dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-gear"></i>
+                            Configurar
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-sliders"></i> Preferencias</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-clock-history"></i> Programar</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> Ayuda</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <h3 class="filters-title">
+                <i class="bi bi-funnel"></i>
+                Filtros de Reporte
+            </h3>
+            
+            <form id="report-filters-form">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Período</label>
+                        <select class="form-select" id="periodo-filter">
+                            <option value="mes_actual">Este Mes</option>
+                            <option value="trimestre_actual">Este Trimestre</option>
+                            <option value="semestre_actual">Este Semestre</option>
+                            <option value="ano_actual" selected>Este Año</option>
+                            <option value="personalizado">Período Personalizado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Categoría</label>
+                        <select class="form-select" id="categoria-filter">
+                            <option value="">Todas las Categorías</option>
+                            {% for categoria in categorias_disponibles %}
+                            <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Proveedor</label>
+                        <select class="form-select" id="proveedor-filter">
+                            <option value="">Todos los Proveedores</option>
+                            {% for proveedor in proveedores_disponibles %}
+                            <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Estado de Stock</label>
+                        <select class="form-select" id="stock-filter">
+                            <option value="">Todos los Estados</option>
+                            <option value="optimo">Stock Óptimo</option>
+                            <option value="bajo">Stock Bajo</option>
+                            <option value="critico">Stock Crítico</option>
+                            <option value="agotado">Agotado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-primary" onclick="aplicarFiltros()">
+                        <i class="bi bi-funnel"></i>
+                        Aplicar Filtros
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="limpiarFiltros()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="quick-actions">
+            <h3 class="quick-actions-title">
+                <i class="bi bi-lightning"></i>
+                Acciones Rápidas
+            </h3>
+            <div class="quick-actions-grid">
+                <a href="#" class="quick-action-btn" onclick="exportarExcel()">
+                    <i class="bi bi-file-earmark-excel quick-action-icon"></i>
+                    <span>Exportar a Excel</span>
+                </a>
+                <a href="#" class="quick-action-btn" onclick="exportarPDF()">
+                    <i class="bi bi-file-earmark-pdf quick-action-icon"></i>
+                    <span>Exportar a PDF</span>
+                </a>
+                <a href="#" class="quick-action-btn" onclick="programarReporte()">
+                    <i class="bi bi-calendar-event quick-action-icon"></i>
+                    <span>Programar Reporte</span>
+                </a>
+                <a href="#" class="quick-action-btn" onclick="enviarPorEmail()">
+                    <i class="bi bi-envelope quick-action-icon"></i>
+                    <span>Enviar por Email</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Estadísticas Generales -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_repuestos }}</div>
+                <div class="stat-label">Total Repuestos</div>
+                <div class="stat-description">En inventario activo</div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-value">${{ valor_total|floatformat:0 }}</div>
+                <div class="stat-label">Valor Total</div>
+                <div class="stat-description">Inventario valorizado</div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-value">{{ stock_bajo }}</div>
+                <div class="stat-label">Stock Bajo</div>
+                <div class="stat-description">Requieren reposición</div>
+            </div>
+            
+            <div class="stat-card danger">
+                <div class="stat-value">{{ stock_critico }}</div>
+                <div class="stat-label">Stock Crítico</div>
+                <div class="stat-description">Atención inmediata</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">{{ total_proveedores }}</div>
+                <div class="stat-label">Proveedores</div>
+                <div class="stat-description">Activos y verificados</div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-value">{{ stock_optimo }}</div>
+                <div class="stat-label">Stock Óptimo</div>
+                <div class="stat-description">En niveles adecuados</div>
+            </div>
+        </div>
+
+        <!-- Tipos de Reportes -->
+        <div class="report-types-grid">
+            <!-- Reporte de Stock -->
+            <div class="report-type-card">
+                <div class="report-icon">
+                    <i class="bi bi-boxes"></i>
+                </div>
+                <h4 class="report-title">Reporte de Stock</h4>
+                <p class="report-description">
+                    Análisis detallado de niveles de inventario, stock mínimo, máximo y puntos de reorden para todos los repuestos.
+                </p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="generarReporteStock()">
+                        <i class="bi bi-play"></i>
+                        Generar
+                    </button>
+                    <button class="btn btn-outline" onclick="previsualizarReporte('stock')">
+                        <i class="bi bi-eye"></i>
+                        Vista Previa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reporte de Movimientos -->
+            <div class="report-type-card">
+                <div class="report-icon">
+                    <i class="bi bi-arrow-left-right"></i>
+                </div>
+                <h4 class="report-title">Movimientos de Inventario</h4>
+                <p class="report-description">
+                    Historial completo de entradas, salidas, ajustes y transferencias de inventario con detalles por período.
+                </p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="generarReporteMovimientos()">
+                        <i class="bi bi-play"></i>
+                        Generar
+                    </button>
+                    <button class="btn btn-outline" onclick="previsualizarReporte('movimientos')">
+                        <i class="bi bi-eye"></i>
+                        Vista Previa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reporte de Proveedores -->
+            <div class="report-type-card">
+                <div class="report-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h4 class="report-title">Análisis de Proveedores</h4>
+                <p class="report-description">
+                    Evaluación de desempeño, tiempos de entrega, calidad y costos de proveedores con métricas de eficiencia.
+                </p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="generarReporteProveedores()">
+                        <i class="bi bi-play"></i>
+                        Generar
+                    </button>
+                    <button class="btn btn-outline" onclick="previsualizarReporte('proveedores')">
+                        <i class="bi bi-eye"></i>
+                        Vista Previa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reporte de Costos -->
+            <div class="report-type-card">
+                <div class="report-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <h4 class="report-title">Análisis de Costos</h4>
+                <p class="report-description">
+                    Desglose de costos de inventario, análisis ABC, rotación de inventario y optimización de capital de trabajo.
+                </p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="generarReporteCostos()">
+                        <i class="bi bi-play"></i>
+                        Generar
+                    </button>
+                    <button class="btn btn-outline" onclick="previsualizarReporte('costos')">
+                        <i class="bi bi-eye"></i>
+                        Vista Previa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reporte de Alertas -->
+            <div class="report-type-card">
+                <div class="report-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h4 class="report-title">Alertas y Notificaciones</h4>
+                <p class="report-description">
+                    Resumen de alertas de stock bajo, vencimientos próximos, repuestos obsoletos y recomendaciones de acción.
+                </p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="generarReporteAlertas()">
+                        <i class="bi bi-play"></i>
+                        Generar
+                    </button>
+                    <button class="btn btn-outline" onclick="previsualizarReporte('alertas')">
+                        <i class="bi bi-eye"></i>
+                        Vista Previa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reporte de Tendencias -->
+            <div class="report-type-card">
+                <div class="report-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <h4 class="report-title">Tendencias y Predicciones</h4>
+                <p class="report-description">
+                    Análisis predictivo de consumo, tendencias de uso, pronósticos de demanda y recomendaciones de compra.
+                </p>
+                <div class="report-actions">
+                    <button class="btn btn-primary" onclick="generarReporteTendencias()">
+                        <i class="bi bi-play"></i>
+                        Generar
+                    </button>
+                    <button class="btn btn-outline" onclick="previsualizarReporte('tendencias')">
+                        <i class="bi bi-eye"></i>
+                        Vista Previa
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos y Análisis -->
+        <div class="charts-section">
+            <h3 class="charts-title">
+                <i class="bi bi-bar-chart"></i>
+                Análisis Visual
+            </h3>
+            
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h5 class="chart-title">Distribución por Categoría</h5>
+                    <canvas id="categoryChart" height="200"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h5 class="chart-title">Tendencia de Movimientos</h5>
+                    <canvas id="movementsChart" height="200"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h5 class="chart-title">Top 10 Repuestos por Valor</h5>
+                    <canvas id="valueChart" height="200"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h5 class="chart-title">Estado de Stock</h5>
+                    <canvas id="stockStatusChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reportes Recientes -->
+        <div class="recent-reports">
+            <h3 class="recent-reports-title">
+                <i class="bi bi-clock-history"></i>
+                Reportes Recientes
+            </h3>
+            
+            {% if reportes_recientes %}
+                {% for reporte in reportes_recientes %}
+                <div class="report-item">
+                    <div class="report-info">
+                        <div class="report-name">{{ reporte.nombre }}</div>
+                        <div class="report-date">{{ reporte.fecha|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="report-download">
+                        <button class="btn btn-sm btn-outline" onclick="descargarReporte('{{ reporte.id }}', 'pdf')">
+                            <i class="bi bi-download"></i>
+                            PDF
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="descargarReporte('{{ reporte.id }}', 'excel')">
+                            <i class="bi bi-file-earmark-excel"></i>
+                            Excel
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <p>No hay reportes recientes</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    setupEventListeners();
+    console.log('📊 Reportes de Inventario - Dashboard cargado correctamente');
+});
+
+// ===== INICIALIZACIÓN DE GRÁFICOS =====
+function initializeCharts() {
+    // Datos reales desde Django
+    const categoriasData = {{ categorias_data|safe }};
+    const movimientosData = {{ movimientos_data|safe }};
+    const repuestosValorData = {{ repuestos_valor_data|safe }};
+    const stockData = {{ stock_data|safe }};
+
+    // Gráfico de categorías
+    const categoryCtx = document.getElementById('categoryChart');
+    if (categoryCtx && categoriasData) {
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: categoriasData.labels,
+                datasets: [{
+                    data: categoriasData.values,
+                    backgroundColor: [
+                        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 20, usePointStyle: true }
+                    }
+                }
+            }
+        });
+    }
+
+    // Gráfico de movimientos
+    const movementsCtx = document.getElementById('movementsChart');
+    if (movementsCtx && movimientosData) {
+        new Chart(movementsCtx, {
+            type: 'line',
+            data: {
+                labels: movimientosData.labels,
+                datasets: [{
+                    label: 'Entradas',
+                    data: movimientosData.entradas,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Salidas',
+                    data: movimientosData.salidas,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true } },
+                plugins: { legend: { position: 'top' } }
+            }
+        });
+    }
+
+    // Gráfico de valor de repuestos
+    const valueCtx = document.getElementById('valueChart');
+    if (valueCtx && repuestosValorData) {
+        new Chart(valueCtx, {
+            type: 'bar',
+            data: {
+                labels: repuestosValorData.labels,
+                datasets: [{
+                    label: 'Valor en Stock ($)',
+                    data: repuestosValorData.values,
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // Gráfico de estado de stock
+    const stockStatusCtx = document.getElementById('stockStatusChart');
+    if (stockStatusCtx && stockData) {
+        new Chart(stockStatusCtx, {
+            type: 'pie',
+            data: {
+                labels: stockData.labels,
+                datasets: [{
+                    data: stockData.values,
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#6b7280'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 20, usePointStyle: true }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// ===== GESTIÓN DE FILTROS =====
+function aplicarFiltros() {
+    mostrarCargando('Aplicando filtros...');
+    
+    const filtros = {
+        periodo: document.getElementById('periodo-filter').value,
+        categoria: document.getElementById('categoria-filter').value,
+        proveedor: document.getElementById('proveedor-filter').value,
+        stock: document.getElementById('stock-filter').value
+    };
+
+    // Crear URL con parámetros
+    const url = new URL(window.location.href);
+    Object.keys(filtros).forEach(key => {
+        if (filtros[key]) {
+            url.searchParams.set(key, filtros[key]);
+        } else {
+            url.searchParams.delete(key);
+        }
+    });
+
+    // Recargar la página con los nuevos filtros
+    setTimeout(() => {
+        window.location.href = url.toString();
+    }, 1000);
+}
+
+function limpiarFiltros() {
+    document.getElementById('report-filters-form').reset();
+    document.getElementById('periodo-filter').value = 'ano_actual';
+    
+    // Limpiar parámetros de URL
+    const url = new URL(window.location.href);
+    ['periodo', 'categoria', 'proveedor', 'stock'].forEach(param => {
+        url.searchParams.delete(param);
+    });
+    
+    window.location.href = url.toString();
+}
+
+// ===== GENERACIÓN DE REPORTES =====
+function generarReporteCompleto() {
+    mostrarCargando('Generando reporte completo...');
+    
+    // Crear formulario invisible para enviar la solicitud
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = '/inventario/exportar-excel/';
+    form.style.display = 'none';
+    
+    // Agregar tipo de reporte
+    const tipoInput = document.createElement('input');
+    tipoInput.type = 'hidden';
+    tipoInput.name = 'tipo';
+    tipoInput.value = 'completo';
+    form.appendChild(tipoInput);
+    
+    // Agregar filtros actuales
+    const filtros = obtenerFiltrosActuales();
+    Object.keys(filtros).forEach(key => {
+        if (filtros[key]) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = filtros[key];
+            form.appendChild(input);
+        }
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    
+    setTimeout(() => {
+        ocultarCargando();
+        mostrarNotificacion('Reporte completo generado exitosamente', 'success');
+    }, 2000);
+}
+
+function generarReporteStock() {
+    mostrarCargando('Generando reporte de stock...');
+    generarReporte('stock', 'Reporte_Stock.xlsx');
+}
+
+function generarReporteMovimientos() {
+    mostrarCargando('Generando reporte de movimientos...');
+    generarReporte('movimientos', 'Reporte_Movimientos.pdf');
+}
+
+function generarReporteProveedores() {
+    mostrarCargando('Generando reporte de proveedores...');
+    generarReporte('proveedores', 'Reporte_Proveedores.xlsx');
+}
+
+function generarReporteCostos() {
+    mostrarCargando('Generando análisis de costos...');
+    generarReporte('costos', 'Analisis_Costos.xlsx');
+}
+
+function generarReporteAlertas() {
+    mostrarCargando('Generando reporte de alertas...');
+    generarReporte('alertas', 'Reporte_Alertas.xlsx');
+}
+
+function generarReporteTendencias() {
+    mostrarCargando('Generando análisis de tendencias...');
+    generarReporte('tendencias', 'Analisis_Tendencias.xlsx');
+}
+
+function generarReporte(tipo, nombreArchivo) {
+    const filtros = obtenerFiltrosActuales();
+    
+    // Crear formulario para descarga
+    const form = document.createElement('form');
+    form.method = 'GET';
+    
+    // Determinar endpoint según el tipo
+    if (nombreArchivo.endsWith('.pdf')) {
+        form.action = '/inventario/exportar-pdf/';
+    } else {
+        form.action = '/inventario/exportar-excel/';
+    }
+    
+    form.style.display = 'none';
+    
+    // Agregar tipo
+    const tipoInput = document.createElement('input');
+    tipoInput.type = 'hidden';
+    tipoInput.name = 'tipo';
+    tipoInput.value = tipo;
+    form.appendChild(tipoInput);
+    
+    // Agregar filtros
+    Object.keys(filtros).forEach(key => {
+        if (filtros[key]) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = filtros[key];
+            form.appendChild(input);
+        }
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    
+    setTimeout(() => {
+        ocultarCargando();
+        mostrarNotificacion(`Reporte de ${tipo} generado exitosamente`, 'success');
+    }, 2000);
+}
+
+// ===== EXPORTACIÓN RÁPIDA =====
+function exportarExcel() {
+    mostrarCargando('Exportando a Excel...');
+    generarReporte('stock', 'Inventario_Export.xlsx');
+}
+
+function exportarPDF() {
+    mostrarCargando('Exportando a PDF...');
+    generarReporte('inventario', 'Inventario_Report.pdf');
+}
+
+// ===== FUNCIONES AUXILIARES =====
+function obtenerFiltrosActuales() {
+    return {
+        periodo: document.getElementById('periodo-filter').value,
+        categoria: document.getElementById('categoria-filter').value,
+        proveedor: document.getElementById('proveedor-filter').value,
+        stock: document.getElementById('stock-filter').value
+    };
+}
+
+function setupEventListeners() {
+    // Auto-aplicar filtros al cambiar
+    const filtros = ['periodo-filter', 'categoria-filter', 'proveedor-filter', 'stock-filter'];
+    filtros.forEach(filtroId => {
+        const elemento = document.getElementById(filtroId);
+        if (elemento) {
+            elemento.addEventListener('change', function() {
+                // Aplicar filtros automáticamente después de un pequeño delay
+                setTimeout(aplicarFiltros, 500);
+            });
+        }
+    });
+}
+
+function mostrarCargando(mensaje = 'Cargando...') {
+    const overlay = document.createElement('div');
+    overlay.id = 'loading-overlay';
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center;
+        align-items: center; z-index: 9999;
+    `;
+    
+    overlay.innerHTML = `
+        <div style="background: white; padding: 2rem; border-radius: 1rem; text-align: center;">
+            <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
+            <p style="margin: 0; font-weight: 500;">${mensaje}</p>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+}
+
+function ocultarCargando() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const colores = {
+        'success': '#10b981',
+        'error': '#ef4444',
+        'warning': '#f59e0b',
+        'info': '#3b82f6'
+    };
+    
+    const notificacion = document.createElement('div');
+    notificacion.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10000;
+        background: ${colores[tipo]}; color: white; padding: 1rem 1.5rem;
+        border-radius: 0.5rem; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        max-width: 400px; animation: slideInRight 0.3s ease;
+    `;
+    
+    notificacion.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="bi bi-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'x-circle' : 'info-circle'}"></i>
+            <span>${mensaje}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        notificacion.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => notificacion.remove(), 300);
+    }, 4000);
+}
+
+// Funciones de desarrollo para funcionalidades futuras
+function previsualizarReporte(tipo) {
+    mostrarNotificacion(`Vista previa del reporte de ${tipo} próximamente disponible`, 'info');
+}
+
+function programarReporte() {
+    mostrarNotificacion('Función de programación próximamente disponible', 'info');
+}
+
+function enviarPorEmail() {
+    mostrarNotificacion('Función de envío por email próximamente disponible', 'info');
+}
+
+function descargarReporte(id, formato) {
+    mostrarNotificacion(`Descargando reporte en formato ${formato.toUpperCase()}`, 'info');
+}
+
+// Agregar estilos CSS para animaciones
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    .loading-spinner {
+        width: 40px; height: 40px; border: 4px solid #f3f3f3;
+        border-top: 4px solid #3b82f6; border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

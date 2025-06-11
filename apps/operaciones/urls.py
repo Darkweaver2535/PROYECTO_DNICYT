@@ -12,6 +12,8 @@ urlpatterns = [
     path('aprobar-pop/<str:codigo>/', views.aprobar_pop_view, name='aprobar-pop'),
     path('renovar-pop/<str:codigo>/', views.renovar_pop_view, name='renovar-pop'),
     path('descargar-pop-pdf/<str:codigo>/', views.descargar_pop_pdf_view, name='descargar-pop-pdf'),
-    # URL para Análisis de Riesgos
     path('analisis-riesgos/', views.analisis_riesgos_view, name='analisis-riesgos'),
+    
+    # NUEVA URL PARA MOVIMIENTOS UNIFICADOS
+    path('movimientos/', views.movimientos_unificados_view, name='movimientos-unificados'),
 ]

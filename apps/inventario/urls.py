@@ -29,4 +29,9 @@ urlpatterns = [
     path('detalle-proveedor/<int:pk>/', views.detalle_proveedor_view, name='detalle-proveedor'),
     path('editar-proveedor/<int:pk>/', views.editar_proveedor_view, name='editar-proveedor'),
     path('eliminar-proveedor/<int:pk>/', views.eliminar_proveedor_view, name='eliminar-proveedor'),
+
+    # Reportes
+    path('reportes-inventario/', views.reportes_inventario_view, name='reportes-inventario'),
+    path('exportar-excel/', views.exportar_excel_view, name='exportar-excel'),
+    path('exportar-pdf/', views.exportar_pdf_view, name='exportar-pdf'),
 ]

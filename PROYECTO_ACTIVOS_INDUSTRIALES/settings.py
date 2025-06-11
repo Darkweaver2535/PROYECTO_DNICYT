@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'apps.seguridad',
     'apps.usuarios',
     'apps.inventario',  # <- AGREGAR ESTA LÍNEA
+    'apps.materiales',  # <- AGREGAR ESTA LÍNEA
+    'apps.dashboard',
 ]
 
 MIDDLEWARE = [

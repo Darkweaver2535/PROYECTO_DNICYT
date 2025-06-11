@@ -1,0 +1,1129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* IMPORTANTE: Encapsular todos los estilos dentro de .materiales-page para evitar conflictos */
+    .materiales-page {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .materiales-page .materiales-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .materiales-page .materiales-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .materiales-page .materiales-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .materiales-page .materiales-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .materiales-page .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .materiales-page .stat-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        border-left: 5px solid var(--primary-blue);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .materiales-page .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .materiales-page .stat-card.danger { border-left-color: var(--danger-red); }
+    .materiales-page .stat-card.warning { border-left-color: var(--warning-orange); }
+    .materiales-page .stat-card.success { border-left-color: var(--success-green); }
+    .materiales-page .stat-card.info { border-left-color: var(--primary-blue); }
+
+    .materiales-page .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), transparent);
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+    }
+
+    .materiales-page .stat-value {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary-blue);
+        line-height: 1;
+        margin-bottom: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .materiales-page .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        position: relative;
+        z-index: 1;
+    }
+
+    .materiales-page .stat-icon {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        font-size: 2.5rem;
+        color: var(--primary-blue);
+        opacity: 0.2;
+    }
+
+    .materiales-page .alertas-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .materiales-page .alerta-item {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-md);
+        border-left: 5px solid var(--primary-blue);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .materiales-page .alerta-item:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateX(8px);
+    }
+
+    .materiales-page .alerta-item.danger { border-left-color: var(--danger-red); }
+    .materiales-page .alerta-item.warning { border-left-color: var(--warning-orange); }
+    .materiales-page .alerta-item.info { border-left-color: var(--primary-blue); }
+
+    .materiales-page .alerta-icon {
+        font-size: 2rem;
+        width: 50px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .materiales-page .alerta-content {
+        flex: 1;
+    }
+
+    .materiales-page .alerta-titulo {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+        font-size: 1.1rem;
+    }
+
+    .materiales-page .alerta-descripcion {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin: 0;
+    }
+
+    .materiales-page .filters-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+
+    .materiales-page .filters-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .materiales-page .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .materiales-page .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .materiales-page .filter-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .materiales-page .form-control,
+    .materiales-page .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .materiales-page .form-control:focus,
+    .materiales-page .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    }
+
+    .materiales-page .materiales-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .materiales-page .material-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .materiales-page .material-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--primary-blue);
+    }
+
+    .materiales-page .material-header {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .materiales-page .material-codigo {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        background: var(--light-blue);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .materiales-page .material-nombre {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+    }
+
+    .materiales-page .material-descripcion {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .materiales-page .material-badges {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+
+    .materiales-page .material-body {
+        padding: 2rem;
+    }
+
+    .materiales-page .material-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .materiales-page .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .materiales-page .detail-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+
+    .materiales-page .detail-value {
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .materiales-page .stock-info {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .materiales-page .stock-display {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .materiales-page .stock-actual {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--primary-blue);
+    }
+
+    .materiales-page .stock-minimo {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .materiales-page .stock-progress {
+        height: 8px;
+        background: var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.75rem;
+    }
+
+    .materiales-page .stock-bar {
+        height: 100%;
+        background: linear-gradient(135deg, var(--success-green), var(--primary-blue));
+        transition: width 1s ease;
+        border-radius: 4px;
+    }
+
+    .materiales-page .stock-bar.low {
+        background: linear-gradient(135deg, var(--warning-orange), var(--danger-red));
+    }
+
+    .materiales-page .material-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+    }
+
+    .materiales-page .btn-action {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 2px solid;
+    }
+
+    .materiales-page .btn-view {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+
+    .materiales-page .btn-view:hover {
+        background: var(--primary-blue);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .materiales-page .btn-edit {
+        background: var(--light-yellow);
+        color: var(--warning-orange);
+        border-color: var(--warning-orange);
+    }
+
+    .materiales-page .btn-edit:hover {
+        background: var(--warning-orange);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .materiales-page .btn-move {
+        background: var(--light-green);
+        color: var(--success-green);
+        border-color: var(--success-green);
+    }
+
+    .materiales-page .btn-move:hover {
+        background: var(--success-green);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .materiales-page .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        color: var(--text-light);
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        margin: 2rem 0;
+    }
+
+    .materiales-page .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+        color: var(--text-light);
+    }
+
+    .materiales-page .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 3rem;
+    }
+
+    .materiales-page .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Badge específicos para materiales */
+    .materiales-page .badge-tipo-material { background: #e0f2fe; color: #0277bd; }
+    .materiales-page .badge-tipo-herramienta { background: #f3e5f5; color: #7b1fa2; }
+    .materiales-page .badge-tipo-consumible { background: #e8f5e8; color: #2e7d32; }
+    .materiales-page .badge-tipo-epp { background: #fff3e0; color: #ef6c00; }
+    .materiales-page .badge-tipo-quimico { background: #fce4ec; color: #c2185b; }
+
+    .materiales-page .badge-estado-disponible { background: #e8f5e8; color: #2e7d32; }
+    .materiales-page .badge-estado-agotado { background: #ffebee; color: #d32f2f; }
+    .materiales-page .badge-estado-bajo-stock { background: #fff3e0; color: #f57c00; }
+    .materiales-page .badge-estado-pedido { background: #e3f2fd; color: #1976d2; }
+
+    .materiales-page .badge-criticidad-baja { background: #f5f5f5; color: #616161; }
+    .materiales-page .badge-criticidad-media { background: #e3f2fd; color: #1976d2; }
+    .materiales-page .badge-criticidad-alta { background: #fff3e0; color: #f57c00; }
+    .materiales-page .badge-criticidad-critica { background: #ffebee; color: #d32f2f; }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .materiales-page .materiales-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .materiales-page .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .materiales-page .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .materiales-page .material-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .materiales-page .material-actions {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .materiales-page .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .materiales-page .materiales-title {
+            font-size: 1.75rem;
+        }
+        
+        .materiales-page .material-header,
+        .materiales-page .material-body {
+            padding: 1.5rem;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .materiales-page .material-card {
+        animation: slideInUp 0.6s ease forwards;
+    }
+
+    .materiales-page .material-card:nth-child(1) { animation-delay: 0.1s; }
+    .materiales-page .material-card:nth-child(2) { animation-delay: 0.2s; }
+    .materiales-page .material-card:nth-child(3) { animation-delay: 0.3s; }
+    .materiales-page .material-card:nth-child(4) { animation-delay: 0.4s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- IMPORTANTE: Envolver todo el contenido en .materiales-page -->
+<div class="materiales-page">
+    <div class="container-fluid">
+        <!-- Header Principal -->
+        <div class="materiales-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="materiales-title">
+                        <i class="bi bi-tools"></i>
+                        {{ titulo }}
+                    </h1>
+                    <p class="materiales-subtitle">
+                        Gestión integral de materiales, herramientas y consumibles del laboratorio
+                    </p>
+                </div>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'materiales:crear-material' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-lg"></i>
+                        Nuevo Material
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-warning btn-lg dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
+                            <i class="bi bi-download"></i>
+                            Exportar
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="exportarExcel()">
+                                <i class="bi bi-file-earmark-excel"></i> Excel
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportarPDF()">
+                                <i class="bi bi-file-earmark-pdf"></i> PDF
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportarCSV()">
+                                <i class="bi bi-filetype-csv"></i> CSV
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="stats-grid">
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="bi bi-tools"></i>
+                </div>
+                <div class="stat-value">{{ total_materiales }}</div>
+                <div class="stat-label">Total Materiales</div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="stat-value">{{ materiales_disponibles }}</div>
+                <div class="stat-label">Disponibles</div>
+            </div>
+            
+            <div class="stat-card danger">
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="stat-value">{{ materiales_agotados }}</div>
+                <div class="stat-label">Agotados</div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="bi bi-arrow-down-circle-fill"></i>
+                </div>
+                <div class="stat-value">{{ materiales_bajo_stock }}</div>
+                <div class="stat-label">Stock Bajo</div>
+            </div>
+            
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="bi bi-star-fill"></i>
+                </div>
+                <div class="stat-value">{{ materiales_criticos }}</div>
+                <div class="stat-label">Críticos</div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="stat-value">${{ valor_total_inventario|floatformat:0 }}</div>
+                <div class="stat-label">Valor Total</div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <div class="stat-value">{{ materiales_reposicion }}</div>
+                <div class="stat-label">Reposición</div>
+            </div>
+            
+            <div class="stat-card danger">
+                <div class="stat-icon">
+                    <i class="bi bi-calendar-x"></i>
+                </div>
+                <div class="stat-value">{{ materiales_vencer }}</div>
+                <div class="stat-label">Por Vencer</div>
+            </div>
+        </div>
+
+        <!-- Alertas del Sistema -->
+        {% if alertas %}
+        <div class="alertas-section">
+            {% for alerta in alertas %}
+            <div class="alerta-item {{ alerta.tipo }}">
+                <div class="alerta-icon text-{{ alerta.tipo }}">
+                    <i class="{{ alerta.icono }}"></i>
+                </div>
+                <div class="alerta-content">
+                    <div class="alerta-titulo">{{ alerta.titulo }}</div>
+                    <div class="alerta-descripcion">{{ alerta.descripcion }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Sección de Filtros -->
+        <div class="filters-section">
+            <div class="filters-title">
+                <i class="bi bi-funnel-fill"></i>
+                Filtros de Búsqueda
+            </div>
+            
+            <form method="get" class="filters-form">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Buscar Material</label>
+                        <input type="text" name="search" value="{{ search_query }}" 
+                               class="form-control" placeholder="Código, nombre, marca, modelo...">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Tipo</label>
+                        <select name="tipo" class="form-select">
+                            <option value="">Todos los tipos</option>
+                            {% for value, label in tipos_material %}
+                            <option value="{{ value }}" {% if tipo_filtro == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Categoría</label>
+                        <select name="categoria" class="form-select">
+                            <option value="">Todas las categorías</option>
+                            {% for categoria in categorias_disponibles %}
+                            <option value="{{ categoria.id }}" {% if categoria_filtro == categoria.id|stringformat:"s" %}selected{% endif %}>
+                                {{ categoria.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">Todos los estados</option>
+                            {% for value, label in estados_material %}
+                            <option value="{{ value }}" {% if estado_filtro == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Criticidad</label>
+                        <select name="criticidad" class="form-select">
+                            <option value="">Todas las criticidades</option>
+                            {% for value, label in niveles_criticidad %}
+                            <option value="{{ value }}" {% if criticidad_filtro == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Proveedor</label>
+                        <select name="proveedor" class="form-select">
+                            <option value="">Todos los proveedores</option>
+                            {% for proveedor in proveedores_disponibles %}
+                            <option value="{{ proveedor.id }}" {% if proveedor_filtro == proveedor.id|stringformat:"s" %}selected{% endif %}>
+                                {{ proveedor.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Ubicación</label>
+                        <select name="ubicacion" class="form-select">
+                            <option value="">Todas las ubicaciones</option>
+                            {% for ubicacion in ubicaciones_disponibles %}
+                            <option value="{{ ubicacion }}" {% if ubicacion_filtro == ubicacion %}selected{% endif %}>
+                                {{ ubicacion }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i>
+                            Filtrar
+                        </button>
+                        <a href="{% url 'materiales:materiales' %}" class="btn btn-outline-secondary mt-2">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Grid de Materiales -->
+        {% if materiales %}
+        <div class="materiales-grid">
+            {% for material in materiales %}
+            <div class="material-card">
+                <div class="material-header">
+                    <div class="material-codigo">{{ material.codigo }}</div>
+                    <h3 class="material-nombre">{{ material.nombre }}</h3>
+                    <p class="material-descripcion">{{ material.descripcion|default:"Sin descripción disponible" }}</p>
+                    
+                    <div class="material-badges">
+                        <span class="badge badge-tipo-{{ material.tipo }}">
+                            {{ material.get_tipo_display }}
+                        </span>
+                        <span class="badge badge-estado-{{ material.estado }}">
+                            {{ material.get_estado_display }}
+                        </span>
+                        {% if material.criticidad %}
+                        <span class="badge badge-criticidad-{{ material.criticidad }}">
+                            {{ material.get_criticidad_display }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="material-body">
+                    <div class="material-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Tipo</span>
+                            <span class="detail-value">{{ material.get_tipo_display }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">Categoría</span>
+                            <span class="detail-value">{{ material.categoria.nombre|default:"Sin categoría" }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">Marca</span>
+                            <span class="detail-value">{{ material.marca|default:"N/A" }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">Ubicación</span>
+                            <span class="detail-value">{{ material.ubicacion|default:"No especificada" }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">Unidad</span>
+                            <span class="detail-value">{{ material.get_unidad_medida_display }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">Precio Unit.</span>
+                            <span class="detail-value">${{ material.precio_unitario|default:"0"|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stock-info">
+                        <div class="stock-display">
+                            <div>
+                                <div class="stock-actual">{{ material.stock_actual }}</div>
+                                <div class="stock-minimo">Mín: {{ material.stock_minimo }}</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">${{ material.valor_stock|floatformat:2 }}</div>
+                                <div class="small text-muted">Valor Total</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Barra de progreso de stock -->
+                        <div class="stock-progress">
+                            {% if material.stock_actual and material.stock_minimo %}
+                                {% widthratio material.stock_actual material.stock_minimo 100 as porcentaje %}
+                                <div class="stock-bar {% if porcentaje < 100 %}low{% endif %}" 
+                                     style="width: {{ porcentaje|default:0 }}%">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="material-actions">
+                        <a href="{% url 'materiales:material-detalle' material.pk %}" class="btn-action btn-view">
+                            <i class="bi bi-eye"></i>
+                            Ver
+                        </a>
+                        
+                        <a href="{% url 'materiales:editar-material' material.pk %}" class="btn-action btn-edit">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </a>
+                        
+                        <!-- BOTÓN ESPECÍFICO PARA MOVIMIENTOS DE MATERIALES -->
+                        <a href="{% url 'materiales:crear-movimiento' material.pk %}" class="btn-action btn-move">
+                            <i class="bi bi-arrow-left-right"></i>
+                            Movimiento
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Navegación de materiales">
+                <ul class="pagination pagination-lg">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">
+                            {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Estado vacío -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="bi bi-inbox"></i>
+            </div>
+            <h3>No se encontraron materiales</h3>
+            <p>No hay materiales que coincidan con los filtros seleccionados.</p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{% url 'materiales:materiales' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Limpiar filtros
+                </a>
+                <a href="{% url 'materiales:crear-material' %}" class="btn btn-success">
+                    <i class="bi bi-plus-lg"></i>
+                    Crear primer material
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMaterialesPage();
+    console.log('📦 Materiales y Herramientas - Sistema cargado correctamente');
+});
+
+function initializeMaterialesPage() {
+    // Auto-submit en cambio de filtros
+    const filterSelects = document.querySelectorAll('.materiales-page .filters-form select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            // Delay para mejor UX
+            setTimeout(() => {
+                this.form.submit();
+            }, 300);
+        });
+    });
+    
+    // Animación de entrada para las tarjetas
+    animateCards();
+    
+    // Mejorar la búsqueda con debounce
+    setupSearchInput();
+    
+    // Tooltips para badges
+    setupTooltips();
+}
+
+function animateCards() {
+    const cards = document.querySelectorAll('.materiales-page .material-card');
+    
+    // Resetear animación si ya existen
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+    });
+    
+    // Animar con delay secuencial
+    cards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+}
+
+function setupSearchInput() {
+    const searchInput = document.querySelector('.materiales-page input[name="search"]');
+    if (!searchInput) return;
+    
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        
+        // Debounce de 500ms
+        searchTimeout = setTimeout(() => {
+            if (this.value.length >= 3 || this.value.length === 0) {
+                this.form.submit();
+            }
+        }, 500);
+    });
+}
+
+function setupTooltips() {
+    // Inicializar tooltips de Bootstrap si están disponibles
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+}
+
+// Funciones de exportación
+function exportarExcel() {
+    mostrarNotificacion('Generando archivo Excel...', 'info');
+    // Simular descarga
+    setTimeout(() => {
+        window.location.href = '/materiales/exportar-excel/';
+        mostrarNotificacion('Archivo Excel generado exitosamente', 'success');
+    }, 1500);
+}
+
+function exportarPDF() {
+    mostrarNotificacion('Generando archivo PDF...', 'info');
+    setTimeout(() => {
+        window.location.href = '/materiales/exportar-pdf/';
+        mostrarNotificacion('Archivo PDF generado exitosamente', 'success');
+    }, 1500);
+}
+
+function exportarCSV() {
+    mostrarNotificacion('Generando archivo CSV...', 'info');
+    setTimeout(() => {
+        window.location.href = '/materiales/exportar-csv/';
+        mostrarNotificacion('Archivo CSV generado exitosamente', 'success');
+    }, 1500);
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const colores = {
+        'success': '#10b981',
+        'error': '#ef4444',
+        'warning': '#f59e0b',
+        'info': '#3b82f6'
+    };
+    
+    const iconos = {
+        'success': 'bi-check-circle-fill',
+        'error': 'bi-x-circle-fill',
+        'warning': 'bi-exclamation-triangle-fill',
+        'info': 'bi-info-circle-fill'
+    };
+    
+    // Crear notificación
+    const notificacion = document.createElement('div');
+    notificacion.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: ${colores[tipo]};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        max-width: 400px;
+        animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    `;
+    
+    notificacion.innerHTML = `
+        <i class="bi ${iconos[tipo]}" style="font-size: 1.2rem;"></i>
+        <span>${mensaje}</span>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+        notificacion.style.animation = 'slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => {
+            if (notificacion.parentNode) {
+                notificacion.remove();
+            }
+        }, 400);
+    }, 4000);
+}
+
+// Funciones de desarrollo futuro
+function verDetalleRapido(materialId) {
+    mostrarNotificacion('Función de vista rápida próximamente disponible', 'info');
+}
+
+function programarReposicion(materialId) {
+    mostrarNotificacion('Función de reposición automática próximamente disponible', 'info');
+}
+
+function generarEtiqueta(materialId) {
+    mostrarNotificacion('Función de etiquetas próximamente disponible', 'info');
+}
+
+// Agregar estilos de animación
+const animationStyles = document.createElement('style');
+animationStyles.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(animationStyles);
+</script>
+{% endblock %}

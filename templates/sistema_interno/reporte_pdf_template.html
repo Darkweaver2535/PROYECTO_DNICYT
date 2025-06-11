@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Inventario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #1e40af;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #1e40af;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .summary {
+            background: #f8fafc;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .summary-item {
+            text-align: center;
+        }
+        
+        .summary-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e40af;
+            display: block;
+        }
+        
+        .summary-label {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background: #1e40af;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        td {
+            font-size: 10px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Reporte de Inventario</h1>
+        <p>Sistema de Gestión Industrial - Lab Metal Mecánica UMSA</p>
+        <p><strong>Fecha de generación:</strong> {{ fecha_generacion|date:"d/m/Y H:i" }}</p>
+    </div>
+    
+    <div class="summary">
+        <h3>Resumen Ejecutivo</h3>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <span class="summary-value">{{ total_repuestos }}</span>
+                <span class="summary-label">Total Repuestos</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-value">${{ valor_total|floatformat:2 }}</span>
+                <span class="summary-label">Valor Total</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-value">{{ repuestos|length }}</span>
+                <span class="summary-label">Repuestos Mostrados</span>
+            </div>
+        </div>
+    </div>
+    
+    <h3>Detalle de Inventario</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Stock Actual</th>
+                <th>Stock Mínimo</th>
+                <th>Precio Unit.</th>
+                <th>Valor Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for repuesto in repuestos %}
+            <tr>
+                <td>{{ repuesto.codigo }}</td>
+                <td>{{ repuesto.nombre }}</td>
+                <td>{{ repuesto.categoria }}</td>
+                <td>{{ repuesto.stock_actual|default:0 }}</td>
+                <td>{{ repuesto.stock_minimo|default:0 }}</td>
+                <td>${{ repuesto.precio_unitario|default:0|floatformat:2 }}</td>
+                <td>${{ repuesto.stock_actual|default:0|mul:repuesto.precio_unitario|default:0|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        <p>Este reporte fue generado automáticamente por el Sistema de Inventario</p>
+        <p>Lab Metal Mecánica - Universidad Mayor de San Andrés (UMSA)</p>
+    </div>
+</body>
+</html>

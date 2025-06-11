@@ -618,22 +618,15 @@
 
                 <!-- Acciones del formulario -->
                 <div class="form-actions">
-                    <div>
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle"></i>
-                            Los campos marcados con * son obligatorios
-                        </small>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'inventario:movimientos' %}" class="btn btn-secondary">
-                            <i class="bi bi-x-lg"></i>
-                            Cancelar
-                        </a>
-                        <button type="button" class="btn btn-primary" id="submit-btn" onclick="showConfirmationModal()">
-                            <i class="bi bi-check-lg"></i>
-                            Crear Movimiento
-                        </button>
-                    </div>
+                    <a href="{% url 'operaciones:movimientos-unificados' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Cancelar
+                    </a>
+                    
+                    <button type="button" class="btn btn-primary" onclick="showConfirmationModal()">
+                        <i class="bi bi-check-lg"></i>
+                        Crear Movimiento
+                    </button>
                 </div>
             </div>
         </form>

@@ -6,9 +6,13 @@ from datetime import datetime, timedelta
 from .models import ProcedimientoOperativo, AnalisisRiesgo, MedidaControl
 from .forms import ProcedimientoOperativoForm
 from apps.equipos.models import Equipo
+from django.utils import timezone
 import json
 import random
-from django.utils import timezone
+
+# AGREGAR ESTAS IMPORTACIONES:
+from apps.materiales.models import MovimientoMaterial, Material
+from apps.inventario.models import MovimientoStock, Repuesto
 
 @login_required
 def procedimientos_pop_view(request):
@@ -639,3 +643,166 @@ def analisis_riesgos_view(request):
     }
     
     return render(request, 'sistema_interno/analisis_riesgo.html', context)
+
+@login_required
+def movimientos_unificados_view(request):
+    """Vista unificada de movimientos de materiales, repuestos y equipos"""
+    
+    # Filtros
+    tipo_filtro = request.GET.get('tipo', '')  # material, repuesto, equipo
+    movimiento_filtro = request.GET.get('movimiento', '')  # entrada, salida, etc.
+    fecha_desde = request.GET.get('fecha_desde', '')
+    fecha_hasta = request.GET.get('fecha_hasta', '')
+    search = request.GET.get('search', '')
+    
+    # === OBTENER MOVIMIENTOS DE MATERIALES ===
+    movimientos_materiales = MovimientoMaterial.objects.select_related(
+        'material', 'usuario'
+    ).all()
+    
+    if tipo_filtro == 'material' or not tipo_filtro:
+        if movimiento_filtro:
+            movimientos_materiales = movimientos_materiales.filter(tipo_movimiento=movimiento_filtro)
+        if search:
+            movimientos_materiales = movimientos_materiales.filter(
+                Q(material__nombre__icontains=search) |
+                Q(material__codigo__icontains=search) |
+                Q(numero_movimiento__icontains=search)
+            )
+        if fecha_desde:
+            movimientos_materiales = movimientos_materiales.filter(fecha_movimiento__date__gte=fecha_desde)
+        if fecha_hasta:
+            movimientos_materiales = movimientos_materiales.filter(fecha_movimiento__date__lte=fecha_hasta)
+    else:
+        movimientos_materiales = MovimientoMaterial.objects.none()
+    
+    # === OBTENER MOVIMIENTOS DE REPUESTOS ===
+    movimientos_repuestos = MovimientoStock.objects.select_related(
+        'repuesto', 'usuario'
+    ).all()
+    
+    if tipo_filtro == 'repuesto' or not tipo_filtro:
+        if movimiento_filtro:
+            movimientos_repuestos = movimientos_repuestos.filter(tipo_movimiento=movimiento_filtro)
+        if search:
+            movimientos_repuestos = movimientos_repuestos.filter(
+                Q(repuesto__nombre__icontains=search) |
+                Q(repuesto__codigo__icontains=search) |
+                Q(numero_movimiento__icontains=search)
+            )
+        if fecha_desde:
+            movimientos_repuestos = movimientos_repuestos.filter(fecha_movimiento__date__gte=fecha_desde)
+        if fecha_hasta:
+            movimientos_repuestos = movimientos_repuestos.filter(fecha_movimiento__date__lte=fecha_hasta)
+    else:
+        movimientos_repuestos = MovimientoStock.objects.none()
+    
+    # === CONVERTIR A LISTA UNIFICADA ===
+    movimientos_unificados = []
+    
+    # Agregar movimientos de materiales
+    for mov in movimientos_materiales:
+        movimientos_unificados.append({
+            'id': f"mat_{mov.id}",
+            'numero': mov.numero_movimiento,
+            'tipo_item': 'Material',
+            'item_nombre': mov.material.nombre,
+            'item_codigo': mov.material.codigo,
+            'item_categoria': mov.material.categoria.nombre if mov.material.categoria else 'Sin categoría',
+            'tipo_movimiento': mov.tipo_movimiento,
+            'tipo_movimiento_display': mov.get_tipo_movimiento_display(),
+            'motivo': mov.get_motivo_display(),
+            'cantidad': mov.cantidad,
+            'unidad': mov.material.get_unidad_medida_display(),
+            'stock_anterior': mov.stock_anterior,
+            'stock_nuevo': mov.stock_nuevo,
+            'costo_unitario': mov.costo_unitario,
+            'costo_total': mov.costo_total,
+            'usuario': mov.usuario.get_full_name() if mov.usuario else 'Sistema',
+            'fecha_movimiento': mov.fecha_movimiento,
+            'observaciones': getattr(mov, 'observaciones', ''),  # Usar getattr para seguridad
+            'estado': mov.get_estado_display(),
+            'origen': 'materiales',
+            'detalle_url': f"/materiales/detalle/{mov.material.pk}/",
+        })
+    
+    # Agregar movimientos de repuestos
+    for mov in movimientos_repuestos:
+        movimientos_unificados.append({
+            'id': f"rep_{mov.id}",
+            'numero': getattr(mov, 'numero_movimiento', f'REP-{mov.id}'),  # Usar getattr
+            'tipo_item': 'Repuesto',
+            'item_nombre': mov.repuesto.nombre,
+            'item_codigo': mov.repuesto.codigo,
+            'item_categoria': mov.repuesto.categoria.nombre if mov.repuesto.categoria else 'Sin categoría',
+            'tipo_movimiento': mov.tipo_movimiento,
+            'tipo_movimiento_display': mov.get_tipo_movimiento_display(),
+            'motivo': mov.get_motivo_display() if hasattr(mov, 'get_motivo_display') else 'N/A',
+            'cantidad': mov.cantidad,
+            'unidad': mov.repuesto.get_unidad_medida_display(),
+            'stock_anterior': mov.stock_anterior,
+            'stock_nuevo': mov.stock_nuevo,
+            'costo_unitario': getattr(mov, 'costo_unitario', 0),
+            'costo_total': getattr(mov, 'costo_total', 0),
+            'usuario': mov.usuario.get_full_name() if mov.usuario else 'Sistema',
+            'fecha_movimiento': mov.fecha_movimiento,
+            'observaciones': getattr(mov, 'observaciones', getattr(mov, 'notas', '')),  # Intentar observaciones o notas
+            'estado': mov.get_estado_display() if hasattr(mov, 'get_estado_display') else 'Procesado',
+            'origen': 'inventario',
+            'detalle_url': f"/inventario/repuesto/{mov.repuesto.pk}/",
+        })
+    
+    # === ORDENAR POR FECHA (MÁS RECIENTES PRIMERO) ===
+    movimientos_unificados.sort(key=lambda x: x['fecha_movimiento'], reverse=True)
+    
+    # === PAGINACIÓN MANUAL ===
+    from django.core.paginator import Paginator
+    paginator = Paginator(movimientos_unificados, 20)  # 20 movimientos por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # === ESTADÍSTICAS ===
+    total_movimientos = len(movimientos_unificados)
+    entradas = sum(1 for mov in movimientos_unificados if mov['tipo_movimiento'] in ['entrada', 'ajuste_positivo'])
+    salidas = sum(1 for mov in movimientos_unificados if mov['tipo_movimiento'] in ['salida', 'ajuste_negativo'])
+    transferencias = sum(1 for mov in movimientos_unificados if 'transferencia' in mov['tipo_movimiento'])
+    
+    # Estadísticas por tipo
+    movimientos_materiales_count = sum(1 for mov in movimientos_unificados if mov['origen'] == 'materiales')
+    movimientos_repuestos_count = sum(1 for mov in movimientos_unificados if mov['origen'] == 'inventario')
+    
+    # Valor total movilizado
+    valor_total = sum(mov['costo_total'] or 0 for mov in movimientos_unificados)
+    
+    # Obtener listas para filtros
+    tipos_movimiento = [
+        ('entrada', 'Entrada'),
+        ('salida', 'Salida'),
+        ('ajuste_positivo', 'Ajuste Positivo'),
+        ('ajuste_negativo', 'Ajuste Negativo'),
+        ('transferencia', 'Transferencia'),
+        ('devolucion', 'Devolución'),
+        ('merma', 'Merma'),
+    ]
+    
+    context = {
+        'movimientos': page_obj,
+        'page_obj': page_obj,
+        'total_movimientos': total_movimientos,
+        'entradas': entradas,
+        'salidas': salidas,
+        'transferencias': transferencias,
+        'movimientos_materiales': movimientos_materiales_count,
+        'movimientos_repuestos': movimientos_repuestos_count,
+        'valor_total': valor_total,
+        'search': search,
+        'tipo_filtro': tipo_filtro,
+        'movimiento_filtro': movimiento_filtro,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta,
+        'tipos_movimiento': tipos_movimiento,
+        'titulo': 'Movimientos de Inventario',
+        'fecha_actualizacion': timezone.now(),
+    }
+    
+    return render(request, 'sistema_interno/movimientos_unificados.html', context)

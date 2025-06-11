@@ -1,0 +1,919 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ material.nombre }} - Detalle Material{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detalle-material-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .detalle-material-page .header-detalle {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .detalle-material-page .header-detalle::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .detalle-material-page .material-titulo {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .detalle-material-page .material-codigo-principal {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .detalle-material-page .badges-principales {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-end;
+        z-index: 1;
+    }
+
+    .detalle-material-page .badge-principal {
+        padding: 0.75rem 1.25rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        box-shadow: var(--shadow-md);
+    }
+
+    .detalle-material-page .contenido-detalle {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .detalle-material-page .informacion-principal {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+
+    .detalle-material-page .panel-lateral {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .detalle-material-page .seccion-titulo {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid var(--primary-blue);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .detalle-material-page .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detalle-material-page .info-item {
+        background: var(--off-white);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border-left: 4px solid var(--primary-blue);
+        transition: all 0.3s ease;
+    }
+
+    .detalle-material-page .info-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .detalle-material-page .info-label {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .detalle-material-page .info-valor {
+        font-size: 1.1rem;
+        color: var(--text-dark);
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .detalle-material-page .card-lateral {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+
+    .detalle-material-page .stock-panel {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .detalle-material-page .stock-actual {
+        font-size: 4rem;
+        font-weight: 800;
+        color: var(--primary-blue);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .detalle-material-page .stock-unidad {
+        font-size: 1.2rem;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+    }
+
+    .detalle-material-page .stock-niveles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        text-align: left;
+    }
+
+    .detalle-material-page .nivel-item {
+        background: var(--off-white);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+    }
+
+    .detalle-material-page .nivel-valor {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .detalle-material-page .nivel-label {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+    }
+
+    .detalle-material-page .progress-container {
+        margin: 1.5rem 0;
+    }
+
+    .detalle-material-page .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+    }
+
+    .detalle-material-page .progress {
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: var(--border-color);
+    }
+
+    .detalle-material-page .progress-bar {
+        height: 100%;
+        background: linear-gradient(135deg, var(--success-green), var(--primary-blue));
+        transition: width 1s ease;
+        border-radius: 6px;
+    }
+
+    .detalle-material-page .progress-bar.low {
+        background: linear-gradient(135deg, var(--warning-orange), var(--danger-red));
+    }
+
+    .detalle-material-page .acciones-rapidas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .detalle-material-page .btn-accion {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 2px solid;
+        text-align: center;
+    }
+
+    .detalle-material-page .btn-editar {
+        background: var(--light-yellow);
+        color: var(--warning-orange);
+        border-color: var(--warning-orange);
+    }
+
+    .detalle-material-page .btn-editar:hover {
+        background: var(--warning-orange);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .detalle-material-page .btn-movimiento {
+        background: var(--light-green);
+        color: var(--success-green);
+        border-color: var(--success-green);
+    }
+
+    .detalle-material-page .btn-movimiento:hover {
+        background: var(--success-green);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .detalle-material-page .alertas-material {
+        margin-bottom: 1rem;
+    }
+
+    .detalle-material-page .alerta-item {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: var(--shadow-sm);
+        border-left: 4px solid var(--primary-blue);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .detalle-material-page .alerta-item.danger { border-left-color: var(--danger-red); }
+    .detalle-material-page .alerta-item.warning { border-left-color: var(--warning-orange); }
+    .detalle-material-page .alerta-item.info { border-left-color: var(--primary-blue); }
+
+    .detalle-material-page .alerta-icono {
+        font-size: 1.5rem;
+        width: 40px;
+        text-align: center;
+    }
+
+    .detalle-material-page .movimientos-recientes {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .detalle-material-page .movimiento-item {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 3px solid var(--primary-blue);
+    }
+
+    .detalle-material-page .movimiento-fecha {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-bottom: 0.25rem;
+    }
+
+    .detalle-material-page .movimiento-tipo {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .detalle-material-page .movimiento-cantidad {
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+
+    .detalle-material-page .valor-monetario {
+        background: linear-gradient(135deg, var(--success-green), var(--primary-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+    }
+
+    .detalle-material-page .imagen-material {
+        width: 100%;
+        max-width: 300px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 1rem;
+    }
+
+    .detalle-material-page .sin-imagen {
+        width: 100%;
+        height: 200px;
+        background: var(--border-color);
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-light);
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Responsivo */
+    @media (max-width: 992px) {
+        .detalle-material-page .contenido-detalle {
+            grid-template-columns: 1fr;
+        }
+        
+        .detalle-material-page .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .detalle-material-page .badges-principales {
+            position: static;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .detalle-material-page .acciones-rapidas {
+            grid-template-columns: 1fr;
+        }
+        
+        .detalle-material-page .stock-niveles {
+            grid-template-columns: 1fr;
+        }
+        
+        .detalle-material-page .material-titulo {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detalle-material-page">
+    <div class="container-fluid">
+        <!-- Header del Material -->
+        <div class="header-detalle">
+            <div class="material-codigo-principal">{{ material.codigo }}</div>
+            <h1 class="material-titulo">{{ material.nombre }}</h1>
+            <p class="text-muted">{{ material.descripcion|default:"Sin descripción disponible" }}</p>
+            
+            <div class="badges-principales">
+                <span class="badge-principal badge-tipo-{{ material.tipo }}">
+                    {{ material.get_tipo_display }}
+                </span>
+                <span class="badge-principal badge-estado-{{ material.estado }}">
+                    {{ material.get_estado_display }}
+                </span>
+                {% if material.criticidad %}
+                <span class="badge-principal badge-criticidad-{{ material.criticidad }}">
+                    {{ material.get_criticidad_display }}
+                </span>
+                {% endif %}
+                {% if material.es_herramienta_critica %}
+                <span class="badge-principal bg-danger text-white">
+                    <i class="bi bi-exclamation-triangle"></i> Crítico
+                </span>
+                {% endif %}
+            </div>
+            
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mt-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'materiales:materiales' %}">
+                            <i class="bi bi-tools"></i> Materiales
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ material.codigo }}</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Alertas del Material -->
+        {% if alertas %}
+        <div class="alertas-material">
+            {% for alerta in alertas %}
+            <div class="alerta-item {{ alerta.tipo }}">
+                <div class="alerta-icono text-{{ alerta.tipo }}">
+                    <i class="{{ alerta.icono }}"></i>
+                </div>
+                <div>
+                    <div class="fw-bold">{{ alerta.titulo }}</div>
+                    <div class="small">{{ alerta.descripcion }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Contenido Principal -->
+        <div class="contenido-detalle">
+            <!-- Información Principal -->
+            <div class="informacion-principal">
+                <!-- Información Básica -->
+                <div class="mb-4">
+                    <h3 class="seccion-titulo">
+                        <i class="bi bi-info-circle"></i>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Código</div>
+                            <div class="info-valor">{{ material.codigo }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Categoría</div>
+                            <div class="info-valor">{{ material.categoria.nombre|default:"Sin categoría" }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Tipo</div>
+                            <div class="info-valor">{{ material.get_tipo_display }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Estado</div>
+                            <div class="info-valor">{{ material.get_estado_display }}</div>
+                        </div>
+                        
+                        {% if material.marca %}
+                        <div class="info-item">
+                            <div class="info-label">Marca</div>
+                            <div class="info-valor">{{ material.marca }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if material.modelo %}
+                        <div class="info-item">
+                            <div class="info-label">Modelo</div>
+                            <div class="info-valor">{{ material.modelo }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if material.numero_parte %}
+                        <div class="info-item">
+                            <div class="info-label">Número de Parte</div>
+                            <div class="info-valor">{{ material.numero_parte }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="info-item">
+                            <div class="info-label">Unidad de Medida</div>
+                            <div class="info-valor">{{ material.get_unidad_medida_display }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de Ubicación y Proveedor -->
+                <div class="mb-4">
+                    <h3 class="seccion-titulo">
+                        <i class="bi bi-geo-alt"></i>
+                        Ubicación y Proveedor
+                    </h3>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Ubicación en Almacén</div>
+                            <div class="info-valor">{{ material.ubicacion|default:"No especificada" }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Proveedor Principal</div>
+                            <div class="info-valor">{{ material.proveedor_principal.nombre|default:"Sin proveedor" }}</div>
+                        </div>
+                        
+                        {% if material.proveedor_principal %}
+                        <div class="info-item">
+                            <div class="info-label">Contacto Proveedor</div>
+                            <div class="info-valor">{{ material.proveedor_principal.email|default:"Sin contacto" }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Teléfono Proveedor</div>
+                            <div class="info-valor">{{ material.proveedor_principal.telefono|default:"Sin teléfono" }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Fechas Importantes -->
+                {% if material.fecha_vencimiento or material.fecha_ultima_compra %}
+                <div class="mb-4">
+                    <h3 class="seccion-titulo">
+                        <i class="bi bi-calendar"></i>
+                        Fechas Importantes
+                    </h3>
+                    
+                    <div class="info-grid">
+                        {% if material.fecha_vencimiento %}
+                        <div class="info-item">
+                            <div class="info-label">Fecha de Vencimiento</div>
+                            <div class="info-valor">{{ material.fecha_vencimiento|date:"d/m/Y" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Días hasta Vencimiento</div>
+                            <div class="info-valor">
+                                {% if material.dias_hasta_vencimiento %}
+                                    {% if material.dias_hasta_vencimiento < 0 %}
+                                        <span class="text-danger">Vencido hace {{ material.dias_hasta_vencimiento|floatformat:0|slice:"1:" }} días</span>
+                                    {% elif material.dias_hasta_vencimiento < 30 %}
+                                        <span class="text-warning">{{ material.dias_hasta_vencimiento }} días</span>
+                                    {% else %}
+                                        <span class="text-success">{{ material.dias_hasta_vencimiento }} días</span>
+                                    {% endif %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if material.fecha_ultima_compra %}
+                        <div class="info-item">
+                            <div class="info-label">Última Compra</div>
+                            <div class="info-valor">{{ material.fecha_ultima_compra|date:"d/m/Y" }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="info-item">
+                            <div class="info-label">Fecha de Registro</div>
+                            <div class="info-valor">{{ material.fecha_creacion|date:"d/m/Y H:i" }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Información Técnica para Herramientas -->
+                {% if material.tipo == 'herramienta' %}
+                <div class="mb-4">
+                    <h3 class="seccion-titulo">
+                        <i class="bi bi-gear"></i>
+                        Información Técnica
+                    </h3>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Herramienta Crítica</div>
+                            <div class="info-valor">
+                                {% if material.es_herramienta_critica %}
+                                    <span class="text-danger fw-bold">Sí</span>
+                                {% else %}
+                                    <span class="text-success">No</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Requiere Calibración</div>
+                            <div class="info-valor">
+                                {% if material.requiere_calibracion %}
+                                    <span class="text-warning fw-bold">Sí</span>
+                                {% else %}
+                                    <span class="text-success">No</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if material.requiere_calibracion and material.fecha_ultima_calibracion %}
+                        <div class="info-item">
+                            <div class="info-label">Última Calibración</div>
+                            <div class="info-valor">{{ material.fecha_ultima_calibracion|date:"d/m/Y" }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Frecuencia Calibración</div>
+                            <div class="info-valor">{{ material.frecuencia_calibracion }} días</div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="info-item">
+                            <div class="info-label">Requiere Mantenimiento</div>
+                            <div class="info-valor">
+                                {% if material.requiere_mantenimiento %}
+                                    <span class="text-info fw-bold">Sí</span>
+                                {% else %}
+                                    <span class="text-success">No</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Panel Lateral -->
+            <div class="panel-lateral">
+                <!-- Panel de Stock -->
+                <div class="card-lateral">
+                    <div class="stock-panel">
+                        <div class="stock-actual">{{ material.stock_actual|floatformat:0 }}</div>
+                        <div class="stock-unidad">{{ material.get_unidad_medida_display }}</div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Nivel de Stock</span>
+                                <span>
+                                    {% widthratio material.stock_actual material.stock_minimo 100 as porcentaje %}
+                                    {{ porcentaje|default:0 }}%
+                                </span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar {% if porcentaje < 100 %}low{% endif %}" 
+                                     style="width: {{ porcentaje|default:0 }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="stock-niveles">
+                            <div class="nivel-item">
+                                <div class="nivel-valor">{{ material.stock_minimo|floatformat:0 }}</div>
+                                <div class="nivel-label">Mínimo</div>
+                            </div>
+                            <div class="nivel-item">
+                                <div class="nivel-valor">{{ material.stock_maximo|floatformat:0 }}</div>
+                                <div class="nivel-label">Máximo</div>
+                            </div>
+                            <div class="nivel-item">
+                                <div class="nivel-valor">{{ material.punto_reorden|floatformat:0 }}</div>
+                                <div class="nivel-label">Reorden</div>
+                            </div>
+                            <div class="nivel-item">
+                                <div class="nivel-valor valor-monetario">${{ material.precio_unitario|floatformat:2 }}</div>
+                                <div class="nivel-label">Precio Unit.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Imagen del Material -->
+                <div class="card-lateral">
+                    {% if material.foto %}
+                        <img src="{{ material.foto.url }}" alt="{{ material.nombre }}" class="imagen-material">
+                    {% else %}
+                        <div class="sin-imagen">
+                            <i class="bi bi-image"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="text-center">
+                        <small class="text-muted">Imagen del Material</small>
+                    </div>
+                </div>
+
+                <!-- Valor Total del Stock -->
+                <div class="card-lateral text-center">
+                    <h4 class="mb-3">Valor Total</h4>
+                    <div class="display-6 valor-monetario mb-2">
+                        ${{ material.valor_stock|floatformat:2 }}
+                    </div>
+                    <small class="text-muted">
+                        {{ material.stock_actual|floatformat:0 }} × ${{ material.precio_unitario|floatformat:2 }}
+                    </small>
+                </div>
+
+                <!-- Acciones Rápidas -->
+                <div class="card-lateral">
+                    <h5 class="mb-3">Acciones Rápidas</h5>
+                    <div class="acciones-rapidas">
+                        <a href="{% url 'materiales:editar-material' material.pk %}" class="btn-accion btn-editar">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </a>
+                        <a href="{% url 'materiales:crear-movimiento' material.pk %}" class="btn-accion btn-movimiento">
+                            <i class="bi bi-arrow-left-right"></i>
+                            Movimiento
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Movimientos Recientes -->
+                {% if movimientos_recientes %}
+                <div class="card-lateral">
+                    <h5 class="mb-3">
+                        <i class="bi bi-clock-history"></i>
+                        Movimientos Recientes
+                    </h5>
+                    <div class="movimientos-recientes">
+                        {% for movimiento in movimientos_recientes %}
+                        <div class="movimiento-item">
+                            <div class="movimiento-fecha">{{ movimiento.fecha_movimiento|date:"d/m/Y H:i" }}</div>
+                            <div class="movimiento-tipo">{{ movimiento.get_tipo_movimiento_display }}</div>
+                            <div class="movimiento-cantidad">
+                                Cantidad: {{ movimiento.cantidad|floatformat:0 }} {{ material.get_unidad_medida_display }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Botones de Acción Inferiores -->
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{% url 'materiales:materiales' %}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-arrow-left"></i>
+                Volver al Listado
+            </a>
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-info btn-lg" onclick="imprimirFicha()">
+                    <i class="bi bi-printer"></i>
+                    Imprimir
+                </button>
+                <button class="btn btn-success btn-lg" onclick="generarEtiqueta()">
+                    <i class="bi bi-qr-code"></i>
+                    Generar Etiqueta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📦 Material Detalle - Cargado correctamente');
+    
+    // Animar barras de progreso
+    animateProgressBars();
+    
+    // Configurar tooltips si están disponibles
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+});
+
+function animateProgressBars() {
+    const progressBars = document.querySelectorAll('.detalle-material-page .progress-bar');
+    
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
+    });
+}
+
+function imprimirFicha() {
+    // Crear ventana de impresión
+    const contenido = document.querySelector('.detalle-material-page').innerHTML;
+    const ventana = window.open('', '_blank');
+    
+    ventana.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Ficha de Material - {{ material.codigo }}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .no-print { display: none !important; }
+                .material-titulo { color: #1e40af; margin-bottom: 10px; }
+                .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+                .info-item { border: 1px solid #e5e7eb; padding: 10px; border-radius: 5px; }
+                .info-label { font-size: 12px; color: #6b7280; text-transform: uppercase; }
+                .info-valor { font-weight: bold; color: #1f2937; }
+                @page { margin: 1cm; }
+            </style>
+        </head>
+        <body>
+            ${contenido}
+        </body>
+        </html>
+    `);
+    
+    ventana.document.close();
+    ventana.print();
+}
+
+function generarEtiqueta() {
+    mostrarNotificacion('Generando etiqueta QR para el material...', 'info');
+    
+    // Simular generación de etiqueta
+    setTimeout(() => {
+        mostrarNotificacion('Etiqueta QR generada exitosamente', 'success');
+    }, 2000);
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const colores = {
+        'success': '#10b981',
+        'error': '#ef4444',
+        'warning': '#f59e0b',
+        'info': '#3b82f6'
+    };
+    
+    const iconos = {
+        'success': 'bi-check-circle-fill',
+        'error': 'bi-x-circle-fill',
+        'warning': 'bi-exclamation-triangle-fill',
+        'info': 'bi-info-circle-fill'
+    };
+    
+    // Crear notificación
+    const notificacion = document.createElement('div');
+    notificacion.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: ${colores[tipo]};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        max-width: 400px;
+        animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    `;
+    
+    notificacion.innerHTML = `
+        <i class="bi ${iconos[tipo]}" style="font-size: 1.2rem;"></i>
+        <span>${mensaje}</span>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+        notificacion.style.animation = 'slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => {
+            if (notificacion.parentNode) {
+                notificacion.remove();
+            }
+        }, 400);
+    }, 4000);
+}
+
+// Agregar animaciones CSS
+const animationStyles = document.createElement('style');
+animationStyles.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(animationStyles);
+</script>
+{% endblock %}

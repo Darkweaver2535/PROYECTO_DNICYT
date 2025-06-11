@@ -1,0 +1,542 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .crear-movimiento-material-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .crear-movimiento-material-page .form-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .crear-movimiento-material-page .form-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .crear-movimiento-material-page .material-info {
+        background: var(--light-blue);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .crear-movimiento-material-page .form-container {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .crear-movimiento-material-page .form-section {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .crear-movimiento-material-page .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .crear-movimiento-material-page .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .crear-movimiento-material-page .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .crear-movimiento-material-page .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .crear-movimiento-material-page .form-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .crear-movimiento-material-page .form-label.required::after {
+        content: "*";
+        color: var(--danger-red);
+        font-weight: 700;
+        margin-left: 0.25rem;
+    }
+
+    .crear-movimiento-material-page .form-control,
+    .crear-movimiento-material-page .form-select {
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        background: var(--pure-white);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        color: var(--text-dark);
+    }
+
+    .crear-movimiento-material-page .form-control:focus,
+    .crear-movimiento-material-page .form-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        background: var(--light-blue);
+    }
+
+    .crear-movimiento-material-page .form-help {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+        font-style: italic;
+    }
+
+    .crear-movimiento-material-page .stock-display {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .crear-movimiento-material-page .stock-actual {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+    }
+
+    .crear-movimiento-material-page .calculadora {
+        background: var(--light-blue);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .crear-movimiento-material-page .calc-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .crear-movimiento-material-page .calc-row:last-child {
+        margin-bottom: 0;
+        border-top: 2px solid var(--border-color);
+        padding-top: 0.75rem;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .crear-movimiento-material-page .form-actions {
+        background: var(--off-white);
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .crear-movimiento-material-page .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .crear-movimiento-material-page .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: var(--pure-white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .crear-movimiento-material-page .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: var(--pure-white);
+    }
+
+    .crear-movimiento-material-page .btn-secondary {
+        background: var(--border-color);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .crear-movimiento-material-page .btn-secondary:hover {
+        background: var(--text-light);
+        color: var(--pure-white);
+        transform: translateY(-1px);
+    }
+
+    .crear-movimiento-material-page .alert {
+        border: none;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .crear-movimiento-material-page .tipo-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .crear-movimiento-material-page .tipo-badge.entrada {
+        background: var(--success-green);
+        color: var(--pure-white);
+    }
+
+    .crear-movimiento-material-page .tipo-badge.salida {
+        background: var(--danger-red);
+        color: var(--pure-white);
+    }
+
+    .crear-movimiento-material-page .tipo-badge.ajuste {
+        background: var(--warning-orange);
+        color: var(--pure-white);
+    }
+
+    .crear-movimiento-material-page .movimientos-recientes {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .crear-movimiento-material-page .movimiento-item {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 3px solid var(--primary-blue);
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .crear-movimiento-material-page .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .crear-movimiento-material-page .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .crear-movimiento-material-page .btn {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="crear-movimiento-material-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="form-header">
+            <h1 class="form-title">
+                <i class="bi bi-arrow-left-right"></i>
+                {{ titulo }}
+            </h1>
+            
+            <div class="material-info">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 class="text-primary mb-2">{{ material.codigo }} - {{ material.nombre }}</h4>
+                        <p class="mb-1"><strong>Descripción:</strong> {{ material.descripcion|truncatewords:15 }}</p>
+                        <p class="mb-1"><strong>Categoría:</strong> {{ material.categoria.nombre|default:"Sin categoría" }}</p>
+                        <p class="mb-0"><strong>Unidad:</strong> {{ material.get_unidad_medida_display }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stock-display">
+                            <div class="stock-actual">{{ material.stock_actual }}</div>
+                            <div class="text-muted">{{ material.get_unidad_medida_display }} disponibles</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <form method="post" class="movimiento-form" id="movimiento-form">
+            {% csrf_token %}
+            
+            <div class="form-container">
+                <!-- Tipo de Movimiento -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-gear"></i>
+                        Tipo de Movimiento
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">Tipo de Movimiento</label>
+                            <select name="tipo_movimiento" class="form-select" required id="tipo-movimiento">
+                                <option value="">Seleccionar tipo de movimiento</option>
+                                {% for value, display in tipos_movimiento %}
+                                <option value="{{ value }}">{{ display }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-help">Seleccione el tipo de movimiento a realizar</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Motivo</label>
+                            <select name="motivo" class="form-select" id="motivo">
+                                {% for value, display in motivos %}
+                                <option value="{{ value }}">{{ display }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-help">Motivo del movimiento</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cantidad y Costo -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-calculator"></i>
+                        Cantidad y Costos
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">Cantidad</label>
+                            <input type="number" name="cantidad" class="form-control" 
+                                   step="0.01" min="0.01" required id="cantidad"
+                                   placeholder="Cantidad a mover">
+                            <div class="form-help">Cantidad en {{ material.get_unidad_medida_display }}</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Costo Unitario</label>
+                            <input type="number" name="costo_unitario" class="form-control" 
+                                   step="0.01" min="0" id="costo-unitario"
+                                   value="{{ material.precio_unitario|default:'0' }}"
+                                   placeholder="Costo por unidad">
+                            <div class="form-help">Costo por {{ material.get_unidad_medida_display }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calculadora en tiempo real -->
+                    <div class="calculadora" id="calculadora" style="display: none;">
+                        <h5>Resumen del Movimiento</h5>
+                        <div class="calc-row">
+                            <span>Stock actual:</span>
+                            <span id="calc-stock-actual">{{ material.stock_actual }} {{ material.get_unidad_medida_display }}</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Movimiento:</span>
+                            <span id="calc-movimiento">-</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Stock resultante:</span>
+                            <span id="calc-stock-nuevo">-</span>
+                        </div>
+                        <div class="calc-row">
+                            <span>Costo total:</span>
+                            <span id="calc-costo-total">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-chat-left-text"></i>
+                        Observaciones
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Observaciones Adicionales</label>
+                        <textarea name="observaciones" class="form-control" rows="4"
+                                  placeholder="Observaciones sobre el movimiento (opcional)"></textarea>
+                        <div class="form-help">Información adicional sobre el movimiento</div>
+                    </div>
+                </div>
+
+                <!-- Movimientos Recientes -->
+                {% if movimientos_recientes %}
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-clock-history"></i>
+                        Movimientos Recientes
+                    </h3>
+                    
+                    <div class="movimientos-recientes">
+                        {% for movimiento in movimientos_recientes %}
+                        <div class="movimiento-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="tipo-badge {{ movimiento.tipo_movimiento }}">
+                                        {{ movimiento.get_tipo_movimiento_display }}
+                                    </span>
+                                    <strong>{{ movimiento.cantidad }} {{ material.get_unidad_medida_display }}</strong>
+                                </div>
+                                <small class="text-muted">{{ movimiento.fecha_movimiento|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <div class="mt-1">
+                                <small class="text-muted">{{ movimiento.get_motivo_display }}</small>
+                                {% if movimiento.observaciones %}
+                                <br><small>{{ movimiento.observaciones|truncatewords:10 }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Acciones -->
+                <div class="form-actions">
+                    <a href="{% url 'materiales:material-detalle' material.pk %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Cancelar
+                    </a>
+                    
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <i class="bi bi-check-lg"></i>
+                        Registrar Movimiento
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoMovimiento = document.getElementById('tipo-movimiento');
+    const cantidadInput = document.getElementById('cantidad');
+    const costoUnitarioInput = document.getElementById('costo-unitario');
+    const calculadora = document.getElementById('calculadora');
+    const stockActual = parseFloat({{ material.stock_actual }});  // Convertir a número
+    
+    function calcularMovimiento() {
+        const tipo = tipoMovimiento.value;
+        const cantidad = parseFloat(cantidadInput.value) || 0;
+        const costoUnitario = parseFloat(costoUnitarioInput.value) || 0;
+        
+        if (!tipo || cantidad <= 0) {
+            calculadora.style.display = 'none';
+            return;
+        }
+        
+        let stockNuevo = stockActual;
+        let movimientoTexto = '';
+        
+        if (tipo === 'entrada' || tipo === 'ajuste_positivo') {
+            stockNuevo = stockActual + cantidad;
+            movimientoTexto = `+${cantidad.toFixed(2)} {{ material.get_unidad_medida_display }}`;
+        } else if (tipo === 'salida' || tipo === 'ajuste_negativo') {
+            stockNuevo = stockActual - cantidad;
+            movimientoTexto = `-${cantidad.toFixed(2)} {{ material.get_unidad_medida_display }}`;
+        }
+        
+        const costoTotal = cantidad * costoUnitario;
+        
+        // Actualizar calculadora
+        document.getElementById('calc-movimiento').textContent = movimientoTexto;
+        document.getElementById('calc-stock-nuevo').textContent = `${stockNuevo.toFixed(2)} {{ material.get_unidad_medida_display }}`;
+        document.getElementById('calc-costo-total').textContent = `$${costoTotal.toFixed(2)}`;
+        
+        calculadora.style.display = 'block';
+        
+        // Validar stock negativo
+        if (stockNuevo < 0) {
+            document.getElementById('calc-stock-nuevo').style.color = 'var(--danger-red)';
+        } else {
+            document.getElementById('calc-stock-nuevo').style.color = 'var(--text-dark)';
+        }
+    }
+    
+    // Event listeners
+    tipoMovimiento.addEventListener('change', calcularMovimiento);
+    cantidadInput.addEventListener('input', calcularMovimiento);
+    costoUnitarioInput.addEventListener('input', calcularMovimiento);
+    
+    // Validación del formulario
+    document.getElementById('movimiento-form').addEventListener('submit', function(e) {
+        const tipo = tipoMovimiento.value;
+        const cantidad = parseFloat(cantidadInput.value) || 0;
+        
+        if (!tipo) {
+            e.preventDefault();
+            alert('Por favor seleccione el tipo de movimiento');
+            return;
+        }
+        
+        if (cantidad <= 0) {
+            e.preventDefault();
+            alert('La cantidad debe ser mayor a cero');
+            return;
+        }
+        
+        // Validar que los campos sean números válidos
+        if (isNaN(cantidad)) {
+            e.preventDefault();
+            alert('La cantidad debe ser un número válido');
+            return;
+        }
+        
+        const costoUnitario = parseFloat(costoUnitarioInput.value) || 0;
+        if (isNaN(costoUnitario)) {
+            e.preventDefault();
+            alert('El costo unitario debe ser un número válido');
+            return;
+        }
+        
+        if ((tipo === 'salida' || tipo === 'ajuste_negativo') && cantidad > stockActual) {
+            e.preventDefault();
+            alert(`No hay suficiente stock. Stock disponible: ${stockActual.toFixed(2)}`);
+            return;
+        }
+    });
+    
+    console.log('Crear Movimiento Material - JavaScript cargado correctamente');
+});
+</script>
+{% endblock %}
