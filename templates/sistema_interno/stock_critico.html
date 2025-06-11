@@ -1,0 +1,956 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* IMPORTANTE: Encapsular todos los estilos dentro de .stock-critico-page para evitar afectar el sidebar */
+    .stock-critico-page {
+        background: linear-gradient(135deg, #fff1f2 0%, #fef3c7 50%, #dbeafe 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .stock-critico-page .dashboard-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .stock-critico-page .dashboard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stock-critico-page .dashboard-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .stock-critico-page .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stock-critico-page .stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--primary-blue);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stock-critico-page .stat-card.critical {
+        border-left-color: var(--danger-red);
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(239, 68, 68, 0.02) 100%);
+    }
+
+    .stock-critico-page .stat-card.warning {
+        border-left-color: var(--warning-orange);
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(245, 158, 11, 0.02) 100%);
+    }
+
+    .stock-critico-page .stat-card.success {
+        border-left-color: var(--success-green);
+        background: linear-gradient(135deg, var(--pure-white) 0%, rgba(16, 185, 129, 0.02) 100%);
+    }
+
+    .stock-critico-page .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stock-critico-page .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--light-blue), transparent);
+        border-radius: 50%;
+        transform: translate(25px, -25px);
+        opacity: 0.1;
+    }
+
+    .stock-critico-page .stat-value {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+
+    .stock-critico-page .stat-card.critical .stat-value {
+        color: var(--danger-red);
+    }
+
+    .stock-critico-page .stat-card.warning .stat-value {
+        color: var(--warning-orange);
+    }
+
+    .stock-critico-page .stat-card.success .stat-value {
+        color: var(--success-green);
+    }
+
+    .stock-critico-page .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .stock-critico-page .stat-description {
+        color: var(--text-dark);
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .stock-critico-page .filters-section {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .stock-critico-page .filters-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stock-critico-page .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stock-critico-page .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stock-critico-page .filter-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .stock-critico-page .form-control,
+    .stock-critico-page .form-select {
+        padding: 0.625rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        background: var(--pure-white);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .stock-critico-page .form-control:focus,
+    .stock-critico-page .form-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .stock-critico-page .quick-filters {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .stock-critico-page .quick-filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        background: var(--pure-white);
+        color: var(--text-dark);
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stock-critico-page .quick-filter-btn:hover {
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        background: var(--light-blue);
+    }
+
+    .stock-critico-page .quick-filter-btn.active {
+        border-color: var(--primary-blue);
+        background: var(--primary-blue);
+        color: var(--pure-white);
+    }
+
+    .stock-critico-page .recommendations-section {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .stock-critico-page .recommendations-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stock-critico-page .recommendation-item {
+        background: linear-gradient(135deg, var(--off-white), var(--pure-white));
+        border-left: 4px solid var(--primary-blue);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .stock-critico-page .recommendation-item:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateX(4px);
+    }
+
+    .stock-critico-page .recommendation-item.danger {
+        border-left-color: var(--danger-red);
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), var(--pure-white));
+    }
+
+    .stock-critico-page .recommendation-item.warning {
+        border-left-color: var(--warning-orange);
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), var(--pure-white));
+    }
+
+    .stock-critico-page .recommendation-item.info {
+        border-left-color: var(--primary-blue);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), var(--pure-white));
+    }
+
+    .stock-critico-page .recommendation-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stock-critico-page .recommendation-icon {
+        font-size: 1.25rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-blue);
+        color: var(--pure-white);
+    }
+
+    .stock-critico-page .recommendation-item.danger .recommendation-icon {
+        background: var(--danger-red);
+    }
+
+    .stock-critico-page .recommendation-item.warning .recommendation-icon {
+        background: var(--warning-orange);
+    }
+
+    .stock-critico-page .recommendation-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .stock-critico-page .recommendation-description {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stock-critico-page .recommendation-action {
+        color: var(--primary-blue);
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .stock-critico-page .recommendation-action:hover {
+        color: var(--secondary-blue);
+    }
+
+    .stock-critico-page .repuestos-table-section {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .stock-critico-page .table-header {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: var(--pure-white);
+        padding: 1.5rem;
+    }
+
+    .stock-critico-page .table-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .stock-critico-page .table-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .stock-critico-page .table-responsive {
+        overflow-x: auto;
+    }
+
+    .stock-critico-page .repuestos-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+    }
+
+    .stock-critico-page .repuestos-table th {
+        background: var(--off-white);
+        color: var(--text-dark);
+        font-weight: 600;
+        padding: 1rem 0.75rem;
+        text-align: left;
+        border-bottom: 2px solid var(--border-color);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .stock-critico-page .repuestos-table td {
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+        font-size: 0.875rem;
+    }
+
+    .stock-critico-page .repuestos-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .stock-critico-page .repuestos-table tbody tr:hover {
+        background: var(--light-blue);
+    }
+
+    .stock-critico-page .alert-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .stock-critico-page .alert-badge.critico {
+        background: var(--danger-red);
+        color: var(--pure-white);
+    }
+
+    .stock-critico-page .alert-badge.alto {
+        background: var(--warning-orange);
+        color: var(--pure-white);
+    }
+
+    .stock-critico-page .alert-badge.medio {
+        background: var(--primary-yellow);
+        color: var(--text-dark);
+    }
+
+    .stock-critico-page .alert-badge.normal {
+        background: var(--success-green);
+        color: var(--pure-white);
+    }
+
+    .stock-critico-page .stock-progress {
+        width: 100%;
+        height: 8px;
+        background: var(--off-white);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.25rem;
+    }
+
+    .stock-critico-page .stock-progress-bar {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .stock-critico-page .stock-progress-bar.critico {
+        background: linear-gradient(90deg, var(--danger-red), #dc2626);
+    }
+
+    .stock-critico-page .stock-progress-bar.alto {
+        background: linear-gradient(90deg, var(--warning-orange), #d97706);
+    }
+
+    .stock-critico-page .stock-progress-bar.medio {
+        background: linear-gradient(90deg, var(--primary-yellow), #eab308);
+    }
+
+    .stock-critico-page .stock-progress-bar.normal {
+        background: linear-gradient(90deg, var(--success-green), #059669);
+    }
+
+    .stock-critico-page .stock-info {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .stock-critico-page .problema-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .stock-critico-page .problema-tag {
+        background: var(--danger-red);
+        color: var(--pure-white);
+        padding: 0.125rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    .stock-critico-page .problema-tag.warning {
+        background: var(--warning-orange);
+    }
+
+    .stock-critico-page .problema-tag.info {
+        background: var(--primary-blue);
+    }
+
+    .stock-critico-page .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-light);
+    }
+
+    .stock-critico-page .empty-state-icon {
+        font-size: 4rem;
+        color: var(--success-green);
+        margin-bottom: 1rem;
+    }
+
+    .stock-critico-page .empty-state-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .stock-critico-page .empty-state-description {
+        font-size: 0.95rem;
+        color: var(--text-light);
+    }
+
+    .stock-critico-page .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .stock-critico-page .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: all 0.2s ease;
+    }
+
+    .stock-critico-page .btn-primary {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+        border: 1px solid var(--primary-blue);
+    }
+
+    .stock-critico-page .btn-primary:hover {
+        background: var(--secondary-blue);
+        color: var(--pure-white);
+        transform: translateY(-1px);
+    }
+
+    .stock-critico-page .btn-warning {
+        background: var(--warning-orange);
+        color: var(--pure-white);
+        border: 1px solid var(--warning-orange);
+    }
+
+    .stock-critico-page .btn-warning:hover {
+        background: #d97706;
+        color: var(--pure-white);
+        transform: translateY(-1px);
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .stock-critico-page .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stock-critico-page .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stock-critico-page .quick-filters {
+            flex-direction: column;
+        }
+        
+        .stock-critico-page .dashboard-title {
+            font-size: 1.5rem;
+        }
+        
+        .stock-critico-page .repuestos-table {
+            font-size: 0.8rem;
+        }
+        
+        .stock-critico-page .repuestos-table th,
+        .stock-critico-page .repuestos-table td {
+            padding: 0.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .stock-critico-page .dashboard-header {
+            padding: 1.5rem;
+        }
+        
+        .stock-critico-page .filters-section,
+        .stock-critico-page .recommendations-section {
+            padding: 1rem;
+        }
+        
+        .stock-critico-page .stat-value {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- IMPORTANTE: Envolver todo el contenido en .stock-critico-page -->
+<div class="stock-critico-page">
+    <div class="container-fluid">
+        <!-- Header del Dashboard -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">
+                <i class="bi bi-exclamation-triangle"></i>
+                {{ titulo }}
+            </h1>
+            <p class="dashboard-subtitle">
+                Análisis y control de inventario crítico - Repuestos con niveles bajos de stock
+            </p>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-clock"></i>
+                    Última actualización: {{ fecha_actualizacion|date:"d/m/Y H:i" }}
+                </small>
+            </div>
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="stats-grid">
+            <div class="stat-card critical">
+                <div class="stat-value">{{ total_agotados }}</div>
+                <div class="stat-label">Repuestos Agotados</div>
+                <div class="stat-description">Sin stock disponible</div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-value">{{ total_bajo_minimo }}</div>
+                <div class="stat-label">Bajo Stock Mínimo</div>
+                <div class="stat-description">Por debajo del nivel mínimo</div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-value">{{ total_criticos_bajo }}</div>
+                <div class="stat-label">Críticos con Stock Bajo</div>
+                <div class="stat-description">Activos críticos en riesgo</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">{{ total_cerca_reorden }}</div>
+                <div class="stat-label">Cerca de Reorden</div>
+                <div class="stat-description">Próximos a punto de reorden</div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-value">{{ porcentaje_cumplimiento }}%</div>
+                <div class="stat-label">Cumplimiento Stock</div>
+                <div class="stat-description">Nivel general de inventario</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">${{ valor_total_riesgo|floatformat:0 }}</div>
+                <div class="stat-label">Valor en Riesgo</div>
+                <div class="stat-description">Impacto económico potencial</div>
+            </div>
+        </div>
+
+        <!-- Recomendaciones -->
+        {% if recomendaciones %}
+        <div class="recommendations-section">
+            <h3 class="recommendations-title">
+                <i class="bi bi-lightbulb"></i>
+                Recomendaciones Automáticas
+            </h3>
+            
+            {% for rec in recomendaciones %}
+            <div class="recommendation-item {{ rec.tipo }}">
+                <div class="recommendation-header">
+                    <div class="recommendation-icon">
+                        {% if rec.tipo == 'danger' %}
+                            <i class="bi bi-exclamation-triangle"></i>
+                        {% elif rec.tipo == 'warning' %}
+                            <i class="bi bi-exclamation-circle"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle"></i>
+                        {% endif %}
+                    </div>
+                    <h4 class="recommendation-title">{{ rec.titulo }}</h4>
+                </div>
+                <p class="recommendation-description">{{ rec.descripcion }}</p>
+                <a href="#" class="recommendation-action">
+                    <i class="bi bi-arrow-right"></i>
+                    {{ rec.accion }}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <h3 class="filters-title">
+                <i class="bi bi-funnel"></i>
+                Filtros de Búsqueda
+            </h3>
+            
+            <form method="get" class="filters-form">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Buscar</label>
+                        <input type="text" name="search" value="{{ search }}" 
+                               class="form-control" placeholder="Nombre, código, fabricante...">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Categoría</label>
+                        <select name="categoria" class="form-select">
+                            <option value="">Todas las categorías</option>
+                            {% for categoria in categorias_disponibles %}
+                            <option value="{{ categoria.id }}" {% if categoria.id|stringformat:"s" == categoria_filtro %}selected{% endif %}>
+                                {{ categoria.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Criticidad</label>
+                        <select name="criticidad" class="form-select">
+                            <option value="">Todas las criticidades</option>
+                            {% for key, value in criticidades %}
+                            <option value="{{ key }}" {% if key == criticidad_filtro %}selected{% endif %}>
+                                {{ value }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Proveedor</label>
+                        <select name="proveedor" class="form-select">
+                            <option value="">Todos los proveedores</option>
+                            {% for proveedor in proveedores_disponibles %}
+                            <option value="{{ proveedor.id }}" {% if proveedor.id|stringformat:"s" == proveedor_filtro %}selected{% endif %}>
+                                {{ proveedor.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Filtros Rápidos -->
+                <div class="quick-filters">
+                    <a href="?tipo_alerta=agotado" class="quick-filter-btn {% if tipo_alerta == 'agotado' %}active{% endif %}">
+                        <i class="bi bi-x-circle"></i>
+                        Solo Agotados
+                    </a>
+                    <a href="?tipo_alerta=bajo_minimo" class="quick-filter-btn {% if tipo_alerta == 'bajo_minimo' %}active{% endif %}">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        Bajo Mínimo
+                    </a>
+                    <a href="?tipo_alerta=criticos" class="quick-filter-btn {% if tipo_alerta == 'criticos' %}active{% endif %}">
+                        <i class="bi bi-exclamation-diamond"></i>
+                        Solo Críticos
+                    </a>
+                    <a href="?tipo_alerta=cerca_reorden" class="quick-filter-btn {% if tipo_alerta == 'cerca_reorden' %}active{% endif %}">
+                        <i class="bi bi-arrow-repeat"></i>
+                        Cerca Reorden
+                    </a>
+                    <a href="?" class="quick-filter-btn">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        Limpiar Filtros
+                    </a>
+                </div>
+                
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                        Aplicar Filtros
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de Repuestos Críticos -->
+        <div class="repuestos-table-section">
+            <div class="table-header">
+                <h3 class="table-title">
+                    <i class="bi bi-table"></i>
+                    Repuestos con Stock Crítico
+                </h3>
+                <p class="table-subtitle">
+                    {{ repuestos_criticos|length }} repuesto(s) encontrado(s) con alertas de inventario
+                </p>
+            </div>
+            
+            {% if repuestos_criticos %}
+            <div class="table-responsive">
+                <table class="repuestos-table">
+                    <thead>
+                        <tr>
+                            <th>Repuesto</th>
+                            <th>Categoría</th>
+                            <th>Stock Actual</th>
+                            <th>Stock Mínimo</th>
+                            <th>Nivel de Alerta</th>
+                            <th>Problemas</th>
+                            <th>Días Stock</th>
+                            <th>Proveedor</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in repuestos_criticos %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>{{ item.repuesto.nombre }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ item.repuesto.codigo }}</small>
+                                    {% if item.repuesto.es_activo_critico %}
+                                        <span class="badge bg-danger ms-1">CRÍTICO</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ item.repuesto.categoria.codigo }}</span>
+                                <br>
+                                <small>{{ item.repuesto.categoria.nombre }}</small>
+                            </td>
+                            <td>
+                                <div class="stock-progress">
+                                    <div class="stock-progress-bar {{ item.nivel_alerta }}" 
+                                         style="width: {{ item.porcentaje_stock|default:0 }}%"></div>
+                                </div>
+                                <strong>{{ item.repuesto.stock_actual }} {{ item.repuesto.unidad_medida }}</strong>
+                                <div class="stock-info">
+                                    {{ item.porcentaje_stock|floatformat:1 }}% del mínimo
+                                </div>
+                            </td>
+                            <td>
+                                <strong>{{ item.repuesto.stock_minimo }} {{ item.repuesto.unidad_medida }}</strong>
+                                {% if item.repuesto.punto_reorden %}
+                                    <br><small class="text-muted">Reorden: {{ item.repuesto.punto_reorden }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="alert-badge {{ item.nivel_alerta }}">
+                                    {% if item.nivel_alerta == 'critico' %}
+                                        CRÍTICO
+                                    {% elif item.nivel_alerta == 'alto' %}
+                                        ALTO
+                                    {% elif item.nivel_alerta == 'medio' %}
+                                        MEDIO
+                                    {% else %}
+                                        NORMAL
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="problema-tags">
+                                    {% for problema in item.tipo_problema %}
+                                    <span class="problema-tag {% if 'Sin Stock' in problema or 'Crítico' in problema %}danger{% elif 'Bajo' in problema %}warning{% else %}info{% endif %}">
+                                        {{ problema }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if item.dias_stock > 0 %}
+                                    <strong>{{ item.dias_stock }} días</strong>
+                                {% else %}
+                                    <span class="text-danger"><strong>0 días</strong></span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.repuesto.proveedor_principal %}
+                                    {{ item.repuesto.proveedor_principal.nombre }}
+                                    {% if item.repuesto.tiempo_entrega %}
+                                        <br><small class="text-muted">{{ item.repuesto.tiempo_entrega }} días entrega</small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">Sin proveedor</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'inventario:editar-repuesto' item.repuesto.pk %}" 
+                                       class="btn-sm btn-primary">
+                                        <i class="bi bi-pencil"></i>
+                                        Editar
+                                    </a>
+                                    {% if item.nivel_alerta in 'critico,alto' %}
+                                    <a href="#" class="btn-sm btn-warning">
+                                        <i class="bi bi-cart-plus"></i>
+                                        Comprar
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <h4 class="empty-state-title">¡Excelente! No hay alertas críticas</h4>
+                <p class="empty-state-description">
+                    Todos los repuestos están dentro de los niveles de stock recomendados.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Actualizar automáticamente las barras de progreso
+    const progressBars = document.querySelectorAll('.stock-progress-bar');
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 300);
+    });
+    
+    // Efecto hover en las filas de la tabla
+    const tableRows = document.querySelectorAll('.repuestos-table tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+    
+    // Auto-submit del formulario de filtros cuando cambian los selects
+    const selectFilters = document.querySelectorAll('.filters-section select');
+    selectFilters.forEach(select => {
+        select.addEventListener('change', function() {
+            // Solo auto-submit si no es el campo de búsqueda
+            if (this.name !== 'search') {
+                this.form.submit();
+            }
+        });
+    });
+    
+    // Animación de entrada para las cards de estadísticas
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Tooltip para elementos con información adicional
+    const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    if (tooltipElements.length > 0 && typeof bootstrap !== 'undefined') {
+        tooltipElements.forEach(element => {
+            new bootstrap.Tooltip(element);
+        });
+    }
+    
+    console.log('Stock Crítico Dashboard cargado correctamente');
+});
+</script>
+{% endblock %}

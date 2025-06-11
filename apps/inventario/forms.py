@@ -1,5 +1,5 @@
 from django import forms
-from .models import Repuesto, CategoriaRepuesto, Proveedor
+from .models import Repuesto, CategoriaRepuesto, Proveedor, MovimientoStock
 from apps.equipos.models import Equipo
 from django.contrib.auth.models import User
 
@@ -422,3 +422,148 @@ class ProveedorForm(forms.ModelForm):
                 'class': 'form-check-input'
             }),
         }
+
+class MovimientoStockForm(forms.ModelForm):
+    class Meta:
+        model = MovimientoStock
+        exclude = [
+            'numero_movimiento', 'stock_anterior', 'stock_nuevo', 'fecha_procesamiento',
+            'aprobado_por', 'fecha_aprobacion', 'fecha_creacion', 'fecha_actualizacion', 'activo'
+        ]
+        
+        widgets = {
+            'repuesto': forms.Select(attrs={
+                'class': 'form-select',
+                'required': True
+            }),
+            'tipo_movimiento': forms.Select(attrs={
+                'class': 'form-select',
+                'required': True
+            }),
+            'motivo': forms.Select(attrs={
+                'class': 'form-select',
+                'required': True
+            }),
+            'motivo_detalle': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Detalles adicionales del motivo (opcional)'
+            }),
+            'cantidad': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0.01',
+                'step': '0.01',
+                'placeholder': 'Cantidad del movimiento',
+                'required': True
+            }),
+            'costo_unitario': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '0.01',
+                'placeholder': 'Costo unitario (opcional)'
+            }),
+            'usuario': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'fecha_movimiento': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'documento_referencia': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Documento de referencia (opcional)'
+            }),
+            'numero_factura': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Número de factura (opcional)'
+            }),
+            'numero_orden': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Número de orden (opcional)'
+            }),
+            'ubicacion_origen': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ubicación de origen'
+            }),
+            'ubicacion_destino': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ubicación de destino'
+            }),
+            'proveedor': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'estado': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'requiere_aprobacion': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'observaciones': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Observaciones generales'
+            }),
+            'notas_internas': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Notas internas (opcional)'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Configurar opciones
+        self.fields['repuesto'].queryset = Repuesto.objects.filter(activo=True).order_by('nombre')
+        self.fields['repuesto'].empty_label = "Seleccionar repuesto..."
+        
+        self.fields['proveedor'].queryset = Proveedor.objects.filter(activo=True).order_by('nombre')
+        self.fields['proveedor'].empty_label = "Seleccionar proveedor (opcional)..."
+        
+        self.fields['usuario'].queryset = User.objects.filter(is_active=True).order_by('first_name', 'last_name')
+        self.fields['usuario'].empty_label = "Seleccionar responsable..."
+        
+        # Campos obligatorios
+        self.fields['repuesto'].required = True
+        self.fields['tipo_movimiento'].required = True
+        self.fields['motivo'].required = True
+        self.fields['cantidad'].required = True
+        self.fields['usuario'].required = True
+        
+        # Valor por defecto para fecha
+        if not self.instance.pk:
+            self.fields['fecha_movimiento'].initial = timezone.now().strftime('%Y-%m-%dT%H:%M')
+    
+    def clean_cantidad(self):
+        cantidad = self.cleaned_data.get('cantidad')
+        if cantidad is None or cantidad <= 0:
+            raise forms.ValidationError('La cantidad debe ser mayor a 0.')
+        return cantidad
+    
+    def clean_costo_unitario(self):
+        costo = self.cleaned_data.get('costo_unitario')
+        if costo is not None and costo < 0:
+            raise forms.ValidationError('El costo unitario no puede ser negativo.')
+        return costo or 0
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        repuesto = cleaned_data.get('repuesto')
+        tipo_movimiento = cleaned_data.get('tipo_movimiento')
+        cantidad = cleaned_data.get('cantidad')
+        motivo = cleaned_data.get('motivo')
+        
+        # Validar coherencia entre tipo y motivo
+        if tipo_movimiento and motivo:
+            entradas_validas = ['entrada', 'ajuste_positivo', 'transferencia_entrada', 'devolucion']
+            motivos_entrada = ['compra', 'produccion', 'devolucion_cliente', 'conteo_fisico', 'correccion_error', 'transferencia_interna']
+            
+            if tipo_movimiento in entradas_validas and motivo not in motivos_entrada + ['otro']:
+                self.add_error('motivo', 'El motivo seleccionado no es válido para este tipo de movimiento.')
+        
+        # Validar stock disponible para salidas
+        if repuesto and tipo_movimiento in ['salida', 'ajuste_negativo', 'transferencia_salida', 'merma'] and cantidad:
+            if cantidad > repuesto.stock_actual:
+                self.add_error('cantidad', f'No hay stock suficiente. Stock actual: {repuesto.stock_actual} {repuesto.unidad_medida}')
+        
+        return cleaned_data

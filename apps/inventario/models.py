@@ -1,10 +1,10 @@
 from django.db import models
 from django.urls import reverse
-from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from apps.equipos.models import Equipo
 from datetime import date, timedelta
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 class CategoriaRepuesto(models.Model):
     """Categorías para clasificar repuestos según el laboratorio industrial"""
@@ -326,46 +326,197 @@ class Repuesto(models.Model):
         return dict(self.SECCION_TRABAJO_CHOICES).get(self.seccion_trabajo, 'No asignado')
 
 class MovimientoStock(models.Model):
-    """Registro de movimientos de stock"""
+    """Modelo para registrar movimientos de stock de repuestos"""
     
     TIPO_MOVIMIENTO_CHOICES = [
         ('entrada', 'Entrada'),
         ('salida', 'Salida'),
-        ('ajuste', 'Ajuste'),
+        ('ajuste_positivo', 'Ajuste Positivo'),
+        ('ajuste_negativo', 'Ajuste Negativo'),
+        ('transferencia_entrada', 'Transferencia Entrada'),
+        ('transferencia_salida', 'Transferencia Salida'),
         ('devolucion', 'Devolución'),
-        ('transferencia', 'Transferencia'),
-        ('perdida', 'Pérdida'),
-        ('inventario', 'Ajuste por Inventario'),
         ('merma', 'Merma'),
-        ('rechazo_calidad', 'Rechazo por Calidad'),
+        ('inventario_inicial', 'Inventario Inicial'),
     ]
     
-    repuesto = models.ForeignKey(Repuesto, on_delete=models.CASCADE, related_name='movimientos')
-    tipo_movimiento = models.CharField("Tipo de Movimiento", max_length=20, choices=TIPO_MOVIMIENTO_CHOICES)
+    MOTIVO_CHOICES = [
+        ('compra', 'Compra'),
+        ('produccion', 'Producción'),
+        ('devolucion_proveedor', 'Devolución a Proveedor'),
+        ('devolucion_cliente', 'Devolución de Cliente'),
+        ('uso_mantenimiento', 'Uso en Mantenimiento'),
+        ('uso_produccion', 'Uso en Producción'),
+        ('venta', 'Venta'),
+        ('regalo', 'Regalo/Donación'),
+        ('perdida', 'Pérdida'),
+        ('robo', 'Robo'),
+        ('vencimiento', 'Vencimiento'),
+        ('dano', 'Daño'),
+        ('conteo_fisico', 'Conteo Físico'),
+        ('correccion_error', 'Corrección de Error'),
+        ('transferencia_interna', 'Transferencia Interna'),
+        ('prestamo', 'Préstamo'),
+        ('otro', 'Otro'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('procesado', 'Procesado'),
+        ('cancelado', 'Cancelado'),
+        ('rechazado', 'Rechazado'),
+    ]
+    
+    # Información básica
+    numero_movimiento = models.CharField("Número de Movimiento", max_length=20, unique=True)
+    repuesto = models.ForeignKey(
+        Repuesto, 
+        on_delete=models.CASCADE, 
+        related_name='movimientos',
+        verbose_name="Repuesto"
+    )
+    
+    # Tipo y motivo del movimiento
+    tipo_movimiento = models.CharField("Tipo de Movimiento", max_length=25, choices=TIPO_MOVIMIENTO_CHOICES)
+    motivo = models.CharField("Motivo", max_length=25, choices=MOTIVO_CHOICES)
+    motivo_detalle = models.TextField("Detalle del Motivo", blank=True, null=True)
+    
+    # Cantidades
     cantidad = models.DecimalField("Cantidad", max_digits=10, decimal_places=2)
     stock_anterior = models.DecimalField("Stock Anterior", max_digits=10, decimal_places=2)
     stock_nuevo = models.DecimalField("Stock Nuevo", max_digits=10, decimal_places=2)
     
-    motivo = models.CharField("Motivo", max_length=200)
-    observaciones = models.TextField("Observaciones", blank=True)
+    # Costos
+    costo_unitario = models.DecimalField("Costo Unitario", max_digits=12, decimal_places=2, default=0)
+    costo_total = models.DecimalField("Costo Total", max_digits=15, decimal_places=2, default=0)
     
-    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    # Responsables y fechas
+    usuario = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='movimientos_inventario',
+        verbose_name="Usuario Responsable"
+    )
     fecha_movimiento = models.DateTimeField("Fecha del Movimiento", default=timezone.now)
+    fecha_procesamiento = models.DateTimeField("Fecha de Procesamiento", null=True, blank=True)
     
-    # Referencias externas
-    orden_trabajo = models.CharField("Orden de Trabajo", max_length=50, blank=True)
-    numero_lote = models.CharField("Número de Lote", max_length=50, blank=True)
-    proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True)
+    # Documentos relacionados
+    documento_referencia = models.CharField("Documento de Referencia", max_length=100, blank=True, null=True)
+    numero_factura = models.CharField("Número de Factura", max_length=50, blank=True, null=True)
+    numero_orden = models.CharField("Número de Orden", max_length=50, blank=True, null=True)
     
-    # Información adicional
-    costo_unitario = models.DecimalField("Costo Unitario del Movimiento", max_digits=12, decimal_places=2, blank=True, null=True)
-    responsable_movimiento = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
-                                             related_name='movimientos_responsable')
+    # Ubicación
+    ubicacion_origen = models.CharField("Ubicación Origen", max_length=100, blank=True, null=True)
+    ubicacion_destino = models.CharField("Ubicación Destino", max_length=100, blank=True, null=True)
+    
+    # Proveedor (para entradas)
+    proveedor = models.ForeignKey(
+        Proveedor, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        verbose_name="Proveedor"
+    )
+    
+    # Control y seguimiento
+    estado = models.CharField("Estado", max_length=15, choices=ESTADO_CHOICES, default='procesado')
+    requiere_aprobacion = models.BooleanField("Requiere Aprobación", default=False)
+    aprobado_por = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='movimientos_aprobados',
+        verbose_name="Aprobado Por"
+    )
+    fecha_aprobacion = models.DateTimeField("Fecha de Aprobación", null=True, blank=True)
+    
+    # Observaciones
+    observaciones = models.TextField("Observaciones", blank=True, null=True)
+    notas_internas = models.TextField("Notas Internas", blank=True, null=True)
+    
+    # Metadatos
+    fecha_creacion = models.DateTimeField("Fecha de Creación", auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField("Última Actualización", auto_now=True)
+    activo = models.BooleanField("Activo", default=True)
     
     class Meta:
         verbose_name = "Movimiento de Stock"
         verbose_name_plural = "Movimientos de Stock"
-        ordering = ['-fecha_movimiento']
+        ordering = ['-fecha_movimiento', '-fecha_creacion']
+        indexes = [
+            models.Index(fields=['repuesto', 'tipo_movimiento']),
+            models.Index(fields=['fecha_movimiento']),
+            models.Index(fields=['usuario']),
+            models.Index(fields=['estado']),
+        ]
     
     def __str__(self):
-        return f"{self.repuesto.codigo} - {self.tipo_movimiento} - {self.cantidad}"
+        return f"{self.numero_movimiento} - {self.repuesto.nombre} ({self.get_tipo_movimiento_display()})"
+    
+    def save(self, *args, **kwargs):
+        # Generar número de movimiento automático
+        if not self.numero_movimiento:
+            ultimo_numero = MovimientoStock.objects.filter(
+                numero_movimiento__startswith='MOV'
+            ).order_by('numero_movimiento').last()
+            
+            if ultimo_numero:
+                numero = int(ultimo_numero.numero_movimiento[3:]) + 1
+            else:
+                numero = 1
+            
+            self.numero_movimiento = f"MOV{numero:06d}"
+        
+        # Calcular costo total
+        if self.cantidad and self.costo_unitario:
+            self.costo_total = self.cantidad * self.costo_unitario
+        
+        # Si no tiene fecha de procesamiento y está procesado, asignarla
+        if self.estado == 'procesado' and not self.fecha_procesamiento:
+            self.fecha_procesamiento = timezone.now()
+        
+        super().save(*args, **kwargs)
+    
+    def get_tipo_display_color(self):
+        """Retorna el color para mostrar el tipo de movimiento"""
+        colores = {
+            'entrada': 'success',
+            'salida': 'danger',
+            'ajuste_positivo': 'info',
+            'ajuste_negativo': 'warning',
+            'transferencia_entrada': 'primary',
+            'transferencia_salida': 'primary',
+            'devolucion': 'secondary',
+            'merma': 'dark',
+            'inventario_inicial': 'light',
+        }
+        return colores.get(self.tipo_movimiento, 'secondary')
+    
+    def get_estado_display_color(self):
+        """Retorna el color para mostrar el estado"""
+        colores = {
+            'pendiente': 'warning',
+            'procesado': 'success',
+            'cancelado': 'secondary',
+            'rechazado': 'danger',
+        }
+        return colores.get(self.estado, 'secondary')
+    
+    def is_entrada(self):
+        """Verifica si es un movimiento de entrada"""
+        return self.tipo_movimiento in ['entrada', 'ajuste_positivo', 'transferencia_entrada', 'devolucion']
+    
+    def is_salida(self):
+        """Verifica si es un movimiento de salida"""
+        return self.tipo_movimiento in ['salida', 'ajuste_negativo', 'transferencia_salida', 'merma']
+    
+    def get_impacto_stock(self):
+        """Calcula el impacto en el stock (positivo o negativo)"""
+        if self.is_entrada():
+            return self.cantidad
+        elif self.is_salida():
+            return -self.cantidad
+        else:
+            return 0

@@ -1,0 +1,921 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* IMPORTANTE: Encapsular todos los estilos dentro de .crear-movimiento-page para evitar afectar el sidebar */
+    .crear-movimiento-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .crear-movimiento-page .form-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .crear-movimiento-page .form-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .crear-movimiento-page .form-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .crear-movimiento-page .form-container {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .crear-movimiento-page .form-section {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .crear-movimiento-page .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .crear-movimiento-page .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .crear-movimiento-page .section-title i {
+        color: var(--primary-blue);
+        font-size: 1.5rem;
+    }
+
+    .crear-movimiento-page .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .crear-movimiento-page .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .crear-movimiento-page .form-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .crear-movimiento-page .form-label.required::after {
+        content: "*";
+        color: var(--danger-red);
+        font-weight: 700;
+    }
+
+    .crear-movimiento-page .form-control,
+    .crear-movimiento-page .form-select {
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        background: var(--pure-white);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        color: var(--text-dark);
+    }
+
+    .crear-movimiento-page .form-control:focus,
+    .crear-movimiento-page .form-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        background: var(--light-blue);
+    }
+
+    .crear-movimiento-page .form-help {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+        font-style: italic;
+    }
+
+    .crear-movimiento-page .repuesto-info {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+        border-left: 4px solid var(--primary-blue);
+        display: none;
+    }
+
+    .crear-movimiento-page .repuesto-info.show {
+        display: block;
+    }
+
+    .crear-movimiento-page .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .crear-movimiento-page .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .crear-movimiento-page .info-label {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .crear-movimiento-page .info-value {
+        font-size: 0.875rem;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .crear-movimiento-page .stock-warning {
+        background: linear-gradient(135deg, #fef3c7, #fbbf24);
+        color: var(--text-dark);
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: none;
+    }
+
+    .crear-movimiento-page .stock-warning.show {
+        display: block;
+    }
+
+    .crear-movimiento-page .calculation-panel {
+        background: var(--light-blue);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .crear-movimiento-page .calc-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .crear-movimiento-page .calc-row:last-child {
+        margin-bottom: 0;
+        border-top: 2px solid var(--border-color);
+        padding-top: 0.75rem;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .crear-movimiento-page .calc-label {
+        color: var(--text-light);
+    }
+
+    .crear-movimiento-page .calc-value {
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .crear-movimiento-page .form-actions {
+        background: var(--off-white);
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .crear-movimiento-page .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .crear-movimiento-page .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: var(--pure-white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .crear-movimiento-page .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: var(--pure-white);
+    }
+
+    .crear-movimiento-page .btn-secondary {
+        background: var(--border-color);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .crear-movimiento-page .btn-secondary:hover {
+        background: var(--text-light);
+        color: var(--pure-white);
+        transform: translateY(-1px);
+    }
+
+    .crear-movimiento-page .alert {
+        border: none;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .crear-movimiento-page .alert-danger {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: var(--danger-red);
+        border-left: 4px solid var(--danger-red);
+    }
+
+    .crear-movimiento-page .alert-warning {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+        border-left: 4px solid var(--warning-orange);
+    }
+
+    .crear-movimiento-page .tipo-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .crear-movimiento-page .tipo-badge.entrada {
+        background: var(--success-green);
+        color: var(--pure-white);
+    }
+
+    .crear-movimiento-page .tipo-badge.salida {
+        background: var(--danger-red);
+        color: var(--pure-white);
+    }
+
+    .crear-movimiento-page .tipo-badge.ajuste {
+        background: var(--warning-orange);
+        color: var(--pure-white);
+    }
+
+    .crear-movimiento-page .tipo-badge.transferencia {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+    }
+
+    /* Estilos para el modal de confirmación */
+    .crear-movimiento-page .modal-content {
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-xl);
+        border: none;
+    }
+    
+    .crear-movimiento-page .modal-header {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+        border-bottom: none;
+    }
+    
+    .crear-movimiento-page .modal-title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .crear-movimiento-page .btn-close {
+        filter: invert(1);
+    }
+    
+    .crear-movimiento-page .modal-body {
+        padding: 2rem;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    
+    .crear-movimiento-page .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--border-color);
+        border-radius: 0 0 0.75rem 0.75rem;
+    }
+    
+    .crear-movimiento-page .confirmation-details {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+    
+    .crear-movimiento-page .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .crear-movimiento-page .detail-row:last-child {
+        margin-bottom: 0;
+    }
+    
+    .crear-movimiento-page .detail-label {
+        font-weight: 500;
+        color: var(--text-light);
+    }
+    
+    .crear-movimiento-page .detail-value {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .crear-movimiento-page .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .crear-movimiento-page .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .crear-movimiento-page .btn {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .crear-movimiento-page .form-header {
+            padding: 1.5rem;
+        }
+        
+        .crear-movimiento-page .form-section {
+            padding: 1.5rem;
+        }
+        
+        .crear-movimiento-page .form-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- IMPORTANTE: Envolver todo el contenido en .crear-movimiento-page -->
+<div class="crear-movimiento-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="form-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="form-title">
+                        <i class="bi bi-plus-square"></i>
+                        {{ titulo }}
+                    </h1>
+                    <p class="form-subtitle">
+                        Registrar nuevo movimiento de inventario
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'inventario:movimientos' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Volver a Movimientos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <form method="post" class="movimiento-form" id="movimiento-form">
+            {% csrf_token %}
+            
+            <div class="form-container">
+                <!-- Sección 1: Información Básica -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-info-circle"></i>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">Repuesto</label>
+                            <select name="repuesto" class="form-select" id="repuesto-select" required>
+                                <option value="">Seleccionar repuesto...</option>
+                                {% for repuesto in repuestos %}
+                                <option value="{{ repuesto.id }}" 
+                                        data-stock="{{ repuesto.stock_actual }}"
+                                        data-codigo="{{ repuesto.codigo }}"
+                                        data-unidad="{{ repuesto.unidad_medida }}"
+                                        data-precio="{{ repuesto.precio_unitario }}"
+                                        data-stock-minimo="{{ repuesto.stock_minimo }}"
+                                        data-punto-reorden="{{ repuesto.punto_reorden }}">
+                                    {{ repuesto.codigo }} - {{ repuesto.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-help">Seleccione el repuesto para el movimiento</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label required">Tipo de Movimiento</label>
+                            <select name="tipo_movimiento" class="form-select" id="tipo-movimiento" required>
+                                <option value="">Seleccionar tipo...</option>
+                                {% for key, value in tipos_movimiento %}
+                                <option value="{{ key }}" data-tipo="{% if key == 'entrada' or key == 'ajuste_positivo' or key == 'transferencia_entrada' or key == 'devolucion' %}entrada{% elif key == 'salida' or key == 'ajuste_negativo' or key == 'transferencia_salida' or key == 'merma' %}salida{% else %}otro{% endif %}">
+                                    {{ value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-help">Tipo de movimiento a realizar</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">Motivo</label>
+                            <select name="motivo" class="form-select" required>
+                                <option value="">Seleccionar motivo...</option>
+                                {% for key, value in motivos %}
+                                <option value="{{ key }}">{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-help">Motivo del movimiento</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Documento de Referencia</label>
+                            <input type="text" name="documento_referencia" class="form-control" 
+                                   placeholder="Ej: FAC-2025-001, OT-2025-100">
+                            <div class="form-help">Factura, orden de trabajo, etc. (opcional)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información del repuesto seleccionado -->
+                    <div class="repuesto-info" id="repuesto-info">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary-blue); font-size: 1rem;">
+                            <i class="bi bi-gear"></i>
+                            Información del Repuesto
+                        </h4>
+                        <div class="info-item">
+                            <span class="info-label">Stock Actual:</span>
+                            <span class="info-value" id="stock-actual">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Unidad de Medida:</span>
+                            <span class="info-value" id="unidad-medida">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Stock Mínimo:</span>
+                            <span class="info-value" id="stock-minimo">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Punto de Reorden:</span>
+                            <span class="info-value" id="punto-reorden">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Precio Unitario:</span>
+                            <span class="info-value" id="precio-unitario">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 2: Cantidad y Costos -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-calculator"></i>
+                        Cantidad y Costos
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">Cantidad</label>
+                            <input type="number" name="cantidad" class="form-control" id="cantidad" 
+                                   step="0.01" min="0.01" required placeholder="0.00">
+                            <div class="form-help">Cantidad del movimiento</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Costo Unitario</label>
+                            <input type="number" name="costo_unitario" class="form-control" id="costo-unitario" 
+                                   step="0.01" min="0" placeholder="0.00">
+                            <div class="form-help">Costo por unidad (opcional)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Panel de cálculos -->
+                    <div class="calculation-panel" id="calculation-panel" style="display: none;">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary-blue); font-size: 1rem;">
+                            <i class="bi bi-calculator-fill"></i>
+                            Cálculos Automáticos
+                        </h4>
+                        <div class="calc-row">
+                            <span class="calc-label">Stock Anterior:</span>
+                            <span class="calc-value" id="calc-stock-anterior">-</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Movimiento:</span>
+                            <span class="calc-value" id="calc-movimiento">-</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Stock Nuevo:</span>
+                            <span class="calc-value" id="calc-stock-nuevo">-</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Costo Total:</span>
+                            <span class="calc-value" id="calc-costo-total">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Alerta de stock -->
+                    <div class="stock-warning" id="stock-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Advertencia:</strong> <span id="warning-message"></span>
+                    </div>
+                </div>
+
+                <!-- Sección 3: Detalles Adicionales -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-file-text"></i>
+                        Detalles Adicionales
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Proveedor</label>
+                            <select name="proveedor" class="form-select" id="proveedor-select">
+                                <option value="">Seleccionar proveedor (opcional)...</option>
+                                {% for proveedor in proveedores %}
+                                <option value="{{ proveedor.id }}">{{ proveedor.codigo }} - {{ proveedor.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-help">Solo para movimientos de entrada</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Ubicación Destino</label>
+                            <input type="text" name="ubicacion_destino" class="form-control" 
+                                   placeholder="Ej: Almacén Principal, Taller de Soldadura">
+                            <div class="form-help">Ubicación donde se dirige el repuesto</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label">Detalle del Motivo</label>
+                            <textarea name="motivo_detalle" class="form-control" rows="3" 
+                                      placeholder="Descripción adicional del movimiento..."></textarea>
+                            <div class="form-help">Información adicional sobre el movimiento</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones del formulario -->
+                <div class="form-actions">
+                    <div>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i>
+                            Los campos marcados con * son obligatorios
+                        </small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'inventario:movimientos' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i>
+                            Cancelar
+                        </a>
+                        <button type="button" class="btn btn-primary" id="submit-btn" onclick="showConfirmationModal()">
+                            <i class="bi bi-check-lg"></i>
+                            Crear Movimiento
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">
+                    <i class="bi bi-check-circle"></i>
+                    Confirmar Movimiento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea registrar este movimiento de inventario?</p>
+                
+                <div class="confirmation-details" id="confirmation-details">
+                    <!-- Los detalles se llenarán con JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="confirm-submit" onclick="submitForm()">
+                    <i class="bi bi-check-lg"></i>
+                    Confirmar Movimiento
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const repuestoSelect = document.getElementById('repuesto-select');
+    const tipoMovimiento = document.getElementById('tipo-movimiento');
+    const cantidadInput = document.getElementById('cantidad');
+    const costoUnitarioInput = document.getElementById('costo-unitario');
+    const proveedorSelect = document.getElementById('proveedor-select');
+    const repuestoInfo = document.getElementById('repuesto-info');
+    const calculationPanel = document.getElementById('calculation-panel');
+    const stockWarning = document.getElementById('stock-warning');
+    const submitBtn = document.getElementById('submit-btn');
+
+    let repuestoData = null;
+
+    // Cuando se selecciona un repuesto
+    repuestoSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            repuestoData = {
+                stock: parseFloat(selectedOption.dataset.stock),
+                codigo: selectedOption.dataset.codigo,
+                unidad: selectedOption.dataset.unidad,
+                precio: parseFloat(selectedOption.dataset.precio),
+                stockMinimo: parseFloat(selectedOption.dataset.stockMinimo),
+                puntoReorden: parseFloat(selectedOption.dataset.puntoReorden)
+            };
+            
+            // Mostrar información del repuesto
+            document.getElementById('stock-actual').textContent = `${repuestoData.stock} ${repuestoData.unidad}`;
+            document.getElementById('unidad-medida').textContent = repuestoData.unidad;
+            document.getElementById('stock-minimo').textContent = `${repuestoData.stockMinimo} ${repuestoData.unidad}`;
+            document.getElementById('punto-reorden').textContent = `${repuestoData.puntoReorden} ${repuestoData.unidad}`;
+            document.getElementById('precio-unitario').textContent = `$${repuestoData.precio.toFixed(2)}`;
+            
+            repuestoInfo.classList.add('show');
+            
+            // Autocompletar precio si está disponible
+            if (repuestoData.precio > 0) {
+                costoUnitarioInput.value = repuestoData.precio.toFixed(2);
+            }
+            
+            calcularMovimiento();
+        } else {
+            repuestoInfo.classList.remove('show');
+            calculationPanel.style.display = 'none';
+            stockWarning.classList.remove('show');
+            repuestoData = null;
+        }
+    });
+
+    // Cuando cambia el tipo de movimiento
+    tipoMovimiento.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const tipo = selectedOption.dataset.tipo;
+        
+        // Mostrar/ocultar proveedor según el tipo
+        if (tipo === 'entrada') {
+            proveedorSelect.parentElement.style.display = 'block';
+        } else {
+            proveedorSelect.parentElement.style.display = 'none';
+            proveedorSelect.value = '';
+        }
+        
+        // Actualizar el botón según el tipo
+        if (tipo === 'entrada') {
+            submitBtn.innerHTML = '<i class="bi bi-arrow-down-circle"></i> Registrar Entrada';
+            submitBtn.className = 'btn btn-primary';
+        } else if (tipo === 'salida') {
+            submitBtn.innerHTML = '<i class="bi bi-arrow-up-circle"></i> Registrar Salida';
+            submitBtn.className = 'btn btn-primary';
+        } else {
+            submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Crear Movimiento';
+            submitBtn.className = 'btn btn-primary';
+        }
+        
+        calcularMovimiento();
+    });
+
+    // Cuando cambia la cantidad o costo
+    cantidadInput.addEventListener('input', calcularMovimiento);
+    costoUnitarioInput.addEventListener('input', calcularMovimiento);
+
+    function calcularMovimiento() {
+        if (!repuestoData || !tipoMovimiento.value || !cantidadInput.value) {
+            calculationPanel.style.display = 'none';
+            stockWarning.classList.remove('show');
+            return;
+        }
+
+        const cantidad = parseFloat(cantidadInput.value) || 0;
+        const costoUnitario = parseFloat(costoUnitarioInput.value) || 0;
+        const selectedTipo = tipoMovimiento.options[tipoMovimiento.selectedIndex];
+        const tipoCategoria = selectedTipo.dataset.tipo;
+        
+        let stockNuevo = repuestoData.stock;
+        let movimientoTexto = '';
+        
+        if (tipoCategoria === 'entrada') {
+            stockNuevo = repuestoData.stock + cantidad;
+            movimientoTexto = `+${cantidad} ${repuestoData.unidad}`;
+        } else if (tipoCategoria === 'salida') {
+            stockNuevo = repuestoData.stock - cantidad;
+            movimientoTexto = `-${cantidad} ${repuestoData.unidad}`;
+        }
+        
+        const costoTotal = cantidad * costoUnitario;
+        
+        // Actualizar panel de cálculos
+        document.getElementById('calc-stock-anterior').textContent = `${repuestoData.stock} ${repuestoData.unidad}`;
+        document.getElementById('calc-movimiento').textContent = movimientoTexto;
+        document.getElementById('calc-stock-nuevo').textContent = `${stockNuevo.toFixed(2)} ${repuestoData.unidad}`;
+        document.getElementById('calc-costo-total').textContent = `$${costoTotal.toFixed(2)}`;
+        
+        calculationPanel.style.display = 'block';
+        
+        // Verificar alertas de stock
+        verificarAlertas(stockNuevo, cantidad, tipoCategoria);
+    }
+
+    function verificarAlertas(stockNuevo, cantidad, tipoCategoria) {
+        let alertas = [];
+        
+        // Stock insuficiente para salidas
+        if (tipoCategoria === 'salida' && stockNuevo < 0) {
+            alertas.push(`Stock insuficiente. Stock disponible: ${repuestoData.stock} ${repuestoData.unidad}`);
+        }
+        
+        // Stock por debajo del mínimo
+        if (stockNuevo < repuestoData.stockMinimo) {
+            alertas.push(`El stock resultante estará por debajo del mínimo (${repuestoData.stockMinimo} ${repuestoData.unidad})`);
+        }
+        
+        // Stock por debajo del punto de reorden
+        if (stockNuevo <= repuestoData.puntoReorden && stockNuevo >= repuestoData.stockMinimo) {
+            alertas.push(`El stock resultante activará el punto de reorden (${repuestoData.puntoReorden} ${repuestoData.unidad})`);
+        }
+        
+        // Mostrar alertas
+        if (alertas.length > 0) {
+            document.getElementById('warning-message').innerHTML = alertas.join('<br>');
+            stockWarning.classList.add('show');
+            
+            // Deshabilitar submit si hay stock insuficiente
+            if (tipoCategoria === 'salida' && stockNuevo < 0) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Stock Insuficiente';
+            } else {
+                submitBtn.disabled = false;
+                // Restaurar texto del botón según el tipo
+                if (tipoCategoria === 'entrada') {
+                    submitBtn.innerHTML = '<i class="bi bi-arrow-down-circle"></i> Registrar Entrada';
+                } else if (tipoCategoria === 'salida') {
+                    submitBtn.innerHTML = '<i class="bi bi-arrow-up-circle"></i> Registrar Salida';
+                } else {
+                    submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Crear Movimiento';
+                }
+            }
+        } else {
+            stockWarning.classList.remove('show');
+            submitBtn.disabled = false;
+        }
+    }
+
+    // Función global para mostrar el modal de confirmación
+    window.showConfirmationModal = function() {
+        const repuesto = repuestoSelect.value;
+        const tipo = tipoMovimiento.value;
+        const cantidad = cantidadInput.value;
+        
+        if (!repuesto || !tipo || !cantidad) {
+            // Crear modal de error personalizado
+            const alertModal = new bootstrap.Modal(document.createElement('div'));
+            const modalHTML = `
+                <div class="modal fade" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Campos Incompletos
+                                </h5>
+                            </div>
+                            <div class="modal-body">
+                                <p>Por favor complete todos los campos obligatorios antes de continuar.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            const tempModal = new bootstrap.Modal(document.body.lastElementChild);
+            tempModal.show();
+            return false;
+        }
+        
+        if (parseFloat(cantidad) <= 0) {
+            // Similar modal para cantidad inválida
+            return false;
+        }
+        
+        // Llenar los detalles de confirmación
+        const detailsContainer = document.getElementById('confirmation-details');
+        const repuestoNombre = repuestoSelect.options[repuestoSelect.selectedIndex].text;
+        const tipoNombre = tipoMovimiento.options[tipoMovimiento.selectedIndex].text;
+        const unidad = repuestoData ? repuestoData.unidad : '';
+        
+        detailsContainer.innerHTML = `
+            <div class="detail-row">
+                <span class="detail-label">Repuesto:</span>
+                <span class="detail-value">${repuestoNombre}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Tipo de Movimiento:</span>
+                <span class="detail-value">${tipoNombre}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Cantidad:</span>
+                <span class="detail-value">${cantidad} ${unidad}</span>
+            </div>
+            ${costoUnitarioInput.value ? `
+            <div class="detail-row">
+                <span class="detail-label">Costo Total:</span>
+                <span class="detail-value">$${(parseFloat(cantidad) * parseFloat(costoUnitarioInput.value)).toFixed(2)}</span>
+            </div>
+            ` : ''}
+        `;
+        
+        // Mostrar el modal
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        confirmModal.show();
+    };
+
+    // Función global para enviar el formulario
+    window.submitForm = function() {
+        document.getElementById('movimiento-form').submit();
+    };
+
+    console.log('Crear Movimiento - JavaScript cargado correctamente');
+});
+</script>
+{% endblock %}

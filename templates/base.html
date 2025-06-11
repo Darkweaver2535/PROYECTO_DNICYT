@@ -753,8 +753,6 @@
             letter-spacing: 0.02em;
         }
 
-        ======
-        <style>
         /* Estilos específicos para el dashboard */
         .dashboard-card {
             background: var(--pure-white);
@@ -1026,6 +1024,41 @@
                 font-size: 2rem;
             }
         }
+
+        .nav-counter {
+            animation: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-counter.pulse {
+            animation: counterPulse 0.6s ease-in-out 3;
+        }
+
+        @keyframes counterPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+                background: #dc2626;
+            }
+        }
+
+        .sidebar-stats .stat-value {
+            transition: color 0.3s ease;
+        }
+
+        .sidebar-stats .stat-item:first-child .stat-value {
+            color: var(--danger-red);
+        }
+
+        .sidebar-stats .stat-item:nth-child(2) .stat-value {
+            color: var(--warning-orange);
+        }
+
+        .sidebar-stats .stat-item:nth-child(3) .stat-value {
+            color: var(--primary-blue);
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -1062,37 +1095,6 @@
                 Lab Metal Mecánica
             </h5>
             <p class="sidebar-subtitle">Sistema de Gestión Integral v2.0</p>
-            
-            <!-- Stats Dashboard -->
-            <div class="sidebar-stats">
-                <div class="stat-item flex-grow-1">
-                    <div class="stat-value">42</div>
-                    <div class="stat-label">Equipos</div>
-                </div>
-                <div class="stat-item flex-grow-1">
-                    <div class="stat-value">5</div>
-                    <div class="stat-label">Secciones</div>
-                </div>
-                <div class="stat-item flex-grow-1">
-                    <div class="stat-value">3</div>
-                    <div class="stat-label">Alertas</div>
-                </div>
-            </div>
-
-            <!-- Buscador Sidebar -->
-            <div class="sidebar-search-container mt-4 mb-2">
-                <div class="position-relative">
-                    <i class="bi bi-search sidebar-search-icon"></i>
-                    <input type="text" class="form-control sidebar-search-input" name="q" placeholder="Buscar módulos..." aria-label="Buscar" autocomplete="off">
-                    <button type="button" class="sidebar-search-clear-btn" id="sidebarSearchClear" title="Limpiar búsqueda">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-                <div class="d-flex align-items-center mt-1">
-                    <span class="sidebar-search-count" id="sidebarSearchCount"></span>
-                </div>
-                <div class="sidebar-search-empty" id="sidebarSearchEmpty">No se encontraron resultados.</div>
-            </div>
         </div>
         
         <nav class="sidebar-nav">
@@ -1204,34 +1206,53 @@
                 </div>
             </div>
 
-            <!-- Inventario - SECCIÓN ACTUALIZADA -->
+            <!-- INVENTARIO -->
             <div class="nav-section">
                 <div class="nav-section-title">
-                    <i class="bi bi-boxes"></i>
+                    <i class="bi bi-box-seam"></i>
                     Inventario
                 </div>
+                
                 <div class="nav-item">
-                    <a href="{% url 'inventario:repuestos' %}" 
-                       class="nav-link {% if request.resolver_match.namespace == 'inventario' and 'repuestos' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="nav-icon bi bi-box-seam"></i>
+                    <a href="{% url 'inventario:repuestos' %}" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-gear"></i></span>
                         <span class="nav-text">Repuestos</span>
                     </a>
                 </div>
+                
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-graph-down-arrow"></i>
+                    <a href="{% url 'inventario:stock-critico' %}" class="nav-link" id="stock-critico-link">
+                        <span class="nav-icon"><i class="bi bi-exclamation-triangle"></i></span>
                         <span class="nav-text">Stock Crítico</span>
-                        <span class="nav-counter">2</span>
+                        <span class="nav-counter" id="alertas-counter" style="display: none;">0</span>
                     </a>
                 </div>
+                
+                <!-- HABILITAR MOVIMIENTOS -->
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-cart-plus"></i>
-                        <span class="nav-text">Solicitudes de Compra</span>
+                    <a href="{% url 'inventario:movimientos' %}" class="nav-link">
+                        <span class="nav-icon"><i class="bi bi-arrow-left-right"></i></span>
+                        <span class="nav-text">Movimientos</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="#" class="nav-link disabled">
+                        <span class="nav-icon"><i class="bi bi-truck"></i></span>
+                        <span class="nav-text">Proveedores</span>
+                        <span class="nav-badge soon">Pronto</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="#" class="nav-link disabled">
+                        <span class="nav-icon"><i class="bi bi-bar-chart"></i></span>
+                        <span class="nav-text">Reportes</span>
+                        <span class="nav-badge soon">Pronto</span>
                     </a>
                 </div>
             </div>
-
+            
             <!-- Materiales y Herramientas -->
             <div class="nav-section">
                 <div class="nav-section-title">
@@ -1429,5 +1450,88 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para actualizar alertas del sidebar
+    function actualizarAlertasSidebar() {
+        fetch('/inventario/api/alertas-stock/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const alertas = data.alertas;
+                    
+                    // Actualizar SOLO el contador en Stock Crítico
+                    const stockCriticoLink = document.getElementById('stock-critico-link');
+                    let contador = document.getElementById('alertas-counter');
+                    
+                    if (stockCriticoLink && contador) {
+                        if (alertas.total_alertas_criticas > 0) {
+                            contador.textContent = alertas.total_alertas_criticas;
+                            contador.style.display = 'flex';
+                            
+                            // Agregar animación al contador si hay nuevas alertas
+                            contador.classList.add('pulse');
+                            setTimeout(() => contador.classList.remove('pulse'), 2000);
+                        } else {
+                            contador.style.display = 'none';
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.warn('Error actualizando alertas de stock:', error);
+            });
+    }
+    
+    // Actualizar inmediatamente
+    actualizarAlertasSidebar();
+    
+    // Actualizar cada 2 minutos
+    setInterval(actualizarAlertasSidebar, 120000);
+    
+    // También actualizar cuando se enfoca la ventana
+    window.addEventListener('focus', actualizarAlertasSidebar);
+});
+</script>
+
+<!-- CSS adicional para animaciones -->
+<style>
+.nav-counter {
+    animation: none;
+    transition: all 0.3s ease;
+}
+
+.nav-counter.pulse {
+    animation: counterPulse 0.6s ease-in-out 3;
+}
+
+@keyframes counterPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+        background: #dc2626;
+    }
+}
+
+.sidebar-stats .stat-value {
+    transition: color 0.3s ease;
+}
+
+.sidebar-stats .stat-item:first-child .stat-value {
+    color: var(--danger-red);
+}
+
+.sidebar-stats .stat-item:nth-child(2) .stat-value {
+    color: var(--warning-orange);
+}
+
+.sidebar-stats .stat-item:nth-child(3) .stat-value {
+    color: var(--primary-blue);
+}
+</style>
+
 </body>
 </html>

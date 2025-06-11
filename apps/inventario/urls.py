@@ -14,8 +14,11 @@ urlpatterns = [
     path('editar-repuesto/<int:pk>/', views.editar_repuesto_view, name='editar-repuesto'),
     path('exportar-repuestos/', views.exportar_repuestos_view, name='exportar-repuestos'),
     
-    # URLs futuras
-    # path('movimientos/', views.movimientos_view, name='movimientos'),
-    # path('categorias/', views.categorias_view, name='categorias'),
-    # path('proveedores/', views.proveedores_view, name='proveedores'),
+    # Otras URLs
+    path('stock-critico/', views.stock_critico_view, name='stock-critico'),
+    path('api/alertas-stock/', views.alertas_stock_api, name='alertas-stock-api'),
+    
+    # NUEVAS URLs para Movimientos
+    path('movimientos/', views.movimientos_stock_view, name='movimientos'),
+    path('crear-movimiento/', views.crear_movimiento_view, name='crear-movimiento'),
 ]
