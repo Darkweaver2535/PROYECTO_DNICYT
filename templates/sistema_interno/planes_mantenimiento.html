@@ -673,6 +673,13 @@
         gap: 1rem;
     }
 
+    .badge-tareas {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--plan-info);
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        font-weight: 600;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
         .plan-header {
@@ -734,10 +741,12 @@
                 <p class="mb-0 opacity-75 fs-5">Gestión integral de planes de mantenimiento preventivo, correctivo y predictivo según normativas ISO 55000</p>
             </div>
             <div class="col-md-4 text-md-end">
-                <a href="{% url 'mantenimiento:crear-plan' %}" class="plan-btn plan-btn-success">
-                    <i class="bi bi-plus-circle"></i>
-                    Crear Nuevo Plan
-                </a>
+                <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+                    <a href="{% url 'mantenimiento:crear-plan' %}" class="plan-btn plan-btn-success">
+                        <i class="bi bi-plus-circle"></i>
+                        Crear Nuevo Plan
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -1052,7 +1061,16 @@
                         <span class="plan-badge badge-prioridad-{{ plan.prioridad }}">
                             {{ plan.get_prioridad_display }}
                         </span>
-                        <!-- *** NUEVOS BADGES DE CUMPLIMIENTO NORMATIVO *** -->
+                        
+                        <!-- NUEVO BADGE PARA TAREAS -->
+                        {% if plan.tareas.exists %}
+                            <span class="plan-badge badge-tareas">
+                                <i class="bi bi-list-check me-1"></i>
+                                {{ plan.tareas.count }} tarea{{ plan.tareas.count|pluralize:"s" }}
+                            </span>
+                        {% endif %}
+                        
+                        <!-- Badges de cumplimiento normativo existentes -->
                         {% if plan.cumple_iso %}
                             <span class="plan-badge badge-iso">ISO Compliant</span>
                         {% endif %}
@@ -1135,121 +1153,100 @@
                         <a href="{% url 'mantenimiento:plan-detalle' plan.pk %}" 
                            class="plan-btn plan-btn-secondary">
                             <i class="bi bi-eye"></i>
-                            Ver
+                            Ver Detalle
                         </a>
                         <a href="{% url 'mantenimiento:editar-plan' plan.pk %}" 
                            class="plan-btn plan-btn-warning">
                             <i class="bi bi-pencil"></i>
                             Editar
                         </a>
-                        {% if plan.atrasado or plan.dias_restantes <= 7 %}
-                            <button class="plan-btn plan-btn-success" 
-                                    onclick="ejecutarMantenimiento({{ plan.pk }})">
-                                <i class="bi bi-play-circle"></i>
-                                Ejecutar
-                            </button>
+                        {% if plan.tareas.exists %}
+                            <a href="{% url 'mantenimiento:tareas' %}?plan={{ plan.pk }}" 
+                               class="plan-btn plan-btn-secondary">
+                                <i class="bi bi-list-check"></i>
+                                Tareas ({{ plan.tareas.count }})
+                            </a>
                         {% endif %}
                     </div>
                 </div>
             {% endfor %}
         </div>
-
-        <!-- Paginación -->
-        {% if page_obj.has_other_pages %}
-            <div class="plan-pagination">
-                <nav aria-label="Paginación de planes">
-                    <ul class="pagination">
-                        {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">
-                                    <i class="bi bi-chevron-double-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">
-                                    <i class="bi bi-chevron-left"></i>
-                                </a>
-                            </li>
-                        {% endif %}
-
-                        {% for num in page_obj.paginator.page_range %}
-                            {% if page_obj.number == num %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ num }}</span>
-                                </li>
-                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">{{ num }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">
-                                    <i class="bi bi-chevron-right"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}">
-                                    <i class="bi bi-chevron-double-right"></i>
-                                </a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            </div>
-        {% endif %}
     {% else %}
         <div class="plan-empty-state">
             <i class="bi bi-calendar-x plan-empty-icon"></i>
-            <h3>No hay planes de mantenimiento</h3>
-            <p>No se encontraron planes que coincidan con los filtros aplicados.</p>
-            <a href="{% url 'mantenimiento:crear-plan' %}" class="plan-btn">
+            <h2 class="h4">No hay planes de mantenimiento</h2>
+            <p>Actualmente no existen planes de mantenimiento que coincidan con los criterios de búsqueda.</p>
+            <a href="{% url 'mantenimiento:crear-plan' %}" class="plan-btn plan-btn-success">
                 <i class="bi bi-plus-circle"></i>
-                Crear Primer Plan
+                Crear Nuevo Plan
             </a>
         </div>
     {% endif %}
+
+    <!-- Paginación -->
+    <div class="plan-pagination">
+        {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}{% if normativa_filtro %}&normativa={{ normativa_filtro }}{% endif %}{% if temporal_filtro %}&temporal={{ temporal_filtro }}{% endif %}" tabindex="-1">
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}{% if normativa_filtro %}&normativa={{ normativa_filtro }}{% endif %}{% if temporal_filtro %}&temporal={{ temporal_filtro }}{% endif %}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}{% if normativa_filtro %}&normativa={{ normativa_filtro }}{% endif %}{% if temporal_filtro %}&temporal={{ temporal_filtro }}{% endif %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}{% if normativa_filtro %}&normativa={{ normativa_filtro }}{% endif %}{% if temporal_filtro %}&temporal={{ temporal_filtro }}{% endif %}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if prioridad_filtro %}&prioridad={{ prioridad_filtro }}{% endif %}{% if normativa_filtro %}&normativa={{ normativa_filtro }}{% endif %}{% if temporal_filtro %}&temporal={{ temporal_filtro }}{% endif %}">
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-submit filtros cuando cambian
-    const filterForm = document.querySelector('.plan-filters form');
-    const filterInputs = filterForm.querySelectorAll('select');
-    
-    filterInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            filterForm.submit();
-        });
-    });
-    
-    // Función para ejecutar mantenimiento (placeholder)
-    window.ejecutarMantenimiento = function(planId) {
-        if (confirm('¿Está seguro de que desea ejecutar este mantenimiento?')) {
-            // Aquí iría la lógica para ejecutar el mantenimiento
-            alert('Funcionalidad de ejecución próximamente disponible');
-        }
-    };
-
-    // Función para limpiar búsqueda
-    window.clearSearch = function() {
-        const searchInput = document.querySelector('input[name="search"]');
-        searchInput.value = '';
-        searchInput.focus();
-        filterForm.submit();
+    function clearSearch() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('search');
+        window.location.href = url.toString();
     }
 
-    // Función para togglear filtros avanzados
-    window.toggleAdvancedFilters = function() {
-        const advancedFilters = document.getElementById('advancedFilters');
-        if (advancedFilters.style.display === 'none' || advancedFilters.style.display === '') {
-            advancedFilters.style.display = 'block';
+    function toggleAdvancedFilters() {
+        const container = document.getElementById('advancedFilters');
+        if (container.style.display === 'none' || container.style.display === '') {
+            container.style.display = 'block';
         } else {
-            advancedFilters.style.display = 'none';
+            container.style.display = 'none';
         }
     }
-});
 </script>
-{% endblock %}
+{% endblock content %}

@@ -205,12 +205,21 @@ class PlanMantenimiento(models.Model):
 
     def esta_atrasado(self):
         """Verifica si el mantenimiento está atrasado"""
+        from django.utils import timezone
         from datetime import date
         
         if not self.proxima_ejecucion:
             return False
         
-        return date.today() > self.proxima_ejecucion
+        # Si proxima_ejecucion es un DateField (solo fecha), comparar con date.today()
+        if hasattr(self.proxima_ejecucion, 'date'):
+            # Es un datetime, extraer solo la fecha
+            fecha_proxima = self.proxima_ejecucion.date()
+        else:
+            # Ya es una fecha
+            fecha_proxima = self.proxima_ejecucion
+        
+        return date.today() > fecha_proxima
 
     def dias_hasta_mantenimiento(self):
         """Calcula los días hasta el próximo mantenimiento"""
@@ -219,7 +228,13 @@ class PlanMantenimiento(models.Model):
         if not self.proxima_ejecucion:
             return None
         
-        diferencia = self.proxima_ejecucion - date.today()
+        # Si proxima_ejecucion es un DateTimeField, extraer solo la fecha
+        if hasattr(self.proxima_ejecucion, 'date'):
+            fecha_proxima = self.proxima_ejecucion.date()
+        else:
+            fecha_proxima = self.proxima_ejecucion
+        
+        diferencia = fecha_proxima - date.today()
         return diferencia.days
 
     def get_estado_badge_class(self):
@@ -529,9 +544,19 @@ class OrdenTrabajo(models.Model):
 
     def esta_atrasada(self):
         """Verifica si la orden está atrasada"""
-        from datetime import datetime
+        from django.utils import timezone
+        
         if self.fecha_programada and self.estado not in ['completada', 'cancelada']:
-            return datetime.now() > self.fecha_programada
+            # Usar timezone.now() que es aware y hacer la fecha programada compatible
+            ahora = timezone.now()
+            
+            # Si fecha_programada es naive, convertirla a aware
+            if timezone.is_naive(self.fecha_programada):
+                fecha_programada_aware = timezone.make_aware(self.fecha_programada)
+            else:
+                fecha_programada_aware = self.fecha_programada
+            
+            return ahora > fecha_programada_aware
         return False
 
     def get_estado_badge_class(self):

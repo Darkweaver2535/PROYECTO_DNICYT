@@ -1,4 +1,6 @@
 {% load static %}
+<!-- TEMPORALMENTE COMENTAR ESTA LÍNEA HASTA QUE FUNCIONE TODO -->
+<!-- {% load sidebar_tags %} -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1140,58 +1142,66 @@
                 </div>
             </div>
 
-            <!-- Mantenimiento -->
+            <!-- Sección de Mantenimiento -->
             <div class="nav-section">
                 <div class="nav-section-title">
-                    <i class="bi bi-tools"></i>
+                    <i class="bi bi-tools me-2"></i>
                     Mantenimiento
                 </div>
+                
                 <div class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'inventario_equipos' %}active{% endif %}" 
-                       href="{% url 'mantenimiento:planes-mantenimiento' %}">
-                        <i class="nav-icon bi bi-calendar-check"></i>
+                    <a href="{% url 'mantenimiento:planes-mantenimiento' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'mantenimiento' and 'planes' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-calendar-check nav-icon"></i>
                         <span class="nav-text">Planes de Mantenimiento</span>
-                        <span class="nav-badge beta">Beta</span>
                     </a>
                 </div>
+                
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-wrench"></i>
+                    <a href="{% url 'mantenimiento:ordenes-trabajo' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'mantenimiento' and 'ordenes' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-clipboard-check nav-icon"></i>
                         <span class="nav-text">Órdenes de Trabajo</span>
-                        <span class="nav-counter">5</span>
                     </a>
                 </div>
+                
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-journal-medical"></i>
-                        <span class="nav-text">Historial de Mantenimiento</span>
+                    <a href="{% url 'mantenimiento:analisis-predictivo' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'mantenimiento' and request.resolver_match.url_name == 'analisis-predictivo' %}active{% endif %}">
+                        <i class="bi bi-graph-up-arrow nav-icon"></i>
+                        <span class="nav-text">Análisis Predictivo</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="{% url 'mantenimiento:tareas' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'mantenimiento' and 'tareas' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-list-check nav-icon"></i>
+                        <span class="nav-text">Tareas</span>
                     </a>
                 </div>
             </div>
-
-            <!-- Operaciones -->
+            
+            <!-- Sección de Operaciones -->
             <div class="nav-section">
                 <div class="nav-section-title">
-                    <i class="bi bi-play-circle"></i>
+                    <i class="bi bi-gear-wide-connected me-2"></i>
                     Operaciones
                 </div>
+                
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-file-earmark-text"></i>
-                        <span class="nav-text">Procedimientos (POP)</span>
-                        <span class="nav-badge beta">Beta</span>
+                    <a href="{% url 'operaciones:procedimientos-pop' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'operaciones' and 'procedimientos-pop' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-file-earmark-text nav-icon"></i>
+                        <span class="nav-text">Procedimientos POP</span>
                     </a>
                 </div>
+                
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-exclamation-triangle"></i>
-                        <span class="nav-text">Diagnósticos</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-shield-check"></i>
-                        <span class="nav-text">Seguridad Industrial</span>
+                    <a href="{% url 'operaciones:analisis-riesgos' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'operaciones' and request.resolver_match.url_name == 'analisis-riesgos' %}active{% endif %}">
+                        <i class="bi bi-shield-exclamation nav-icon"></i>
+                        <span class="nav-text">Análisis de Riesgos</span>
                     </a>
                 </div>
             </div>
@@ -1381,196 +1391,44 @@
             </div>
         </nav>
     </aside>
+
     <!-- Main Content -->
     <main class="main-content">
         <div class="content-container">
-            {% block content %}
-            <!-- Aquí va el contenido principal de cada sección -->
-            {% endblock %}
+            <!-- Flash Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show flash-message" role="alert">
+                        <strong>
+                            {% if message.tags == 'success' %}
+                                <i class="bi bi-check-circle"></i>
+                            {% elif message.tags == 'error' %}
+                                <i class="bi bi-x-circle"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i class="bi bi-exclamation-triangle"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle"></i>
+                            {% endif %}
+                        </strong>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block content %}{% endblock %}
         </div>
     </main>
+
     <!-- Footer -->
     <footer class="footer mt-auto">
         <div class="container-fluid text-center">
             <span>&copy; {{ year|default:2025 }} Lab Metal Mecánica - EMI. Todos los derechos reservados.</span>
         </div>
     </footer>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
-    <!-- Botón flotante de retroceso -->
-    {% if request.resolver_match.url_name != 'dashboard' %}
-    <a href="javascript:history.back()" 
-       class="btn btn-warning btn-fab-back"
-       title="Volver atrás">
-        <i class="bi bi-arrow-left"></i>
-    </a>
-    {% endif %}
-    <!-- Enviar búsqueda al presionar Enter -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const input = document.querySelector('.sidebar-search-input');
-            const form = document.getElementById('sidebarSearchForm');
-            if(input && form) {
-                input.addEventListener('keydown', function(e) {
-                    if(e.key === 'Enter') {
-                        e.preventDefault();
-                        form.innerHTML = '';
-                        const hidden = document.createElement('input');
-                        hidden.type = 'hidden';
-                        hidden.name = 'q';
-                        hidden.value = input.value;
-                        form.appendChild(hidden);
-                        form.submit();
-                    }
-                });
-            }
-        });
-    </script>
-    <!-- Sidebar live filter -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarInput = document.querySelector('.sidebar-search-input');
-            const navLinks = document.querySelectorAll('.sidebar-nav .nav-link:not(.disabled)');
-            const navSections = document.querySelectorAll('.sidebar-nav .nav-section');
-
-            sidebarInput.addEventListener('input', function() {
-                const term = this.value.trim().toLowerCase();
-
-                navLinks.forEach(link => {
-                    const text = link.textContent.trim().toLowerCase();
-                    if (!term || text.includes(term)) {
-                        link.parentElement.style.display = '';
-                    } else {
-                        link.parentElement.style.display = 'none';
-                    }
-                });
-
-                // Oculta secciones sin resultados visibles
-                navSections.forEach(section => {
-                    const visible = section.querySelectorAll('.nav-item:not([style*="display: none"])').length;
-                    section.style.display = visible ? '' : 'none';
-                });
-            });
-        });
-    </script>
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Cache de elementos y textos
-    const sidebarInput = document.querySelector('.sidebar-search-input');
-    const navSections = Array.from(document.querySelectorAll('.sidebar-nav .nav-section'));
-    const navItems = Array.from(document.querySelectorAll('.sidebar-nav .nav-item'));
-    const clearBtn = document.getElementById('sidebarSearchClear');
-    const resultCount = document.getElementById('sidebarSearchCount');
-    const emptyMsg = document.getElementById('sidebarSearchEmpty');
-
-    // Función para normalizar texto (quita tildes y pasa a minúsculas)
-    function normalize(str) {
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    }
-
-    // Preprocesa textos buscables
-    navItems.forEach(item => {
-        const link = item.querySelector('.nav-link');
-        const badge = item.querySelector('.nav-badge');
-        const section = item.closest('.nav-section');
-        const sectionTitle = section ? section.querySelector('.nav-section-title') : null;
-        let text = '';
-        if (link) text += link.textContent + ' ';
-        if (badge) text += badge.textContent + ' ';
-        if (sectionTitle) text += sectionTitle.textContent + ' ';
-        item.dataset.search = normalize(text.trim());
-    });
-
-    // Debounce
-    let debounceTimer;
-    function debounce(fn, delay) {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(fn, delay);
-    }
-
-    // Highlight coincidencias (resalta aunque no haya tildes)
-    function highlight(text, term) {
-        if (!term) return text;
-        // Normaliza ambos para encontrar coincidencias sin tildes
-        const normText = normalize(text);
-        const normTerm = normalize(term);
-        let result = '';
-        let i = 0;
-        while (i < text.length) {
-            let found = false;
-            for (let j = text.length; j > i; j--) {
-                if (normalize(text.slice(i, j)).startsWith(normTerm)) {
-                    result += `<mark class="sidebar-search-highlight">${text.slice(i, j)}</mark>`;
-                    i = j;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                result += text[i];
-                i++;
-            }
-        }
-        return result;
-    }
-
-    // Filtrado principal
-    function filterSidebar() {
-        const term = normalize(sidebarInput.value.trim());
-        let matches = 0;
-
-        navItems.forEach(item => {
-            const search = item.dataset.search;
-            const link = item.querySelector('.nav-link .nav-text');
-            if (!term || search.includes(term)) {
-                item.style.display = '';
-                // Highlight
-                if (link) link.innerHTML = highlight(link.textContent, sidebarInput.value.trim());
-                matches++;
-            } else {
-                item.style.display = 'none';
-                if (link) link.innerHTML = link.textContent; // limpia highlight
-            }
-        });
-
-        // Oculta secciones vacías
-        navSections.forEach(section => {
-            const visible = section.querySelectorAll('.nav-item:not([style*="display: none"])').length;
-            section.style.display = visible ? '' : 'none';
-        });
-
-        // Contador y estado vacío
-        if (resultCount) resultCount.textContent = matches;
-        if (emptyMsg) emptyMsg.style.display = matches ? 'none' : '';
-    }
-
-    // Eventos
-    sidebarInput.addEventListener('input', function() {
-        debounce(filterSidebar, 120);
-        if (clearBtn) clearBtn.style.display = this.value ? '' : 'none';
-    });
-
-    sidebarInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            sidebarInput.value = '';
-            filterSidebar();
-            if (clearBtn) clearBtn.style.display = 'none';
-        }
-    });
-
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            sidebarInput.value = '';
-            filterSidebar();
-            clearBtn.style.display = 'none';
-            sidebarInput.focus();
-        });
-    }
-
-    // Inicializa
-    filterSidebar();
-});
-</script>
 </body>
 </html>

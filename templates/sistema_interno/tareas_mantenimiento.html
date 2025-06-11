@@ -7,8 +7,58 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <h2>Tareas de Mantenimiento</h2>
-            <p class="text-muted">Gestión de tareas de mantenimiento por plan</p>
+            <!-- Header mejorado -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i class="bi bi-list-check me-2"></i>
+                        Tareas de Mantenimiento
+                        {% if plan_seleccionado %}
+                            <small class="text-muted">- {{ plan_seleccionado.codigo_plan }}</small>
+                        {% endif %}
+                    </h2>
+                    <p class="text-muted mb-0">
+                        {% if plan_seleccionado %}
+                            Tareas del plan: {{ plan_seleccionado.nombre }}
+                        {% else %}
+                            Gestión de tareas de mantenimiento por plan
+                        {% endif %}
+                        • Total: {{ total_tareas }} tarea{{ total_tareas|pluralize:"s" }}
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    {% if plan_seleccionado %}
+                        <a href="{% url 'mantenimiento:plan-detalle' plan_seleccionado.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Volver al Plan
+                        </a>
+                        <a href="{% url 'mantenimiento:crear-tarea' plan_seleccionado.pk %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Nueva Tarea
+                        </a>
+                    {% else %}
+                        <a href="{% url 'mantenimiento:planes-mantenimiento' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-calendar-check me-2"></i>
+                            Ver Planes
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Breadcrumb si viene de un plan específico -->
+            {% if plan_seleccionado %}
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'mantenimiento:planes-mantenimiento' %}">Planes de Mantenimiento</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'mantenimiento:plan-detalle' plan_seleccionado.pk %}">{{ plan_seleccionado.codigo_plan }}</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Tareas</li>
+                    </ol>
+                </nav>
+            {% endif %}
         </div>
     </div>
     

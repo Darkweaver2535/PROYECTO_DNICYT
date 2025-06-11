@@ -16,6 +16,7 @@ from django.conf import settings
 import os
 from django.db.models import Count, Q, Avg
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 class EquipoListView(ListView):
     model = Equipo
@@ -278,3 +279,6 @@ def ficha_detallada_view(request, pk):
         'equipo': equipo,
     }
     return render(request, 'sistema_interno/ficha_detallada.html', context)
+
+# Ejemplo de uso de timezone
+fecha_creacion = timezone.make_aware(datetime(2025, 4, 1))

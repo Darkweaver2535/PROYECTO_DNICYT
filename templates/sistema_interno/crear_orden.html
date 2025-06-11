@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .crear-orden-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        font-size: 1.4rem;
+    }
+
+    .form-floating label {
+        color: var(--text-light);
+    }
+
+    .btn-guardar {
+        background: linear-gradient(135deg, var(--success-green), #16a34a);
+        border: none;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .btn-guardar:hover {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-cancelar {
+        background: var(--border-color);
+        color: var(--text-dark);
+        border: none;
+        padding: 0.75rem 2rem;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        transition: all var(--transition-speed) ease;
+    }
+
+    .btn-cancelar:hover {
+        background: var(--text-light);
+        color: var(--pure-white);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="bi bi-plus-circle me-2"></i>
+                {{ titulo }}
+            </h1>
+            <p class="text-muted mb-0">Complete los campos para crear una nueva orden de trabajo</p>
+        </div>
+    </div>
+
+    <div class="crear-orden-container">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Información Básica -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-info-circle"></i>
+                    Información Básica
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.titulo }}
+                            <label for="{{ form.titulo.id_for_label }}">{{ form.titulo.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.equipo }}
+                            <label for="{{ form.equipo.id_for_label }}">{{ form.equipo.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            {{ form.descripcion }}
+                            <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clasificación -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-tags"></i>
+                    Clasificación
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.tipo_orden }}
+                            <label for="{{ form.tipo_orden.id_for_label }}">{{ form.tipo_orden.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.prioridad }}
+                            <label for="{{ form.prioridad.id_for_label }}">{{ form.prioridad.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.plan_mantenimiento }}
+                            <label for="{{ form.plan_mantenimiento.id_for_label }}">{{ form.plan_mantenimiento.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Programación -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-calendar-event"></i>
+                    Programación
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.fecha_programada }}
+                            <label for="{{ form.fecha_programada.id_for_label }}">{{ form.fecha_programada.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.fecha_fin_programada }}
+                            <label for="{{ form.fecha_fin_programada.id_for_label }}">{{ form.fecha_fin_programada.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Responsables -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-people"></i>
+                    Responsables
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.asignado_a }}
+                            <label for="{{ form.asignado_a.id_for_label }}">{{ form.asignado_a.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.supervisado_por }}
+                            <label for="{{ form.supervisado_por.id_for_label }}">{{ form.supervisado_por.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estimaciones -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-calculator"></i>
+                    Estimaciones
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.horas_estimadas }}
+                            <label for="{{ form.horas_estimadas.id_for_label }}">{{ form.horas_estimadas.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.costo_estimado }}
+                            <label for="{{ form.costo_estimado.id_for_label }}">{{ form.costo_estimado.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detalles Técnicos -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-gear"></i>
+                    Detalles Técnicos
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.materiales_necesarios }}
+                            <label for="{{ form.materiales_necesarios.id_for_label }}">{{ form.materiales_necesarios.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.herramientas_necesarias }}
+                            <label for="{{ form.herramientas_necesarias.id_for_label }}">{{ form.herramientas_necesarias.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            {{ form.procedimientos_seguir }}
+                            <label for="{{ form.procedimientos_seguir.id_for_label }}">{{ form.procedimientos_seguir.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            {{ form.observaciones_iniciales }}
+                            <label for="{{ form.observaciones_iniciales.id_for_label }}">{{ form.observaciones_iniciales.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Archivos -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-paperclip"></i>
+                    Documentos
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.documentos_adjuntos.label }}</label>
+                        {{ form.documentos_adjuntos }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.fotos_antes.label }}</label>
+                        {{ form.fotos_antes }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control de Calidad -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-shield-check"></i>
+                    Control de Calidad
+                </h3>
+                <div class="form-check">
+                    {{ form.requiere_pruebas }}
+                    <label class="form-check-label" for="{{ form.requiere_pruebas.id_for_label }}">
+                        {{ form.requiere_pruebas.label }}
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-end gap-3">
+                <a href="{% url 'mantenimiento:ordenes-trabajo' %}" class="btn btn-cancelar">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-guardar">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Crear Orden
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

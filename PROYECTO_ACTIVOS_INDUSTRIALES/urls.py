@@ -41,4 +41,5 @@ urlpatterns = [
     path('inventario/', EquipoListView.as_view(), name='inventario_equipos'),
     path('dashboard/', dashboard_view, name='dashboard'),  # ← CORREGIDO: Usar dashboard_view importado correctamente
     path('mantenimiento/', include('apps.mantenimiento.urls')),
+    path('operaciones/', include('apps.operaciones.urls')),  # <-- AGREGAR ESTA LÍNEA
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

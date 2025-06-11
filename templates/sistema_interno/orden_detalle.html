@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ orden.numero_orden }} - Detalle Orden{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orden-header {
+        background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .orden-numero {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin: 0;
+    }
+
+    .orden-titulo {
+        font-size: 1.5rem;
+        color: var(--text-dark);
+        margin: 0.5rem 0;
+    }
+
+    .detalle-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .detalle-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        background: var(--off-white);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .status-timeline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 2rem 0;
+        position: relative;
+    }
+
+    .status-timeline::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border-color);
+        z-index: 1;
+    }
+
+    .status-step {
+        background: var(--pure-white);
+        border: 3px solid var(--border-color);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: var(--text-light);
+        position: relative;
+        z-index: 2;
+    }
+
+    .status-step.active {
+        border-color: var(--primary-blue);
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .status-step.completed {
+        border-color: var(--success-green);
+        background: var(--success-green);
+        color: white;
+    }
+
+    .foto-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .foto-item {
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+
+    .foto-item img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="orden-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="orden-numero">{{ orden.numero_orden }}</h1>
+                <h2 class="orden-titulo">{{ orden.titulo }}</h2>
+                <div class="d-flex align-items-center gap-3 mt-3">
+                    <span class="badge {{ orden.get_estado_badge_class }} fs-6">
+                        {{ orden.get_estado_display }}
+                    </span>
+                    <span class="badge {{ orden.get_prioridad_badge_class }} fs-6">
+                        {{ orden.get_prioridad_display }}
+                    </span>
+                    <span class="text-muted">
+                        <i class="bi bi-tag me-1"></i>
+                        {{ orden.get_tipo_orden_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="d-flex flex-column gap-2">
+                    {% if orden.estado != 'completada' and orden.estado != 'cancelada' %}
+                        <a href="{% url 'mantenimiento:actualizar-orden' orden.pk %}" 
+                           class="btn btn-warning">
+                            <i class="bi bi-pencil me-2"></i>
+                            Actualizar Estado
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'mantenimiento:ordenes-trabajo' %}" 
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        Volver a Órdenes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información del Equipo -->
+        <div class="col-lg-6">
+            <div class="detalle-card">
+                <h3 class="detalle-title">
+                    <i class="bi bi-gear-fill"></i>
+                    Información del Equipo
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Código</div>
+                        <div class="info-value">{{ orden.equipo.codigo_interno }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Nombre</div>
+                        <div class="info-value">{{ orden.equipo.nombre }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Sección</div>
+                        <div class="info-value">{{ orden.equipo.get_seccion_display }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Estado</div>
+                        <div class="info-value">{{ orden.equipo.get_estado_display }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fechas y Programación -->
+        <div class="col-lg-6">
+            <div class="detalle-card">
+                <h3 class="detalle-title">
+                    <i class="bi bi-calendar-event"></i>
+                    Fechas y Programación
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Fecha Creación</div>
+                        <div class="info-value">{{ orden.fecha_creacion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Fecha Programada</div>
+                        <div class="info-value">
+                            {% if orden.fecha_programada %}
+                                {{ orden.fecha_programada|date:"d/m/Y H:i" }}
+                            {% else %}
+                                Sin programar
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Fecha Inicio Real</div>
+                        <div class="info-value">
+                            {% if orden.fecha_inicio_real %}
+                                {{ orden.fecha_inicio_real|date:"d/m/Y H:i" }}
+                            {% else %}
+                                No iniciado
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Fecha Completada</div>
+                        <div class="info-value">
+                            {% if orden.fecha_completada %}
+                                {{ orden.fecha_completada|date:"d/m/Y H:i" }}
+                            {% else %}
+                                No completado
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Descripción y Detalles -->
+    <div class="detalle-card">
+        <h3 class="detalle-title">
+            <i class="bi bi-file-text"></i>
+            Descripción del Trabajo
+        </h3>
+        <p class="mb-0">{{ orden.descripcion }}</p>
+    </div>
+
+    <!-- Responsables -->
+    <div class="detalle-card">
+        <h3 class="detalle-title">
+            <i class="bi bi-people"></i>
+            Responsables
+        </h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Solicitante</div>
+                <div class="info-value">{{ orden.solicitante.get_full_name|default:orden.solicitante.username }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Asignado a</div>
+                <div class="info-value">
+                    {% if orden.asignado_a %}
+                        {{ orden.asignado_a.get_full_name|default:orden.asignado_a.username }}
+                    {% else %}
+                        Sin asignar
+                    {% endif %}
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Supervisado por</div>
+                <div class="info-value">
+                    {% if orden.supervisado_por %}
+                        {{ orden.supervisado_por.get_full_name|default:orden.supervisado_por.username }}
+                    {% else %}
+                        Sin supervisor
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Métricas y Costos -->
+    {% if orden.horas_estimadas > 0 or orden.costo_estimado > 0 %}
+    <div class="detalle-card">
+        <h3 class="detalle-title">
+            <i class="bi bi-graph-up"></i>
+            Métricas y Costos
+        </h3>
+        <div class="info-grid">
+            {% if orden.horas_estimadas > 0 %}
+            <div class="info-item">
+                <div class="info-label">Horas Estimadas</div>
+                <div class="info-value">{{ orden.horas_estimadas }} horas</div>
+            </div>
+            {% endif %}
+            {% if orden.horas_reales > 0 %}
+            <div class="info-item">
+                <div class="info-label">Horas Reales</div>
+                <div class="info-value">{{ orden.horas_reales }} horas</div>
+            </div>
+            {% endif %}
+            {% if orden.costo_estimado > 0 %}
+            <div class="info-item">
+                <div class="info-label">Costo Estimado</div>
+                <div class="info-value">${{ orden.costo_estimado }}</div>
+            </div>
+            {% endif %}
+            {% if orden.costo_real > 0 %}
+            <div class="info-item">
+                <div class="info-label">Costo Real</div>
+                <div class="info-value">${{ orden.costo_real }}</div>
+            </div>
+            {% endif %}
+            {% if orden.eficiencia > 0 %}
+            <div class="info-item">
+                <div class="info-label">Eficiencia</div>
+                <div class="info-value">{{ orden.eficiencia|floatformat:1 }}%</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Trabajo Realizado -->
+    {% if orden.trabajo_realizado %}
+    <div class="detalle-card">
+        <h3 class="detalle-title">
+            <i class="bi bi-check-circle"></i>
+            Trabajo Realizado
+        </h3>
+        <p class="mb-0">{{ orden.trabajo_realizado }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Observaciones -->
+    {% if orden.observaciones_iniciales or orden.observaciones_finales %}
+    <div class="detalle-card">
+        <h3 class="detalle-title">
+            <i class="bi bi-chat-square-text"></i>
+            Observaciones
+        </h3>
+        {% if orden.observaciones_iniciales %}
+        <div class="mb-3">
+            <strong>Observaciones Iniciales:</strong>
+            <p class="mt-1 mb-0">{{ orden.observaciones_iniciales }}</p>
+        </div>
+        {% endif %}
+        {% if orden.observaciones_finales %}
+        <div>
+            <strong>Observaciones Finales:</strong>
+            <p class="mt-1 mb-0">{{ orden.observaciones_finales }}</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Fotos -->
+    {% if orden.fotos_antes or orden.fotos_despues %}
+    <div class="detalle-card">
+        <h3 class="detalle-title">
+            <i class="bi bi-camera"></i>
+            Documentación Fotográfica
+        </h3>
+        <div class="foto-container">
+            {% if orden.fotos_antes %}
+            <div class="foto-item">
+                <img src="{{ orden.fotos_antes.url }}" alt="Foto antes del trabajo">
+                <div class="p-2">
+                    <small class="text-muted">Antes del trabajo</small>
+                </div>
+            </div>
+            {% endif %}
+            {% if orden.fotos_despues %}
+            <div class="foto-item">
+                <img src="{{ orden.fotos_despues.url }}" alt="Foto después del trabajo">
+                <div class="p-2">
+                    <small class="text-muted">Después del trabajo</small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

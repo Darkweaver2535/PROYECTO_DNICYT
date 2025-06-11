@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .actualizar-orden-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .orden-info {
+        background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .orden-numero {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin: 0;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="bi bi-pencil-square me-2"></i>
+                {{ titulo }}
+            </h1>
+            <p class="text-muted mb-0">Actualice el progreso y estado de la orden de trabajo</p>
+        </div>
+    </div>
+
+    <div class="actualizar-orden-container">
+        <!-- Info de la orden -->
+        <div class="orden-info">
+            <h3 class="orden-numero">{{ orden.numero_orden }}</h3>
+            <p class="mb-1"><strong>{{ orden.titulo }}</strong></p>
+            <p class="mb-0 text-muted">{{ orden.equipo.codigo_interno }} - {{ orden.equipo.nombre }}</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Estado y Control -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-activity"></i>
+                    Estado y Control
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.estado }}
+                            <label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.fecha_inicio_real }}
+                            <label for="{{ form.fecha_inicio_real.id_for_label }}">{{ form.fecha_inicio_real.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            {{ form.horas_reales }}
+                            <label for="{{ form.horas_reales.id_for_label }}">{{ form.horas_reales.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trabajo Realizado -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-tools"></i>
+                    Trabajo Realizado
+                </h3>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="form-floating">
+                            {{ form.trabajo_realizado }}
+                            <label for="{{ form.trabajo_realizado.id_for_label }}">{{ form.trabajo_realizado.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.repuestos_utilizados }}
+                            <label for="{{ form.repuestos_utilizados.id_for_label }}">{{ form.repuestos_utilizados.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.costo_real }}
+                            <label for="{{ form.costo_real.id_for_label }}">{{ form.costo_real.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control de Calidad -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-shield-check"></i>
+                    Control de Calidad
+                </h3>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="form-floating">
+                            {{ form.pruebas_realizadas }}
+                            <label for="{{ form.pruebas_realizadas.id_for_label }}">{{ form.pruebas_realizadas.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.resultado_satisfactorio }}
+                            <label class="form-check-label" for="{{ form.resultado_satisfactorio.id_for_label }}">
+                                {{ form.resultado_satisfactorio.label }}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.calificacion_trabajo }}
+                            <label for="{{ form.calificacion_trabajo.id_for_label }}">{{ form.calificacion_trabajo.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observaciones y Seguimiento -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-chat-square-text"></i>
+                    Observaciones y Seguimiento
+                </h3>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="form-floating">
+                            {{ form.observaciones_finales }}
+                            <label for="{{ form.observaciones_finales.id_for_label }}">{{ form.observaciones_finales.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            {{ form.comentarios_adicionales }}
+                            <label for="{{ form.comentarios_adicionales.id_for_label }}">{{ form.comentarios_adicionales.label }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {{ form.requiere_seguimiento }}
+                            <label class="form-check-label" for="{{ form.requiere_seguimiento.id_for_label }}">
+                                {{ form.requiere_seguimiento.label }}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            {{ form.fecha_proximo_seguimiento }}
+                            <label for="{{ form.fecha_proximo_seguimiento.id_for_label }}">{{ form.fecha_proximo_seguimiento.label }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentación -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="bi bi-camera"></i>
+                    Documentación
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.fotos_despues.label }}</label>
+                        {{ form.fotos_despues }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-end gap-3">
+                <a href="{% url 'mantenimiento:orden-detalle' orden.pk %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Actualizar Orden
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

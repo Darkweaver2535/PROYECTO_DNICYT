@@ -1,0 +1,719 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Procedimiento {{ procedimiento.codigo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Reutilizar estilos del formulario de creación */
+    .pop-form-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .pop-form-header {
+        background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--secondary-yellow) 100%);
+        color: var(--text-dark);
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pop-form-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .pop-form-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .pop-form-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0.5rem 0 0 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .pop-form-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-yellow);
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-yellow);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .version-info {
+        background: var(--light-yellow);
+        border: 1px solid var(--warning-orange);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .version-badge {
+        background: var(--primary-yellow);
+        color: var(--text-dark);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .required-field {
+        color: var(--danger-red);
+        margin-left: 0.25rem;
+    }
+
+    .form-control,
+    .form-select {
+        border: 1.5px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all var(--transition-speed) ease;
+        background: var(--pure-white);
+        color: var(--text-dark);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary-yellow);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        outline: none;
+        background: var(--pure-white);
+    }
+
+    .text-danger {
+        color: var(--danger-red) !important;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .btn-update {
+        background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+        color: var(--text-dark);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all var(--transition-speed) ease;
+    }
+
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        color: var(--text-dark);
+    }
+
+    .btn-cancel {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1.5px solid var(--border-color);
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all var(--transition-speed) ease;
+    }
+
+    .btn-cancel:hover {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .field-modified {
+        background: rgba(245, 158, 11, 0.1);
+        border-color: var(--warning-orange) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="pop-form-container">
+        <div class="pop-form-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="pop-form-title">
+                        <i class="bi bi-pencil-square me-3"></i>
+                        Editar Procedimiento {{ procedimiento.codigo }}
+                    </h1>
+                    <p class="pop-form-subtitle">
+                        Modifique los campos necesarios y guarde los cambios
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{% url 'operaciones:procedimientos-pop' %}" class="btn btn-outline-dark">
+                        <i class="bi bi-arrow-left"></i>
+                        Volver a Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="pop-form-body">
+            <!-- Información de versión -->
+            <div class="version-info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="version-badge">{{ procedimiento.version }}</span>
+                        <span class="ms-2">Última modificación: {{ procedimiento.fecha_ultima_revision|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">
+                            Estado: <strong>{{ procedimiento.get_estado_display }}</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mostrar errores del formulario -->
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                <h6><i class="bi bi-exclamation-triangle"></i> Errores en el formulario:</h6>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <div>• {{ field }}: {{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Mostrar mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" id="popEditForm">
+                {% csrf_token %}
+                
+                <!-- Sección 1: Información Básica -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-info-circle"></i>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.titulo.label }}<span class="required-field">*</span></label>
+                                {{ form.titulo }}
+                                {% if form.titulo.errors %}
+                                    <div class="text-danger">{{ form.titulo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.version.label }}</label>
+                                {{ form.version }}
+                                {% if form.version.errors %}
+                                    <div class="text-danger">{{ form.version.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.area.label }}<span class="required-field">*</span></label>
+                                {{ form.area }}
+                                {% if form.area.errors %}
+                                    <div class="text-danger">{{ form.area.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.descripcion.label }}<span class="required-field">*</span></label>
+                                {{ form.descripcion }}
+                                {% if form.descripcion.errors %}
+                                    <div class="text-danger">{{ form.descripcion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 2: Clasificación y Prioridad -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-tags"></i>
+                        Clasificación y Prioridad
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.tipo.label }}<span class="required-field">*</span></label>
+                                {{ form.tipo }}
+                                {% if form.tipo.errors %}
+                                    <div class="text-danger">{{ form.tipo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.prioridad.label }}<span class="required-field">*</span></label>
+                                {{ form.prioridad }}
+                                {% if form.prioridad.errors %}
+                                    <div class="text-danger">{{ form.prioridad.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.estado.label }}<span class="required-field">*</span></label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="text-danger">{{ form.estado.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                <div class="form-check mt-4">
+                                    {{ form.es_critico }}
+                                    <label class="form-check-label" for="{{ form.es_critico.id_for_label }}">
+                                        {{ form.es_critico.label }}
+                                    </label>
+                                    {% if form.es_critico.errors %}
+                                        <div class="text-danger">{{ form.es_critico.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 3: Asignación y Equipos -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-people"></i>
+                        Asignación y Equipos
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.responsable.label }}<span class="required-field">*</span></label>
+                                {{ form.responsable }}
+                                {% if form.responsable.errors %}
+                                    <div class="text-danger">{{ form.responsable.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.equipo_asociado.label }}</label>
+                                {{ form.equipo_asociado }}
+                                {% if form.equipo_asociado.errors %}
+                                    <div class="text-danger">{{ form.equipo_asociado.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.tiempo_estimado.label }}</label>
+                                <div class="input-group">
+                                    {{ form.tiempo_estimado }}
+                                    <span class="input-group-text">min</span>
+                                </div>
+                                {% if form.tiempo_estimado.errors %}
+                                    <div class="text-danger">{{ form.tiempo_estimado.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 4: Normativa y Tiempos -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-clock"></i>
+                        Normativa y Programación
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.normativa.label }}<span class="required-field">*</span></label>
+                                {{ form.normativa }}
+                                {% if form.normativa.errors %}
+                                    <div class="text-danger">{{ form.normativa.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.frecuencia_aplicacion.label }}</label>
+                                {{ form.frecuencia_aplicacion }}
+                                {% if form.frecuencia_aplicacion.errors %}
+                                    <div class="text-danger">{{ form.frecuencia_aplicacion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.fecha_ultima_revision.label }}<span class="required-field">*</span></label>
+                                {{ form.fecha_ultima_revision }}
+                                {% if form.fecha_ultima_revision.errors %}
+                                    <div class="text-danger">{{ form.fecha_ultima_revision.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.fecha_proxima_revision.label }}<span class="required-field">*</span></label>
+                                {{ form.fecha_proxima_revision }}
+                                {% if form.fecha_proxima_revision.errors %}
+                                    <div class="text-danger">{{ form.fecha_proxima_revision.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.fecha_vencimiento.label }}</label>
+                                {{ form.fecha_vencimiento }}
+                                {% if form.fecha_vencimiento.errors %}
+                                    <div class="text-danger">{{ form.fecha_vencimiento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 5: Contenido del Procedimiento -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-file-text"></i>
+                        Contenido del Procedimiento
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.objetivo.label }}<span class="required-field">*</span></label>
+                                {{ form.objetivo }}
+                                {% if form.objetivo.errors %}
+                                    <div class="text-danger">{{ form.objetivo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.alcance.label }}</label>
+                                {{ form.alcance }}
+                                {% if form.alcance.errors %}
+                                    <div class="text-danger">{{ form.alcance.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.materiales_herramientas.label }}</label>
+                                {{ form.materiales_herramientas }}
+                                {% if form.materiales_herramientas.errors %}
+                                    <div class="text-danger">{{ form.materiales_herramientas.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.epp_requerido.label }}</label>
+                                {{ form.epp_requerido }}
+                                {% if form.epp_requerido.errors %}
+                                    <div class="text-danger">{{ form.epp_requerido.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.precauciones_seguridad.label }}</label>
+                                {{ form.precauciones_seguridad }}
+                                {% if form.precauciones_seguridad.errors %}
+                                    <div class="text-danger">{{ form.precauciones_seguridad.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.procedimiento_paso_a_paso.label }}<span class="required-field">*</span></label>
+                                {{ form.procedimiento_paso_a_paso }}
+                                {% if form.procedimiento_paso_a_paso.errors %}
+                                    <div class="text-danger">{{ form.procedimiento_paso_a_paso.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.criterios_aceptacion.label }}</label>
+                                {{ form.criterios_aceptacion }}
+                                {% if form.criterios_aceptacion.errors %}
+                                    <div class="text-danger">{{ form.criterios_aceptacion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.registros_documentos.label }}</label>
+                                {{ form.registros_documentos }}
+                                {% if form.registros_documentos.errors %}
+                                    <div class="text-danger">{{ form.registros_documentos.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 6: Documentos -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-paperclip"></i>
+                        Documentos Adjuntos
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.documento_pdf.label }}</label>
+                                {{ form.documento_pdf }}
+                                {% if procedimiento.documento_pdf %}
+                                    <div class="form-text">Archivo actual: <a href="{{ procedimiento.documento_pdf.url }}" target="_blank">{{ procedimiento.documento_pdf.name|cut:"procedimientos/documentos/" }}</a></div>
+                                {% endif %}
+                                {% if form.documento_pdf.errors %}
+                                    <div class="text-danger">{{ form.documento_pdf.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.diagrama_flujo.label }}</label>
+                                {{ form.diagrama_flujo }}
+                                {% if procedimiento.diagrama_flujo %}
+                                    <div class="form-text">Archivo actual: <a href="{{ procedimiento.diagrama_flujo.url }}" target="_blank">{{ procedimiento.diagrama_flujo.name|cut:"procedimientos/diagramas/" }}</a></div>
+                                {% endif %}
+                                {% if form.diagrama_flujo.errors %}
+                                    <div class="text-danger">{{ form.diagrama_flujo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.fotos_referencia.label }}</label>
+                                {{ form.fotos_referencia }}
+                                {% if procedimiento.fotos_referencia %}
+                                    <div class="form-text">Archivo actual: <a href="{{ procedimiento.fotos_referencia.url }}" target="_blank">{{ procedimiento.fotos_referencia.name|cut:"procedimientos/fotos/" }}</a></div>
+                                {% endif %}
+                                {% if form.fotos_referencia.errors %}
+                                    <div class="text-danger">{{ form.fotos_referencia.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 7: Configuración Adicional -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-gear"></i>
+                        Configuración Adicional
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                {{ form.requiere_certificacion }}
+                                <label class="form-check-label" for="{{ form.requiere_certificacion.id_for_label }}">
+                                    {{ form.requiere_certificacion.label }}
+                                </label>
+                                {% if form.requiere_certificacion.errors %}
+                                    <div class="text-danger">{{ form.requiere_certificacion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                {{ form.activo }}
+                                <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                    {{ form.activo.label }}
+                                </label>
+                                {% if form.activo.errors %}
+                                    <div class="text-danger">{{ form.activo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ form.observaciones.label }}</label>
+                                {{ form.observaciones }}
+                                {% if form.observaciones.errors %}
+                                    <div class="text-danger">{{ form.observaciones.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="action-buttons">
+                    <a href="{% url 'operaciones:procedimientos-pop' %}" class="btn-cancel">
+                        <i class="bi bi-x-circle"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn-update">
+                        <i class="bi bi-check-circle"></i>
+                        Actualizar Procedimiento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('popEditForm');
+    const originalValues = {};
+    
+    // Capturar valores originales
+    form.querySelectorAll('input, select, textarea').forEach(field => {
+        originalValues[field.name] = field.value;
+    });
+    
+    // Detectar cambios
+    form.addEventListener('input', function(e) {
+        const field = e.target;
+        if (originalValues[field.name] !== field.value) {
+            field.classList.add('field-modified');
+        } else {
+            field.classList.remove('field-modified');
+        }
+    });
+    
+    // Validación del formulario
+    form.addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.style.borderColor = 'var(--danger-red)';
+                isValid = false;
+            } else {
+                field.style.borderColor = 'var(--border-color)';
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Por favor complete todos los campos requeridos.');
+        }
+    });
+    
+    // Confirmar si hay cambios sin guardar
+    window.addEventListener('beforeunload', function(e) {
+        const hasChanges = form.querySelector('.field-modified');
+        if (hasChanges) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    
+    // Auto-llenar fecha de vencimiento
+    const fechaProxima = document.querySelector('#id_fecha_proxima_revision');
+    const fechaVencimiento = document.querySelector('#id_fecha_vencimiento');
+    
+    if (fechaProxima && fechaVencimiento) {
+        fechaProxima.addEventListener('change', function() {
+            if (!fechaVencimiento.value) {
+                fechaVencimiento.value = this.value;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

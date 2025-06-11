@@ -1,0 +1,736 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ procedimiento.codigo }} - {{ procedimiento.titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pop-detail-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .pop-detail-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: var(--pure-white);
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pop-detail-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .pop-detail-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .pop-detail-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0.5rem 0 0 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .pop-status-badges {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        position: relative;
+        z-index: 2;
+        flex-wrap: wrap;
+    }
+
+    .pop-status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .pop-status-badge.activo {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--success-green);
+        border-color: var(--success-green);
+    }
+
+    .pop-status-badge.pendiente_aprobacion {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--warning-orange);
+        border-color: var(--warning-orange);
+    }
+
+    .pop-status-badge.vencido {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--danger-red);
+        border-color: var(--danger-red);
+        animation: pulse 2s infinite;
+    }
+
+    .pop-status-badge.critico {
+        background: rgba(30, 64, 175, 0.2);
+        color: var(--primary-blue);
+        border-color: var(--light-blue);
+    }
+
+    .pop-detail-body {
+        padding: 2rem;
+    }
+
+    .pop-info-section {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .pop-info-section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .pop-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .pop-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .pop-info-label {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+    }
+
+    .pop-info-value {
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: 500;
+        padding: 0.75rem;
+        background: var(--pure-white);
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+    }
+
+    .pop-info-value.textarea {
+        min-height: 120px;
+        align-items: flex-start;
+        padding-top: 1rem;
+        white-space: pre-wrap;
+        line-height: 1.6;
+    }
+
+    .pop-info-value.large {
+        min-height: 200px;
+        align-items: flex-start;
+        padding-top: 1rem;
+    }
+
+    .pop-actions-section {
+        background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .pop-actions-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .pop-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .pop-action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        border: none;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all var(--transition-speed) ease;
+        box-shadow: var(--shadow-md);
+    }
+
+    .pop-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .pop-action-btn.primary {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: var(--pure-white);
+    }
+
+    .pop-action-btn.warning {
+        background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+        color: var(--text-dark);
+    }
+
+    .pop-action-btn.secondary {
+        background: var(--pure-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .pop-action-btn.danger {
+        background: linear-gradient(135deg, var(--danger-red), #dc2626);
+        color: var(--pure-white);
+    }
+
+    .pop-action-btn.success {
+        background: linear-gradient(135deg, var(--success-green), #059669);
+        color: var(--pure-white);
+    }
+
+    .pop-meta-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .pop-alert {
+        padding: 1rem;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+
+    .pop-alert.warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-orange);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .pop-alert.danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-red);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    .pop-alert.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .pop-timing-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .pop-timing-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .pop-timing-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+
+    .pop-timing-label {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+    }
+
+    .pop-documents {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .pop-document {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        text-decoration: none;
+        color: var(--text-dark);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .pop-document:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        color: var(--primary-blue);
+    }
+
+    .pop-document-icon {
+        font-size: 2rem;
+        color: var(--primary-blue);
+    }
+
+    .pop-document-info {
+        flex: 1;
+    }
+
+    .pop-document-name {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .pop-document-size {
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .pop-detail-header {
+            padding: 1.5rem;
+        }
+
+        .pop-detail-title {
+            font-size: 1.5rem;
+        }
+
+        .pop-detail-body {
+            padding: 1rem;
+        }
+
+        .pop-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pop-actions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pop-status-badges {
+            justify-content: center;
+        }
+
+        .pop-timing-info {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="pop-detail-container">
+        <!-- Header -->
+        <div class="pop-detail-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="pop-detail-title">
+                        <i class="bi bi-file-earmark-text me-3"></i>
+                        {{ procedimiento.codigo }}
+                    </h1>
+                    <p class="pop-detail-subtitle">
+                        {{ procedimiento.titulo }}
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{% url 'operaciones:procedimientos-pop' %}" class="btn btn-outline-light">
+                        <i class="bi bi-arrow-left"></i>
+                        Volver a Lista
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Status Badges -->
+            <div class="pop-status-badges">
+                <span class="pop-status-badge {{ procedimiento.estado }}">
+                    <i class="bi bi-circle-fill"></i>
+                    {% if procedimiento.estado == 'activo' %}Activo
+                    {% elif procedimiento.estado == 'pendiente_aprobacion' %}Pendiente Aprobación
+                    {% elif procedimiento.estado == 'en_capacitacion' %}En Capacitación
+                    {% elif procedimiento.estado == 'validado_campo' %}Validado en Campo
+                    {% elif procedimiento.estado == 'vencido' %}Vencido
+                    {% else %}{{ procedimiento.get_estado_display }}
+                    {% endif %}
+                </span>
+                
+                <span class="pop-status-badge">
+                    <i class="bi bi-flag-fill"></i>
+                    Prioridad {{ procedimiento.get_prioridad_display }}
+                </span>
+                
+                {% if procedimiento.es_critico %}
+                <span class="pop-status-badge critico">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Crítico
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="pop-detail-body">
+            <!-- Alertas -->
+            {% if procedimiento.vencido %}
+            <div class="pop-alert danger">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <strong>¡Procedimiento Vencido!</strong> Este procedimiento ha expirado y requiere renovación inmediata.
+            </div>
+            {% elif procedimiento.dias_restantes <= 30 %}
+            <div class="pop-alert warning">
+                <i class="bi bi-clock-fill"></i>
+                <strong>Próximo a Vencer:</strong> Este procedimiento vence en {{ procedimiento.dias_restantes }} días.
+            </div>
+            {% endif %}
+
+            <!-- Meta información -->
+            <div class="pop-meta-info">
+                <span><strong>Creado:</strong> {{ procedimiento.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                <span><strong>Versión:</strong> {{ procedimiento.version }}</span>
+                <span><strong>Actualizado:</strong> {{ procedimiento.fecha_ultima_revision|date:"d/m/Y" }}</span>
+            </div>
+
+            <!-- Información Básica -->
+            <div class="pop-info-section">
+                <h3 class="pop-info-section-title">
+                    <i class="bi bi-info-circle"></i>
+                    Información Básica
+                </h3>
+                
+                <div class="pop-info-grid">
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Descripción</label>
+                        <div class="pop-info-value textarea">{{ procedimiento.descripcion|default:"No especificada" }}</div>
+                    </div>
+                    
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Área</label>
+                        <div class="pop-info-value">{{ procedimiento.get_area_display }}</div>
+                    </div>
+                    
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Tipo</label>
+                        <div class="pop-info-value">{{ procedimiento.get_tipo_display }}</div>
+                    </div>
+                    
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Responsable</label>
+                        <div class="pop-info-value">{{ procedimiento.responsable }}</div>
+                    </div>
+                    
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Equipo Asociado</label>
+                        <div class="pop-info-value">{{ procedimiento.equipo_asociado|default:"No asignado" }}</div>
+                    </div>
+                    
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Normativa</label>
+                        <div class="pop-info-value">{{ procedimiento.get_normativa_display }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tiempos y Fechas -->
+            <div class="pop-info-section">
+                <h3 class="pop-info-section-title">
+                    <i class="bi bi-clock"></i>
+                    Programación y Tiempos
+                </h3>
+                
+                <div class="pop-timing-info">
+                    <div class="pop-timing-item">
+                        <div class="pop-timing-value">{{ procedimiento.tiempo_estimado }}</div>
+                        <div class="pop-timing-label">Minutos</div>
+                    </div>
+                    
+                    <div class="pop-timing-item">
+                        <div class="pop-timing-value">{{ procedimiento.get_frecuencia_aplicacion_display }}</div>
+                        <div class="pop-timing-label">Frecuencia</div>
+                    </div>
+                    
+                    <div class="pop-timing-item">
+                        <div class="pop-timing-value">{{ procedimiento.fecha_proxima_revision|date:"d/m" }}</div>
+                        <div class="pop-timing-label">Próx. Revisión</div>
+                    </div>
+                    
+                    <div class="pop-timing-item">
+                        <div class="pop-timing-value">
+                            {% if procedimiento.dias_restantes >= 0 %}
+                                {{ procedimiento.dias_restantes }}
+                            {% else %}
+                                <span style="color: var(--danger-red);">{{ procedimiento.dias_restantes_abs }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="pop-timing-label">
+                            {% if procedimiento.dias_restantes >= 0 %}
+                                Días Restantes
+                            {% else %}
+                                Días Vencido
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido del Procedimiento -->
+            <div class="pop-info-section">
+                <h3 class="pop-info-section-title">
+                    <i class="bi bi-file-text"></i>
+                    Contenido del Procedimiento
+                </h3>
+                
+                <div class="pop-info-grid">
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Objetivo</label>
+                        <div class="pop-info-value textarea">{{ procedimiento.objetivo|default:"No especificado" }}</div>
+                    </div>
+                    
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Alcance</label>
+                        <div class="pop-info-value textarea">{{ procedimiento.alcance|default:"No especificado" }}</div>
+                    </div>
+                    
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Materiales y Herramientas</label>
+                        <div class="pop-info-value textarea">{{ procedimiento.materiales_herramientas|default:"No especificado" }}</div>
+                    </div>
+                    
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">EPP Requerido</label>
+                        <div class="pop-info-value textarea">{{ procedimiento.epp_requerido|default:"No especificado" }}</div>
+                    </div>
+                </div>
+                
+                <div class="pop-info-item mt-3">
+                    <label class="pop-info-label">Procedimiento Paso a Paso</label>
+                    <div class="pop-info-value large">{{ procedimiento.procedimiento_paso_a_paso|default:"No especificado" }}</div>
+                </div>
+                
+                <div class="pop-info-grid mt-3">
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Precauciones de Seguridad</label>
+                        <div class="pop-info-value textarea">{{ procedimiento.precauciones_seguridad|default:"No especificado" }}</div>
+                    </div>
+                    
+                    <div class="pop-info-item">
+                        <label class="pop-info-label">Criterios de Aceptación</label>
+                        <div class="pop-info-value textarea">{{ procedimiento.criterios_aceptacion|default:"No especificado" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentos Adjuntos -->
+            {% if procedimiento.documento_pdf or procedimiento.diagrama_flujo or procedimiento.fotos_referencia %}
+            <div class="pop-info-section">
+                <h3 class="pop-info-section-title">
+                    <i class="bi bi-paperclip"></i>
+                    Documentos Adjuntos
+                </h3>
+                
+                <div class="pop-documents">
+                    {% if procedimiento.documento_pdf %}
+                    <a href="{{ procedimiento.documento_pdf.url }}" target="_blank" class="pop-document">
+                        <i class="bi bi-file-earmark-pdf pop-document-icon"></i>
+                        <div class="pop-document-info">
+                            <div class="pop-document-name">Documento PDF</div>
+                            <div class="pop-document-size">Documento principal</div>
+                        </div>
+                    </a>
+                    {% endif %}
+                    
+                    {% if procedimiento.diagrama_flujo %}
+                    <a href="{{ procedimiento.diagrama_flujo.url }}" target="_blank" class="pop-document">
+                        <i class="bi bi-diagram-3 pop-document-icon"></i>
+                        <div class="pop-document-info">
+                            <div class="pop-document-name">Diagrama de Flujo</div>
+                            <div class="pop-document-size">Imagen de referencia</div>
+                        </div>
+                    </a>
+                    {% endif %}
+                    
+                    {% if procedimiento.fotos_referencia %}
+                    <a href="{{ procedimiento.fotos_referencia.url }}" target="_blank" class="pop-document">
+                        <i class="bi bi-images pop-document-icon"></i>
+                        <div class="pop-document-info">
+                            <div class="pop-document-name">Fotos de Referencia</div>
+                            <div class="pop-document-size">Imágenes explicativas</div>
+                        </div>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Observaciones -->
+            {% if procedimiento.observaciones %}
+            <div class="pop-info-section">
+                <h3 class="pop-info-section-title">
+                    <i class="bi bi-chat-text"></i>
+                    Observaciones
+                </h3>
+                
+                <div class="pop-info-value textarea">{{ procedimiento.observaciones }}</div>
+            </div>
+            {% endif %}
+
+            <!-- Acciones -->
+            <div class="pop-actions-section">
+                <h3 class="pop-actions-title">
+                    <i class="bi bi-gear"></i>
+                    Acciones Disponibles
+                </h3>
+                
+                <div class="pop-actions-grid">
+                    <a href="{% url 'operaciones:editar-pop' procedimiento.codigo %}" class="pop-action-btn primary">
+                        <i class="bi bi-pencil"></i>
+                        Editar Procedimiento
+                    </a>
+                    
+                    {% if procedimiento.estado == 'pendiente_aprobacion' %}
+                    <a href="{% url 'operaciones:aprobar-pop' procedimiento.codigo %}" class="pop-action-btn success">
+                        <i class="bi bi-check-circle"></i>
+                        Aprobar
+                    </a>
+                    {% elif procedimiento.estado == 'vencido' %}
+                    <a href="{% url 'operaciones:renovar-pop' procedimiento.codigo %}" class="pop-action-btn warning">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Renovar
+                    </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'operaciones:descargar-pop-pdf' procedimiento.codigo %}" class="pop-action-btn secondary">
+                        <i class="bi bi-download"></i>
+                        Descargar PDF
+                    </a>
+                    
+                    <button type="button" class="pop-action-btn secondary" onclick="window.print()">
+                        <i class="bi bi-printer"></i>
+                        Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de entrada
+    const container = document.querySelector('.pop-detail-container');
+    if (container) {
+        container.style.opacity = '0';
+        container.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            container.style.transition = 'all 0.5s ease';
+            container.style.opacity = '1';
+            container.style.transform = 'translateY(0)';
+        }, 100);
+    }
+    
+    // Smooth scroll para enlaces internos
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Tooltips para badges
+    const badges = document.querySelectorAll('.pop-status-badge');
+    badges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Confirmación para acciones críticas
+    const criticalActions = document.querySelectorAll('.pop-action-btn.danger');
+    criticalActions.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('¿Está seguro de realizar esta acción? Esta operación no se puede deshacer.')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

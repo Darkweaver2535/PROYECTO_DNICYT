@@ -1,0 +1,1010 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Análisis Predictivo - Sistema de Mantenimiento{% endblock %}
+
+{% block extra_css %}
+<style>
+    .predictivo-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .predictivo-header {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+        padding: 2rem;
+        border-radius: 1rem 1rem 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .predictivo-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: rotate(45deg);
+    }
+
+    .predictivo-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .predictivo-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .metric-card-predictivo {
+        background: linear-gradient(135deg, var(--pure-white), var(--off-white));
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-card-predictivo:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .metric-card-predictivo::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--primary-blue);
+    }
+
+    .metric-card-predictivo.warning::before {
+        background: var(--warning-orange);
+    }
+
+    .metric-card-predictivo.danger::before {
+        background: var(--danger-red);
+    }
+
+    .metric-card-predictivo.success::before {
+        background: var(--success-green);
+    }
+
+    .metric-value-large {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-label-predictivo {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .metric-trend-predictivo {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .trend-up-predictivo {
+        color: var(--success-green);
+    }
+
+    .trend-down-predictivo {
+        color: var(--danger-red);
+    }
+
+    .chart-container-predictivo {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+        height: 400px; /* Altura fija para el gráfico */
+    }
+
+    .chart-container-predictivo:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .mtbf-table {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .mtbf-table-header {
+        background: var(--light-blue);
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mtbf-table-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin: 0;
+    }
+
+    .mtbf-row {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background var(--transition-speed) ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .mtbf-row:hover {
+        background: var(--off-white);
+    }
+
+    .mtbf-row:last-child {
+        border-bottom: none;
+    }
+
+    .equipo-info {
+        flex: 1;
+    }
+
+    .equipo-nombre {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .equipo-codigo {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    .mtbf-metrics {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .mtbf-value {
+        text-align: center;
+    }
+
+    .mtbf-number {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.25rem;
+    }
+
+    .mtbf-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .criticidad-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .criticidad-alta {
+        background: var(--danger-red);
+        color: white;
+    }
+
+    .criticidad-media {
+        background: var(--warning-orange);
+        color: white;
+    }
+
+    .criticidad-baja {
+        background: var(--success-green);
+        color: white;
+    }
+
+    .alert-card-predictivo {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--warning-orange);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .alert-card-predictivo:hover {
+        transform: translateX(4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .alert-card-predictivo.critica {
+        border-left-color: var(--danger-red);
+        background: linear-gradient(135deg, var(--pure-white), rgba(239, 68, 68, 0.02));
+    }
+
+    .alert-card-predictivo.warning {
+        border-left-color: var(--warning-orange);
+        background: linear-gradient(135deg, var(--pure-white), rgba(245, 158, 11, 0.02));
+    }
+
+    .alert-card-predictivo.info {
+        border-left-color: var(--primary-blue);
+        background: linear-gradient(135deg, var(--pure-white), rgba(59, 130, 246, 0.02));
+    }
+
+    .alert-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-description {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .alert-action {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition-speed) ease;
+    }
+
+    .alert-action:hover {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .filtros-container {
+        background: var(--off-white);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .filtros-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+    }
+
+    .progress-ring {
+        width: 120px;
+        height: 120px;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    .progress-ring-circle {
+        stroke: var(--border-color);
+        stroke-width: 8;
+        fill: transparent;
+        r: 52;
+        cx: 60;
+        cy: 60;
+    }
+
+    .progress-ring-fill {
+        stroke: var(--primary-blue);
+        stroke-width: 8;
+        fill: transparent;
+        r: 52;
+        cx: 60;
+        cy: 60;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 60px 60px;
+        transition: stroke-dashoffset 1s ease;
+    }
+
+    .progress-ring-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+
+    .prediction-card {
+        background: linear-gradient(135deg, var(--light-yellow), var(--light-blue));
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .prediction-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: rgba(251, 191, 36, 0.2);
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+    }
+
+    .prediction-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .prediction-item {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .prediction-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .urgencia-critica {
+        border-left: 4px solid var(--danger-red);
+    }
+
+    .urgencia-alta {
+        border-left: 4px solid var(--warning-orange);
+    }
+
+    .urgencia-media {
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title-predictivo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title-predictivo::before {
+        content: '';
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border-radius: 2px;
+    }
+
+    .export-btn {
+        background: var(--primary-yellow);
+        color: var(--text-dark);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-speed) ease;
+        box-shadow: var(--shadow-md);
+    }
+
+    .export-btn:hover {
+        background: var(--secondary-yellow);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Mejoras visuales adicionales */
+    .chart-container-predictivo {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+        height: 400px; /* Altura fija para el gráfico */
+    }
+
+    .chart-container-predictivo:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Loading state para gráficos */
+    .chart-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 300px;
+        color: var(--text-light);
+    }
+
+    /* Animaciones mejoradas */
+    .metric-card-predictivo {
+        animation: slideInUp 0.6s ease forwards;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive mejorado */
+    @media (max-width: 992px) {
+        .chart-container-predictivo {
+            height: 300px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .chart-container-predictivo {
+            height: 250px;
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Principal -->
+    <div class="predictivo-container">
+        <div class="predictivo-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="predictivo-title">
+                        <i class="bi bi-graph-up-arrow me-3"></i>
+                        Análisis Predictivo de Mantenimiento
+                    </h1>
+                    <p class="predictivo-subtitle">
+                        Análisis inteligente basado en datos históricos y tendencias • Período: {{ fecha_inicio|date:"d/m/Y" }} - {{ fecha_fin|date:"d/m/Y" }}
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{% url 'mantenimiento:tareas' %}" class="btn btn-light me-2">
+                        <i class="bi bi-list-check me-2"></i>
+                        Gestionar Tareas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="p-4">
+            <form method="GET" class="filtros-container">
+                <h3 class="filtros-title">
+                    <i class="bi bi-funnel me-2"></i>
+                    Filtros de Análisis
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Período de Análisis</label>
+                        <select name="periodo" class="form-select">
+                            <option value="3" {% if periodo_filtro == '3' %}selected{% endif %}>Últimos 3 meses</option>
+                            <option value="6" {% if periodo_filtro == '6' %}selected{% endif %}>Últimos 6 meses</option>
+                            <option value="12" {% if periodo_filtro == '12' %}selected{% endif %}>Último año</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Equipo Específico (Opcional)</label>
+                        <select name="equipo" class="form-select">
+                            <option value="">Todos los equipos</option>
+                            {% for equipo in equipos_disponibles %}
+                            <option value="{{ equipo.id }}" {% if equipo_filtro == equipo.id|stringformat:"s" %}selected{% endif %}>
+                                {{ equipo.codigo_interno }} - {{ equipo.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search me-2"></i>
+                            Aplicar Filtros
+                        </button>
+                        <button type="button" class="export-btn">
+                            <i class="bi bi-download"></i>
+                            Exportar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Métricas Principales -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="metric-card-predictivo">
+                <div class="metric-value-large">{{ mtbf_promedio }}</div>
+                <div class="metric-label-predictivo">MTBF Promedio (horas)</div>
+                <div class="metric-trend-predictivo">
+                    <i class="bi bi-graph-up trend-up-predictivo"></i>
+                    Tiempo medio entre fallas
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="metric-card-predictivo success">
+                <div class="metric-value-large">{{ disponibilidad_promedio }}%</div>
+                <div class="metric-label-predictivo">Disponibilidad Promedio</div>
+                <div class="metric-trend-predictivo">
+                    <i class="bi bi-shield-check trend-up-predictivo"></i>
+                    Sistema operativo
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="metric-card-predictivo {% if ratio_prev_corr < 3 %}warning{% else %}success{% endif %}">
+                <div class="metric-value-large">{{ ratio_prev_corr }}:1</div>
+                <div class="metric-label-predictivo">Ratio Prev/Correctivo</div>
+                <div class="metric-trend-predictivo">
+                    <i class="bi bi-{% if ratio_prev_corr >= 4 %}check-circle trend-up-predictivo{% else %}exclamation-triangle trend-down-predictivo{% endif %}"></i>
+                    {% if ratio_prev_corr >= 4 %}Óptimo{% else %}Mejorable{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="metric-card-predictivo {% if eficiencia_tiempo >= 80 %}success{% elif eficiencia_tiempo >= 60 %}warning{% else %}danger{% endif %}">
+                <div class="metric-value-large">{{ eficiencia_tiempo }}%</div>
+                <div class="metric-label-predictivo">Eficiencia Temporal</div>
+                <div class="metric-trend-predictivo">
+                    <i class="bi bi-clock trend-{% if eficiencia_tiempo >= 70 %}up-predictivo{% else %}down-predictivo{% endif %}"></i>
+                    Cumplimiento programado
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Gráfico de Tendencias -->
+        <div class="col-lg-8">
+            <div class="chart-container-predictivo">
+                <h3 class="chart-title">
+                    <i class="bi bi-graph-up me-2"></i>
+                    Tendencias de Mantenimiento por Mes
+                </h3>
+                <canvas id="tendenciasChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Disponibilidad del Sistema -->
+        <div class="col-lg-4">
+            <div class="chart-container-predictivo">
+                <h3 class="chart-title">
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    Disponibilidad del Sistema
+                </h3>
+                <div class="d-flex justify-content-center align-items-center h-75">
+                    <div class="progress-ring">
+                        <svg class="progress-ring" width="120" height="120">
+                            <circle class="progress-ring-circle" cx="60" cy="60" r="52" 
+                                    stroke="#e2e8f0" stroke-width="8" fill="transparent"></circle>
+                            <circle class="progress-ring-fill" cx="60" cy="60" r="52" 
+                                    stroke="#3b82f6" stroke-width="8" fill="transparent"
+                                    stroke-linecap="round" stroke-dasharray="327" 
+                                    stroke-dashoffset="{{ stroke_dashoffset }}"
+                                    transform="rotate(-90 60 60)"></circle>
+                        </svg>
+                        <div class="progress-ring-text">{{ disponibilidad_promedio|floatformat:1 }}%</div>
+                    </div>
+                </div>
+                <div class="text-center mt-2">
+                    <small class="text-muted">
+                        {% if disponibilidad_promedio >= 95 %}
+                            <i class="bi bi-check-circle text-success me-1"></i>Excelente
+                        {% elif disponibilidad_promedio >= 85 %}
+                            <i class="bi bi-exclamation-triangle text-warning me-1"></i>Bueno
+                        {% else %}
+                            <i class="bi bi-x-circle text-danger me-1"></i>Requiere atención
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        <!-- Equipos Críticos por MTBF -->
+        <div class="col-lg-8">
+            <div class="section-header">
+                <h2 class="section-title-predictivo">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Equipos Críticos - Análisis MTBF
+                </h2>
+            </div>
+            
+            <div class="mtbf-table">
+                <div class="mtbf-table-header">
+                    <h3 class="mtbf-table-title">
+                        <i class="bi bi-speedometer me-2"></i>
+                        Equipos con Mayor Criticidad
+                    </h3>
+                </div>
+                
+                {% for equipo_data in equipos_mtbf %}
+                <div class="mtbf-row">
+                    <div class="equipo-info">
+                        <div class="equipo-nombre">{{ equipo_data.equipo.nombre }}</div>
+                        <div class="equipo-codigo">{{ equipo_data.equipo.codigo_interno }} • {{ equipo_data.equipo.get_seccion_display }}</div>
+                    </div>
+                    
+                    <div class="mtbf-metrics">
+                        <div class="mtbf-value">
+                            <div class="mtbf-number">{{ equipo_data.mtbf }}</div>
+                            <div class="mtbf-label">MTBF (hrs)</div>
+                        </div>
+                        
+                        <div class="mtbf-value">
+                            <div class="mtbf-number">{{ equipo_data.disponibilidad }}%</div>
+                            <div class="mtbf-label">Disponibilidad</div>
+                        </div>
+                        
+                        <div class="mtbf-value">
+                            <div class="mtbf-number">{{ equipo_data.ordenes_correctivas }}</div>
+                            <div class="mtbf-label">Fallas</div>
+                        </div>
+                        
+                        <span class="criticidad-badge criticidad-{{ equipo_data.criticidad }}">
+                            {{ equipo_data.criticidad|capfirst }}
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="mtbf-row">
+                    <div class="text-center w-100 text-muted">
+                        <i class="bi bi-info-circle me-2"></i>
+                        No hay datos suficientes para el análisis
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Predicciones de Mantenimiento -->
+        <div class="col-lg-4">
+            <div class="section-header">
+                <h2 class="section-title-predictivo">
+                    <i class="bi bi-calendar-event"></i>
+                    Predicciones
+                </h2>
+            </div>
+            
+            <div class="prediction-card">
+                <h3 class="prediction-title">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Mantenimientos Próximos (30 días)
+                </h3>
+                
+                {% for prediccion in equipos_mantenimiento_proximo %}
+                <div class="prediction-item urgencia-{{ prediccion.urgencia }}">
+                    <div>
+                        <div class="fw-semibold">{{ prediccion.plan.equipo.codigo_interno }}</div>
+                        <small class="text-muted">{{ prediccion.plan.nombre }}</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold text-primary">{{ prediccion.dias_restantes }} días</div>
+                        <small class="text-muted">{{ prediccion.probabilidad_falla }}% prob. falla</small>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-check-circle me-2"></i>
+                    No hay mantenimientos críticos programados
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas y Recomendaciones -->
+    {% if alertas %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="section-header">
+                <h2 class="section-title-predictivo">
+                    <i class="bi bi-bell"></i>
+                    Alertas y Recomendaciones
+                </h2>
+            </div>
+            
+            {% for alerta in alertas %}
+            <div class="alert-card-predictivo {{ alerta.tipo }}">
+                <div class="alert-title">
+                    <i class="bi bi-{% if alerta.tipo == 'critica' %}exclamation-triangle-fill{% elif alerta.tipo == 'warning' %}exclamation-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+                    {{ alerta.titulo }}
+                </div>
+                <div class="alert-description">{{ alerta.descripcion }}</div>
+                <button class="alert-action">
+                    <i class="bi bi-arrow-right me-1"></i>
+                    {{ alerta.accion }}
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // === GRÁFICA DE TENDENCIAS (ARREGLADO) ===
+    const ctx = document.getElementById('tendenciasChart');
+    if (ctx) {
+        const mesesLabels = {{ meses_labels|safe }};
+        const preventivasData = {{ preventivas_data|safe }};
+        const correctivasData = {{ correctivas_data|safe }};
+        const predictivasData = {{ predictivas_data|safe }};
+        
+        console.log('Datos del gráfico:', {
+            labels: mesesLabels,
+            preventivas: preventivasData,
+            correctivas: correctivasData,
+            predictivas: predictivasData
+        });
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: mesesLabels,
+                datasets: [{
+                    label: 'Preventivo',
+                    data: preventivasData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }, {
+                    label: 'Correctivo',
+                    data: correctivasData,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }, {
+                    label: 'Predictivo',
+                    data: predictivasData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#1e293b',
+                        bodyColor: '#64748b',
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1,
+                        titleFont: {
+                            weight: '600'
+                        },
+                        callbacks: {
+                            title: function(context) {
+                                return 'Mes: ' + context[0].label;
+                            },
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw + ' órdenes';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Período',
+                            font: {
+                                size: 14,
+                                weight: '600'
+                            }
+                        },
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Cantidad de Órdenes',
+                            font: {
+                                size: 14,
+                                weight: '600'
+                            }
+                        },
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(226, 232, 240, 0.5)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            },
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        console.error('Canvas element not found');
+    }
+
+    // === ANIMACIÓN DEL CÍRCULO DE PROGRESO ===
+    setTimeout(() => {
+        const progressFill = document.querySelector('.progress-ring-fill');
+        if (progressFill) {
+            const percentage = {{ disponibilidad_promedio|default:0 }};
+            const circumference = 2 * Math.PI * 52;
+            const offset = circumference - (percentage / 100 * circumference);
+            progressFill.style.strokeDashoffset = offset;
+            console.log('Círculo actualizado:', percentage + '%', 'Offset:', offset);
+        }
+    }, 500);
+
+    // === FUNCIONALIDAD DE EXPORTAR ===
+    const exportBtn = document.querySelector('.export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            alert('Funcionalidad de exportar próximamente disponible');
+        });
+    }
+
+    // === ANIMACIONES DE ENTRADA ===
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Animar elementos al entrar en vista
+    document.querySelectorAll('.metric-card-predictivo, .chart-container-predictivo, .mtbf-row').forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}

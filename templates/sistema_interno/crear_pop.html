@@ -1,0 +1,857 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pop-form-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .pop-form-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: var(--pure-white);
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pop-form-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .pop-form-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .pop-form-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0.5rem 0 0 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .pop-form-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .pop-form-stat-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .pop-form-stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-yellow);
+    }
+
+    .pop-form-stat-label {
+        font-size: 0.75rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+    }
+
+    .pop-form-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-blue);
+        margin: 0 0 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-section-title::before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: var(--primary-blue);
+        border-radius: 2px;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        border: 1.5px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        transition: all var(--transition-speed) ease;
+        background: var(--pure-white);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-light);
+        opacity: 0.7;
+    }
+
+    .form-check {
+        padding: 0.75rem;
+        background: var(--pure-white);
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        margin: 0.5rem 0;
+    }
+
+    .form-check-input {
+        margin-right: 0.75rem;
+    }
+
+    .form-check-label {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .btn-pop-primary {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border: none;
+        color: var(--pure-white);
+        padding: 0.875rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all var(--transition-speed) ease;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-pop-primary:hover {
+        color: var(--pure-white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-pop-secondary {
+        background: var(--off-white);
+        border: 1px solid var(--border-color);
+        color: var(--text-dark);
+        padding: 0.875rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all var(--transition-speed) ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-pop-secondary:hover {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        border-color: var(--primary-blue);
+        transform: translateY(-2px);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .help-text {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+        font-style: italic;
+    }
+
+    .required-field {
+        color: var(--danger-red);
+        margin-left: 2px;
+    }
+
+    .alert-form {
+        border: none;
+        border-radius: 0.75rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-red);
+        border-left: 4px solid var(--danger-red);
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+        border-left: 4px solid var(--success-green);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .pop-form-body {
+            padding: 1rem;
+        }
+
+        .form-section {
+            padding: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-pop-primary,
+        .btn-pop-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* File upload styling */
+    .form-control[type="file"] {
+        padding: 0.5rem;
+    }
+
+    .form-control[type="file"]::-webkit-file-upload-button {
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        margin-right: 1rem;
+        cursor: pointer;
+    }
+
+    /* Row spacing */
+    .row .col-md-6,
+    .row .col-md-4,
+    .row .col-md-3 {
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="pop-form-container">
+        <!-- Header -->
+        <div class="pop-form-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="pop-form-title">
+                        <i class="bi bi-file-earmark-plus me-3"></i>
+                        {{ titulo }}
+                    </h1>
+                    <p class="pop-form-subtitle">
+                        Crear un nuevo procedimiento operativo estándar según normas ISO 9001:2015
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    {% if stats %}
+                    <div class="pop-form-stats">
+                        <div class="pop-form-stat-card">
+                            <div class="pop-form-stat-value">{{ stats.total_pops }}</div>
+                            <div class="pop-form-stat-label">Total POPs</div>
+                        </div>
+                        <div class="pop-form-stat-card">
+                            <div class="pop-form-stat-value">{{ stats.pops_activos }}</div>
+                            <div class="pop-form-stat-label">Activos</div>
+                        </div>
+                        <div class="pop-form-stat-card">
+                            <div class="pop-form-stat-value">{{ stats.total_equipos }}</div>
+                            <div class="pop-form-stat-label">Equipos</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="pop-form-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-form alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Información Básica -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-info-circle"></i>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.codigo.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.codigo }}
+                                <div class="help-text">Se genera automáticamente</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.titulo.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.titulo }}
+                                {% if form.titulo.errors %}
+                                    <div class="text-danger">{{ form.titulo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.version.label_tag }}</label>
+                                {{ form.version }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.descripcion.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.descripcion }}
+                                {% if form.descripcion.errors %}
+                                    <div class="text-danger">{{ form.descripcion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clasificación -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-tags"></i>
+                        Clasificación
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.area.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.area }}
+                                {% if form.area.errors %}
+                                    <div class="text-danger">{{ form.area.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.tipo.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.tipo }}
+                                {% if form.tipo.errors %}
+                                    <div class="text-danger">{{ form.tipo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.prioridad.label_tag }}</label>
+                                {{ form.prioridad }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.estado.label_tag }}</label>
+                                {{ form.estado }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal y Equipos -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-people"></i>
+                        Personal y Equipos
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.responsable.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.responsable }}
+                                {% if form.responsable.errors %}
+                                    <div class="text-danger">{{ form.responsable.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.equipo_asociado.label_tag }}</label>
+                                {{ form.equipo_asociado }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.equipo.label_tag }}</label>
+                                {{ form.equipo }}
+                                <div class="help-text">Seleccionar del inventario</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Normativa y Tiempos -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-clock"></i>
+                        Normativa y Tiempos
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.normativa.label_tag }}</label>
+                                {{ form.normativa }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.tiempo_estimado.label_tag }}</label>
+                                {{ form.tiempo_estimado }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.frecuencia_aplicacion.label_tag }}</label>
+                                {{ form.frecuencia_aplicacion }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.normativa_especifica.label_tag }}</label>
+                                {{ form.normativa_especifica }}
+                                <div class="help-text">Completar solo si seleccionó "Otra normativa"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fechas -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-calendar"></i>
+                        Control de Fechas
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fecha_ultima_revision.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.fecha_ultima_revision }}
+                                {% if form.fecha_ultima_revision.errors %}
+                                    <div class="text-danger">{{ form.fecha_ultima_revision.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fecha_proxima_revision.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.fecha_proxima_revision }}
+                                {% if form.fecha_proxima_revision.errors %}
+                                    <div class="text-danger">{{ form.fecha_proxima_revision.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fecha_vencimiento.label_tag }}</label>
+                                {{ form.fecha_vencimiento }}
+                                {% if form.fecha_vencimiento.errors %}
+                                    <div class="text-danger">{{ form.fecha_vencimiento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenido del Procedimiento -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-file-text"></i>
+                        Contenido del Procedimiento
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.objetivo.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.objetivo }}
+                                {% if form.objetivo.errors %}
+                                    <div class="text-danger">{{ form.objetivo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.alcance.label_tag }}</label>
+                                {{ form.alcance }}
+                                {% if form.alcance.errors %}
+                                    <div class="text-danger">{{ form.alcance.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.materiales_herramientas.label_tag }}</label>
+                                {{ form.materiales_herramientas }}
+                                {% if form.materiales_herramientas.errors %}
+                                    <div class="text-danger">{{ form.materiales_herramientas.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.epp_requerido.label_tag }}</label>
+                                {{ form.epp_requerido }}
+                                {% if form.epp_requerido.errors %}
+                                    <div class="text-danger">{{ form.epp_requerido.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.precauciones_seguridad.label_tag }}</label>
+                                {{ form.precauciones_seguridad }}
+                                {% if form.precauciones_seguridad.errors %}
+                                    <div class="text-danger">{{ form.precauciones_seguridad.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.procedimiento_paso_a_paso.label_tag }}<span class="required-field">*</span></label>
+                                {{ form.procedimiento_paso_a_paso }}
+                                {% if form.procedimiento_paso_a_paso.errors %}
+                                    <div class="text-danger">{{ form.procedimiento_paso_a_paso.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.criterios_aceptacion.label_tag }}</label>
+                                {{ form.criterios_aceptacion }}
+                                {% if form.criterios_aceptacion.errors %}
+                                    <div class="text-danger">{{ form.criterios_aceptacion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.registros_documentos.label_tag }}</label>
+                                {{ form.registros_documentos }}
+                                {% if form.registros_documentos.errors %}
+                                    <div class="text-danger">{{ form.registros_documentos.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documentos -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-paperclip"></i>
+                        Documentos Adjuntos
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.documento_pdf.label_tag }}</label>
+                                {{ form.documento_pdf }}
+                                {% if form.documento_pdf.errors %}
+                                    <div class="text-danger">{{ form.documento_pdf.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.diagrama_flujo.label_tag }}</label>
+                                {{ form.diagrama_flujo }}
+                                {% if form.diagrama_flujo.errors %}
+                                    <div class="text-danger">{{ form.diagrama_flujo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fotos_referencia.label_tag }}</label>
+                                {{ form.fotos_referencia }}
+                                {% if form.fotos_referencia.errors %}
+                                    <div class="text-danger">{{ form.fotos_referencia.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración Adicional -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="bi bi-gear"></i>
+                        Configuración Adicional
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.es_critico }}
+                                <label class="form-check-label" for="{{ form.es_critico.id_for_label }}">
+                                    {{ form.es_critico.label }}
+                                </label>
+                                {% if form.es_critico.errors %}
+                                    <div class="text-danger">{{ form.es_critico.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.requiere_certificacion }}
+                                <label class="form-check-label" for="{{ form.requiere_certificacion.id_for_label }}">
+                                    {{ form.requiere_certificacion.label }}
+                                </label>
+                                {% if form.requiere_certificacion.errors %}
+                                    <div class="text-danger">{{ form.requiere_certificacion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.observaciones.label_tag }}</label>
+                                {{ form.observaciones }}
+                                {% if form.observaciones.errors %}
+                                    <div class="text-danger">{{ form.observaciones.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                {{ form.activo }}
+                                <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                    {{ form.activo.label }}
+                                </label>
+                                {% if form.activo.errors %}
+                                    <div class="text-danger">{{ form.activo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="form-actions">
+                    <a href="{% url 'operaciones:procedimientos-pop' %}" class="btn-pop-secondary">
+                        <i class="bi bi-x-circle"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn-pop-primary">
+                        <i class="bi bi-check-circle"></i>
+                        {% if accion == 'crear' %}Crear Procedimiento{% else %}Actualizar Procedimiento{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-llenar fecha de vencimiento con la próxima revisión
+    const fechaProxima = document.querySelector('#id_fecha_proxima_revision');
+    const fechaVencimiento = document.querySelector('#id_fecha_vencimiento');
+    
+    if (fechaProxima && fechaVencimiento) {
+        fechaProxima.addEventListener('change', function() {
+            if (!fechaVencimiento.value) {
+                fechaVencimiento.value = this.value;
+            }
+        });
+    }
+    
+    // Mostrar/ocultar campo normativa específica
+    const normativaSelect = document.querySelector('#id_normativa');
+    const normativaEspecifica = document.querySelector('#id_normativa_especifica').closest('.form-group');
+    
+    if (normativaSelect && normativaEspecifica) {
+        function toggleNormativaEspecifica() {
+            if (normativaSelect.value === 'otra') {
+                normativaEspecifica.style.display = 'block';
+            } else {
+                normativaEspecifica.style.display = 'none';
+            }
+        }
+        
+        normativaSelect.addEventListener('change', toggleNormativaEspecifica);
+        toggleNormativaEspecifica(); // Ejecutar al cargar
+    }
+    
+    // Validación de fechas
+    const fechaUltima = document.querySelector('#id_fecha_ultima_revision');
+    
+    if (fechaUltima && fechaProxima) {
+        function validarFechas() {
+            if (fechaUltima.value && fechaProxima.value) {
+                if (new Date(fechaProxima.value) <= new Date(fechaUltima.value)) {
+                    fechaProxima.setCustomValidity('La fecha de próxima revisión debe ser posterior a la última revisión.');
+                } else {
+                    fechaProxima.setCustomValidity('');
+                }
+            }
+        }
+        
+        fechaUltima.addEventListener('change', validarFechas);
+        fechaProxima.addEventListener('change', validarFechas);
+    }
+    
+    // Validación adicional en tiempo real
+    const requiredFields = document.querySelectorAll('[required]');
+    
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        field.addEventListener('input', function() {
+            clearFieldError(this);
+        });
+    });
+    
+    function validateField(field) {
+        const value = field.value.trim();
+        const isValid = value !== '';
+        
+        if (!isValid) {
+            field.style.borderColor = 'var(--danger-red)';
+            field.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.1)';
+        } else {
+            clearFieldError(field);
+        }
+        
+        return isValid;
+    }
+    
+    function clearFieldError(field) {
+        field.style.borderColor = 'var(--border-color)';
+        field.style.boxShadow = '';
+    }
+    
+    // Validación del formulario antes de enviar
+    const form = document.getElementById('popForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!validateField(field)) {
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Por favor complete todos los campos obligatorios marcados con *');
+                
+                // Scroll al primer campo con error
+                const firstError = document.querySelector('[style*="danger-red"]');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+    }
+    
+    // Auto-focus en el primer campo
+    const primerCampo = document.querySelector('#id_titulo');
+    if (primerCampo) {
+        primerCampo.focus();
+    }
+});
+</script>
+{% endblock %}
