@@ -1259,16 +1259,16 @@
                     Materiales y Herramientas
                 </div>
                 <div class="nav-item">
-            <!-- CAMBIAR ESTA LÍNEA - Quitar 'disabled' y agregar la URL correcta -->
-                    <a href="{% url 'materiales:materiales' %}" class="nav-link {% if 'materiales' in request.resolver_match.app_names %}active{% endif %}">
+                    <a href="{% url 'materiales:materiales' %}" class="nav-link {% if request.resolver_match.url_name == 'materiales' and request.resolver_match.namespace == 'materiales' %}active{% endif %}">
                     <i class="nav-icon bi bi-box-seam"></i>
                     <span class="nav-text">Materiales</span>
                     </a>
                 </div>
             
+                <!-- CORREGIR ESTA ENTRADA -->
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-tools"></i>
+                    <a href="{% url 'materiales:herramientas' %}" class="nav-link {% if request.resolver_match.url_name == 'herramientas' and request.resolver_match.namespace == 'materiales' %}active{% endif %}">
+                        <span class="nav-icon"><i class="bi bi-tools"></i></span>
                         <span class="nav-text">Herramientas</span>
                     </a>
                 </div>

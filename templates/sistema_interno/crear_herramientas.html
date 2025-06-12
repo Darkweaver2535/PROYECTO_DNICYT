@@ -1,0 +1,986 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* IMPORTANTE: Encapsular todos los estilos dentro de .crear-herramientas-page */
+    .crear-herramientas-page {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .crear-herramientas-page .herramientas-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .crear-herramientas-page .herramientas-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .crear-herramientas-page .herramientas-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .crear-herramientas-page .herramientas-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .crear-herramientas-page .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .crear-herramientas-page .stat-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        border-left: 5px solid var(--primary-blue);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .crear-herramientas-page .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .crear-herramientas-page .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .crear-herramientas-page .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .crear-herramientas-page .form-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    /* ✅ CORREGIR ESTILOS DEL ENCABEZADO DE SECCIÓN */
+    .crear-herramientas-page .section-header {
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        color: white;
+        padding: 1.5rem 2rem;
+        margin-bottom: 0;
+    }
+
+    .crear-herramientas-page .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: white !important; /* ✅ FORZAR COLOR BLANCO */
+    }
+
+    .crear-herramientas-page .section-title i {
+        color: white !important; /* ✅ ÍCONOS TAMBIÉN EN BLANCO */
+    }
+
+    .crear-herramientas-page .section-body {
+        padding: 2rem;
+    }
+
+    .crear-herramientas-page .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .crear-herramientas-page .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ✅ MEJORAR ESTILOS DE LABELS */
+    .crear-herramientas-page .form-label {
+        font-weight: 600;
+        color: #374151 !important; /* ✅ COLOR GRIS OSCURO PARA CONTRASTE */
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .crear-herramientas-page .form-label.required::after {
+        content: ' *';
+        color: #dc2626 !important; /* ✅ ROJO PARA ASTERISCO */
+    }
+
+    .crear-herramientas-page .form-control,
+    .crear-herramientas-page .form-select {
+        border: 2px solid #d1d5db;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        background: #ffffff;
+        color: #374151; /* ✅ COLOR DEL TEXTO */
+    }
+
+    .crear-herramientas-page .form-control:focus,
+    .crear-herramientas-page .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        outline: none;
+    }
+
+    .crear-herramientas-page .form-control.is-invalid,
+    .crear-herramientas-page .form-select.is-invalid {
+        border-color: #dc2626;
+    }
+
+    .crear-herramientas-page .invalid-feedback {
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block !important;
+    }
+
+    .crear-herramientas-page .form-help {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    .crear-herramientas-page .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s ease;
+    }
+
+    .crear-herramientas-page .form-check:hover {
+        background: #e0f2fe;
+        border-color: #3b82f6;
+    }
+
+    .crear-herramientas-page .form-check-input {
+        width: 1.2rem;
+        height: 1.2rem;
+        margin: 0;
+    }
+
+    .crear-herramientas-page .form-check-label {
+        font-weight: 500;
+        color: #374151 !important; /* ✅ COLOR PARA LABELS DE CHECKBOX */
+        margin: 0;
+        cursor: pointer;
+    }
+
+    /* Sección específica para herramientas */
+    .crear-herramientas-page .herramientas-specific {
+        background: linear-gradient(135deg, #f0f8ff 0%, #e8f4f8 100%);
+        border: 2px solid #bfdbfe;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .crear-herramientas-page .herramientas-specific-title {
+        color: #1e40af;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Campos condicionales */
+    .crear-herramientas-page .conditional-fields {
+        display: none;
+        transition: all 0.3s ease;
+    }
+
+    .crear-herramientas-page .conditional-fields.show {
+        display: block;
+    }
+
+    .crear-herramientas-page .actions-section {
+        background: #f9fafb;
+        padding: 2rem;
+        border-top: 1px solid #d1d5db;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .crear-herramientas-page .btn-group {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .crear-herramientas-page .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 2px solid;
+        cursor: pointer;
+    }
+
+    .crear-herramientas-page .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .crear-herramientas-page .btn-primary:hover {
+        background: #1e40af;
+        border-color: #1e40af;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .crear-herramientas-page .btn-secondary {
+        background: white;
+        color: #374151;
+        border-color: #d1d5db;
+    }
+
+    .crear-herramientas-page .btn-secondary:hover {
+        background: #f9fafb;
+        border-color: #374151;
+    }
+
+    /* Alertas de validación */
+    .crear-herramientas-page .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid;
+    }
+
+    .crear-herramientas-page .alert-danger {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+    }
+
+    .crear-herramientas-page .alert-success {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+        color: #16a34a;
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .crear-herramientas-page .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .crear-herramientas-page .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .crear-herramientas-page .actions-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .crear-herramientas-page .btn-group {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .crear-herramientas-page .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .crear-herramientas-page .herramientas-title {
+            font-size: 1.75rem;
+        }
+        
+        .crear-herramientas-page .section-body {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- IMPORTANTE: Envolver todo el contenido en .crear-herramientas-page -->
+<div class="crear-herramientas-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="herramientas-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="herramientas-title">
+                        <i class="bi bi-tools"></i>
+                        {{ titulo }}
+                    </h1>
+                    <p class="herramientas-subtitle">
+                        Complete la información técnica de la herramienta
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'materiales:herramientas' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Volver a Herramientas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas rápidas -->
+        {% if stats %}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_herramientas }}</div>
+                <div class="stat-label">Total Herramientas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_categorias_herramientas }}</div>
+                <div class="stat-label">Categorías Disponibles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_proveedores }}</div>
+                <div class="stat-label">Proveedores Activos</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Alertas de validación -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong><i class="bi bi-exclamation-triangle"></i> Error de validación:</strong>
+            <ul class="mb-0 mt-2">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field|title }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Formulario principal -->
+        <form method="post" enctype="multipart/form-data" class="herramientas-form" id="herramientaForm">
+            {% csrf_token %}
+            
+            <!-- Información Básica -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="bi bi-info-circle"></i>
+                        Información Básica
+                    </h3>
+                </div>
+                <div class="section-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.nombre.label }}</label>
+                            {{ form.nombre }}
+                            <div class="form-help">Nombre descriptivo de la herramienta</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.tipo.label }}</label>
+                            {{ form.tipo }}
+                            <div class="form-help">Clasificación del tipo de herramienta</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.descripcion.label }}</label>
+                            {{ form.descripcion }}
+                            <div class="form-help">Descripción detallada de la herramienta</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.categoria.label }}</label>
+                            {{ form.categoria }}
+                            <div class="form-help">Categoría de clasificación</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.marca.label }}</label>
+                            {{ form.marca }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.modelo.label }}</label>
+                            {{ form.modelo }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.numero_parte.label }}</label>
+                            {{ form.numero_parte }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.codigo_barras.label }}</label>
+                            {{ form.codigo_barras }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventario y Stock -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="bi bi-boxes"></i>
+                        Inventario y Stock
+                    </h3>
+                </div>
+                <div class="section-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.stock_actual.label }}</label>
+                            {{ form.stock_actual }}
+                            <div class="form-help">Cantidad actual en inventario</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.stock_minimo.label }}</label>
+                            {{ form.stock_minimo }}
+                            <div class="form-help">Nivel mínimo de stock</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.stock_maximo.label }}</label>
+                            {{ form.stock_maximo }}
+                            <div class="form-help">Nivel máximo de stock</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.punto_reorden.label }}</label>
+                            {{ form.punto_reorden }}
+                            <div class="form-help">Punto para solicitar reposición</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.unidad_medida.label }}</label>
+                            {{ form.unidad_medida }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.precio_unitario.label }}</label>
+                            {{ form.precio_unitario }}
+                            <div class="form-help">Precio en bolivianos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clasificación y Control -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="bi bi-tags"></i>
+                        Clasificación y Control
+                    </h3>
+                </div>
+                <div class="section-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">{{ form.estado.label }}</label>
+                            {{ form.estado }}
+                            <div class="form-help">Estado actual de la herramienta</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.criticidad.label }}</label>
+                            {{ form.criticidad }}
+                            <div class="form-help">Nivel de criticidad operacional</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.ubicacion.label }}</label>
+                            {{ form.ubicacion }}
+                            <div class="form-help">Ubicación física en almacén</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.proveedor_principal.label }}</label>
+                            {{ form.proveedor_principal }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.requiere_refrigeracion }}
+                                <label class="form-check-label">{{ form.requiere_refrigeracion.label }}</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.requiere_manejo_especial }}
+                                <label class="form-check-label">{{ form.requiere_manejo_especial.label }}</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.es_herramienta_critica }}
+                                <label class="form-check-label">{{ form.es_herramienta_critica.label }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calibración y Mantenimiento -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="bi bi-speedometer2"></i>
+                        Calibración y Mantenimiento
+                    </h3>
+                </div>
+                <div class="section-body">
+                    <div class="herramientas-specific">
+                        <h4 class="herramientas-specific-title">
+                            <i class="bi bi-gear"></i>
+                            Configuración Específica para Herramientas
+                        </h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    {{ form.requiere_calibracion }}
+                                    <label class="form-check-label">{{ form.requiere_calibracion.label }}</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check">
+                                    {{ form.requiere_mantenimiento }}
+                                    <label class="form-check-label">{{ form.requiere_mantenimiento.label }}</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="conditional-fields" id="calibracion-fields">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">{{ form.fecha_ultima_calibracion.label }}</label>
+                                    {{ form.fecha_ultima_calibracion }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">{{ form.frecuencia_calibracion.label }}</label>
+                                    {{ form.frecuencia_calibracion }}
+                                    <div class="form-help">Días entre calibraciones</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="conditional-fields" id="mantenimiento-fields">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">{{ form.fecha_ultimo_mantenimiento.label }}</label>
+                                    {{ form.fecha_ultimo_mantenimiento }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">{{ form.frecuencia_mantenimiento.label }}</label>
+                                    {{ form.frecuencia_mantenimiento }}
+                                    <div class="form-help">Días entre mantenimientos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fechas Importantes -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="bi bi-calendar"></i>
+                        Fechas Importantes
+                    </h3>
+                </div>
+                <div class="section-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.fecha_vencimiento.label }}</label>
+                            {{ form.fecha_vencimiento }}
+                            <div class="form-help">Fecha de vencimiento (si aplica)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.fecha_ultima_compra.label }}</label>
+                            {{ form.fecha_ultima_compra }}
+                            <div class="form-help">Fecha de la última compra</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentos -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="bi bi-file-earmark"></i>
+                        Documentos y Archivos
+                    </h3>
+                </div>
+                <div class="section-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.foto.label }}</label>
+                            {{ form.foto }}
+                            <div class="form-help">Imagen de la herramienta</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.ficha_tecnica.label }}</label>
+                            {{ form.ficha_tecnica }}
+                            <div class="form-help">Documento técnico (PDF, DOC)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="actions-section">
+                <div class="d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Limpiar Formulario
+                    </button>
+                    
+                    <div class="btn-group">
+                        <a href="{% url 'materiales:herramientas' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="bi bi-check-circle"></i>
+                            {% if accion == 'crear' %}Crear Herramienta{% else %}Actualizar Herramienta{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCrearHerramientasForm();
+    console.log('🔧 Crear Herramientas - Formulario cargado correctamente');
+});
+
+function initializeCrearHerramientasForm() {
+    // Configurar campos de calibración
+    setupCalibracionFields();
+    
+    // Configurar campos de mantenimiento  
+    setupMantenimientoFields();
+    
+    // Validación en tiempo real
+    setupRealTimeValidation();
+}
+
+function setupCalibracionFields() {
+    const requiereCalibracion = document.getElementById('id_requiere_calibracion');
+    const calibracionFields = document.getElementById('calibracion-fields');
+    
+    if (requiereCalibracion && calibracionFields) {
+        function toggleCalibracionFields() {
+            if (requiereCalibracion.checked) {
+                calibracionFields.classList.add('show');
+            } else {
+                calibracionFields.classList.remove('show');
+            }
+        }
+        
+        requiereCalibracion.addEventListener('change', toggleCalibracionFields);
+        toggleCalibracionFields(); // Inicializar estado
+    }
+}
+
+function setupMantenimientoFields() {
+    const requiereMantenimiento = document.getElementById('id_requiere_mantenimiento');
+    const mantenimientoFields = document.getElementById('mantenimiento-fields');
+    
+    if (requiereMantenimiento && mantenimientoFields) {
+        function toggleMantenimientoFields() {
+            if (requiereMantenimiento.checked) {
+                mantenimientoFields.classList.add('show');
+            } else {
+                mantenimientoFields.classList.remove('show');
+            }
+        }
+        
+        requiereMantenimiento.addEventListener('change', toggleMantenimientoFields);
+        toggleMantenimientoFields(); // Inicializar estado
+    }
+}
+
+function setupRealTimeValidation() {
+    const form = document.getElementById('herramientaForm');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+    });
+}
+
+function validateField(field) {
+    let isValid = true;
+    let errorMessage = '';
+    
+    // Validaciones específicas
+    switch(field.name) {
+        case 'nombre':
+            if (!field.value.trim()) {
+                isValid = false;
+                errorMessage = 'El nombre de la herramienta es obligatorio';
+            } else if (field.value.trim().length < 3) {
+                isValid = false;
+                errorMessage = 'El nombre debe tener al menos 3 caracteres';
+            }
+            break;
+            
+        case 'stock_actual':
+        case 'stock_minimo':
+        case 'punto_reorden':
+            if (field.value && (isNaN(field.value) || field.value < 0)) {
+                isValid = false;
+                errorMessage = 'Debe ser un número positivo';
+            }
+            break;
+            
+        case 'precio_unitario':
+            if (field.value && (isNaN(field.value) || field.value < 0)) {
+                isValid = false;
+                errorMessage = 'El precio debe ser un número positivo';
+            }
+            break;
+            
+        case 'frecuencia_calibracion':
+            const requiereCalibracion = document.getElementById('id_requiere_calibracion');
+            if (requiereCalibracion && requiereCalibracion.checked && !field.value) {
+                isValid = false;
+                errorMessage = 'La frecuencia de calibración es obligatoria';
+            }
+            break;
+    }
+    
+    // Mostrar/ocultar error
+    if (!isValid) {
+        showFieldError(field, errorMessage);
+    } else {
+        hideFieldError(field);
+    }
+    
+    return isValid;
+}
+
+function showFieldError(field, message) {
+    field.classList.add('is-invalid');
+    
+    let feedback = field.parentNode.querySelector('.invalid-feedback');
+    if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        field.parentNode.appendChild(feedback);
+    }
+    
+    feedback.textContent = message;
+    feedback.style.display = 'block';
+}
+
+function hideFieldError(field) {
+    field.classList.remove('is-invalid');
+    const feedback = field.parentNode.querySelector('.invalid-feedback');
+    if (feedback) {
+        feedback.style.display = 'none';
+    }
+}
+
+function limpiarFormulario() {
+    if (confirm('¿Estás seguro de que quieres limpiar todos los campos del formulario?')) {
+        document.getElementById('herramientaForm').reset();
+        
+        // Ocultar campos condicionales
+        document.getElementById('calibracion-fields').classList.remove('show');
+        document.getElementById('mantenimiento-fields').classList.remove('show');
+        
+        // Limpiar errores
+        const invalidFields = document.querySelectorAll('.is-invalid');
+        invalidFields.forEach(field => hideFieldError(field));
+        
+        mostrarNotificacion('Formulario limpiado', 'info');
+    }
+}
+
+// Validación antes de enviar
+document.getElementById('herramientaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const form = this;
+    
+    // Validar todo el formulario
+    const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+    let isFormValid = true;
+    
+    inputs.forEach(input => {
+        if (!validateField(input)) {
+            isFormValid = false;
+        }
+    });
+    
+    if (!isFormValid) {
+        mostrarNotificacion('Por favor corrige los errores en el formulario', 'error');
+        return;
+    }
+    
+    // Mostrar loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+    
+    // Enviar formulario
+    setTimeout(() => {
+        form.submit();
+    }, 500);
+});
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const colores = {
+        'success': '#10b981',
+        'error': '#ef4444',
+        'warning': '#f59e0b',
+        'info': '#3b82f6'
+    };
+    
+    const iconos = {
+        'success': 'bi-check-circle-fill',
+        'error': 'bi-x-circle-fill',
+        'warning': 'bi-exclamation-triangle-fill',
+        'info': 'bi-info-circle-fill'
+    };
+    
+    // Crear notificación
+    const notificacion = document.createElement('div');
+    notificacion.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: ${colores[tipo]};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        max-width: 400px;
+        animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    `;
+    
+    notificacion.innerHTML = `
+        <i class="bi ${iconos[tipo]}" style="font-size: 1.2rem;"></i>
+        <span>${mensaje}</span>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+        notificacion.style.animation = 'slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => {
+            if (notificacion.parentNode) {
+                notificacion.parentNode.removeChild(notificacion);
+            }
+        }, 400);
+    }, 4000);
+}
+
+// Agregar estilos de animación
+const animationStyles = document.createElement('style');
+animationStyles.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(animationStyles);
+</script>
+{% endblock %}

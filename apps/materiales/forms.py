@@ -1,108 +1,119 @@
 from django import forms
-from .models import Material, MovimientoMaterial, CategoriaMaterial
+from .models import Material, CategoriaMaterial, MovimientoMaterial
 from apps.inventario.models import Proveedor
-from django.contrib.auth.models import User
-from datetime import date
+from datetime import date, timedelta
 
 class MaterialForm(forms.ModelForm):
     class Meta:
         model = Material
-        exclude = ['fecha_creacion', 'fecha_actualizacion', 'codigo', 'activo']
+        exclude = ['codigo', 'fecha_creacion', 'fecha_actualizacion']
+        
         widgets = {
-            # Información básica
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Nombre descriptivo del material',
-                'required': True
+                'placeholder': 'Nombre del material o herramienta'
             }),
             'descripcion': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Descripción detallada del material',
-                'required': True
+                'rows': 3,
+                'placeholder': 'Descripción detallada'
             }),
             'tipo': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
-            }),
-            'categoria': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
-            }),
-            'estado': forms.Select(attrs={  # <- AGREGAR ESTE WIDGET QUE FALTABA
-                'class': 'form-select',
-                'required': True
-            }),
-            'criticidad': forms.Select(attrs={  # <- AGREGAR ESTE WIDGET
                 'class': 'form-select'
             }),
-            
-            # Identificación
+            'categoria': forms.Select(attrs={
+                'class': 'form-select'
+            }),
             'marca': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Marca del material'
+                'placeholder': 'Marca del producto'
             }),
             'modelo': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Modelo o referencia específica'
+                'placeholder': 'Modelo'
             }),
             'numero_parte': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Número de parte del fabricante'
+                'placeholder': 'Número de parte'
             }),
             'codigo_barras': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Código de barras (opcional)'
+                'placeholder': 'Código de barras'
             }),
-            
-            # Inventario
             'stock_actual': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
-                'step': '0.01',
-                'value': '0',
-                'required': True
+                'step': '0.01'
             }),
             'stock_minimo': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
-                'step': '0.01',
-                'value': '1',
-                'required': True
+                'step': '0.01'
             }),
             'stock_maximo': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
-                'step': '0.01',
-                'value': '100'
+                'step': '0.01'
             }),
             'punto_reorden': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
-                'step': '0.01',
-                'value': '5'
+                'step': '0.01'
             }),
             'unidad_medida': forms.Select(attrs={
-                'class': 'form-select',
-                'required': True
+                'class': 'form-select'
             }),
             'precio_unitario': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
-                'step': '0.01',
-                'value': '0'
+                'step': '0.01'
             }),
-            
-            # Ubicación y proveedor - CORREGIR ESTE WIDGET
-            'ubicacion': forms.TextInput(attrs={  # <- CAMBIAR DE Textarea A TextInput
+            'criticidad': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'estado': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'ubicacion': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ubicación específica en el almacén (ej: Estante A-3, Nivel 2)'
+                'placeholder': 'Ubicación en almacén'
             }),
             'proveedor_principal': forms.Select(attrs={
                 'class': 'form-select'
             }),
-            
-            # Fechas importantes
+            'requiere_refrigeracion': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'requiere_manejo_especial': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'es_herramienta_critica': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'requiere_calibracion': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'fecha_ultima_calibracion': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'frecuencia_calibracion': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Días entre calibraciones'
+            }),
+            'requiere_mantenimiento': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'fecha_ultimo_mantenimiento': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'frecuencia_mantenimiento': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Días entre mantenimientos'
+            }),
             'fecha_vencimiento': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
@@ -111,18 +122,6 @@ class MaterialForm(forms.ModelForm):
                 'class': 'form-control',
                 'type': 'date'
             }),
-            
-            # Características especiales
-            'requiere_refrigeracion': forms.CheckboxInput(attrs={
-                'class': 'form-check-input',
-                'id': 'id_requiere_refrigeracion'
-            }),
-            'requiere_manejo_especial': forms.CheckboxInput(attrs={
-                'class': 'form-check-input', 
-                'id': 'id_requiere_manejo_especial'
-            }),
-            
-            # Documentos
             'foto': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*'
@@ -131,153 +130,153 @@ class MaterialForm(forms.ModelForm):
                 'class': 'form-control',
                 'accept': '.pdf,.doc,.docx'
             }),
+            'activo': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Configurar queryset para categorías
-        self.fields['categoria'].queryset = CategoriaMaterial.objects.filter(
-            activo=True
-        ).order_by('nombre')
-        self.fields['categoria'].empty_label = "Seleccionar categoría"
-        
         # Configurar queryset para proveedores
-        self.fields['proveedor_principal'].queryset = Proveedor.objects.filter(
-            activo=True
-        ).order_by('nombre')
+        self.fields['proveedor_principal'].queryset = Proveedor.objects.filter(activo=True).order_by('nombre')
         self.fields['proveedor_principal'].empty_label = "Seleccionar proveedor (opcional)"
         
-        # CAMBIAR ESTA LÍNEA - quitar 'criticidad' de los campos obligatorios
-        campos_obligatorios = ['nombre', 'descripcion', 'tipo', 'categoria', 'stock_actual', 'stock_minimo', 'unidad_medida', 'estado']
+        # Configurar queryset para categorías
+        self.fields['categoria'].queryset = CategoriaMaterial.objects.filter(activo=True).order_by('nombre')
         
-        for campo in campos_obligatorios:
-            if campo in self.fields:
-                self.fields[campo].required = True
-        
-        # Configurar valores por defecto SOLO para nuevos materiales
-        if not self.instance.pk:
-            self.fields['stock_actual'].initial = 0
-            self.fields['stock_minimo'].initial = 1
-            self.fields['stock_maximo'].initial = 100
-            self.fields['punto_reorden'].initial = 5
-            self.fields['precio_unitario'].initial = 0
-            self.fields['criticidad'].initial = 'media'  # <- MANTENER ESTE DEFAULT
-            self.fields['estado'].initial = 'disponible'
-
-    def clean_estado(self):  # <- AGREGAR VALIDACIÓN PARA ESTADO
-        estado = self.cleaned_data.get('estado')
-        if not estado:
-            raise forms.ValidationError('El estado del material es obligatorio.')
-        return estado
-
-    def clean_ubicacion(self):  # <- AGREGAR VALIDACIÓN PARA UBICACIÓN
-        ubicacion = self.cleaned_data.get('ubicacion')
-        # La ubicación puede ser opcional, pero si se proporciona debe ser válida
-        if ubicacion:
-            ubicacion = ubicacion.strip()
-            if len(ubicacion) < 3:
-                raise forms.ValidationError('La ubicación debe tener al menos 3 caracteres.')
-            return ubicacion
-        return ubicacion  # Puede ser None o vacío
+        # Hacer obligatorios solo los campos esenciales
+        self.fields['nombre'].required = True
+        self.fields['descripcion'].required = True
+        self.fields['tipo'].required = True
+        self.fields['categoria'].required = True
+        self.fields['estado'].required = True  # ✅ AGREGAR ESTA LÍNEA
 
     def clean_nombre(self):
         nombre = self.cleaned_data.get('nombre')
-        if not nombre:
-            raise forms.ValidationError('El nombre del material es obligatorio.')
-        nombre = nombre.strip()
-        if len(nombre) < 3:
+        if not nombre or not nombre.strip():
+            raise forms.ValidationError('El nombre es obligatorio.')
+        if len(nombre.strip()) < 3:
             raise forms.ValidationError('El nombre debe tener al menos 3 caracteres.')
-        return nombre
+        return nombre.strip()
 
     def clean_descripcion(self):
         descripcion = self.cleaned_data.get('descripcion')
-        if not descripcion:
+        if not descripcion or not descripcion.strip():
             raise forms.ValidationError('La descripción es obligatoria.')
-        descripcion = descripcion.strip()
-        if len(descripcion) < 10:
+        if len(descripcion.strip()) < 10:
             raise forms.ValidationError('La descripción debe tener al menos 10 caracteres.')
-        return descripcion
-
-    def clean_stock_actual(self):
-        stock = self.cleaned_data.get('stock_actual')
-        if stock is None:
-            return 0  # Valor por defecto
-        if stock < 0:
-            raise forms.ValidationError('El stock actual no puede ser negativo.')
-        return stock
-
-    def clean_stock_minimo(self):
-        stock_min = self.cleaned_data.get('stock_minimo')
-        if stock_min is None:
-            return 1  # Valor por defecto
-        if stock_min < 0:
-            raise forms.ValidationError('El stock mínimo no puede ser negativo.')
-        return stock_min
-
-    def clean_precio_unitario(self):
-        precio = self.cleaned_data.get('precio_unitario')
-        if precio is None:
-            return 0  # Valor por defecto
-        if precio < 0:
-            raise forms.ValidationError('El precio no puede ser negativo.')
-        return precio
+        return descripcion.strip()
 
     def clean(self):
         cleaned_data = super().clean()
         
-        # Debug para ver qué datos llegan
-        print(f"DEBUG FORM: cleaned_data = {cleaned_data}")
+        # Solo validar calibración si se requiere y se proporcionan datos
+        requiere_calibracion = cleaned_data.get('requiere_calibracion')
+        fecha_ultima_calibracion = cleaned_data.get('fecha_ultima_calibracion')
+        frecuencia_calibracion = cleaned_data.get('frecuencia_calibracion')
         
-        stock_actual = cleaned_data.get('stock_actual', 0)
-        stock_minimo = cleaned_data.get('stock_minimo', 1)
-        stock_maximo = cleaned_data.get('stock_maximo')
-        punto_reorden = cleaned_data.get('punto_reorden', 5)
-        fecha_vencimiento = cleaned_data.get('fecha_vencimiento')
-        
-        # Validar lógica de stocks solo si tenemos valores
-        if stock_minimo and stock_maximo and stock_maximo <= stock_minimo:
-            raise forms.ValidationError({
-                'stock_maximo': 'El stock máximo debe ser mayor al stock mínimo.'
-            })
-        
-        if punto_reorden and stock_minimo and punto_reorden > stock_minimo:
-            raise forms.ValidationError({
-                'punto_reorden': 'El punto de reorden no puede ser mayor al stock mínimo.'
-            })
-        
-        # Validar fecha de vencimiento
-        if fecha_vencimiento and fecha_vencimiento <= date.today():
-            raise forms.ValidationError({
-                'fecha_vencimiento': 'La fecha de vencimiento debe ser posterior a hoy.'
-            })
+        if requiere_calibracion and fecha_ultima_calibracion and frecuencia_calibracion:
+            if fecha_ultima_calibracion > date.today():
+                raise forms.ValidationError({
+                    'fecha_ultima_calibracion': 'La fecha de última calibración no puede ser futura.'
+                })
         
         return cleaned_data
+
+class HerramientaForm(MaterialForm):
+    """Formulario específico para herramientas (hereda de MaterialForm)"""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Filtrar tipos solo para herramientas
+        tipos_herramientas = [
+            ('herramienta_manual', 'Herramienta Manual'),
+            ('herramienta_electrica', 'Herramienta Eléctrica'),
+            ('herramienta_precision', 'Herramienta de Precisión'),
+            ('herramienta_soldadura', 'Herramienta de Soldadura'),
+            ('herramienta_corte', 'Herramienta de Corte'),
+            ('herramienta_medicion', 'Herramienta de Medición'),
+            ('herramienta_seguridad', 'Herramienta de Seguridad'),
+            ('instrumento_laboratorio', 'Instrumento de Laboratorio'),
+            ('herramienta_neumatica', 'Herramienta Neumática'),
+            ('herramienta_hidraulica', 'Herramienta Hidráulica'),
+            ('equipo_calibracion', 'Equipo de Calibración'),
+            ('instrumento_medicion_digital', 'Instrumento de Medición Digital'),
+            ('herramienta_especial', 'Herramienta Especializada'),
+        ]
+        
+        self.fields['tipo'].choices = tipos_herramientas
+        
+        # Filtrar categorías solo para herramientas
+        self.fields['categoria'].queryset = CategoriaMaterial.objects.filter(
+            tipo_categoria__in=[
+                'herramientas_manuales', 'herramientas_electricas', 'instrumentos_medicion',
+                'herramientas_precision', 'herramientas_corte', 'equipos_laboratorio',
+                'herramientas_soldadura_eq', 'herramientas_neumaticas', 'herramientas_hidraulicas',
+                'instrumentos_calibracion', 'herramientas_seguridad', 'herramientas_especiales'
+            ],
+            activo=True
+        ).order_by('nombre')
 
 class MovimientoMaterialForm(forms.ModelForm):
     class Meta:
         model = MovimientoMaterial
-        exclude = ['numero_movimiento', 'usuario', 'stock_anterior', 'stock_nuevo']
+        exclude = ['numero_movimiento', 'stock_anterior', 'stock_nuevo', 'usuario', 'costo_total']
+        
         widgets = {
-            'material': forms.Select(attrs={'class': 'form-select'}),
-            'tipo_movimiento': forms.Select(attrs={'class': 'form-select'}),
-            'motivo': forms.Select(attrs={'class': 'form-select'}),
+            'material': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'tipo_movimiento': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'motivo': forms.Select(attrs={
+                'class': 'form-select'
+            }),
             'cantidad': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'step': '0.01',
-                'min': '0.01'
+                'min': '0.01',
+                'step': '0.01'
             }),
             'costo_unitario': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
-            }),
-            'observaciones': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3
+                'min': '0',
+                'step': '0.01'
             }),
             'fecha_movimiento': forms.DateTimeInput(attrs={
                 'class': 'form-control',
                 'type': 'datetime-local'
             }),
+            'documento_referencia': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Número de documento o referencia'
+            }),
+            'observaciones': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Observaciones adicionales'
+            }),
+            'estado': forms.Select(attrs={
+                'class': 'form-select'
+            }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Configurar queryset para materiales
+        self.fields['material'].queryset = Material.objects.filter(activo=True).order_by('nombre')
+        
+        # Hacer obligatorios los campos esenciales
+        self.fields['material'].required = True
+        self.fields['tipo_movimiento'].required = True
+        self.fields['motivo'].required = True
+        self.fields['cantidad'].required = True
+
+    def clean_cantidad(self):
+        cantidad = self.cleaned_data.get('cantidad')
+        if cantidad <= 0:
+            raise forms.ValidationError('La cantidad debe ser mayor a cero.')
+        return cantidad

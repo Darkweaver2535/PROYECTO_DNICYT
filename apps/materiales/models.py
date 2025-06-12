@@ -6,12 +6,11 @@ from datetime import date, timedelta
 from django.utils import timezone
 from decimal import Decimal
 
-# NO crear clase Proveedor aquí - usar la del inventario
-
 class CategoriaMaterial(models.Model):
-    """Categorías para clasificar materiales"""
+    """Categorías para clasificar materiales y herramientas"""
     
     TIPO_CATEGORIA_CHOICES = [
+        # ✅ CATEGORÍAS PARA MATERIALES
         ('materiales_construccion', 'Materiales de Construcción'),
         ('materiales_soldadura', 'Materiales de Soldadura'),
         ('consumibles_laboratorio', 'Consumibles de Laboratorio'),
@@ -24,6 +23,20 @@ class CategoriaMaterial(models.Model):
         ('adhesivos_sellantes', 'Adhesivos y Sellantes'),
         ('abrasivos_pulimentos', 'Abrasivos y Pulimentos'),
         ('materiales_proteccion', 'Materiales de Protección'),
+        
+        # ✅ CATEGORÍAS ESPECÍFICAS PARA HERRAMIENTAS
+        ('herramientas_manuales', 'Herramientas Manuales'),
+        ('herramientas_electricas', 'Herramientas Eléctricas'),
+        ('instrumentos_medicion', 'Instrumentos de Medición'),
+        ('herramientas_precision', 'Herramientas de Precisión'),
+        ('herramientas_corte', 'Herramientas de Corte'),
+        ('equipos_laboratorio', 'Equipos de Laboratorio'),
+        ('herramientas_soldadura_eq', 'Herramientas de Soldadura'),
+        ('herramientas_neumaticas', 'Herramientas Neumáticas'),
+        ('herramientas_hidraulicas', 'Herramientas Hidráulicas'),
+        ('instrumentos_calibracion', 'Instrumentos de Calibración'),
+        ('herramientas_seguridad', 'Herramientas de Seguridad'),
+        ('herramientas_especiales', 'Herramientas Especializadas'),
     ]
     
     nombre = models.CharField("Nombre de Categoría", max_length=100, unique=True)
@@ -40,12 +53,11 @@ class CategoriaMaterial(models.Model):
     def __str__(self):
         return f"{self.codigo} - {self.nombre}"
 
-# NO crear clase Proveedor aquí - usar la del inventario
-
 class Material(models.Model):
-    """Modelo principal para materiales (NO herramientas)"""
+    """Modelo principal para materiales y herramientas"""
     
     TIPO_CHOICES = [
+        # ✅ TIPOS DE MATERIALES
         ('material_construccion', 'Material de Construcción'),
         ('material_soldadura', 'Material de Soldadura'),
         ('consumible_general', 'Consumible General'),
@@ -58,6 +70,21 @@ class Material(models.Model):
         ('combustible', 'Combustible'),
         ('gas_industrial', 'Gas Industrial'),
         ('pintura_recubrimiento', 'Pintura/Recubrimiento'),
+        
+        # ✅ TIPOS ESPECÍFICOS DE HERRAMIENTAS
+        ('herramienta_manual', 'Herramienta Manual'),
+        ('herramienta_electrica', 'Herramienta Eléctrica'),
+        ('herramienta_precision', 'Herramienta de Precisión'),
+        ('herramienta_soldadura', 'Herramienta de Soldadura'),
+        ('herramienta_corte', 'Herramienta de Corte'),
+        ('herramienta_medicion', 'Herramienta de Medición'),
+        ('herramienta_seguridad', 'Herramienta de Seguridad'),
+        ('instrumento_laboratorio', 'Instrumento de Laboratorio'),
+        ('herramienta_neumatica', 'Herramienta Neumática'),
+        ('herramienta_hidraulica', 'Herramienta Hidráulica'),
+        ('equipo_calibracion', 'Equipo de Calibración'),
+        ('instrumento_medicion_digital', 'Instrumento de Medición Digital'),
+        ('herramienta_especial', 'Herramienta Especializada'),
     ]
     
     ESTADO_CHOICES = [
@@ -66,6 +93,9 @@ class Material(models.Model):
         ('bajo_stock', 'Stock Bajo'),
         ('en_pedido', 'En Pedido'),
         ('descontinuado', 'Descontinuado'),
+        ('en_uso', 'En Uso'),
+        ('mantenimiento', 'En Mantenimiento'),
+        ('calibracion', 'En Calibración'),
     ]
     
     CRITICIDAD_CHOICES = [
@@ -85,13 +115,16 @@ class Material(models.Model):
         ('rollo', 'Rollo'),
         ('par', 'Par'),
         ('juego', 'Juego'),
+        ('kit', 'Kit'),
+        ('set', 'Set'),
+        ('pieza', 'Pieza'),
     ]
     
     # Información básica
     codigo = models.CharField("Código Interno", max_length=30, unique=True)
-    nombre = models.CharField("Nombre del Material", max_length=200)
+    nombre = models.CharField("Nombre del Material/Herramienta", max_length=200)
     descripcion = models.TextField("Descripción Detallada")
-    tipo = models.CharField("Tipo", max_length=25, choices=TIPO_CHOICES)
+    tipo = models.CharField("Tipo", max_length=30, choices=TIPO_CHOICES)
     categoria = models.ForeignKey(CategoriaMaterial, on_delete=models.PROTECT, related_name='materiales')
     
     # Identificación
@@ -100,7 +133,7 @@ class Material(models.Model):
     numero_parte = models.CharField("Número de Parte", max_length=100, blank=True)
     codigo_barras = models.CharField("Código de Barras", max_length=50, blank=True)
     
-    # Inventario - USAR Decimal para todos los campos numéricos
+    # Inventario
     stock_actual = models.DecimalField("Stock Actual", max_digits=10, decimal_places=2, default=Decimal('0'))
     stock_minimo = models.DecimalField("Stock Mínimo", max_digits=10, decimal_places=2, default=Decimal('1'))
     stock_maximo = models.DecimalField("Stock Máximo", max_digits=10, decimal_places=2, default=Decimal('100'))
@@ -110,33 +143,33 @@ class Material(models.Model):
     # Costos
     precio_unitario = models.DecimalField("Precio Unitario", max_digits=12, decimal_places=2, default=Decimal('0'))
     
-    # Clasificación - AGREGAR CAMPO ESTADO QUE FALTA
+    # Clasificación
     criticidad = models.CharField("Criticidad", max_length=10, choices=CRITICIDAD_CHOICES, default='media')
-    estado = models.CharField("Estado", max_length=15, choices=ESTADO_CHOICES, default='disponible')  # <- ESTE FALTABA
+    estado = models.CharField("Estado", max_length=15, choices=ESTADO_CHOICES, default='disponible')
     
-    # Ubicación física - AGREGAR ESTE CAMPO QUE FALTA
-    ubicacion = models.CharField("Ubicación en Almacén", max_length=200, blank=True, null=True)  # <- ESTE FALTABA
+    # Ubicación física
+    ubicacion = models.CharField("Ubicación en Almacén", max_length=200, blank=True, null=True)
     
-    # ASEGURAR que esta línea esté correcta:
+    # Proveedor
     proveedor_principal = models.ForeignKey(
-        'inventario.Proveedor',  # <- Referencia al modelo del inventario
+        'inventario.Proveedor',
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 
         related_name='materiales_principales'
     )
     
-    # Características especiales - AGREGAR ESTOS CAMPOS QUE FALTAN
+    # Características especiales para materiales
     requiere_refrigeracion = models.BooleanField("Requiere Refrigeración", default=False)
     requiere_manejo_especial = models.BooleanField("Requiere Manejo Especial", default=False)
     
-    # Herramientas específicas (mantener para compatibilidad pero no usar en formulario)
+    # ✅ CAMPOS ESPECÍFICOS PARA HERRAMIENTAS (SIN VALIDACIONES ESTRICTAS)
     es_herramienta_critica = models.BooleanField("Herramienta Crítica", default=False)
     requiere_calibracion = models.BooleanField("Requiere Calibración", default=False)
     fecha_ultima_calibracion = models.DateField("Última Calibración", null=True, blank=True)
     frecuencia_calibracion = models.IntegerField("Frecuencia Calibración (días)", null=True, blank=True)
     
-    # Mantenimiento
+    # Mantenimiento (SIN VALIDACIONES OBLIGATORIAS)
     requiere_mantenimiento = models.BooleanField("Requiere Mantenimiento", default=False)
     fecha_ultimo_mantenimiento = models.DateField("Último Mantenimiento", null=True, blank=True)
     frecuencia_mantenimiento = models.IntegerField("Frecuencia Mantenimiento (días)", null=True, blank=True)
@@ -146,7 +179,7 @@ class Material(models.Model):
     fecha_ultima_compra = models.DateField("Fecha Última Compra", null=True, blank=True)
     
     # Documentos
-    foto = models.ImageField("Foto del Material", upload_to='materiales/fotos/', blank=True, null=True)
+    foto = models.ImageField("Foto", upload_to='materiales/fotos/', blank=True, null=True)
     ficha_tecnica = models.FileField("Ficha Técnica", upload_to='materiales/fichas/', blank=True, null=True)
     
     # Control
@@ -155,8 +188,8 @@ class Material(models.Model):
     fecha_actualizacion = models.DateTimeField("Última Actualización", auto_now=True)
     
     class Meta:
-        verbose_name = "Material"
-        verbose_name_plural = "Materiales"
+        verbose_name = "Material/Herramienta"
+        verbose_name_plural = "Materiales y Herramientas"
         ordering = ['-fecha_creacion']
     
     def __str__(self):
@@ -165,23 +198,47 @@ class Material(models.Model):
     def get_absolute_url(self):
         return reverse('materiales:material-detalle', kwargs={'pk': self.pk})
     
+    def es_herramienta(self):
+        """Determina si el item es una herramienta"""
+        tipos_herramientas = [
+            'herramienta_manual', 'herramienta_electrica', 'herramienta_precision',
+            'herramienta_soldadura', 'herramienta_corte', 'herramienta_medicion',
+            'herramienta_seguridad', 'instrumento_laboratorio', 'herramienta_neumatica',
+            'herramienta_hidraulica', 'equipo_calibracion', 'instrumento_medicion_digital',
+            'herramienta_especial'
+        ]
+        return self.tipo in tipos_herramientas
+    
+    def necesita_calibracion_check(self):
+        """Verifica si necesita calibración (para herramientas)"""
+        if not self.requiere_calibracion or not self.fecha_ultima_calibracion or not self.frecuencia_calibracion:
+            return False
+        
+        proxima_calibracion = self.fecha_ultima_calibracion + timedelta(days=self.frecuencia_calibracion)
+        return date.today() >= proxima_calibracion
+    
     def save(self, *args, **kwargs):
         # Generar código automático si no existe
         if not self.codigo:
-            ultimo_material = Material.objects.filter(
-                codigo__startswith='MAT'
+            if self.es_herramienta():
+                prefijo = 'HERR'
+            else:
+                prefijo = 'MAT'
+                
+            ultimo_item = Material.objects.filter(
+                codigo__startswith=prefijo
             ).order_by('codigo').last()
             
-            if ultimo_material:
+            if ultimo_item:
                 try:
-                    ultimo_numero = int(ultimo_material.codigo.split('-')[1])
+                    ultimo_numero = int(ultimo_item.codigo.split('-')[1])
                     nuevo_numero = ultimo_numero + 1
                 except (ValueError, IndexError):
                     nuevo_numero = 1
             else:
                 nuevo_numero = 1
             
-            self.codigo = f"MAT-{nuevo_numero:04d}"
+            self.codigo = f"{prefijo}-{nuevo_numero:04d}"
         
         # Actualizar estado según stock
         self.actualizar_estado_stock()
@@ -200,7 +257,7 @@ class Material(models.Model):
             self.estado = 'disponible'
     
     def necesita_reposicion(self):
-        """Verifica si el material necesita reposición"""
+        """Verifica si necesita reposición"""
         return self.stock_actual <= self.punto_reorden
     
     def esta_vencido(self):
@@ -216,22 +273,6 @@ class Material(models.Model):
             return diferencia.days
         return None
     
-    def necesita_calibracion(self):
-        """Verifica si necesita calibración"""
-        if not self.requiere_calibracion or not self.fecha_ultima_calibracion or not self.frecuencia_calibracion:
-            return False
-        
-        proxima_calibracion = self.fecha_ultima_calibracion + timedelta(days=self.frecuencia_calibracion)
-        return date.today() >= proxima_calibracion
-    
-    def necesita_mantenimiento(self):
-        """Verifica si necesita mantenimiento"""
-        if not self.requiere_mantenimiento or not self.fecha_ultimo_mantenimiento or not self.frecuencia_mantenimiento:
-            return False
-        
-        proximo_mantenimiento = self.fecha_ultimo_mantenimiento + timedelta(days=self.frecuencia_mantenimiento)
-        return date.today() >= proximo_mantenimiento
-    
     def valor_stock_actual(self):
         """Calcula el valor total del stock actual"""
         return self.stock_actual * self.precio_unitario
@@ -244,6 +285,9 @@ class Material(models.Model):
             'bajo_stock': 'bg-warning',
             'en_pedido': 'bg-info',
             'descontinuado': 'bg-secondary',
+            'en_uso': 'bg-primary',
+            'mantenimiento': 'bg-warning',
+            'calibracion': 'bg-info',
         }
         return clases.get(self.estado, 'bg-secondary')
     

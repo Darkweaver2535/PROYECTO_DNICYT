@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Confirmar Eliminación
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>¿Está seguro que desea eliminar esta herramienta?</strong>
+                        <br>Esta acción no se puede deshacer.
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Información de la Herramienta:</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>Código:</strong> {{ herramienta.codigo }}</li>
+                                <li><strong>Nombre:</strong> {{ herramienta.nombre }}</li>
+                                <li><strong>Tipo:</strong> {{ herramienta.get_tipo_display }}</li>
+                                <li><strong>Stock Actual:</strong> {{ herramienta.stock_actual }}</li>
+                                <li><strong>Estado:</strong> {{ herramienta.get_estado_display }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            {% if herramienta.foto %}
+                            <img src="{{ herramienta.foto.url }}" class="img-fluid rounded" alt="Foto de la herramienta">
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'materiales:herramientas' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Cancelar
+                        </a>
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i>
+                                Confirmar Eliminación
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

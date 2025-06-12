@@ -1,0 +1,1067 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* IMPORTANTE: Encapsular todos los estilos dentro de .herramientas-page para evitar conflictos */
+    .herramientas-page {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .herramientas-page .herramientas-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .herramientas-page .herramientas-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .herramientas-page .herramientas-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .herramientas-page .herramientas-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .herramientas-page .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .herramientas-page .stat-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        border-left: 5px solid var(--primary-blue);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .herramientas-page .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .herramientas-page .stat-card.disponible { border-left-color: var(--success-green); }
+    .herramientas-page .stat-card.mantenimiento { border-left-color: var(--warning-orange); }
+    .herramientas-page .stat-card.criticas { border-left-color: var(--danger-red); }
+    .herramientas-page .stat-card.calibracion { border-left-color: #6366f1; }
+
+    .herramientas-page .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), transparent);
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+    }
+
+    .herramientas-page .stat-value {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary-blue);
+        line-height: 1;
+        margin-bottom: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .herramientas-page .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        position: relative;
+        z-index: 1;
+    }
+
+    .herramientas-page .stat-icon {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        font-size: 2.5rem;
+        color: var(--primary-blue);
+        opacity: 0.2;
+    }
+
+    .herramientas-page .alertas-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .herramientas-page .alerta-item {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-md);
+        border-left: 5px solid var(--primary-blue);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .herramientas-page .alerta-item:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateX(8px);
+    }
+
+    .herramientas-page .alerta-item.danger { border-left-color: var(--danger-red); }
+    .herramientas-page .alerta-item.warning { border-left-color: var(--warning-orange); }
+    .herramientas-page .alerta-item.info { border-left-color: var(--primary-blue); }
+
+    .herramientas-page .alerta-icon {
+        font-size: 2rem;
+        width: 50px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .herramientas-page .alerta-content {
+        flex: 1;
+    }
+
+    .herramientas-page .alerta-titulo {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+        font-size: 1.1rem;
+    }
+
+    .herramientas-page .alerta-descripcion {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin: 0;
+    }
+
+    .herramientas-page .filters-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+
+    .herramientas-page .filters-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .herramientas-page .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .herramientas-page .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .herramientas-page .filter-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .herramientas-page .form-control,
+    .herramientas-page .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .herramientas-page .form-control:focus,
+    .herramientas-page .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    }
+
+    .herramientas-page .herramientas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .herramientas-page .herramienta-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .herramientas-page .herramienta-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--primary-blue);
+    }
+
+    .herramientas-page .herramienta-header {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .herramientas-page .herramienta-codigo {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        background: var(--light-blue);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .herramientas-page .herramienta-nombre {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+    }
+
+    .herramientas-page .herramienta-descripcion {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .herramientas-page .herramienta-badges {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+
+    .herramientas-page .herramienta-body {
+        padding: 2rem;
+    }
+
+    .herramientas-page .herramienta-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .herramientas-page .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .herramientas-page .detail-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+
+    .herramientas-page .detail-value {
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .herramientas-page .herramienta-status-section {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .herramientas-page .status-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .herramientas-page .status-item {
+        text-align: center;
+        padding: 0.75rem;
+        background: var(--pure-white);
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .herramientas-page .status-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        display: block;
+    }
+
+    .herramientas-page .status-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+    }
+
+    /* Indicadores específicos para herramientas */
+    .herramientas-page .calibracion-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .herramientas-page .calibracion-indicator.vencida {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-red);
+    }
+
+    .herramientas-page .calibracion-indicator.vigente {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+    }
+
+    .herramientas-page .herramienta-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+    }
+
+    .herramientas-page .btn-action {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 2px solid;
+    }
+
+    .herramientas-page .btn-view {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+
+    .herramientas-page .btn-view:hover {
+        background: var(--primary-blue);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .herramientas-page .btn-calibrate {
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+        border-color: #6366f1;
+    }
+
+    .herramientas-page .btn-calibrate:hover {
+        background: #6366f1;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .herramientas-page .btn-maintenance {
+        background: var(--light-yellow);
+        color: var(--warning-orange);
+        border-color: var(--warning-orange);
+    }
+
+    .herramientas-page .btn-maintenance:hover {
+        background: var(--warning-orange);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .herramientas-page .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        color: var(--text-light);
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        margin: 2rem 0;
+    }
+
+    .herramientas-page .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+        color: var(--primary-blue);
+    }
+
+    .herramientas-page .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 3rem;
+    }
+
+    .herramientas-page .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Badge específicos para herramientas - CORREGIR COLORES */
+    .herramientas-page .badge-tipo-herramienta_manual { background: var(--primary-blue); color: white; }
+    .herramientas-page .badge-tipo-herramienta_electrica { background: #f59e0b; color: white; }
+    .herramientas-page .badge-tipo-herramienta_precision { background: #6366f1; color: white; }
+    .herramientas-page .badge-tipo-instrumento_laboratorio { background: #10b981; color: white; }
+
+    .herramientas-page .badge-estado-disponible { background: #e8f5e8; color: #2e7d32; }
+    .herramientas-page .badge-estado-en_uso { background: #e3f2fd; color: #1976d2; }
+    .herramientas-page .badge-estado-mantenimiento { background: #fff3e0; color: #f57c00; }
+    .herramientas-page .badge-estado-calibracion { background: #f3e5f5; color: #7b1fa2; }
+
+    .herramientas-page .badge-criticidad-baja { background: #f5f5f5; color: #616161; }
+    .herramientas-page .badge-criticidad-media { background: #e3f2fd; color: #1976d2; }
+    .herramientas-page .badge-criticidad-alta { background: #fff3e0; color: #f57c00; }
+    .herramientas-page .badge-criticidad-critica { background: #ffebee; color: #d32f2f; }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .herramientas-page .herramientas-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .herramientas-page .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .herramientas-page .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+    }
+
+    @media (max-width: 576px) {
+        .herramientas-page .herramienta-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .herramientas-page .status-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .herramientas-page .herramientas-title {
+            font-size: 1.75rem;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .herramientas-page .herramienta-card {
+        animation: slideInUp 0.6s ease-out forwards;
+        opacity: 0;
+    }
+
+    .herramientas-page .herramienta-card:nth-child(1) { animation-delay: 0.1s; }
+    .herramientas-page .herramienta-card:nth-child(2) { animation-delay: 0.2s; }
+    .herramientas-page .herramienta-card:nth-child(3) { animation-delay: 0.3s; }
+    .herramientas-page .herramienta-card:nth-child(4) { animation-delay: 0.4s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- IMPORTANTE: Envolver todo el contenido en .herramientas-page -->
+<div class="herramientas-page">
+    <div class="container-fluid">
+        <!-- Header de Herramientas -->
+        <div class="herramientas-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="herramientas-title">
+                        <i class="bi bi-tools"></i>
+                        {{ titulo }}
+                    </h1>
+                    <p class="herramientas-subtitle">
+                        Gestión integral de herramientas, instrumentos de medición y equipos de precisión
+                    </p>
+                </div>
+                <div class="d-flex gap-3">
+                    <!-- ✅ CORREGIR ESTA URL -->
+                    <a href="{% url 'materiales:crear-herramienta' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-lg"></i>
+                        Nueva Herramienta
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-warning btn-lg dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
+                            <i class="bi bi-download"></i>
+                            Exportar
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="exportarExcel()">
+                                <i class="bi bi-file-earmark-excel"></i> Excel
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportarPDF()">
+                                <i class="bi bi-file-earmark-pdf"></i> PDF
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportarCSV()">
+                                <i class="bi bi-filetype-csv"></i> CSV
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-tools"></i>
+                </div>
+                <div class="stat-value">{{ total_herramientas }}</div>
+                <div class="stat-label">Total Herramientas</div>
+            </div>
+            
+            <div class="stat-card disponible">
+                <div class="stat-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-value">{{ herramientas_disponibles }}</div>
+                <div class="stat-label">Disponibles</div>
+            </div>
+            
+            <div class="stat-card mantenimiento">
+                <div class="stat-icon">
+                    <i class="bi bi-wrench"></i>
+                </div>
+                <div class="stat-value">{{ herramientas_mantenimiento }}</div>
+                <div class="stat-label">En Mantenimiento</div>
+            </div>
+            
+            <div class="stat-card criticas">
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div class="stat-value">{{ herramientas_criticas }}</div>
+                <div class="stat-label">Herramientas Críticas</div>
+            </div>
+            
+            <div class="stat-card calibracion">
+                <div class="stat-icon">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+                <div class="stat-value">{{ herramientas_calibracion }}</div>
+                <div class="stat-label">Requieren Calibración</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="stat-value">${{ valor_total_inventario|floatformat:0 }}</div>
+                <div class="stat-label">Valor Total</div>
+            </div>
+        </div>
+
+        <!-- Alertas -->
+        {% if alertas %}
+        <div class="alertas-section">
+            {% for alerta in alertas %}
+            <div class="alerta-item {{ alerta.tipo }}">
+                <div class="alerta-icon text-{{ alerta.tipo }}">
+                    <i class="{{ alerta.icono }}"></i>
+                </div>
+                <div class="alerta-content">
+                    <h6 class="alerta-titulo">{{ alerta.titulo }}</h6>
+                    <p class="alerta-descripcion">{{ alerta.descripcion }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <h3 class="filters-title">
+                <i class="bi bi-funnel"></i>
+                Filtros de Búsqueda
+            </h3>
+            
+            <form method="get" class="filters-form">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Buscar Herramienta</label>
+                        <input type="text" name="search" class="form-control" 
+                               value="{{ search_query }}" 
+                               placeholder="Código, nombre, marca, modelo...">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Categoría</label>
+                        <select name="categoria" class="form-select">
+                            <option value="">Todas las categorías</option>
+                            {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}" {% if categoria_filtro == categoria.id|stringformat:"s" %}selected{% endif %}>
+                                {{ categoria.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">Todos los estados</option>
+                            {% for codigo, nombre in estados %}
+                            <option value="{{ codigo }}" {% if estado_filtro == codigo %}selected{% endif %}>{{ nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Criticidad</label>
+                        <select name="criticidad" class="form-select">
+                            <option value="">Todas las criticidades</option>
+                            {% for codigo, nombre in criticidades %}
+                            <option value="{{ codigo }}" {% if criticidad_filtro == codigo %}selected{% endif %}>{{ nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Calibración</label>
+                        <select name="calibracion" class="form-select">
+                            <option value="">Todas</option>
+                            <option value="requiere" {% if calibracion_filtro == 'requiere' %}selected{% endif %}>Requieren Calibración</option>
+                            <option value="vencida" {% if calibracion_filtro == 'vencida' %}selected{% endif %}>Calibración Vencida</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i>
+                            Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Grid de Herramientas -->
+        {% if herramientas %}
+        <div class="herramientas-grid">
+            {% for herramienta in herramientas %}
+            <div class="herramienta-card">
+                <!-- Header de la herramienta -->
+                <div class="herramienta-header">
+                    <div class="herramienta-codigo">{{ herramienta.codigo }}</div>
+                    <h4 class="herramienta-nombre">{{ herramienta.nombre }}</h4>
+                    <p class="herramienta-descripcion">{{ herramienta.descripcion|default:"Sin descripción disponible" }}</p>
+                    
+                    <!-- Badges -->
+                    <div class="herramienta-badges">
+                        <span class="badge badge-tipo-{{ herramienta.tipo }}">
+                            {{ herramienta.get_tipo_display }}
+                        </span>
+                        <span class="badge badge-estado-{{ herramienta.estado }}">
+                            {{ herramienta.get_estado_display }}
+                        </span>
+                        {% if herramienta.criticidad %}
+                        <span class="badge badge-criticidad-{{ herramienta.criticidad }}">
+                            {{ herramienta.get_criticidad_display }}
+                        </span>
+                        {% endif %}
+                        {% if herramienta.es_critica %}
+                        <span class="badge bg-danger text-white">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Crítica
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Body de la herramienta -->
+                <div class="herramienta-body">
+                    <!-- Detalles básicos -->
+                    <div class="herramienta-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Marca</span>
+                            <span class="detail-value">{{ herramienta.marca|default:"No especificada" }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">Modelo</span>
+                            <span class="detail-value">{{ herramienta.modelo|default:"No especificado" }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">Categoría</span>
+                            <span class="detail-value">{{ herramienta.categoria.nombre|default:"Sin categoría" }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">Ubicación</span>
+                            <span class="detail-value">{{ herramienta.ubicacion|default:"No especificada" }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Status de la herramienta -->
+                    <div class="herramienta-status-section">
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span class="status-value">{{ herramienta.stock_actual|default:0 }}</span>
+                                <span class="status-label">Stock Actual</span>
+                            </div>
+                            
+                            <div class="status-item">
+                                <span class="status-value">${{ herramienta.precio_unitario|default:0|floatformat:0 }}</span>
+                                <span class="status-label">Precio Unit.</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Indicador de calibración para herramientas de precisión -->
+                        {% if herramienta.requiere_calibracion %}
+                        <div class="calibracion-indicator {% if herramienta.necesita_calibracion_check %}vencida{% else %}vigente{% endif %}">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>
+                                {% if herramienta.necesita_calibracion_check %}
+                                    Calibración vencida
+                                {% else %}
+                                    Calibración vigente
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="herramienta-actions">
+                        <a href="{% url 'materiales:material-detalle' herramienta.pk %}" 
+                           class="btn-action btn-view">
+                            <i class="bi bi-eye"></i>
+                            Ver Detalle
+                        </a>
+                        
+                        {% if herramienta.requiere_calibracion %}
+                        <a href="#" class="btn-action btn-calibrate" 
+                           onclick="programarCalibracion({{ herramienta.pk }})">
+                            <i class="bi bi-speedometer2"></i>
+                            Calibrar
+                        </a>
+                        {% endif %}
+                        
+                        {% if herramienta.estado == 'disponible' %}
+                        <a href="#" class="btn-action btn-maintenance" 
+                           onclick="programarMantenimiento({{ herramienta.pk }})">
+                            <i class="bi bi-wrench"></i>
+                            Mantto.
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Navegación de herramientas">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}">Anterior</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if categoria_filtro %}&categoria={{ categoria_filtro }}{% endif %}">Siguiente</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Estado vacío -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="bi bi-tools"></i>
+            </div>
+            <h4>No se encontraron herramientas</h4>
+            <p>No hay herramientas que coincidan con los filtros seleccionados.</p>
+            <div class="mt-3">
+                <!-- ✅ CORREGIR TAMBIÉN ESTA URL -->
+                <a href="{% url 'materiales:crear-herramienta' %}" class="btn btn-success btn-lg">
+                    <i class="bi bi-plus-lg"></i>
+                    Registrar Primera Herramienta
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeHerramientasPage();
+    console.log('🔧 Herramientas - Sistema cargado correctamente');
+});
+
+function initializeHerramientasPage() {
+    // Auto-submit en cambio de filtros
+    const filterSelects = document.querySelectorAll('.herramientas-page .filters-form select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+    
+    // Animación de entrada para las tarjetas
+    animateCards();
+    
+    // Mejorar la búsqueda con debounce
+    setupSearchInput();
+    
+    // Tooltips para badges
+    setupTooltips();
+}
+
+function animateCards() {
+    const cards = document.querySelectorAll('.herramientas-page .herramienta-card');
+    
+    // Resetear animación si ya existen
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+    });
+    
+    // Animar con delay secuencial
+    cards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease-out';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+}
+
+function setupSearchInput() {
+    const searchInput = document.querySelector('.herramientas-page input[name="search"]');
+    if (!searchInput) return;
+    
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            this.form.submit();
+        }, 800);
+    });
+}
+
+function setupTooltips() {
+    // Inicializar tooltips de Bootstrap si están disponibles
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+}
+
+// Funciones específicas para herramientas
+function programarCalibracion(herramientaId) {
+    mostrarNotificacion('Programando calibración para la herramienta...', 'info');
+    
+    // Simular programación de calibración
+    setTimeout(() => {
+        mostrarNotificacion('Calibración programada exitosamente', 'success');
+    }, 1500);
+}
+
+function programarMantenimiento(herramientaId) {
+    mostrarNotificacion('Programando mantenimiento preventivo...', 'info');
+    
+    // Simular programación de mantenimiento
+    setTimeout(() => {
+        mostrarNotificacion('Mantenimiento programado exitosamente', 'success');
+    }, 1500);
+}
+
+// Funciones de exportación
+function exportarExcel() {
+    mostrarNotificacion('Generando archivo Excel de herramientas...', 'info');
+    setTimeout(() => {
+        mostrarNotificacion('Archivo Excel generado exitosamente', 'success');
+    }, 1500);
+}
+
+function exportarPDF() {
+    mostrarNotificacion('Generando archivo PDF de herramientas...', 'info');
+    setTimeout(() => {
+        mostrarNotificacion('Archivo PDF generado exitosamente', 'success');
+    }, 1500);
+}
+
+function exportarCSV() {
+    mostrarNotificacion('Generando archivo CSV de herramientas...', 'info');
+    setTimeout(() => {
+        mostrarNotificacion('Archivo CSV generado exitosamente', 'success');
+    }, 1500);
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const colores = {
+        'success': '#10b981',
+        'error': '#ef4444',
+        'warning': '#f59e0b',
+        'info': '#3b82f6'
+    };
+    
+    const iconos = {
+        'success': 'bi-check-circle-fill',
+        'error': 'bi-x-circle-fill',
+        'warning': 'bi-exclamation-triangle-fill',
+        'info': 'bi-info-circle-fill'
+    };
+    
+    // Crear notificación
+    const notificacion = document.createElement('div');
+    notificacion.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: ${colores[tipo]};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        max-width: 400px;
+        animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    `;
+    
+    notificacion.innerHTML = `
+        <i class="bi ${iconos[tipo]}" style="font-size: 1.2rem;"></i>
+        <span>${mensaje}</span>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+        notificacion.style.animation = 'slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => {
+            if (notificacion.parentNode) {
+                notificacion.parentNode.removeChild(notificacion);
+            }
+        }, 400);
+    }, 4000);
+}
+
+// Agregar estilos de animación
+const animationStyles = document.createElement('style');
+animationStyles.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(animationStyles);
+</script>
+{% endblock %}

@@ -1,0 +1,546 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .herramienta-detalle-page {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .herramienta-detalle-page .detalle-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .herramienta-detalle-page .detalle-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    /* Reutilizar estilos similares a material_detalle pero con temática de herramientas */
+    .herramienta-detalle-page .herramienta-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .herramienta-detalle-page .info-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .herramienta-detalle-page .info-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .herramienta-detalle-page .info-card-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .herramienta-detalle-page .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .herramienta-detalle-page .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .herramienta-detalle-page .detail-label {
+        font-weight: 600;
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+
+    .herramienta-detalle-page .detail-value {
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    /* Estilos específicos para herramientas */
+    .herramienta-detalle-page .calibracion-status {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .herramienta-detalle-page .calibracion-status.vigente {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #059669;
+    }
+
+    .herramienta-detalle-page .calibracion-status.vencida {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #dc2626;
+    }
+
+    .herramienta-detalle-page .calibracion-status.pendiente {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        color: #d97706;
+    }
+
+    .herramienta-detalle-page .acciones-herramienta {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .herramienta-detalle-page .btn-action {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.25rem;
+        border: 2px solid;
+    }
+
+    .herramienta-detalle-page .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .herramienta-detalle-page .btn-primary:hover {
+        background: #1e40af;
+        border-color: #1e40af;
+        transform: translateY(-2px);
+    }
+
+    .herramienta-detalle-page .btn-secondary {
+        background: white;
+        color: #6b7280;
+        border-color: #d1d5db;
+    }
+
+    .herramienta-detalle-page .btn-secondary:hover {
+        background: #f9fafb;
+        border-color: #6b7280;
+    }
+
+    .herramienta-detalle-page .btn-warning {
+        background: #f59e0b;
+        color: white;
+        border-color: #f59e0b;
+    }
+
+    .herramienta-detalle-page .btn-warning:hover {
+        background: #d97706;
+        border-color: #d97706;
+        transform: translateY(-2px);
+    }
+
+    .herramienta-detalle-page .movimientos-table {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .herramienta-detalle-page .table {
+        margin-bottom: 0;
+    }
+
+    .herramienta-detalle-page .table th {
+        background: var(--primary-blue);
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 1rem;
+    }
+
+    .herramienta-detalle-page .table td {
+        padding: 1rem;
+        border-color: var(--border-color);
+    }
+
+    .herramienta-detalle-page .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .herramienta-detalle-page .herramienta-info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .herramienta-detalle-page .acciones-herramienta {
+            text-align: center;
+        }
+        
+        .herramienta-detalle-page .btn-action {
+            width: 100%;
+            justify-content: center;
+            margin: 0.5rem 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="herramienta-detalle-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="detalle-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="detalle-title">
+                        <i class="bi bi-tools"></i>
+                        {{ herramienta.nombre }}
+                    </h1>
+                    <p class="detalle-subtitle">
+                        Código: <strong>{{ herramienta.codigo }}</strong> | 
+                        Tipo: <strong>{{ herramienta.get_tipo_display }}</strong>
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'materiales:herramientas' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Volver a Herramientas
+                    </a>
+                    <a href="{% url 'materiales:editar-herramienta' herramienta.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i>
+                        Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de información -->
+        <div class="herramienta-info-grid">
+            <!-- Información básica -->
+            <div class="info-card">
+                <h3 class="info-card-title">
+                    <i class="bi bi-info-circle"></i>
+                    Información Básica
+                </h3>
+                <div class="detail-row">
+                    <span class="detail-label">Código:</span>
+                    <span class="detail-value">{{ herramienta.codigo }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Nombre:</span>
+                    <span class="detail-value">{{ herramienta.nombre }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Descripción:</span>
+                    <span class="detail-value">{{ herramienta.descripcion|default:"No especificada" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tipo:</span>
+                    <span class="detail-value">{{ herramienta.get_tipo_display }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Categoría:</span>
+                    <span class="detail-value">{{ herramienta.categoria.nombre|default:"Sin categoría" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Marca:</span>
+                    <span class="detail-value">{{ herramienta.marca|default:"No especificada" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Modelo:</span>
+                    <span class="detail-value">{{ herramienta.modelo|default:"No especificado" }}</span>
+                </div>
+            </div>
+
+            <!-- Stock e inventario -->
+            <div class="info-card">
+                <h3 class="info-card-title">
+                    <i class="bi bi-boxes"></i>
+                    Stock e Inventario
+                </h3>
+                <div class="detail-row">
+                    <span class="detail-label">Stock Actual:</span>
+                    <span class="detail-value">{{ herramienta.stock_actual }} {{ herramienta.get_unidad_medida_display }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Stock Mínimo:</span>
+                    <span class="detail-value">{{ herramienta.stock_minimo }} {{ herramienta.get_unidad_medida_display }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Stock Máximo:</span>
+                    <span class="detail-value">{{ herramienta.stock_maximo }} {{ herramienta.get_unidad_medida_display }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Punto de Reorden:</span>
+                    <span class="detail-value">{{ herramienta.punto_reorden }} {{ herramienta.get_unidad_medida_display }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Precio Unitario:</span>
+                    <span class="detail-value">Bs. {{ herramienta.precio_unitario|floatformat:2 }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Valor Total:</span>
+                    <span class="detail-value">Bs. {{ herramienta.valor_total|floatformat:2 }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Estado:</span>
+                    <span class="detail-value">
+                        <span class="badge {{ herramienta.get_estado_badge_class }}">
+                            {{ herramienta.get_estado_display }}
+                        </span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Criticidad:</span>
+                    <span class="detail-value">
+                        <span class="badge {{ herramienta.get_criticidad_badge_class }}">
+                            {{ herramienta.get_criticidad_display }}
+                        </span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Calibración y Mantenimiento (solo para herramientas) -->
+            {% if herramienta.requiere_calibracion or herramienta.requiere_mantenimiento %}
+            <div class="info-card">
+                <h3 class="info-card-title">
+                    <i class="bi bi-speedometer2"></i>
+                    Calibración y Mantenimiento
+                </h3>
+                
+                {% if herramienta.requiere_calibracion %}
+                <div class="calibracion-status {% if herramienta.necesita_calibracion_flag %}vencida{% else %}vigente{% endif %}">
+                    <strong>Estado de Calibración:</strong>
+                    {% if herramienta.necesita_calibracion_flag %}
+                        <span class="text-danger">Calibración Vencida</span>
+                    {% else %}
+                        <span class="text-success">Calibración Vigente</span>
+                    {% endif %}
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Última Calibración:</span>
+                    <span class="detail-value">{{ herramienta.fecha_ultima_calibracion|default:"No registrada" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Frecuencia (días):</span>
+                    <span class="detail-value">{{ herramienta.frecuencia_calibracion|default:"No definida" }}</span>
+                </div>
+                {% if herramienta.dias_proxima_calibracion is not None %}
+                <div class="detail-row">
+                    <span class="detail-label">Próxima Calibración:</span>
+                    <span class="detail-value">
+                        {% if herramienta.dias_proxima_calibracion > 0 %}
+                            En {{ herramienta.dias_proxima_calibracion }} días
+                        {% elif herramienta.dias_proxima_calibracion == 0 %}
+                            <span class="text-warning">Hoy</span>
+                        {% else %}
+                            <span class="text-danger">Vencida hace {{ herramienta.dias_proxima_calibracion_abs|default:0 }} días</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                {% endif %}
+
+                {% if herramienta.requiere_mantenimiento %}
+                <hr>
+                <div class="detail-row">
+                    <span class="detail-label">Último Mantenimiento:</span>
+                    <span class="detail-value">{{ herramienta.fecha_ultimo_mantenimiento|default:"No registrado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Frecuencia Mant. (días):</span>
+                    <span class="detail-value">{{ herramienta.frecuencia_mantenimiento|default:"No definida" }}</span>
+                </div>
+                {% if herramienta.dias_proximo_mantenimiento is not None %}
+                <div class="detail-row">
+                    <span class="detail-label">Próximo Mantenimiento:</span>
+                    <span class="detail-value">
+                        {% if herramienta.dias_proximo_mantenimiento > 0 %}
+                            En {{ herramienta.dias_proximo_mantenimiento }} días
+                        {% elif herramienta.dias_proximo_mantenimiento == 0 %}
+                            <span class="text-warning">Hoy</span>
+                        {% else %}
+                            <span class="text-danger">Vencido hace {{ herramienta.dias_proximo_mantenimiento_abs|default:0 }} días</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Ubicación y detalles -->
+            <div class="info-card">
+                <h3 class="info-card-title">
+                    <i class="bi bi-geo-alt"></i>
+                    Ubicación y Detalles
+                </h3>
+                <div class="detail-row">
+                    <span class="detail-label">Ubicación:</span>
+                    <span class="detail-value">{{ herramienta.ubicacion|default:"No especificada" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Proveedor Principal:</span>
+                    <span class="detail-value">{{ herramienta.proveedor_principal.nombre|default:"No asignado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Número de Parte:</span>
+                    <span class="detail-value">{{ herramienta.numero_parte|default:"No especificado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Código de Barras:</span>
+                    <span class="detail-value">{{ herramienta.codigo_barras|default:"No especificado" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Fecha de Creación:</span>
+                    <span class="detail-value">{{ herramienta.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Última Actualización:</span>
+                    <span class="detail-value">{{ herramienta.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="acciones-herramienta">
+            <h3 class="info-card-title">
+                <i class="bi bi-gear"></i>
+                Acciones Disponibles
+            </h3>
+            <div class="d-flex flex-wrap gap-2">
+                <!-- ✅ CORREGIR LA URL DEL MOVIMIENTO -->
+                <a href="{% url 'materiales:crear-movimiento-material' herramienta.pk %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-repeat"></i>
+                    Registrar Movimiento
+                </a>
+                
+                {% if herramienta.requiere_calibracion %}
+                <button class="btn btn-warning" onclick="programarCalibracion({{ herramienta.pk }})">
+                    <i class="bi bi-speedometer2"></i>
+                    Programar Calibración
+                </button>
+                {% endif %}
+
+                {% if herramienta.requiere_mantenimiento %}
+                <button class="btn btn-info" onclick="programarMantenimiento({{ herramienta.pk }})">
+                    <i class="bi bi-wrench"></i>
+                    Programar Mantenimiento
+                </button>
+                {% endif %}
+
+                <button class="btn btn-secondary" onclick="generarEtiqueta({{ herramienta.pk }})">
+                    <i class="bi bi-qr-code"></i>
+                    Generar Etiqueta
+                </button>
+
+                <button class="btn btn-outline-primary" onclick="exportarReporte({{ herramienta.pk }})">
+                    <i class="bi bi-file-pdf"></i>
+                    Exportar Reporte
+                </button>
+            </div>
+        </div>
+
+        <!-- Movimientos Recientes -->
+        {% if movimientos_recientes %}
+        <div class="movimientos-table">
+            <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                <h3 class="mb-0">
+                    <i class="bi bi-arrow-repeat"></i>
+                    Movimientos Recientes
+                </h3>
+                <a href="{% url 'materiales:movimientos' %}?material={{ herramienta.pk }}" class="btn btn-sm btn-outline-primary">
+                    Ver todos
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Cantidad</th>
+                            <th>Stock Anterior</th>
+                            <th>Stock Nuevo</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movimiento in movimientos_recientes %}
+                        <tr>
+                            <td>{{ movimiento.fecha_movimiento|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <span class="badge bg-{{ movimiento.get_tipo_color }}">
+                                    {{ movimiento.get_tipo_movimiento_display }}
+                                </span>
+                            </td>
+                            <td>{{ movimiento.cantidad }}</td>
+                            <td>{{ movimiento.stock_anterior }}</td>
+                            <td>{{ movimiento.stock_nuevo }}</td>
+                            <td>{{ movimiento.usuario.username }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function programarCalibracion(herramientaId) {
+    alert('Función de programación de calibración próximamente disponible.');
+}
+
+function programarMantenimiento(herramientaId) {
+    alert('Función de programación de mantenimiento próximamente disponible.');
+}
+
+function generarEtiqueta(herramientaId) {
+    alert('Función de generación de etiquetas próximamente disponible.');
+}
+
+function exportarReporte(herramientaId) {
+    alert('Función de exportación de reportes próximamente disponible.');
+}
+</script>
+{% endblock %}
