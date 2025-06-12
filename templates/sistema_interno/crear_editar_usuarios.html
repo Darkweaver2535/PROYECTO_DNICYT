@@ -1,0 +1,468 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .crear-usuario-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .crear-usuario-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .crear-usuario-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .crear-usuario-header h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.8rem;
+    }
+
+    .crear-usuario-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+    }
+
+    .crear-usuario-body {
+        padding: 2rem;
+    }
+
+    .crear-usuario-section {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .crear-usuario-section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .crear-usuario-form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .crear-usuario-form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .crear-usuario-form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .crear-usuario-form-control, 
+    .crear-usuario-form-select {
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .crear-usuario-form-control:focus, 
+    .crear-usuario-form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .crear-usuario-help-text {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+    }
+
+    .crear-usuario-required {
+        color: #ef4444;
+    }
+
+    .crear-usuario-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .crear-usuario-btn-cancelar {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .crear-usuario-btn-cancelar:hover {
+        background: var(--border-color);
+        transform: translateY(-2px);
+        color: var(--text-dark);
+        text-decoration: none;
+    }
+
+    .crear-usuario-btn-guardar {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .crear-usuario-btn-guardar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3);
+    }
+
+    .crear-usuario-checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .crear-usuario-checkbox {
+        width: 18px;
+        height: 18px;
+    }
+
+    .crear-usuario-avatar-preview {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: var(--pure-white);
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .crear-usuario-page {
+            padding: 1rem 0;
+        }
+
+        .crear-usuario-body {
+            padding: 1.5rem;
+        }
+
+        .crear-usuario-form-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .crear-usuario-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="crear-usuario-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                <div class="crear-usuario-container">
+                    <!-- Header -->
+                    <div class="crear-usuario-header">
+                        <h1>
+                            <i class="bi bi-person-plus-fill"></i>
+                            {{ titulo }}
+                        </h1>
+                        <p>Complete la información del usuario del sistema</p>
+                    </div>
+
+                    <!-- Cuerpo del formulario -->
+                    <div class="crear-usuario-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Información personal -->
+                            <div class="crear-usuario-section">
+                                <h3 class="crear-usuario-section-title">
+                                    <i class="bi bi-person-circle"></i>
+                                    Información Personal
+                                </h3>
+                                
+                                <!-- Avatar preview -->
+                                <div class="text-center mb-3">
+                                    <div class="crear-usuario-avatar-preview" id="avatarPreview">
+                                        <i class="bi bi-person"></i>
+                                    </div>
+                                </div>
+
+                                <div class="crear-usuario-form-row">
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">
+                                            Nombre de Usuario <span class="crear-usuario-required">*</span>
+                                        </label>
+                                        {{ form.username }}
+                                        <div class="crear-usuario-help-text">Único en el sistema</div>
+                                    </div>
+                                    
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">
+                                            Email <span class="crear-usuario-required">*</span>
+                                        </label>
+                                        {{ form.email }}
+                                        <div class="crear-usuario-help-text">Correo electrónico oficial</div>
+                                    </div>
+                                </div>
+
+                                <div class="crear-usuario-form-row">
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Nombres</label>
+                                        {{ form.first_name }}
+                                    </div>
+                                    
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Apellidos</label>
+                                        {{ form.last_name }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Seguridad y acceso -->
+                            <div class="crear-usuario-section">
+                                <h3 class="crear-usuario-section-title">
+                                    <i class="bi bi-shield-lock"></i>
+                                    Seguridad y Acceso
+                                </h3>
+                                
+                                {% if accion == 'crear' %}
+                                <div class="crear-usuario-form-row">
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">
+                                            Contraseña <span class="crear-usuario-required">*</span>
+                                        </label>
+                                        {{ form.password1 }}
+                                        <div class="crear-usuario-help-text">Mínimo 8 caracteres</div>
+                                    </div>
+                                    
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">
+                                            Confirmar Contraseña <span class="crear-usuario-required">*</span>
+                                        </label>
+                                        {{ form.password2 }}
+                                        <div class="crear-usuario-help-text">Debe coincidir con la anterior</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <div class="crear-usuario-form-row">
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">
+                                            Rol del Sistema <span class="crear-usuario-required">*</span>
+                                        </label>
+                                        {{ perfil_form.rol_sistema }}
+                                        <div class="crear-usuario-help-text">Define los permisos del usuario</div>
+                                    </div>
+                                    
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Estado del Usuario</label>
+                                        <div class="crear-usuario-checkbox-group">
+                                            {% if form.is_active %}
+                                                {{ form.is_active }}
+                                                <label>Usuario Activo</label>
+                                            {% else %}
+                                                <input type="checkbox" name="is_active" checked class="crear-usuario-checkbox" id="id_is_active">
+                                                <label for="id_is_active">Usuario Activo</label>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información laboral -->
+                            <div class="crear-usuario-section">
+                                <h3 class="crear-usuario-section-title">
+                                    <i class="bi bi-briefcase"></i>
+                                    Información Laboral
+                                </h3>
+                                
+                                <div class="crear-usuario-form-row">
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Área de Trabajo</label>
+                                        {{ perfil_form.area_trabajo }}
+                                        <div class="crear-usuario-help-text">Sección donde trabaja</div>
+                                    </div>
+                                    
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Cargo/Puesto</label>
+                                        {{ perfil_form.cargo }}
+                                        <div class="crear-usuario-help-text">Cargo que desempeña</div>
+                                    </div>
+                                </div>
+
+                                <div class="crear-usuario-form-row">
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Teléfono</label>
+                                        {{ perfil_form.telefono }}
+                                        <div class="crear-usuario-help-text">Número de contacto</div>
+                                    </div>
+                                    
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Supervisor</label>
+                                        {{ perfil_form.supervisor }}
+                                        <div class="crear-usuario-help-text">Supervisor directo</div>
+                                    </div>
+                                </div>
+
+                                <div class="crear-usuario-form-row">
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Fecha de Ingreso</label>
+                                        {{ perfil_form.fecha_ingreso }}
+                                    </div>
+                                    
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Avatar</label>
+                                        {{ perfil_form.avatar }}
+                                        <div class="crear-usuario-help-text">Foto de perfil (opcional)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Configuraciones -->
+                            <div class="crear-usuario-section">
+                                <h3 class="crear-usuario-section-title">
+                                    <i class="bi bi-gear"></i>
+                                    Configuraciones
+                                </h3>
+                                
+                                <div class="crear-usuario-form-row">
+                                    <div class="crear-usuario-form-group">
+                                        <label class="crear-usuario-form-label">Notificaciones</label>
+                                        <div class="crear-usuario-checkbox-group">
+                                            {{ perfil_form.recibir_notificaciones }}
+                                            <label>Recibir notificaciones del sistema</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Acciones del formulario -->
+                            <div class="crear-usuario-actions">
+                                <a href="{% url 'usuarios:lista-usuarios' %}" class="crear-usuario-btn-cancelar">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="crear-usuario-btn-guardar">
+                                    <i class="bi bi-check-circle"></i> 
+                                    {% if accion == 'crear' %}Crear Usuario{% else %}Actualizar Usuario{% endif %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Formulario de usuario cargado');
+
+    // Generar avatar preview
+    function updateAvatarPreview() {
+        const firstName = document.querySelector('input[name="first_name"]');
+        const lastName = document.querySelector('input[name="last_name"]');
+        const username = document.querySelector('input[name="username"]');
+        const avatarPreview = document.getElementById('avatarPreview');
+        
+        if (firstName && lastName && avatarPreview) {
+            const firstInitial = firstName.value ? firstName.value.charAt(0).toUpperCase() : '';
+            const lastInitial = lastName.value ? lastName.value.charAt(0).toUpperCase() : '';
+            const usernameInitial = username && username.value ? username.value.charAt(0).toUpperCase() : '';
+            
+            let initials = firstInitial + lastInitial;
+            if (!initials && usernameInitial) {
+                initials = usernameInitial;
+            }
+            
+            avatarPreview.textContent = initials || '?';
+        }
+    }
+
+    // Event listeners para actualizar avatar
+    const nameInputs = document.querySelectorAll('input[name="first_name"], input[name="last_name"], input[name="username"]');
+    nameInputs.forEach(input => {
+        input.addEventListener('input', updateAvatarPreview);
+    });
+
+    // Actualizar avatar al cargar
+    updateAvatarPreview();
+
+    // Validación de contraseñas en tiempo real
+    const password1 = document.querySelector('input[name="password1"]');
+    const password2 = document.querySelector('input[name="password2"]');
+    
+    if (password1 && password2) {
+        function validatePasswords() {
+            if (password2.value && password1.value !== password2.value) {
+                password2.setCustomValidity('Las contraseñas no coinciden');
+            } else {
+                password2.setCustomValidity('');
+            }
+        }
+        
+        password1.addEventListener('input', validatePasswords);
+        password2.addEventListener('input', validatePasswords);
+    }
+
+    // Validación del formulario
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const username = document.querySelector('input[name="username"]').value;
+            const email = document.querySelector('input[name="email"]').value;
+            const rol = document.querySelector('select[name="rol_sistema"]').value;
+            
+            if (!username || !email || !rol) {
+                e.preventDefault();
+                alert('Por favor complete todos los campos obligatorios marcados con *');
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

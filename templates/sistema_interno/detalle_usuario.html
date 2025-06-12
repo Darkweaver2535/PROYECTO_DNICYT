@@ -1,0 +1,690 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detalle-usuario-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .detalle-usuario-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .detalle-usuario-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .detalle-usuario-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--pure-white);
+        font-size: 2.5rem;
+        margin: 0 auto 1rem;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .detalle-usuario-name {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .detalle-usuario-role {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .detalle-usuario-body {
+        padding: 2rem;
+    }
+
+    .detalle-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .detalle-info-card {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .detalle-info-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detalle-info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .detalle-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .detalle-info-label {
+        font-weight: 500;
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+
+    .detalle-info-value {
+        font-weight: 600;
+        color: var(--text-dark);
+        text-align: right;
+    }
+
+    .detalle-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detalle-stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .detalle-stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .detalle-stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+        color: var(--pure-white);
+    }
+
+    .detalle-stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+    }
+
+    .detalle-stat-label {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .detalle-sesiones-container {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .detalle-sesiones-header {
+        background: var(--off-white);
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .detalle-sesiones-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .detalle-sesiones-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .detalle-sesion-item {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+
+    .detalle-sesion-item:hover {
+        background: var(--light-blue);
+    }
+
+    .detalle-sesion-item:last-child {
+        border-bottom: none;
+    }
+
+    .detalle-sesion-fecha {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .detalle-sesion-ip {
+        color: var(--text-light);
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+
+    .detalle-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+        flex-wrap: wrap;
+    }
+
+    .detalle-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .detalle-btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: var(--pure-white);
+    }
+
+    .detalle-btn-primary:hover {
+        color: var(--pure-white);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3);
+        text-decoration: none;
+    }
+
+    .detalle-btn-warning {
+        background: var(--warning-orange);
+        color: var(--pure-white);
+    }
+
+    .detalle-btn-warning:hover {
+        background: #ea6c04;
+        color: var(--pure-white);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .detalle-btn-secondary {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .detalle-btn-secondary:hover {
+        background: var(--border-color);
+        color: var(--text-dark);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .detalle-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .detalle-badge.activo {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: var(--pure-white);
+    }
+
+    .detalle-badge.inactivo {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+        color: var(--pure-white);
+    }
+
+    .detalle-badge.admin {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: var(--pure-white);
+    }
+
+    .detalle-badge.operario {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: var(--pure-white);
+    }
+
+    .detalle-conexion-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detalle-conexion-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #10b981;
+    }
+
+    .detalle-conexion-dot.offline {
+        background: #6b7280;
+    }
+
+    .detalle-volver {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detalle-volver:hover {
+        background: var(--border-color);
+        color: var(--text-dark);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .detalle-usuario-page {
+            padding: 1rem 0;
+        }
+
+        .detalle-usuario-body {
+            padding: 1.5rem;
+        }
+
+        .detalle-info-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .detalle-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .detalle-actions {
+            flex-direction: column;
+        }
+
+        .detalle-btn {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detalle-usuario-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                <!-- Botón volver -->
+                <a href="{% url 'usuarios:lista-usuarios' %}" class="detalle-volver">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver a Usuarios
+                </a>
+
+                <!-- Container principal -->
+                <div class="detalle-usuario-container">
+                    
+                    <!-- Header con avatar y nombre -->
+                    <div class="detalle-usuario-header">
+                        <div class="detalle-usuario-avatar" style="background-color: {{ perfil.get_color_avatar }};">
+                            {% if perfil.avatar %}
+                                <img src="{{ perfil.avatar.url }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            {% else %}
+                                {{ perfil.get_iniciales }}
+                            {% endif %}
+                        </div>
+                        <h1 class="detalle-usuario-name">{{ usuario.get_full_name|default:usuario.username }}</h1>
+                        <p class="detalle-usuario-role">
+                            <span class="detalle-badge {% if perfil.rol_sistema == 'administrador' %}admin{% else %}operario{% endif %}">
+                                {{ perfil.get_rol_sistema_display }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Cuerpo principal -->
+                    <div class="detalle-usuario-body">
+                        
+                        <!-- Estadísticas de usuario -->
+                        <div class="detalle-stats-grid">
+                            <div class="detalle-stat-card">
+                                <div class="detalle-stat-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                                <div class="detalle-stat-value">{{ total_sesiones }}</div>
+                                <div class="detalle-stat-label">Total Sesiones</div>
+                            </div>
+                            
+                            <div class="detalle-stat-card">
+                                <div class="detalle-stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <div class="detalle-stat-value">{{ sesiones_mes }}</div>
+                                <div class="detalle-stat-label">Sesiones Este Mes</div>
+                            </div>
+                            
+                            <div class="detalle-stat-card">
+                                <div class="detalle-stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                    <i class="bi bi-stopwatch"></i>
+                                </div>
+                                <div class="detalle-stat-value">{{ tiempo_promedio_sesion }}h</div>
+                                <div class="detalle-stat-label">Tiempo Promedio</div>
+                            </div>
+                            
+                            <div class="detalle-stat-card">
+                                <div class="detalle-stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                    <i class="bi bi-wifi"></i>
+                                </div>
+                                <div class="detalle-stat-value">
+                                    {% if perfil.esta_conectado_recientemente %}
+                                        <span style="color: #10b981;">Online</span>
+                                    {% else %}
+                                        <span style="color: #6b7280;">Offline</span>
+                                    {% endif %}
+                                </div>
+                                <div class="detalle-stat-label">Estado Conexión</div>
+                            </div>
+                        </div>
+
+                        <!-- Información detallada -->
+                        <div class="detalle-info-grid">
+                            
+                            <!-- Información personal -->
+                            <div class="detalle-info-card">
+                                <h3 class="detalle-info-title">
+                                    <i class="bi bi-person-circle"></i>
+                                    Información Personal
+                                </h3>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Usuario:</span>
+                                    <span class="detalle-info-value">{{ usuario.username }}</span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Email:</span>
+                                    <span class="detalle-info-value">{{ usuario.email|default:"No especificado" }}</span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Teléfono:</span>
+                                    <span class="detalle-info-value">{{ perfil.telefono|default:"No especificado" }}</span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Estado:</span>
+                                    <span class="detalle-info-value">
+                                        <span class="detalle-badge {% if usuario.is_active %}activo{% else %}inactivo{% endif %}">
+                                            {% if usuario.is_active %}Activo{% else %}Inactivo{% endif %}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Información laboral -->
+                            <div class="detalle-info-card">
+                                <h3 class="detalle-info-title">
+                                    <i class="bi bi-briefcase"></i>
+                                    Información Laboral
+                                </h3>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Área de Trabajo:</span>
+                                    <span class="detalle-info-value">{{ perfil.get_area_trabajo_display|default:"No especificado" }}</span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Cargo:</span>
+                                    <span class="detalle-info-value">{{ perfil.cargo|default:"No especificado" }}</span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Supervisor:</span>
+                                    <span class="detalle-info-value">
+                                        {% if perfil.supervisor %}
+                                            {{ perfil.supervisor.get_full_name|default:perfil.supervisor.username }}
+                                        {% else %}
+                                            No asignado
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Fecha de Ingreso:</span>
+                                    <span class="detalle-info-value">{{ perfil.fecha_ingreso|date:"d/m/Y" }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Configuración del sistema -->
+                            <div class="detalle-info-card">
+                                <h3 class="detalle-info-title">
+                                    <i class="bi bi-gear"></i>
+                                    Configuración del Sistema
+                                </h3>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Notificaciones:</span>
+                                    <span class="detalle-info-value">
+                                        {% if perfil.recibir_notificaciones %}
+                                            <i class="bi bi-check-circle text-success"></i> Habilitadas
+                                        {% else %}
+                                            <i class="bi bi-x-circle text-danger"></i> Deshabilitadas
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Última Actividad:</span>
+                                    <span class="detalle-info-value">
+                                        {% if perfil.ultima_actividad %}
+                                            {{ perfil.ultima_actividad|date:"d/m/Y H:i" }}
+                                        {% else %}
+                                            Nunca
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Fecha de Registro:</span>
+                                    <span class="detalle-info-value">{{ usuario.date_joined|date:"d/m/Y H:i" }}</span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Última Actualización:</span>
+                                    <span class="detalle-info-value">{{ perfil.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Permisos y accesos -->
+                            <div class="detalle-info-card">
+                                <h3 class="detalle-info-title">
+                                    <i class="bi bi-shield-check"></i>
+                                    Permisos y Accesos
+                                </h3>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Es Superusuario:</span>
+                                    <span class="detalle-info-value">
+                                        {% if usuario.is_superuser %}
+                                            <i class="bi bi-check-circle text-success"></i> Sí
+                                        {% else %}
+                                            <i class="bi bi-x-circle text-muted"></i> No
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Acceso Admin:</span>
+                                    <span class="detalle-info-value">
+                                        {% if usuario.is_staff %}
+                                            <i class="bi bi-check-circle text-success"></i> Sí
+                                        {% else %}
+                                            <i class="bi bi-x-circle text-muted"></i> No
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div class="detalle-info-item">
+                                    <span class="detalle-info-label">Puede Administrar:</span>
+                                    <span class="detalle-info-value">
+                                        {% if perfil.puede_administrar %}
+                                            <i class="bi bi-check-circle text-success"></i> Sí
+                                        {% else %}
+                                            <i class="bi bi-x-circle text-muted"></i> No
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Sesiones recientes -->
+                        {% if sesiones_recientes %}
+                        <div class="detalle-sesiones-container">
+                            <div class="detalle-sesiones-header">
+                                <h3 class="detalle-sesiones-title">
+                                    <i class="bi bi-clock-history"></i>
+                                    Sesiones Recientes
+                                </h3>
+                            </div>
+                            <div class="detalle-sesiones-list">
+                                {% for sesion in sesiones_recientes %}
+                                <div class="detalle-sesion-item">
+                                    <div class="detalle-sesion-fecha">
+                                        {{ sesion.fecha_inicio|date:"d/m/Y H:i" }}
+                                        {% if sesion.activa %}
+                                            <span class="detalle-badge activo" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">Activa</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="detalle-sesion-ip">
+                                        IP: {{ sesion.ip_address|default:"No registrada" }}
+                                        {% if sesion.fecha_fin %}
+                                            - Duración: {{ sesion.duracion_sesion.total_seconds|floatformat:0 }}s
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Acciones -->
+                        {% if puede_editar %}
+                        <div class="detalle-actions">
+                            <a href="{% url 'usuarios:lista-usuarios' %}" class="detalle-btn detalle-btn-secondary">
+                                <i class="bi bi-arrow-left"></i>
+                                Volver
+                            </a>
+                            
+                            {% if request.user.perfil.puede_administrar %}
+                            <a href="{% url 'usuarios:editar-usuario' usuario.pk %}" class="detalle-btn detalle-btn-warning">
+                                <i class="bi bi-pencil-square"></i>
+                                Editar Usuario
+                            </a>
+                            
+                            <a href="{% url 'usuarios:cambiar-password' usuario.pk %}" class="detalle-btn detalle-btn-primary">
+                                <i class="bi bi-key"></i>
+                                Cambiar Contraseña
+                            </a>
+                            {% endif %}
+                            
+                            {% if request.user == usuario %}
+                            <a href="{% url 'usuarios:configuracion' %}" class="detalle-btn detalle-btn-primary">
+                                <i class="bi bi-gear"></i>
+                                Configuración
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Vista de detalle de usuario cargada');
+    
+    // Animación de las tarjetas al cargar
+    const cards = document.querySelectorAll('.detalle-stat-card, .detalle-info-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Tooltip para información adicional
+    const tooltipElements = document.querySelectorAll('[data-tooltip]');
+    tooltipElements.forEach(element => {
+        element.addEventListener('mouseenter', function() {
+            // Crear tooltip dinámico si es necesario
+        });
+    });
+});
+</script>
+{% endblock %}

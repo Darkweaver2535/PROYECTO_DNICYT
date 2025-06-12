@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .configuracion-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .configuracion-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .configuracion-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .configuracion-body {
+        padding: 2rem;
+    }
+
+    .config-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .config-section h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-select, .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="configuracion-page">
+    <div class="container">
+        <div class="configuracion-container">
+            <div class="configuracion-header">
+                <h1>
+                    <i class="bi bi-gear"></i>
+                    {{ titulo }}
+                </h1>
+                <p>Personaliza tu experiencia en el sistema</p>
+            </div>
+
+            <div class="configuracion-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="config-section">
+                        <h3><i class="bi bi-palette"></i> Interfaz</h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.tema.label }}</label>
+                            {{ form.tema }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">{{ form.elementos_por_pagina.label }}</label>
+                            {{ form.elementos_por_pagina }}
+                        </div>
+                        
+                        <div class="form-check">
+                            {{ form.mostrar_ayuda }}
+                            <label>{{ form.mostrar_ayuda.label }}</label>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h3><i class="bi bi-bell"></i> Notificaciones</h3>
+                        
+                        <div class="form-check">
+                            {{ form.notificar_mantenimiento }}
+                            <label>{{ form.notificar_mantenimiento.label }}</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            {{ form.notificar_stock_bajo }}
+                            <label>{{ form.notificar_stock_bajo.label }}</label>
+                        </div>
+                        
+                        <div class="form-check">
+                            {{ form.notificar_fallas }}
+                            <label>{{ form.notificar_fallas.label }}</label>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .eliminar-usuario-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .eliminar-usuario-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .eliminar-usuario-header {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .eliminar-usuario-header h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .eliminar-usuario-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+    }
+
+    .eliminar-usuario-body {
+        padding: 2rem;
+    }
+
+    .eliminar-usuario-info {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        border-left: 4px solid #ef4444;
+    }
+
+    .eliminar-usuario-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--pure-white);
+        font-size: 2rem;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .eliminar-usuario-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .eliminar-usuario-details {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+
+    .eliminar-usuario-warning {
+        background: linear-gradient(135deg, #fef3c7, #fbbf24);
+        border: 1px solid #f59e0b;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .eliminar-usuario-warning-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .eliminar-usuario-warning-list {
+        color: #92400e;
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .eliminar-usuario-warning-list li {
+        margin-bottom: 0.5rem;
+    }
+
+    .eliminar-usuario-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .eliminar-usuario-btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        min-width: 150px;
+        justify-content: center;
+    }
+
+    .eliminar-usuario-btn-cancelar {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .eliminar-usuario-btn-cancelar:hover {
+        background: var(--border-color);
+        color: var(--text-dark);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .eliminar-usuario-btn-eliminar {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: var(--pure-white);
+    }
+
+    .eliminar-usuario-btn-eliminar:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: var(--pure-white);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        text-decoration: none;
+    }
+
+    .eliminar-usuario-impact {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .eliminar-usuario-impact-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #991b1b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .eliminar-usuario-impact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        color: #991b1b;
+        font-size: 0.9rem;
+    }
+
+    .eliminar-usuario-volver {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .eliminar-usuario-volver:hover {
+        background: var(--border-color);
+        color: var(--text-dark);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .eliminar-usuario-page {
+            padding: 1rem 0;
+        }
+
+        .eliminar-usuario-body {
+            padding: 1.5rem;
+        }
+
+        .eliminar-usuario-actions {
+            flex-direction: column;
+        }
+
+        .eliminar-usuario-btn {
+            min-width: auto;
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="eliminar-usuario-page">
+    <div class="container">
+        
+        <!-- Botón volver -->
+        <a href="{% url 'usuarios:lista-usuarios' %}" class="eliminar-usuario-volver">
+            <i class="bi bi-arrow-left"></i>
+            Volver a Usuarios
+        </a>
+
+        <div class="eliminar-usuario-container">
+            <!-- Header -->
+            <div class="eliminar-usuario-header">
+                <h1>
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Confirmar Eliminación
+                </h1>
+                <p>Esta acción no se puede deshacer</p>
+            </div>
+
+            <!-- Cuerpo -->
+            <div class="eliminar-usuario-body">
+                
+                <!-- Información del usuario a eliminar -->
+                <div class="eliminar-usuario-info">
+                    <div class="eliminar-usuario-avatar">
+                        {% if usuario.perfil.avatar %}
+                            <img src="{{ usuario.perfil.avatar.url }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        {% else %}
+                            {{ usuario.perfil.get_iniciales|default:usuario.username|slice:":2"|upper }}
+                        {% endif %}
+                    </div>
+                    <h2 class="eliminar-usuario-name">
+                        {{ usuario.get_full_name|default:usuario.username }}
+                    </h2>
+                    <div class="eliminar-usuario-details">
+                        <p><strong>Usuario:</strong> @{{ usuario.username }}</p>
+                        <p><strong>Email:</strong> {{ usuario.email|default:"No especificado" }}</p>
+                        {% if usuario.perfil %}
+                        <p><strong>Rol:</strong> {{ usuario.perfil.get_rol_sistema_display }}</p>
+                        <p><strong>Área:</strong> {{ usuario.perfil.get_area_trabajo_display|default:"No especificado" }}</p>
+                        {% endif %}
+                        <p><strong>Miembro desde:</strong> {{ usuario.date_joined|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+
+                <!-- Advertencia principal -->
+                <div class="eliminar-usuario-warning">
+                    <h3 class="eliminar-usuario-warning-title">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Advertencia Importante
+                    </h3>
+                    <p style="color: #92400e; margin-bottom: 1rem;">
+                        Está a punto de eliminar permanentemente este usuario. Esta acción:
+                    </p>
+                    <ul class="eliminar-usuario-warning-list">
+                        <li><strong>NO se puede deshacer</strong></li>
+                        <li>Eliminará toda la información del perfil</li>
+                        <li>Eliminará el historial de sesiones</li>
+                        <li>Eliminará las configuraciones personalizadas</li>
+                        <li>Puede afectar reportes y registros históricos</li>
+                    </ul>
+                </div>
+
+                <!-- Impacto en el sistema -->
+                <div class="eliminar-usuario-impact">
+                    <h3 class="eliminar-usuario-impact-title">
+                        <i class="bi bi-exclamation-circle"></i>
+                        Impacto en el Sistema
+                    </h3>
+                    
+                    <div class="eliminar-usuario-impact-item">
+                        <i class="bi bi-people"></i>
+                        <span>Los datos relacionados con este usuario en reportes se mantendrán pero sin referencia al usuario</span>
+                    </div>
+                    
+                    <div class="eliminar-usuario-impact-item">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Se perderá el historial completo de actividad del usuario</span>
+                    </div>
+                    
+                    <div class="eliminar-usuario-impact-item">
+                        <i class="bi bi-shield-exclamation"></i>
+                        <span>Si tiene equipos asignados, quedarán sin responsable</span>
+                    </div>
+                    
+                    {% if usuario.supervisados.exists %}
+                    <div class="eliminar-usuario-impact-item">
+                        <i class="bi bi-person-exclamation"></i>
+                        <span><strong>Atención:</strong> Este usuario supervisa a {{ usuario.supervisados.count }} usuario{{ usuario.supervisados.count|pluralize }}. Ellos quedarán sin supervisor.</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Alternativas recomendadas -->
+                <div style="background: #f0f9ff; border: 1px solid #0284c7; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 2rem;">
+                    <h3 style="font-size: 1rem; font-weight: 600; color: #0c4a6e; margin-bottom: 1rem;">
+                        <i class="bi bi-lightbulb"></i>
+                        Alternativas Recomendadas
+                    </h3>
+                    <p style="color: #0c4a6e; margin-bottom: 0.5rem;">En lugar de eliminar, considere:</p>
+                    <ul style="color: #0c4a6e; margin: 0; padding-left: 1.5rem;">
+                        <li><strong>Desactivar el usuario</strong> - mantiene los datos pero impide el acceso</li>
+                        <li><strong>Cambiar el rol</strong> - modificar permisos sin eliminar información</li>
+                        <li><strong>Transferir responsabilidades</strong> - reasignar equipos y supervisión antes de eliminar</li>
+                    </ul>
+                </div>
+
+                <!-- Formulario de confirmación -->
+                <form method="post" style="margin-bottom: 2rem;">
+                    {% csrf_token %}
+                    
+                    <!-- Campo de confirmación -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="font-weight: 600; color: var(--text-dark); margin-bottom: 0.5rem; display: block;">
+                            Para confirmar la eliminación, escriba el nombre de usuario:
+                        </label>
+                        <input type="text" 
+                               name="confirmacion_username" 
+                               placeholder="Escriba: {{ usuario.username }}" 
+                               required
+                               style="width: 100%; padding: 0.75rem; border: 2px solid #ef4444; border-radius: 0.5rem; font-size: 0.9rem;"
+                               pattern="{{ usuario.username }}"
+                               title="Debe escribir exactamente: {{ usuario.username }}">
+                        <small style="color: #ef4444; font-size: 0.8rem;">
+                            Escriba exactamente: <strong>{{ usuario.username }}</strong>
+                        </small>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="eliminar-usuario-actions">
+                        <a href="{% url 'usuarios:lista-usuarios' %}" class="eliminar-usuario-btn eliminar-usuario-btn-cancelar">
+                            <i class="bi bi-x-circle"></i>
+                            Cancelar
+                        </a>
+                        
+                        <button type="submit" class="eliminar-usuario-btn eliminar-usuario-btn-eliminar" id="btnEliminar" disabled>
+                            <i class="bi bi-trash"></i>
+                            Eliminar Usuario
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Página de confirmación de eliminación cargada');
+    
+    const inputConfirmacion = document.querySelector('input[name="confirmacion_username"]');
+    const btnEliminar = document.getElementById('btnEliminar');
+    const usernameEsperado = '{{ usuario.username }}';
+    
+    // Habilitar/deshabilitar botón según confirmación
+    inputConfirmacion.addEventListener('input', function() {
+        if (this.value === usernameEsperado) {
+            btnEliminar.disabled = false;
+            btnEliminar.style.opacity = '1';
+            this.style.borderColor = '#10b981';
+        } else {
+            btnEliminar.disabled = true;
+            btnEliminar.style.opacity = '0.5';
+            this.style.borderColor = '#ef4444';
+        }
+    });
+    
+    // Confirmación adicional antes de enviar
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (inputConfirmacion.value !== usernameEsperado) {
+            e.preventDefault();
+            alert('Debe escribir exactamente el nombre de usuario para confirmar la eliminación.');
+            return false;
+        }
+        
+        const confirmacion = confirm(
+            `¿Está ABSOLUTAMENTE SEGURO que desea eliminar el usuario "${usernameEsperado}"?\n\n` +
+            'Esta acción NO se puede deshacer y eliminará toda la información asociada.\n\n' +
+            'Haga clic en "Aceptar" solo si está completamente seguro.'
+        );
+        
+        if (!confirmacion) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Mostrar indicador de carga
+        btnEliminar.innerHTML = '<i class="bi bi-hourglass-split"></i> Eliminando...';
+        btnEliminar.disabled = true;
+    });
+    
+    // Focus en el campo de confirmación
+    inputConfirmacion.focus();
+});
+</script>
+{% endblock %}
