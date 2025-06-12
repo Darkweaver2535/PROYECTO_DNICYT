@@ -158,14 +158,15 @@ class RegistroFalla(models.Model):
     
     # Documentos
     foto_falla = models.ImageField("Foto de la Falla", upload_to='fallas/fotos/', blank=True, null=True)
-    reporte_tecnico = models.FileField("Reporte Técnico", upload_to='fallas/reportes/', blank=True, null=True)
+    documento_analisis = models.FileField("Documento de Análisis", upload_to='fallas/documentos/', blank=True, null=True)
     
-    # Control
+    # Seguimiento
     requiere_seguimiento = models.BooleanField("Requiere Seguimiento", default=False)
     fecha_seguimiento = models.DateField("Fecha de Seguimiento", blank=True, null=True)
+    
+    # Control
     observaciones = models.TextField("Observaciones", blank=True, null=True)
     activo = models.BooleanField("Activo", default=True)
-    fecha_actualizacion = models.DateTimeField("Última Actualización", auto_now=True)
     
     class Meta:
         verbose_name = "Registro de Falla"
@@ -200,116 +201,63 @@ class RegistroFalla(models.Model):
         super().save(*args, **kwargs)
     
     def calcular_indice_criticidad(self):
-        """Calcula el índice de criticidad basado en múltiples factores"""
-        criticidad = 0
-        
-        # Factor severidad (30%)
-        severidad_pesos = {
-            'critica': 30,
-            'alta': 22,
-            'media': 15,
-            'baja': 8
+        """Calcula el índice de criticidad basado en severidad y tiempo de parada"""
+        base_severidad = {
+            'critica': 90,
+            'alta': 70,
+            'media': 50,
+            'baja': 30
         }
-        criticidad += severidad_pesos.get(self.severidad, 15)
         
-        # Factor tiempo de parada (25%)
+        criticidad = base_severidad.get(self.severidad, 50)
+        
+        # Ajustar por tiempo de parada
         if self.tiempo_parada:
-            if self.tiempo_parada >= 24:
-                criticidad += 25
-            elif self.tiempo_parada >= 8:
-                criticidad += 18
-            elif self.tiempo_parada >= 2:
-                criticidad += 12
-            else:
-                criticidad += 6
+            if self.tiempo_parada > 24:  # Más de un día
+                criticidad = min(100, criticidad + 10)
+            elif self.tiempo_parada > 8:  # Más de 8 horas
+                criticidad = min(100, criticidad + 5)
         
-        # Factor costo (20%)
-        if self.costo_reparacion:
-            if self.costo_reparacion >= 10000:
-                criticidad += 20
-            elif self.costo_reparacion >= 5000:
-                criticidad += 15
-            elif self.costo_reparacion >= 1000:
-                criticidad += 10
-            else:
-                criticidad += 5
-        
-        # Factor recurrencia (15%)
-        fallas_similares = RegistroFalla.objects.filter(
-            equipo=self.equipo,
-            tipo_falla=self.tipo_falla,
-            fecha_ocurrencia__gte=timezone.now() - timedelta(days=180)
-        ).count()
-        
-        if fallas_similares >= 3:
-            criticidad += 15
-        elif fallas_similares >= 2:
-            criticidad += 10
-        else:
-            criticidad += 5
-        
-        # Factor seguridad (10%)
-        if self.tipo_falla in ['electrica', 'hidraulica', 'sobrecarga']:
-            criticidad += 10
-        else:
-            criticidad += 5
-        
-        self.indice_criticidad = min(criticidad, 100)
-    
-    def get_color_severidad(self):
-        """Retorna el color CSS asociado a la severidad"""
-        colores = {
-            'critica': '#dc2626',
-            'alta': '#ea580c',
-            'media': '#2563eb',
-            'baja': '#16a34a',
-        }
-        return colores.get(self.severidad, '#6b7280')
+        self.indice_criticidad = criticidad
     
     def get_dias_transcurridos(self):
-        """Calcula los días transcurridos desde la ocurrencia"""
-        return (timezone.now().date() - self.fecha_ocurrencia.date()).days
+        """Calcula los días transcurridos desde que ocurrió la falla"""
+        if self.estado == 'solucionada' and self.fecha_solucion:
+            return (self.fecha_solucion.date() - self.fecha_ocurrencia.date()).days
+        else:
+            return (date.today() - self.fecha_ocurrencia.date()).days
     
     def esta_vencida(self):
-        """Determina si la falla está vencida para resolución"""
+        """Verifica si la falla ha excedido el tiempo límite para resolución"""
         dias_limite = {
             'critica': 1,
             'alta': 3,
             'media': 7,
-            'baja': 15
+            'baja': 14
         }
         
-        if self.estado in ['solucionada', 'cerrada']:
-            return False
-        
         limite = dias_limite.get(self.severidad, 7)
-        return self.get_dias_transcurridos() > limite
-    
-    def calcular_mttr(self):
-        """Calcula el MTTR (Mean Time To Repair) si está resuelto"""
-        if self.fecha_solucion and self.tiempo_reparacion:
-            return self.tiempo_reparacion
-        return None
+        return self.get_dias_transcurridos() > limite and self.estado != 'solucionada'
 
 class SeguimientoFalla(models.Model):
-    """Modelo para seguimiento de fallas"""
+    """Modelo para registrar seguimientos y acciones sobre fallas"""
     
     TIPO_ACCION_CHOICES = [
         ('diagnostico', 'Diagnóstico'),
-        ('reparacion_temporal', 'Reparación Temporal'),
-        ('reparacion_definitiva', 'Reparación Definitiva'),
-        ('reemplazo_componente', 'Reemplazo de Componente'),
-        ('ajuste_parametros', 'Ajuste de Parámetros'),
-        ('prueba_funcionamiento', 'Prueba de Funcionamiento'),
-        ('verificacion_solucion', 'Verificación de Solución'),
+        ('reparacion', 'Reparación'),
+        ('analisis', 'Análisis'),
+        ('seguimiento', 'Seguimiento'),
         ('cierre_falla', 'Cierre de Falla'),
+        ('asignacion', 'Asignación'),
+        ('escalamiento', 'Escalamiento'),
+        ('validacion', 'Validación'),
     ]
     
     falla = models.ForeignKey(RegistroFalla, on_delete=models.CASCADE, related_name='seguimientos')
-    fecha_accion = models.DateTimeField("Fecha de Acción", default=timezone.now)
-    tipo_accion = models.CharField("Tipo de Acción", max_length=25, choices=TIPO_ACCION_CHOICES)
+    fecha_accion = models.DateTimeField("Fecha de la Acción")
+    tipo_accion = models.CharField("Tipo de Acción", max_length=20, choices=TIPO_ACCION_CHOICES)
     descripcion_accion = models.TextField("Descripción de la Acción")
-    responsable = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    responsable = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='seguimientos_realizados')
     tiempo_empleado = models.DecimalField("Tiempo Empleado (horas)", max_digits=6, decimal_places=2, blank=True, null=True)
     costo_accion = models.DecimalField("Costo de la Acción", max_digits=10, decimal_places=2, blank=True, null=True)
     resultado = models.TextField("Resultado Obtenido", blank=True, null=True)

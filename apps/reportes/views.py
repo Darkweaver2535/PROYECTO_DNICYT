@@ -1,19 +1,17 @@
-import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Count, Avg, Sum, F
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from datetime import date, timedelta, datetime
 from django.utils import timezone
+import json
 
 # Importaciones para Excel
 import openpyxl
-from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
-import csv
 
 # Importaciones para PDF
 from reportlab.lib.pagesizes import letter, A4
@@ -140,6 +138,24 @@ def reportes_equipos_view(request):
     except:
         ultimos_reportes = []
     
+    # === DATOS PARA GRÁFICOS ===
+    # Preparar datos para charts
+    estados_data = {
+        'labels': ['Operativo', 'Mantenimiento', 'Fuera de Servicio'],
+        'data': [equipos_operativos, equipos_mantenimiento, equipos_fuera_servicio],
+        'colors': ['#10b981', '#f59e0b', '#ef4444']
+    }
+    
+    ubicaciones_data = {
+        'labels': [item['seccion'] for item in equipos_por_seccion],
+        'data': [item['total'] for item in equipos_por_seccion]
+    }
+    
+    datos_graficos = {
+        'estados': estados_data,
+        'ubicaciones': ubicaciones_data
+    }
+    
     # === CONTEXT PARA EL TEMPLATE ===
     context = {
         'seccion_filtro': seccion_filtro,
@@ -164,6 +180,7 @@ def reportes_equipos_view(request):
         'equipos_no_criticos': equipos_no_criticos,
         'alertas': alertas,
         'ultimos_reportes': ultimos_reportes,
+        'datos_graficos': json.dumps(datos_graficos),
         'titulo': 'Reportes de Equipos',
     }
     
@@ -267,42 +284,130 @@ def exportar_reporte_equipos_excel(request):
 
 @login_required
 def exportar_reporte_equipos_pdf(request):
-    """Exportar reporte completo de equipos a PDF con gráficos y estadísticas"""
+    """Exportar reporte de equipos a PDF"""
+    
+    # Obtener filtros
+    seccion_filtro = request.GET.get('seccion', '')
+    estado_filtro = request.GET.get('estado', '')
+    
+    # Obtener datos
+    equipos = Equipo.objects.all()
+    
+    if seccion_filtro:
+        equipos = equipos.filter(seccion=seccion_filtro)
+    if estado_filtro:
+        equipos = equipos.filter(estado=estado_filtro)
     
     # Crear respuesta PDF
     response = HttpResponse(content_type='application/pdf')
-    timestamp = timezone.now().strftime("%Y%m%d_%H%M")
-    filename = f'Reporte_Equipos_{timestamp}.pdf'
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response['Content-Disposition'] = f'attachment; filename="Reporte_Equipos_{timezone.now().strftime("%Y%m%d")}.pdf"'
     
-    # Crear documento PDF usando ReportLab
+    # Crear documento
     doc = SimpleDocTemplate(response, pagesize=A4)
     story = []
     
+    # Estilos
     styles = getSampleStyleSheet()
-    title = Paragraph("Reporte de Equipos", styles['Title'])
-    story.append(title)
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+        alignment=1  # Center
+    )
     
+    # Título
+    story.append(Paragraph("REPORTE DE EQUIPOS", title_style))
+    story.append(Spacer(1, 12))
+    
+    # Información del reporte
+    info_data = [
+        ['Fecha de generación:', timezone.now().strftime('%d/%m/%Y %H:%M')],
+        ['Total de equipos:', str(equipos.count())],
+        ['Filtros aplicados:', f'Sección: {seccion_filtro or "Todas"}, Estado: {estado_filtro or "Todos"}'],
+    ]
+    
+    info_table = Table(info_data, colWidths=[2*inch, 3*inch])
+    info_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    
+    story.append(info_table)
+    story.append(Spacer(1, 20))
+    
+    # Tabla de equipos (primeros 50)
+    data = [['Código', 'Nombre', 'Sección', 'Estado', 'Fabricante', 'Responsable']]
+    
+    for equipo in equipos[:50]:  # Limitar para PDF
+        data.append([
+            equipo.codigo_interno,
+            equipo.nombre[:25] + '...' if len(equipo.nombre) > 25 else equipo.nombre,
+            equipo.get_seccion_display(),
+            equipo.get_estado_display(),
+            equipo.fabricante or 'N/A',
+            equipo.responsable or 'No asignado'
+        ])
+    
+    # Crear tabla
+    table = Table(data, colWidths=[1*inch, 2*inch, 1.2*inch, 1.2*inch, 1.2*inch, 1.2*inch])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    story.append(table)
+    
+    # Nota al pie
+    if equipos.count() > 50:
+        story.append(Spacer(1, 12))
+        story.append(Paragraph(f"Nota: Mostrando los primeros 50 equipos de {equipos.count()} totales.", styles['Normal']))
+    
+    # Construir PDF
     doc.build(story)
+    
     return response
 
 @login_required
 def api_equipos_chart_data(request):
     """API para datos de gráficos de equipos"""
     
-    # Datos básicos por estado
-    data = {
-        'estados': {
-            'labels': ['Operativo', 'Mantenimiento', 'Fuera de Servicio'],
-            'data': [
-                Equipo.objects.filter(estado='OPERATIVO').count(),
-                Equipo.objects.filter(estado='MANTENIMIENTO').count(),
-                Equipo.objects.filter(estado='FUERA_SERVICIO').count(),
-            ]
+    tipo_chart = request.GET.get('tipo', 'estados')
+    
+    if tipo_chart == 'estados':
+        # Datos de estados
+        data = {
+            'operativo': Equipo.objects.filter(estado='OPERATIVO').count(),
+            'mantenimiento': Equipo.objects.filter(estado='MANTENIMIENTO').count(),
+            'fuera_servicio': Equipo.objects.filter(estado='FUERA_SERVICIO').count(),
         }
-    }
+    
+    elif tipo_chart == 'secciones':
+        # Datos por sección
+        secciones = Equipo.objects.values('seccion').annotate(
+            total=Count('id')
+        ).order_by('-total')
+        
+        data = {
+            'labels': [s['seccion'] for s in secciones],
+            'values': [s['total'] for s in secciones]
+        }
+    
+    else:
+        data = {'error': 'Tipo de gráfico no válido'}
     
     return JsonResponse(data)
+
+# ===== ANÁLISIS DE FALLAS (SIN CAMBIOS) =====
 
 @login_required
 def analisis_fallas_view(request):
@@ -540,13 +645,13 @@ def crear_falla_view(request):
             falla.save()
             
             messages.success(request, f'Falla {falla.codigo_falla} registrada exitosamente.')
-            return redirect('reportes:analisis-fallas')
+            return redirect('reportes:detalle-falla', codigo_falla=falla.codigo_falla)
         else:
-            messages.error(request, 'Error al registrar la falla. Por favor revise los campos.')
+            messages.error(request, 'Error al registrar la falla. Por favor revise los campos marcados.')
     else:
         form = RegistroFallaForm()
     
-    # Estadísticas para el contexto
+    # Estadísticas para mostrar en el template
     stats = {
         'total_equipos': Equipo.objects.count(),
         'total_fallas': RegistroFalla.objects.count(),
@@ -595,8 +700,6 @@ def editar_falla_view(request, codigo_falla):
             form.save()
             messages.success(request, f'Falla {falla.codigo_falla} actualizada exitosamente.')
             return redirect('reportes:detalle-falla', codigo_falla=falla.codigo_falla)
-        else:
-            messages.error(request, 'Error al actualizar la falla. Por favor revise los campos.')
     else:
         form = RegistroFallaForm(instance=falla)
     
@@ -716,49 +819,36 @@ def asignar_falla_view(request, codigo_falla):
     falla = get_object_or_404(RegistroFalla, codigo_falla=codigo_falla)
     
     if request.method == 'POST':
+        from django.contrib.auth.models import User
         usuario_id = request.POST.get('asignado_a')
         cambiar_estado = request.POST.get('cambiar_estado') == '1'
         
         if usuario_id:
-            from django.contrib.auth.models import User
-            usuario = get_object_or_404(User, id=usuario_id)
-            
-            # Guardar el usuario anterior para el seguimiento
-            usuario_anterior = falla.asignado_a
-            
-            # Asignar nuevo usuario
-            falla.asignado_a = usuario
-            
-            # Cambiar estado si se solicitó
-            if cambiar_estado and falla.estado in ['identificada', 'pendiente']:
-                falla.estado = 'analisis'
-            
-            falla.save()
-            
-            # Crear seguimiento
-            if usuario_anterior:
-                descripcion = f"Falla reasignada de {usuario_anterior.get_full_name() or usuario_anterior.username} a {usuario.get_full_name() or usuario.username}"
-            else:
-                descripcion = f"Falla asignada a {usuario.get_full_name() or usuario.username}"
-            
-            if cambiar_estado:
-                descripcion += " y estado cambiado a 'En Análisis'"
-            
-            SeguimientoFalla.objects.create(
-                falla=falla,
-                fecha_accion=timezone.now(),
-                tipo_accion='asignacion',
-                descripcion_accion=descripcion,
-                responsable=request.user
-            )
-            
-            messages.success(request, f'Falla {falla.codigo_falla} asignada exitosamente a {usuario.get_full_name() or usuario.username}.')
-        else:
-            messages.error(request, 'Debe seleccionar un usuario.')
-        
-        return redirect('reportes:detalle-falla', codigo_falla=falla.codigo_falla)
+            try:
+                usuario = User.objects.get(id=usuario_id)
+                falla.asignado_a = usuario
+                
+                if cambiar_estado:
+                    falla.estado = 'analisis'
+                
+                falla.save()
+                
+                # Crear seguimiento
+                SeguimientoFalla.objects.create(
+                    falla=falla,
+                    fecha_accion=timezone.now(),
+                    tipo_accion='asignacion',
+                    descripcion_accion=f"Falla asignada a {usuario.get_full_name() or usuario.username}",
+                    responsable=request.user,
+                    resultado=f"Falla asignada exitosamente a {usuario.get_full_name() or usuario.username}"
+                )
+                
+                messages.success(request, f'Falla {falla.codigo_falla} asignada a {usuario.get_full_name() or usuario.username} exitosamente.')
+                return redirect('reportes:detalle-falla', codigo_falla=falla.codigo_falla)
+            except User.DoesNotExist:
+                messages.error(request, 'Usuario seleccionado no válido.')
     
-    # Obtener usuarios activos
+    # Obtener usuarios activos para asignación
     from django.contrib.auth.models import User
     usuarios = User.objects.filter(is_active=True).order_by('first_name', 'last_name')
     
@@ -779,12 +869,12 @@ def generar_texto_filtros(seccion, estado, fecha_desde, fecha_hasta):
     if seccion:
         filtros.append(f"Sección: {seccion}")
     else:
-        filtros.append("Todas las secciones")
+        filtros.append("Sección: Todas")
     
     if estado:
         filtros.append(f"Estado: {estado}")
     else:
-        filtros.append("Todos los estados")
+        filtros.append("Estado: Todos")
     
     if fecha_desde:
         filtros.append(f"Desde: {fecha_desde}")
@@ -793,14 +883,14 @@ def generar_texto_filtros(seccion, estado, fecha_desde, fecha_hasta):
         filtros.append(f"Hasta: {fecha_hasta}")
     
     if not fecha_desde and not fecha_hasta:
-        filtros.append("Sin filtro de fechas")
+        filtros.append("Período: Todo el historial")
     
     return " | ".join(filtros)
 
 def truncar_texto(texto, max_length):
     """Trunca texto para que no exceda el ancho de la tabla"""
     if not texto:
-        return ''
+        return "Sin datos"
     
     if len(texto) <= max_length:
         return texto
@@ -827,11 +917,11 @@ def generar_recomendaciones(total, operativos, mantenimiento, fuera_servicio, po
     
     # Análisis de equipos fuera de servicio
     if fuera_servicio > 0:
-        recomendaciones.append(f"Priorizar la reparación de {fuera_servicio} equipos fuera de servicio.")
+        recomendaciones.append(f"Se detectaron {fuera_servicio} equipos fuera de servicio. Priorizar su reparación o reemplazo.")
     
     # Análisis de mantenimiento
     if mantenimiento > 0:
-        recomendaciones.append(f"Optimizar cronograma de mantenimiento para los {mantenimiento} equipos actualmente en servicio.")
+        recomendaciones.append(f"Actualmente {mantenimiento} equipos están en mantenimiento. Monitorear tiempos de ejecución.")
     
     # Recomendación general
     recomendaciones.append("Implementar sistema de monitoreo continuo y mantener actualizado el inventario de repuestos críticos.")

@@ -142,6 +142,8 @@
     .btn-cancelar:hover {
         background: var(--border-color);
         transform: translateY(-2px);
+        color: var(--text-dark);
+        text-decoration: none;
     }
 
     .btn-guardar {
@@ -167,6 +169,14 @@
 
     .required-field {
         color: #ef4444;
+    }
+
+    .fecha-seguimiento-container {
+        display: none;
+    }
+
+    .fecha-seguimiento-container.show {
+        display: block;
     }
 </style>
 {% endblock %}
@@ -250,7 +260,7 @@
                                 </div>
 
                                 <div class="form-row">
-                                    <div class="form-group">
+                                    <div class="form-group" style="grid-column: 1 / -1;">
                                         <label class="form-label">
                                             Descripción de la Falla <span class="required-field">*</span>
                                         </label>
@@ -282,7 +292,7 @@
                                 </div>
 
                                 <div class="form-row">
-                                    <div class="form-group">
+                                    <div class="form-group" style="grid-column: 1 / -1;">
                                         <label class="form-label">Condiciones de Operación</label>
                                         {{ form.condiciones_operacion }}
                                         <div class="help-text">Condiciones en las que operaba el equipo</div>
@@ -320,23 +330,20 @@
                                     
                                     <div class="form-group">
                                         <label class="form-label">
-                                            <input type="checkbox" class="form-check-input me-2">
+                                            <input type="checkbox" name="requiere_seguimiento" id="id_requiere_seguimiento" style="margin-right: 0.5rem;">
                                             Requiere Seguimiento
                                         </label>
-                                        {{ form.requiere_seguimiento }}
                                         <div class="help-text">Marcar si necesita seguimiento posterior</div>
                                     </div>
                                 </div>
 
-                                {% if form.requiere_seguimiento.value %}
-                                <div class="form-row">
+                                <div class="form-row fecha-seguimiento-container" id="fecha-seguimiento-container">
                                     <div class="form-group">
                                         <label class="form-label">Fecha de Seguimiento</label>
                                         {{ form.fecha_seguimiento }}
                                         <div class="help-text">Fecha programada para seguimiento</div>
                                     </div>
                                 </div>
-                                {% endif %}
                             </div>
 
                             <!-- Documentación -->
@@ -382,19 +389,20 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Formulario de registro de fallas cargado');
+
     // Mostrar/ocultar fecha de seguimiento
     const checkboxSeguimiento = document.querySelector('input[name="requiere_seguimiento"]');
     const fechaSeguimiento = document.querySelector('input[name="fecha_seguimiento"]');
+    const contenedorFecha = document.getElementById('fecha-seguimiento-container');
     
-    if (checkboxSeguimiento && fechaSeguimiento) {
-        const contenedorFecha = fechaSeguimiento.closest('.form-group');
-        
+    if (checkboxSeguimiento && fechaSeguimiento && contenedorFecha) {
         function toggleFechaSeguimiento() {
             if (checkboxSeguimiento.checked) {
-                contenedorFecha.style.display = 'block';
+                contenedorFecha.classList.add('show');
                 fechaSeguimiento.required = true;
             } else {
-                contenedorFecha.style.display = 'none';
+                contenedorFecha.classList.remove('show');
                 fechaSeguimiento.required = false;
                 fechaSeguimiento.value = '';
             }
@@ -417,7 +425,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    console.log('✅ Formulario de registro de fallas cargado');
+    // Configurar fecha y hora por defecto
+    const fechaOcurrencia = document.querySelector('input[name="fecha_ocurrencia"]');
+    if (fechaOcurrencia && !fechaOcurrencia.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        fechaOcurrencia.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
 });
 </script>
 {% endblock %}
