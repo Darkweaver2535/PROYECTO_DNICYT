@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirmar Eliminación de Falla - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .eliminar-falla-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .eliminar-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        max-width: 600px;
+        width: 100%;
+    }
+
+    .eliminar-header {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .eliminar-header h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+
+    .eliminar-header .icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .eliminar-body {
+        padding: 2rem;
+    }
+
+    .falla-info {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .falla-detail {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #fecaca;
+    }
+
+    .falla-detail:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #7f1d1d;
+    }
+
+    .detail-value {
+        color: #991b1b;
+    }
+
+    .warning-message {
+        background: #fffbeb;
+        border: 1px solid #fed7aa;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .warning-icon {
+        color: #d97706;
+        font-size: 1.2rem;
+        margin-top: 0.1rem;
+    }
+
+    .warning-text {
+        color: #92400e;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .danger-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .danger-icon {
+        color: #dc2626;
+        font-size: 1.2rem;
+        margin-top: 0.1rem;
+    }
+
+    .danger-text {
+        color: #7f1d1d;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+
+    .btn-cancelar {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancelar:hover {
+        background: var(--border-color);
+        transform: translateY(-2px);
+        color: var(--text-dark);
+        text-decoration: none;
+    }
+
+    .btn-eliminar {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-eliminar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge-critica { background: #fef2f2; color: #dc2626; }
+    .badge-alta { background: #fffbeb; color: #d97706; }
+    .badge-media { background: #eff6ff; color: #2563eb; }
+    .badge-baja { background: #f0fdf4; color: #16a34a; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="eliminar-falla-page">
+    <div class="eliminar-container">
+        <!-- Header -->
+        <div class="eliminar-header">
+            <div class="icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h1>Confirmar Eliminación de Falla</h1>
+            <p>Esta acción no se puede deshacer</p>
+        </div>
+
+        <!-- Cuerpo -->
+        <div class="eliminar-body">
+            <!-- Información de la falla -->
+            <div class="falla-info">
+                <div class="falla-detail">
+                    <span class="detail-label">Código de Falla:</span>
+                    <span class="detail-value">{{ falla.codigo_falla }}</span>
+                </div>
+                <div class="falla-detail">
+                    <span class="detail-label">Equipo:</span>
+                    <span class="detail-value">{{ falla.equipo.nombre }} ({{ falla.equipo.codigo_interno }})</span>
+                </div>
+                <div class="falla-detail">
+                    <span class="detail-label">Fecha de Ocurrencia:</span>
+                    <span class="detail-value">{{ falla.fecha_ocurrencia|date:"d/m/Y H:i" }}</span>
+                </div>
+                <div class="falla-detail">
+                    <span class="detail-label">Severidad:</span>
+                    <span class="detail-value">
+                        <span class="badge badge-{{ falla.severidad }}">{{ falla.get_severidad_display }}</span>
+                    </span>
+                </div>
+                <div class="falla-detail">
+                    <span class="detail-label">Estado:</span>
+                    <span class="detail-value">{{ falla.get_estado_display }}</span>
+                </div>
+                <div class="falla-detail">
+                    <span class="detail-label">Descripción:</span>
+                    <span class="detail-value">{{ falla.descripcion_falla|truncatechars:100 }}</span>
+                </div>
+            </div>
+
+            <!-- Advertencias -->
+            {% if falla.estado != 'solucionada' %}
+            <div class="warning-message">
+                <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+                <div class="warning-text">
+                    <strong>Advertencia:</strong> Esta falla no está marcada como solucionada. 
+                    Eliminarla puede afectar el seguimiento de problemas pendientes en el equipo.
+                </div>
+            </div>
+            {% endif %}
+
+            {% if tiene_seguimientos %}
+            <div class="danger-message">
+                <i class="bi bi-x-circle-fill danger-icon"></i>
+                <div class="danger-text">
+                    <strong>¡Atención!</strong> Esta falla tiene seguimientos registrados. 
+                    Al eliminar la falla, también se eliminarán todos los seguimientos asociados 
+                    y se perderá el historial de acciones realizadas.
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="danger-message">
+                <i class="bi bi-trash3-fill danger-icon"></i>
+                <div class="danger-text">
+                    <strong>Confirmación requerida:</strong> Esta acción eliminará permanentemente 
+                    la falla y toda la información asociada. Esta operación no se puede deshacer.
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="actions">
+                <a href="{% url 'reportes:detalle-falla' codigo_falla=falla.codigo_falla %}" class="btn-cancelar">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+                
+                <form method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-eliminar" 
+                            onclick="return confirm('¿Está completamente seguro de que desea eliminar esta falla?')">
+                        <i class="bi bi-trash3"></i> Eliminar Falla
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

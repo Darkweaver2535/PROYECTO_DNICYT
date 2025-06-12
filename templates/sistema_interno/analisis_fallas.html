@@ -1,0 +1,972 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Análisis de Fallas - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* IMPORTANTE: Encapsular todos los estilos dentro de .analisis-fallas-page para evitar conflictos */
+    .analisis-fallas-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .analisis-fallas-page .fallas-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .analisis-fallas-page .fallas-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .analisis-fallas-page .fallas-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #ef4444;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .analisis-fallas-page .fallas-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .analisis-fallas-page .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .analisis-fallas-page .metric-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--primary-blue);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .analisis-fallas-page .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .analisis-fallas-page .metric-card.critical { border-left-color: #ef4444; }
+    .analisis-fallas-page .metric-card.warning { border-left-color: #f59e0b; }
+    .analisis-fallas-page .metric-card.success { border-left-color: #10b981; }
+    .analisis-fallas-page .metric-card.info { border-left-color: var(--primary-blue); }
+
+    .analisis-fallas-page .metric-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .analisis-fallas-page .metric-label {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .analisis-fallas-page .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .analisis-fallas-page .main-panel {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .analisis-fallas-page .side-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .analisis-fallas-page .panel-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .analisis-fallas-page .section-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 2px solid var(--primary-blue);
+        padding-bottom: 0.5rem;
+    }
+
+    .analisis-fallas-page .filters-section {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .analisis-fallas-page .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .analisis-fallas-page .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .analisis-fallas-page .filter-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .analisis-fallas-page .form-control,
+    .analisis-fallas-page .form-select {
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.6rem;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+
+    .analisis-fallas-page .form-control:focus,
+    .analisis-fallas-page .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    .analisis-fallas-page .fallas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .analisis-fallas-page .falla-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .analisis-fallas-page .falla-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-blue);
+    }
+
+    .analisis-fallas-page .falla-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .analisis-fallas-page .falla-codigo {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        background: var(--light-blue);
+        padding: 0.4rem 0.8rem;
+        border-radius: 1rem;
+        display: inline-block;
+        margin-bottom: 0.75rem;
+    }
+
+    .analisis-fallas-page .falla-titulo {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .analisis-fallas-page .falla-descripcion {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .analisis-fallas-page .falla-badges {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        align-items: flex-end;
+    }
+
+    .analisis-fallas-page .falla-body {
+        padding: 1.5rem;
+    }
+
+    .analisis-fallas-page .falla-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .analisis-fallas-page .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .analisis-fallas-page .detail-label {
+        font-size: 0.7rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+    }
+
+    .analisis-fallas-page .detail-value {
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .analisis-fallas-page .severity-indicator {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .analisis-fallas-page .severity-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.3rem;
+    }
+
+    .analisis-fallas-page .severity-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+    }
+
+    .analisis-fallas-page .severity-critica { background: #fef2f2; }
+    .analisis-fallas-page .severity-critica .severity-value { color: #dc2626; }
+
+    .analisis-fallas-page .severity-alta { background: #fffbeb; }
+    .analisis-fallas-page .severity-alta .severity-value { color: #d97706; }
+
+    .analisis-fallas-page .severity-media { background: #eff6ff; }
+    .analisis-fallas-page .severity-media .severity-value { color: #2563eb; }
+
+    .analisis-fallas-page .severity-baja { background: #f0fdf4; }
+    .analisis-fallas-page .severity-baja .severity-value { color: #16a34a; }
+
+    .analisis-fallas-page .falla-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .analisis-fallas-page .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 0.4rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        border: 1px solid;
+        cursor: pointer;
+    }
+
+    .analisis-fallas-page .btn-view {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+
+    .analisis-fallas-page .btn-view:hover {
+        background: var(--primary-blue);
+        color: white;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .analisis-fallas-page .btn-edit {
+        background: #fef3c7;
+        color: #d97706;
+        border-color: #d97706;
+    }
+
+    .analisis-fallas-page .btn-edit:hover {
+        background: #d97706;
+        color: white;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .analisis-fallas-page .btn-delete {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #dc2626;
+    }
+
+    .analisis-fallas-page .btn-delete:hover {
+        background: #dc2626;
+        color: white;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .analisis-fallas-page .btn-primary {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .analisis-fallas-page .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .analisis-fallas-page .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .analisis-fallas-page .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .analisis-fallas-page .btn-outline-primary {
+        background: transparent;
+        color: var(--primary-blue);
+        border: 1px solid var(--primary-blue);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .analisis-fallas-page .btn-outline-primary:hover {
+        background: var(--primary-blue);
+        color: white;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .analisis-fallas-page .badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .analisis-fallas-page .badge-severity-critica { background: #fef2f2; color: #dc2626; }
+    .analisis-fallas-page .badge-severity-alta { background: #fffbeb; color: #d97706; }
+    .analisis-fallas-page .badge-severity-media { background: #eff6ff; color: #2563eb; }
+    .analisis-fallas-page .badge-severity-baja { background: #f0fdf4; color: #16a34a; }
+
+    .analisis-fallas-page .badge-estado-identificada { background: #fef3c7; color: #d97706; }
+    .analisis-fallas-page .badge-estado-analisis { background: #eff6ff; color: #2563eb; }
+    .analisis-fallas-page .badge-estado-solucionada { background: #f0fdf4; color: #16a34a; }
+    .analisis-fallas-page .badge-estado-pendiente { background: #fef2f2; color: #dc2626; }
+
+    .analisis-fallas-page .chart-container {
+        height: 300px;
+        margin-bottom: 1.5rem;
+    }
+
+    .analisis-fallas-page .alert-item {
+        background: var(--pure-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: var(--shadow-sm);
+        border-left: 3px solid var(--primary-blue);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .analisis-fallas-page .alert-item.critical { border-left-color: #dc2626; }
+    .analisis-fallas-page .alert-item.warning { border-left-color: #d97706; }
+    .analisis-fallas-page .alert-item.info { border-left-color: var(--primary-blue); }
+
+    .analisis-fallas-page .alert-icon {
+        font-size: 1.3rem;
+        width: 30px;
+        text-align: center;
+    }
+
+    .analisis-fallas-page .alert-content {
+        flex: 1;
+    }
+
+    .analisis-fallas-page .alert-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.2rem;
+        font-size: 0.9rem;
+    }
+
+    .analisis-fallas-page .alert-description {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin: 0;
+    }
+
+    .analisis-fallas-page .timeline-item {
+        border-left: 2px solid var(--border-color);
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .analisis-fallas-page .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -5px;
+        top: 0.5rem;
+        width: 8px;
+        height: 8px;
+        background: var(--primary-blue);
+        border-radius: 50%;
+    }
+
+    .analisis-fallas-page .timeline-time {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        margin-bottom: 0.25rem;
+    }
+
+    .analisis-fallas-page .timeline-content {
+        font-size: 0.85rem;
+        color: var(--text-dark);
+    }
+
+    .analisis-fallas-page .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-light);
+    }
+
+    .analisis-fallas-page .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.4;
+    }
+
+    /* Responsivo */
+    @media (max-width: 992px) {
+        .analisis-fallas-page .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .analisis-fallas-page .metrics-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .analisis-fallas-page .fallas-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .analisis-fallas-page .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .analisis-fallas-page .falla-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .analisis-fallas-page .falla-actions {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .analisis-fallas-page .fallas-title {
+            font-size: 1.8rem;
+        }
+        
+        .analisis-fallas-page .metric-value {
+            font-size: 2rem;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes slideInUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .analisis-fallas-page .falla-card {
+        animation: slideInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .analisis-fallas-page .falla-card:nth-child(1) { animation-delay: 0.1s; }
+    .analisis-fallas-page .falla-card:nth-child(2) { animation-delay: 0.2s; }
+    .analisis-fallas-page .falla-card:nth-child(3) { animation-delay: 0.3s; }
+    .analisis-fallas-page .falla-card:nth-child(4) { animation-delay: 0.4s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- IMPORTANTE: Envolver todo el contenido en .analisis-fallas-page -->
+<div class="analisis-fallas-page">
+    <div class="container-fluid">
+        <!-- Header principal -->
+        <div class="fallas-header">
+            <h1 class="fallas-title">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                Análisis de Fallas Industriales
+            </h1>
+            <p class="fallas-subtitle">
+                Sistema integral para la gestión y análisis de fallas en equipos industriales
+            </p>
+            <div style="position: absolute; top: 2rem; right: 2rem; z-index: 2;">
+                <a href="{% url 'reportes:crear-falla' %}" class="btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Registrar Nueva Falla
+                </a>
+            </div>
+        </div>
+
+        <!-- Métricas principales -->
+        <div class="metrics-grid">
+            <div class="metric-card critical">
+                <div class="metric-value">{{ total_fallas }}</div>
+                <div class="metric-label">Total Fallas</div>
+            </div>
+            <div class="metric-card critical">
+                <div class="metric-value">{{ fallas_criticas }}</div>
+                <div class="metric-label">Fallas Críticas</div>
+            </div>
+            <div class="metric-card warning">
+                <div class="metric-value">{{ fallas_pendientes }}</div>
+                <div class="metric-label">Pendientes</div>
+            </div>
+            <div class="metric-card success">
+                <div class="metric-value">{{ fallas_resueltas }}</div>
+                <div class="metric-label">Resueltas</div>
+            </div>
+            <div class="metric-card info">
+                <div class="metric-value">{{ mttr_promedio }}</div>
+                <div class="metric-label">MTTR Promedio (hrs)</div>
+            </div>
+            <div class="metric-card info">
+                <div class="metric-value">{{ mtbf_promedio }}</div>
+                <div class="metric-label">MTBF Promedio (hrs)</div>
+            </div>
+        </div>
+
+        <!-- Dashboard principal -->
+        <div class="dashboard-grid">
+            <!-- Panel principal -->
+            <div class="main-panel">
+                <!-- Filtros -->
+                <div class="filters-section">
+                    <form method="get" class="filters-form">
+                        <div class="filters-grid">
+                            <div class="filter-group">
+                                <label class="filter-label">Buscar:</label>
+                                <input type="text" name="search" value="{{ search_query }}" 
+                                       class="form-control" placeholder="Buscar fallas...">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Severidad:</label>
+                                <select name="severidad" class="form-select">
+                                    <option value="">Todas</option>
+                                    {% for value, label in severidades %}
+                                    <option value="{{ value }}" {% if severidad_filtro == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Estado:</label>
+                                <select name="estado" class="form-select">
+                                    <option value="">Todos</option>
+                                    {% for value, label in estados %}
+                                    <option value="{{ value }}" {% if estado_filtro == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Equipo:</label>
+                                <select name="equipo" class="form-select">
+                                    <option value="">Todos</option>
+                                    {% for equipo in equipos_disponibles %}
+                                    <option value="{{ equipo.id }}" {% if equipo_filtro == equipo.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ equipo.codigo_interno }} - {{ equipo.nombre }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <button type="submit" class="btn-success">
+                                    <i class="bi bi-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Grid de fallas -->
+                <div class="section-title">
+                    <i class="bi bi-list-task"></i>
+                    Fallas Registradas ({{ total_fallas }})
+                </div>
+
+                {% if fallas %}
+                <div class="fallas-grid">
+                    {% for falla in fallas %}
+                    <div class="falla-card">
+                        <!-- Header de la tarjeta -->
+                        <div class="falla-header">
+                            <div class="falla-codigo">{{ falla.codigo_falla }}</div>
+                            <h3 class="falla-titulo">{{ falla.equipo.nombre }}</h3>
+                            <p class="falla-descripcion">{{ falla.descripcion_falla|truncatechars:120 }}</p>
+                            
+                            <!-- Badges en la esquina -->
+                            <div class="falla-badges">
+                                <span class="badge badge-severity-{{ falla.severidad }}">{{ falla.get_severidad_display }}</span>
+                                <span class="badge badge-estado-{{ falla.estado }}">{{ falla.get_estado_display }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Cuerpo de la tarjeta -->
+                        <div class="falla-body">
+                            <!-- Detalles técnicos -->
+                            <div class="falla-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Fecha Ocurrencia</span>
+                                    <span class="detail-value">{{ falla.fecha_ocurrencia|date:"d/m/Y" }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Tiempo Parada</span>
+                                    <span class="detail-value">
+                                        {% if falla.tiempo_parada %}{{ falla.tiempo_parada }} hrs{% else %}---{% endif %}
+                                    </span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Reportado Por</span>
+                                    <span class="detail-value">{{ falla.reportado_por.get_full_name|default:falla.reportado_por.username }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Asignado A</span>
+                                    <span class="detail-value">
+                                        {% if falla.asignado_a %}
+                                            {{ falla.asignado_a.get_full_name|default:falla.asignado_a.username }}
+                                        {% else %}
+                                            <span style="color: #dc2626;">Sin asignar</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Indicador de criticidad -->
+                            <div class="severity-indicator severity-{{ falla.severidad }}">
+                                <div class="severity-value">{{ falla.indice_criticidad }}</div>
+                                <div class="severity-label">Criticidad</div>
+                            </div>
+
+                            <!-- Acciones -->
+                            <div class="falla-actions">
+                                <a href="{% url 'reportes:detalle-falla' codigo_falla=falla.codigo_falla %}" 
+                                   class="btn-action btn-view">
+                                    <i class="bi bi-eye"></i>
+                                    Ver
+                                </a>
+                                <a href="{% url 'reportes:editar-falla' codigo_falla=falla.codigo_falla %}" 
+                                   class="btn-action btn-edit">
+                                    <i class="bi bi-pencil"></i>
+                                    Editar
+                                </a>
+                                <a href="{% url 'reportes:eliminar-falla' codigo_falla=falla.codigo_falla %}" 
+                                   class="btn-action btn-delete"
+                                   onclick="return confirm('¿Está seguro de eliminar esta falla?')">
+                                    <i class="bi bi-trash"></i>
+                                    Eliminar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginación -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Paginación de fallas" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if severidad_filtro %}&severidad={{ severidad_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if equipo_filtro %}&equipo={{ equipo_filtro }}{% endif %}">
+                                Anterior
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if severidad_filtro %}&severidad={{ severidad_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if equipo_filtro %}&equipo={{ equipo_filtro }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if severidad_filtro %}&severidad={{ severidad_filtro }}{% endif %}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if equipo_filtro %}&equipo={{ equipo_filtro }}{% endif %}">
+                                Siguiente
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+                {% else %}
+                <!-- Estado vacío -->
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-clipboard-x"></i>
+                    </div>
+                    <h3>No se encontraron fallas</h3>
+                    <p>No hay fallas registradas que coincidan con los filtros seleccionados.</p>
+                    <a href="{% url 'reportes:crear-falla' %}" class="btn-primary">
+                        <i class="bi bi-plus-circle"></i>
+                        Registrar Primera Falla
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Panel lateral -->
+            <div class="side-panel">
+                <!-- Alertas críticas -->
+                <div class="panel-card">
+                    <h3 class="section-title">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Alertas Críticas
+                    </h3>
+                    
+                    {% if alertas_criticas %}
+                    {% for alerta in alertas_criticas %}
+                    <div class="alert-item critical">
+                        <div class="alert-icon">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">{{ alerta.titulo }}</div>
+                            <div class="alert-description">{{ alerta.descripcion }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="alert-item info">
+                        <div class="alert-icon">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">Sistema Estable</div>
+                            <div class="alert-description">No hay alertas críticas en este momento.</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Actividad reciente -->
+                <div class="panel-card">
+                    <h3 class="section-title">
+                        <i class="bi bi-clock-history"></i>
+                        Actividad Reciente
+                    </h3>
+                    
+                    {% for actividad in actividad_reciente %}
+                    <div class="timeline-item">
+                        <div class="timeline-time">{{ actividad.fecha|timesince }} atrás</div>
+                        <div class="timeline-content">{{ actividad.descripcion }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Gráfico de tendencias -->
+                <div class="panel-card">
+                    <h3 class="section-title">
+                        <i class="bi bi-graph-up"></i>
+                        Tendencia (6 meses)
+                    </h3>
+                    
+                    <div class="chart-container">
+                        <canvas id="tendenciaChart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAnalisisFallas();
+    console.log('⚠️ Análisis de Fallas - Sistema cargado correctamente');
+});
+
+function initializeAnalisisFallas() {
+    // Auto-submit en cambio de filtros
+    const filterSelects = document.querySelectorAll('.analisis-fallas-page .filters-form select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+    
+    // Inicializar gráfico de tendencias
+    initializeTendenciaChart();
+}
+
+function initializeTendenciaChart() {
+    const ctx = document.getElementById('tendenciaChart');
+    if (!ctx) return;
+    
+    const data = {
+        labels: ['Mes -5', 'Mes -4', 'Mes -3', 'Mes -2', 'Mes -1', 'Actual'],
+        datasets: [{
+            label: 'Fallas Registradas',
+            data: {{ tendencia_datos|safe }},
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        });
+}
+</script>
+{% endblock %}

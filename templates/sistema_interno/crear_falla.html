@@ -1,0 +1,423 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .crear-falla-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .falla-form-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .form-header h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.8rem;
+    }
+
+    .form-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+    }
+
+    .form-body {
+        padding: 2rem;
+    }
+
+    .form-section {
+        background: var(--off-white);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select, .form-textarea {
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus, .form-textarea:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--pure-white);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        border-left: 3px solid var(--primary-blue);
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-cancelar {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancelar:hover {
+        background: var(--border-color);
+        transform: translateY(-2px);
+    }
+
+    .btn-guardar {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-guardar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .help-text {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+    }
+
+    .required-field {
+        color: #ef4444;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="crear-falla-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                <!-- Estadísticas rápidas -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ stats.total_equipos }}</div>
+                        <div class="stat-label">Equipos Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ stats.total_fallas }}</div>
+                        <div class="stat-label">Fallas Registradas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ stats.fallas_mes }}</div>
+                        <div class="stat-label">Fallas Este Mes</div>
+                    </div>
+                </div>
+
+                <!-- Formulario principal -->
+                <div class="falla-form-container">
+                    <!-- Header -->
+                    <div class="form-header">
+                        <h1><i class="bi bi-exclamation-triangle-fill"></i> {{ titulo }}</h1>
+                        <p>Complete la información de la falla identificada</p>
+                    </div>
+
+                    <!-- Cuerpo del formulario -->
+                    <div class="form-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Información básica -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-info-circle"></i>
+                                    Información Básica de la Falla
+                                </h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Equipo Afectado <span class="required-field">*</span>
+                                        </label>
+                                        {{ form.equipo }}
+                                        <div class="help-text">Seleccione el equipo donde ocurrió la falla</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Fecha y Hora de Ocurrencia <span class="required-field">*</span>
+                                        </label>
+                                        {{ form.fecha_ocurrencia }}
+                                        <div class="help-text">Momento en que se detectó la falla</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Severidad <span class="required-field">*</span>
+                                        </label>
+                                        {{ form.severidad }}
+                                        <div class="help-text">Nivel de impacto de la falla</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Tipo de Falla <span class="required-field">*</span>
+                                        </label>
+                                        {{ form.tipo_falla }}
+                                        <div class="help-text">Categoría técnica de la falla</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Descripción de la Falla <span class="required-field">*</span>
+                                        </label>
+                                        {{ form.descripcion_falla }}
+                                        <div class="help-text">Describa detalladamente lo que ocurrió</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Análisis técnico -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-tools"></i>
+                                    Análisis Técnico
+                                </h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Causa Inmediata</label>
+                                        {{ form.causa_inmediata }}
+                                        <div class="help-text">Causa directa identificada (si se conoce)</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Tiempo de Parada (horas)</label>
+                                        {{ form.tiempo_parada }}
+                                        <div class="help-text">Tiempo que el equipo estuvo fuera de servicio</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Condiciones de Operación</label>
+                                        {{ form.condiciones_operacion }}
+                                        <div class="help-text">Condiciones en las que operaba el equipo</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Responsables y seguimiento -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-people"></i>
+                                    Responsables y Seguimiento
+                                </h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Estado</label>
+                                        {{ form.estado }}
+                                        <div class="help-text">Estado actual de la falla</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Asignar a</label>
+                                        {{ form.asignado_a }}
+                                        <div class="help-text">Responsable de resolver la falla</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Supervisor</label>
+                                        {{ form.supervisor }}
+                                        <div class="help-text">Nombre del supervisor a cargo</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <input type="checkbox" class="form-check-input me-2">
+                                            Requiere Seguimiento
+                                        </label>
+                                        {{ form.requiere_seguimiento }}
+                                        <div class="help-text">Marcar si necesita seguimiento posterior</div>
+                                    </div>
+                                </div>
+
+                                {% if form.requiere_seguimiento.value %}
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Fecha de Seguimiento</label>
+                                        {{ form.fecha_seguimiento }}
+                                        <div class="help-text">Fecha programada para seguimiento</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Documentación -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-file-image"></i>
+                                    Documentación
+                                </h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Foto de la Falla</label>
+                                        {{ form.foto_falla }}
+                                        <div class="help-text">Imagen que documente la falla (opcional)</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Observaciones</label>
+                                        {{ form.observaciones }}
+                                        <div class="help-text">Información adicional relevante</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Acciones del formulario -->
+                            <div class="form-actions">
+                                <a href="{% url 'reportes:analisis-fallas' %}" class="btn-cancelar">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn-guardar">
+                                    <i class="bi bi-check-circle"></i> Registrar Falla
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar/ocultar fecha de seguimiento
+    const checkboxSeguimiento = document.querySelector('input[name="requiere_seguimiento"]');
+    const fechaSeguimiento = document.querySelector('input[name="fecha_seguimiento"]');
+    
+    if (checkboxSeguimiento && fechaSeguimiento) {
+        const contenedorFecha = fechaSeguimiento.closest('.form-group');
+        
+        function toggleFechaSeguimiento() {
+            if (checkboxSeguimiento.checked) {
+                contenedorFecha.style.display = 'block';
+                fechaSeguimiento.required = true;
+            } else {
+                contenedorFecha.style.display = 'none';
+                fechaSeguimiento.required = false;
+                fechaSeguimiento.value = '';
+            }
+        }
+        
+        checkboxSeguimiento.addEventListener('change', toggleFechaSeguimiento);
+        toggleFechaSeguimiento(); // Ejecutar al cargar
+    }
+    
+    // Validación de tiempo de parada
+    const tiempoParada = document.querySelector('input[name="tiempo_parada"]');
+    if (tiempoParada) {
+        tiempoParada.addEventListener('input', function() {
+            const valor = parseFloat(this.value);
+            if (valor && valor > 168) { // Más de una semana
+                this.setCustomValidity('El tiempo de parada parece excesivo. ¿Está seguro?');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    }
+    
+    console.log('✅ Formulario de registro de fallas cargado');
+});
+</script>
+{% endblock %}

@@ -11,12 +11,19 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from datetime import datetime
 from django.template.loader import render_to_string
-from weasyprint import HTML, CSS
+# COMENTAR TEMPORALMENTE ESTAS LÍNEAS:
+# from weasyprint import HTML, CSS
 from django.conf import settings
 import os
 from django.db.models import Count, Q, Avg
 from datetime import datetime, timedelta
 from django.utils import timezone
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
 
 class EquipoListView(ListView):
     model = Equipo
@@ -237,39 +244,73 @@ def editar_ficha_view(request, pk):
 def exportar_ficha_pdf_view(request, pk):
     equipo = get_object_or_404(Equipo, pk=pk)
     
-    # Renderizar el template HTML
-    html_string = render_to_string('sistema_interno/ficha_pdf_template.html', {
-        'equipo': equipo,
-        'completitud': equipo.calcular_completitud_ficha(),
-    })
-    
-    # Convertir a PDF
-    html = HTML(string=html_string)
-    pdf = html.write_pdf()
-    
-    # Crear la respuesta HTTP
-    response = HttpResponse(pdf, content_type='application/pdf')
+    # Crear respuesta PDF con ReportLab
+    response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="Ficha_Tecnica_{equipo.codigo_interno}.pdf"'
+    
+    # Crear el PDF
+    doc = SimpleDocTemplate(response, pagesize=A4)
+    story = []
+    
+    styles = getSampleStyleSheet()
+    
+    # Título
+    title = Paragraph(f"Ficha Técnica - {equipo.nombre}", styles['Title'])
+    story.append(title)
+    story.append(Spacer(1, 12))
+    
+    # Datos del equipo
+    data = [
+        ['Campo', 'Valor'],
+        ['Código Interno', equipo.codigo_interno],
+        ['Nombre', equipo.nombre],
+        ['Modelo', equipo.modelo or '---'],
+        ['Fabricante', equipo.fabricante or '---'],
+        ['Año', str(equipo.año_fabricacion) if equipo.año_fabricacion else '---'],
+        ['Estado', equipo.get_estado_display()],
+        ['Sección', equipo.get_seccion_display()],
+    ]
+    
+    table = Table(data, colWidths=[2*inch, 4*inch])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    story.append(table)
+    doc.build(story)
     
     return response
 
 @login_required
 def imprimir_ficha_view(request, pk):
-    # Misma funcionalidad pero para mostrar en el navegador (inline)
+    # TEMPORALMENTE DESHABILITAR ESTA FUNCIÓN
     equipo = get_object_or_404(Equipo, pk=pk)
+    messages.error(request, 'La funcionalidad de impresión PDF está temporalmente deshabilitada.')
+    return redirect('equipos:fichas-tecnicas')
     
-    html_string = render_to_string('sistema_interno/ficha_pdf_template.html', {
-        'equipo': equipo,
-        'completitud': equipo.calcular_completitud_ficha(),
-    })
-    
-    html = HTML(string=html_string)
-    pdf = html.write_pdf()
-    
-    response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="Ficha_Tecnica_{equipo.codigo_interno}.pdf"'
-    
-    return response
+    # TODO: Habilitar cuando WeasyPrint esté configurado
+    # # Misma funcionalidad pero para mostrar en el navegador (inline)
+    # equipo = get_object_or_404(Equipo, pk=pk)
+    # 
+    # html_string = render_to_string('sistema_interno/ficha_pdf_template.html', {
+    #     'equipo': equipo,
+    #     'completitud': equipo.calcular_completitud_ficha(),
+    # })
+    # 
+    # html = HTML(string=html_string)
+    # pdf = html.write_pdf()
+    # 
+    # response = HttpResponse(pdf, content_type='application/pdf')
+    # response['Content-Disposition'] = f'inline; filename="Ficha_Tecnica_{equipo.codigo_interno}.pdf"'
+    # 
+    # return response
 
 @login_required
 def ficha_detallada_view(request, pk):

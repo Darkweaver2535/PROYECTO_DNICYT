@@ -1476,7 +1476,8 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <!-- ✅ HABILITAR ANÁLISIS DE FALLAS -->
+                    <a href="{% url 'reportes:analisis-fallas' %}" class="nav-link {% if request.resolver_match.url_name == 'analisis-fallas' %}active{% endif %}">
                         <i class="nav-icon bi bi-graph-up"></i>
                         <span class="nav-text">Análisis de Fallas</span>
                     </a>

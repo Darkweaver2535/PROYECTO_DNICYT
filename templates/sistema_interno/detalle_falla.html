@@ -1,0 +1,667 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ falla.codigo_falla }} - Detalle de Falla{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detalle-falla-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .falla-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .falla-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .falla-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .falla-codigo {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        background: var(--light-blue);
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        display: inline-block;
+    }
+
+    .falla-titulo {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .falla-badges {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .badge-severidad-critica { background: #fef2f2; color: #dc2626; }
+    .badge-severidad-alta { background: #fffbeb; color: #d97706; }
+    .badge-severidad-media { background: #eff6ff; color: #2563eb; }
+    .badge-severidad-baja { background: #f0fdf4; color: #16a34a; }
+
+    .badge-estado-identificada { background: #fef3c7; color: #d97706; }
+    .badge-estado-analisis { background: #eff6ff; color: #2563eb; }
+    .badge-estado-solucionada { background: #f0fdf4; color: #16a34a; }
+    .badge-estado-pendiente { background: #fef2f2; color: #dc2626; }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .sidebar-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .info-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 2px solid var(--primary-blue);
+        padding-bottom: 0.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .descripcion-box {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border-left: 4px solid var(--primary-blue);
+        margin: 1.5rem 0;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .timeline-item:last-child {
+        border-bottom: none;
+    }
+
+    .timeline-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-blue);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .timeline-content {
+        flex: 1;
+    }
+
+    .timeline-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .timeline-date {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+    }
+
+    .timeline-description {
+        font-size: 0.9rem;
+        color: var(--text-medium);
+        line-height: 1.4;
+    }
+
+    .actions-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-action {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid;
+        font-size: 0.9rem;
+    }
+
+    .btn-action:last-child {
+        margin-bottom: 0;
+    }
+
+    .btn-edit {
+        background: #fef3c7;
+        color: #d97706;
+        border-color: #d97706;
+    }
+
+    .btn-edit:hover {
+        background: #d97706;
+        color: white;
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .btn-close {
+        background: #f0fdf4;
+        color: #16a34a;
+        border-color: #16a34a;
+    }
+
+    .btn-close:hover {
+        background: #16a34a;
+        color: white;
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .btn-assign {
+        background: #eff6ff;
+        color: #2563eb;
+        border-color: #2563eb;
+    }
+
+    .btn-assign:hover {
+        background: #2563eb;
+        color: white;
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .btn-delete {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #dc2626;
+    }
+
+    .btn-delete:hover {
+        background: #dc2626;
+        color: white;
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .btn-back {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border-color: var(--border-color);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 2rem;
+        text-decoration: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: auto;
+    }
+
+    .btn-back:hover {
+        background: var(--border-color);
+        transform: translateY(-2px);
+        text-decoration: none;
+        color: var(--text-dark);
+    }
+
+    .criticidad-indicator {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .criticidad-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .criticidad-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .alerta-vencimiento {
+        background: #fffbeb;
+        border: 1px solid #fed7aa;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alerta-vencimiento.critica {
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+
+    .alerta-icon {
+        font-size: 1.2rem;
+        color: #d97706;
+    }
+
+    .alerta-icon.critica {
+        color: #dc2626;
+    }
+
+    .alerta-text {
+        font-size: 0.9rem;
+        color: #92400e;
+        font-weight: 500;
+    }
+
+    .alerta-text.critica {
+        color: #7f1d1d;
+    }
+
+    @media (max-width: 992px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .falla-badges {
+            justify-content: center;
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detalle-falla-page">
+    <div class="container-fluid">
+        <!-- Botón de regreso -->
+        <a href="{% url 'reportes:analisis-fallas' %}" class="btn-back">
+            <i class="bi bi-arrow-left"></i>
+            Volver al Análisis de Fallas
+        </a>
+
+        <!-- Header de la falla -->
+        <div class="falla-header">
+            <div class="falla-title">
+                <div class="falla-codigo">{{ falla.codigo_falla }}</div>
+                <h1 class="falla-titulo">{{ falla.equipo.nombre }}</h1>
+            </div>
+            
+            <div class="falla-badges">
+                <span class="badge badge-severidad-{{ falla.severidad }}">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    {{ falla.get_severidad_display }}
+                </span>
+                <span class="badge badge-estado-{{ falla.estado }}">
+                    <i class="bi bi-info-circle-fill"></i>
+                    {{ falla.get_estado_display }}
+                </span>
+                {% if falla.es_critica %}
+                <span class="badge" style="background: #fef2f2; color: #dc2626;">
+                    <i class="bi bi-shield-exclamation"></i>
+                    Falla Crítica
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="content-grid">
+            <!-- Columna principal -->
+            <div class="main-content">
+                <!-- Información básica -->
+                <div class="info-card">
+                    <h2 class="card-title">
+                        <i class="bi bi-info-circle"></i>
+                        Información Básica
+                    </h2>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Equipo Afectado</span>
+                            <span class="info-value">{{ falla.equipo.nombre }} ({{ falla.equipo.codigo_interno }})</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Fecha de Ocurrencia</span>
+                            <span class="info-value">{{ falla.fecha_ocurrencia|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tiempo Transcurrido</span>
+                            <span class="info-value">{{ falla.dias_transcurridos }} días</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Reportado Por</span>
+                            <span class="info-value">{{ falla.reportado_por.get_full_name|default:falla.reportado_por.username }}</span>
+                        </div>
+                        {% if falla.asignado_a %}
+                        <div class="info-item">
+                            <span class="info-label">Asignado A</span>
+                            <span class="info-value">{{ falla.asignado_a.get_full_name|default:falla.asignado_a.username }}</span>
+                        </div>
+                        {% endif %}
+                        {% if falla.supervisor %}
+                        <div class="info-item">
+                            <span class="info-label">Supervisor</span>
+                            <span class="info-value">{{ falla.supervisor }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Descripción de la falla -->
+                <div class="info-card">
+                    <h2 class="card-title">
+                        <i class="bi bi-file-text"></i>
+                        Descripción de la Falla
+                    </h2>
+                    
+                    <div class="descripcion-box">
+                        <p>{{ falla.descripcion_falla }}</p>
+                    </div>
+
+                    {% if falla.causa_inmediata %}
+                    <div class="info-item">
+                        <span class="info-label">Causa Inmediata</span>
+                        <span class="info-value">{{ falla.causa_inmediata }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if falla.condiciones_operacion %}
+                    <div class="info-item" style="margin-top: 1rem;">
+                        <span class="info-label">Condiciones de Operación</span>
+                        <span class="info-value">{{ falla.condiciones_operacion }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Análisis técnico -->
+                <div class="info-card">
+                    <h2 class="card-title">
+                        <i class="bi bi-tools"></i>
+                        Análisis Técnico
+                    </h2>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Tipo de Falla</span>
+                            <span class="info-value">{{ falla.get_tipo_falla_display }}</span>
+                        </div>
+                        {% if falla.causa_raiz %}
+                        <div class="info-item">
+                            <span class="info-label">Causa Raíz</span>
+                            <span class="info-value">{{ falla.get_causa_raiz_display }}</span>
+                        </div>
+                        {% endif %}
+                        {% if falla.tiempo_parada %}
+                        <div class="info-item">
+                            <span class="info-label">Tiempo de Parada</span>
+                            <span class="info-value">{{ falla.tiempo_parada }} horas</span>
+                        </div>
+                        {% endif %}
+                        {% if falla.costo_reparacion %}
+                        <div class="info-item">
+                            <span class="info-label">Costo de Reparación</span>
+                            <span class="info-value">Bs. {{ falla.costo_reparacion|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if falla.solucion_aplicada %}
+                    <div style="margin-top: 1.5rem;">
+                        <span class="info-label">Solución Aplicada</span>
+                        <div class="descripcion-box">
+                            <p>{{ falla.solucion_aplicada }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Seguimientos -->
+                {% if seguimientos %}
+                <div class="info-card">
+                    <h2 class="card-title">
+                        <i class="bi bi-list-task"></i>
+                        Seguimientos y Acciones ({{ seguimientos.count }})
+                    </h2>
+                    
+                    <div class="timeline">
+                        {% for seguimiento in seguimientos %}
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                <i class="bi bi-gear"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">{{ seguimiento.get_tipo_accion_display }}</div>
+                                <div class="timeline-date">{{ seguimiento.fecha_accion|date:"d/m/Y H:i" }}</div>
+                                <div class="timeline-description">
+                                    {{ seguimiento.descripcion_accion }}
+                                    {% if seguimiento.responsable %}
+                                    <br><small><strong>Responsable:</strong> {{ seguimiento.responsable.get_full_name|default:seguimiento.responsable.username }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if falla.observaciones %}
+                <!-- Observaciones -->
+                <div class="info-card">
+                    <h2 class="card-title">
+                        <i class="bi bi-chat-text"></i>
+                        Observaciones
+                    </h2>
+                    
+                    <div class="descripcion-box">
+                        <p>{{ falla.observaciones }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar-content">
+                <!-- Criticidad -->
+                <div class="criticidad-indicator">
+                    <div class="criticidad-value" style="color: #{{ falla.indice_criticidad|add:0|stringformat:'02d' }}{{ falla.indice_criticidad|add:0|stringformat:'02d' }}{{ falla.indice_criticidad|add:0|stringformat:'02d' }};">
+                        {{ falla.indice_criticidad }}
+                    </div>
+                    <div class="criticidad-label">Índice de Criticidad</div>
+                </div>
+
+                <!-- Alertas -->
+                {% if falla.esta_vencida_resolucion %}
+                <div class="alerta-vencimiento critica">
+                    <i class="bi bi-exclamation-triangle-fill alerta-icon critica"></i>
+                    <div class="alerta-text critica">
+                        <strong>Falla Vencida:</strong> Esta falla ha excedido el tiempo límite para su resolución.
+                    </div>
+                </div>
+                {% elif falla.dias_transcurridos > 5 %}
+                <div class="alerta-vencimiento">
+                    <i class="bi bi-clock alerta-icon"></i>
+                    <div class="alerta-text">
+                        <strong>Atención:</strong> Esta falla lleva {{ falla.dias_transcurridos }} días sin resolver.
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Acciones -->
+                <div class="actions-card">
+                    <h3 style="margin-bottom: 1rem; color: var(--text-dark); font-size: 1.1rem;">
+                        <i class="bi bi-lightning"></i>
+                        Acciones Rápidas
+                    </h3>
+                    
+                    <a href="{% url 'reportes:editar-falla' codigo_falla=falla.codigo_falla %}" class="btn-action btn-edit">
+                        <i class="bi bi-pencil"></i>
+                        Editar Falla
+                    </a>
+                    
+                    {% if falla.estado != 'solucionada' %}
+                    <a href="{% url 'reportes:cerrar-falla' codigo_falla=falla.codigo_falla %}" class="btn-action btn-close">
+                        <i class="bi bi-check-circle"></i>
+                        Cerrar como Solucionada
+                    </a>
+                    {% endif %}
+                    
+                    {% if not falla.asignado_a %}
+                    <a href="{% url 'reportes:asignar-falla' codigo_falla=falla.codigo_falla %}" class="btn-action btn-assign">
+                        <i class="bi bi-person-plus"></i>
+                        Asignar Responsable
+                    </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'reportes:eliminar-falla' codigo_falla=falla.codigo_falla %}" class="btn-action btn-delete">
+                        <i class="bi bi-trash"></i>
+                        Eliminar Falla
+                    </a>
+                </div>
+
+                <!-- Información del equipo -->
+                <div class="info-card">
+                    <h3 style="margin-bottom: 1rem; color: var(--text-dark); font-size: 1.1rem;">
+                        <i class="bi bi-gear-wide-connected"></i>
+                        Información del Equipo
+                    </h3>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Estado Actual</span>
+                        <span class="info-value">{{ falla.equipo.get_estado_display }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Sección</span>
+                        <span class="info-value">{{ falla.equipo.get_seccion_display }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ubicación</span>
+                        <span class="info-value">{{ falla.equipo.ubicacion_fisica }}</span>
+                    </div>
+                    {% if falla.equipo.responsable %}
+                    <div class="info-item">
+                        <span class="info-label">Responsable Equipo</span>
+                        <span class="info-value">{{ falla.equipo.responsable }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Detalle de falla {{ falla.codigo_falla }} cargado correctamente');
+});
+</script>
+{% endblock %}
