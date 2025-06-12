@@ -214,7 +214,7 @@
         .sidebar-stats {
             margin-top: 1rem;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             font-size: 0.75rem;
             gap: 0.5rem;
         }
@@ -695,7 +695,7 @@
             font-size: 1rem;
             background: #fff;
             transition: border-color 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 8px rgba(30,64,175,0.04);
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.04);
         }
         .sidebar-search-input:focus {
             outline: none;
@@ -1059,6 +1059,159 @@
         .sidebar-stats .stat-item:nth-child(3) .stat-value {
             color: var(--primary-blue);
         }
+
+        /* === ESTILOS EXCLUSIVOS PARA EL BUSCADOR DEL MENÚ === */
+.menu-search-wrapper {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.menu-search-input-container {
+    position: relative;
+    width: 100%;
+    margin: 0;
+}
+
+.menu-search-field {
+    width: 100%;
+    height: 40px;
+    padding: 0.6rem 2.2rem 0.6rem 2.5rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    background-color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 3px rgba(30, 64, 175, 0.06);
+}
+
+.menu-search-field:focus {
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+    background-color: #ffffff;
+}
+
+.menu-search-field::placeholder {
+    color: #64748b;
+    font-weight: 400;
+}
+
+.menu-search-icon-left {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 1.1rem;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.menu-search-clear-button {
+    position: absolute;
+    right: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    z-index: 3;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-search-clear-button:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.menu-search-clear-button:focus {
+    outline: 2px solid #fbbf24;
+    outline-offset: 1px;
+}
+
+.menu-search-results-info {
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    text-align: center;
+    font-weight: 500;
+    display: none;
+}
+
+.menu-search-results-found {
+    color: #1e40af !important;
+}
+
+.menu-search-results-empty {
+    color: #ef4444 !important;
+    font-style: italic;
+}
+
+.menu-search-text-highlight {
+    background-color: #fbbf24;
+    color: #1e293b;
+    padding: 0.1rem 0.15rem;
+    border-radius: 3px;
+    font-weight: 600;
+    box-decoration-break: clone;
+}
+
+/* Responsividad específica para el buscador */
+@media (max-width: 991px) {
+    .menu-search-field {
+        height: 38px;
+        padding: 0.55rem 2rem 0.55rem 2.3rem;
+        font-size: 0.85rem;
+    }
+    
+    .menu-search-icon-left {
+        left: 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .menu-search-clear-button {
+        right: 0.6rem;
+        width: 22px;
+        height: 22px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .menu-search-field {
+        height: 36px;
+        padding: 0.5rem 1.8rem 0.5rem 2.1rem;
+        font-size: 0.8rem;
+    }
+    
+    .menu-search-icon-left {
+        left: 0.7rem;
+        font-size: 0.95rem;
+    }
+    
+    .menu-search-clear-button {
+        right: 0.55rem;
+        width: 20px;
+        height: 20px;
+        font-size: 0.85rem;
+    }
+    
+    .menu-search-results-info {
+        font-size: 0.7rem;
+        margin-top: 0.4rem;
+    }
+}
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -1095,6 +1248,41 @@
                 Lab Metal Mecánica
             </h5>
             <p class="sidebar-subtitle">Sistema de Gestión Integral v2.0</p>
+            
+            <!-- ✅ NUEVO BUSCADOR CON NOMBRES ÚNICOS -->
+            <div class="menu-search-wrapper">
+                <div class="menu-search-input-container">
+                    <i class="bi bi-search menu-search-icon-left"></i>
+                    <input 
+                        type="text" 
+                        class="menu-search-field" 
+                        id="menuSearchInput"
+                        placeholder="Buscar en menú..."
+                        autocomplete="off"
+                    >
+                    <button 
+                        type="button" 
+                        class="menu-search-clear-button" 
+                        id="menuSearchClearBtn"
+                        style="display: none;"
+                    >
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div class="menu-search-results-info" id="menuSearchResultsInfo"></div>
+            </div>
+            
+            <!-- ✅ CAMBIAR SIDEBAR STATS A SOLO DOS ELEMENTOS CENTRADOS -->
+            <div class="sidebar-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="sidebar-secciones">32</div>
+                    <div class="stat-label">Secciones</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="sidebar-modulos">7</div>
+                    <div class="stat-label">Módulos</div>
+                </div>
+            </div>
         </div>
         
         <nav class="sidebar-nav">
@@ -1281,7 +1469,8 @@
                     Reportes y Análisis
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <!-- ✅ HABILITAR REPORTES DE EQUIPOS -->
+                    <a href="{% url 'reportes:reportes-equipos' %}" class="nav-link {% if request.resolver_match.url_name == 'reportes-equipos' %}active{% endif %}">
                         <i class="nav-icon bi bi-file-earmark-bar-graph"></i>
                         <span class="nav-text">Reportes de Equipos</span>
                     </a>
@@ -1455,15 +1644,142 @@
 
     <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Función para actualizar alertas del sidebar
-    function actualizarAlertasSidebar() {
+    // ✅ FUNCIONALIDAD DEL BUSCADOR DE MENÚ CON NOMBRES ÚNICOS
+    const menuSearchField = document.getElementById('menuSearchInput');
+    const menuClearButton = document.getElementById('menuSearchClearBtn');
+    const menuResultsInfo = document.getElementById('menuSearchResultsInfo');
+    const allMenuSections = document.querySelectorAll('.nav-section');
+    const allMenuItems = document.querySelectorAll('.nav-item');
+
+    // Función principal de búsqueda en el menú
+    function executeMenuSearch() {
+        const searchQuery = menuSearchField.value.toLowerCase().trim();
+        let foundItemsCount = 0;
+        let visibleSectionsCount = 0;
+
+        allMenuSections.forEach(menuSection => {
+            const itemsInSection = menuSection.querySelectorAll('.nav-item');
+            let sectionHasVisibleItems = false;
+
+            itemsInSection.forEach(menuItem => {
+                const menuTextElement = menuItem.querySelector('.nav-text');
+                if (menuTextElement) {
+                    const menuTextContent = menuTextElement.textContent.toLowerCase();
+                    const shouldShowItem = searchQuery === '' || menuTextContent.includes(searchQuery);
+                    
+                    menuItem.style.display = shouldShowItem ? 'block' : 'none';
+                    
+                    if (shouldShowItem) {
+                        foundItemsCount++;
+                        sectionHasVisibleItems = true;
+                        
+                        // Resaltar coincidencias con clase única
+                        if (searchQuery) {
+                            const highlightRegex = new RegExp(`(${searchQuery})`, 'gi');
+                            menuTextElement.innerHTML = menuTextElement.textContent.replace(
+                                highlightRegex, 
+                                '<span class="menu-search-text-highlight">$1</span>'
+                            );
+                        } else {
+                            menuTextElement.innerHTML = menuTextElement.textContent;
+                        }
+                    }
+                }
+            });
+
+            // Mostrar/ocultar sección completa
+            menuSection.style.display = sectionHasVisibleItems || searchQuery === '' ? 'block' : 'none';
+            if (sectionHasVisibleItems || searchQuery === '') visibleSectionsCount++;
+        });
+
+        // Actualizar información de resultados
+        updateMenuSearchResults(searchQuery, foundItemsCount);
+    }
+
+    // Función para actualizar información de resultados
+    function updateMenuSearchResults(query, count) {
+        if (query) {
+            if (count > 0) {
+                menuResultsInfo.textContent = `${count} resultado${count === 1 ? '' : 's'} encontrado${count === 1 ? '' : 's'}`;
+                menuResultsInfo.className = 'menu-search-results-info menu-search-results-found';
+            } else {
+                menuResultsInfo.textContent = 'No se encontraron resultados';
+                menuResultsInfo.className = 'menu-search-results-info menu-search-results-empty';
+            }
+            menuResultsInfo.style.display = 'block';
+            menuClearButton.style.display = 'block';
+        } else {
+            menuResultsInfo.style.display = 'none';
+            menuClearButton.style.display = 'none';
+        }
+    }
+
+    // Event listeners para el buscador de menú
+    if (menuSearchField) {
+        menuSearchField.addEventListener('input', executeMenuSearch);
+        
+        menuSearchField.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                clearMenuSearch();
+                this.blur();
+            }
+        });
+    }
+
+    if (menuClearButton) {
+        menuClearButton.addEventListener('click', clearMenuSearch);
+    }
+
+    // Función para limpiar búsqueda
+    function clearMenuSearch() {
+        menuSearchField.value = '';
+        executeMenuSearch();
+        menuSearchField.focus();
+    }
+
+    // Limpiar resaltado al hacer clic en enlaces del menú
+    document.querySelectorAll('.nav-link').forEach(navLink => {
+        navLink.addEventListener('click', function() {
+            setTimeout(() => {
+                clearMenuSearch();
+            }, 150);
+        });
+    });
+
+    // Toggle sidebar en móvil
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('show');
+        });
+    }
+
+    // Cerrar sidebar al hacer clic fuera en móvil
+    document.addEventListener('click', function(event) {
+        if (window.innerWidth <= 991) {
+            if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        }
+    });
+
+    // ✅ FUNCIÓN SIMPLIFICADA PARA ACTUALIZAR STATS DEL SIDEBAR
+    function actualizarStatsSidebar() {
+        // Secciones del menú (estático)
+        document.getElementById('sidebar-secciones').textContent = '32';
+        
+        // Módulos del sistema (estático)
+        document.getElementById('sidebar-modulos').textContent = '7';
+
+        // Actualizar alertas de stock crítico (mantener funcionalidad existente)
         fetch('/inventario/api/alertas-stock/')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     const alertas = data.alertas;
                     
-                    // Actualizar SOLO el contador en Stock Crítico
                     const stockCriticoLink = document.getElementById('stock-critico-link');
                     let contador = document.getElementById('alertas-counter');
                     
@@ -1472,7 +1788,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             contador.textContent = alertas.total_alertas_criticas;
                             contador.style.display = 'flex';
                             
-                            // Agregar animación al contador si hay nuevas alertas
                             contador.classList.add('pulse');
                             setTimeout(() => contador.classList.remove('pulse'), 2000);
                         } else {
@@ -1486,54 +1801,169 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
-    // Actualizar inmediatamente
-    actualizarAlertasSidebar();
+    // Actualizar inmediatamente al cargar
+    actualizarStatsSidebar();
     
     // Actualizar cada 2 minutos
-    setInterval(actualizarAlertasSidebar, 120000);
+    setInterval(actualizarStatsSidebar, 120000);
     
-    // También actualizar cuando se enfoca la ventana
-    window.addEventListener('focus', actualizarAlertasSidebar);
+    // Actualizar cuando se enfoca la ventana
+    window.addEventListener('focus', actualizarStatsSidebar);
 });
 </script>
 
-<!-- CSS adicional para animaciones -->
+<!-- ✅ ESTILOS ÚNICOS PARA EL BUSCADOR DE MENÚ -->
 <style>
-.nav-counter {
-    animation: none;
-    transition: all 0.3s ease;
+/* === ESTILOS EXCLUSIVOS PARA EL BUSCADOR DEL MENÚ === */
+.menu-search-wrapper {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    padding: 0;
 }
 
-.nav-counter.pulse {
-    animation: counterPulse 0.6s ease-in-out 3;
+.menu-search-input-container {
+    position: relative;
+    width: 100%;
+    margin: 0;
 }
 
-@keyframes counterPulse {
-    0%, 100% {
-        transform: scale(1);
+.menu-search-field {
+    width: 100%;
+    height: 40px;
+    padding: 0.6rem 2.2rem 0.6rem 2.5rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    background-color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 3px rgba(30, 64, 175, 0.06);
+}
+
+.menu-search-field:focus {
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+    background-color: #ffffff;
+}
+
+.menu-search-field::placeholder {
+    color: #64748b;
+    font-weight: 400;
+}
+
+.menu-search-icon-left {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 1.1rem;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.menu-search-clear-button {
+    position: absolute;
+    right: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    z-index: 3;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-search-clear-button:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.menu-search-clear-button:focus {
+    outline: 2px solid #fbbf24;
+    outline-offset: 1px;
+}
+
+.menu-search-results-info {
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    text-align: center;
+    font-weight: 500;
+    display: none;
+}
+
+.menu-search-results-found {
+    color: #1e40af !important;
+}
+
+.menu-search-results-empty {
+    color: #ef4444 !important;
+    font-style: italic;
+}
+
+.menu-search-text-highlight {
+    background-color: #fbbf24;
+    color: #1e293b;
+    padding: 0.1rem 0.15rem;
+    border-radius: 3px;
+    font-weight: 600;
+    box-decoration-break: clone;
+}
+
+/* Responsividad específica para el buscador */
+@media (max-width: 991px) {
+    .menu-search-field {
+        height: 38px;
+        padding: 0.55rem 2rem 0.55rem 2.3rem;
+        font-size: 0.85rem;
     }
-    50% {
-        transform: scale(1.2);
-        background: #dc2626;
+    
+    .menu-search-icon-left {
+        left: 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .menu-search-clear-button {
+        right: 0.6rem;
+        width: 22px;
+        height: 22px;
+        font-size: 0.9rem;
     }
 }
 
-.sidebar-stats .stat-value {
-    transition: color 0.3s ease;
-}
-
-.sidebar-stats .stat-item:first-child .stat-value {
-    color: var(--danger-red);
-}
-
-.sidebar-stats .stat-item:nth-child(2) .stat-value {
-    color: var(--warning-orange);
-}
-
-.sidebar-stats .stat-item:nth-child(3) .stat-value {
-    color: var(--primary-blue);
+@media (max-width: 576px) {
+    .menu-search-field {
+        height: 36px;
+        padding: 0.5rem 1.8rem 0.5rem 2.1rem;
+        font-size: 0.8rem;
+    }
+    
+    .menu-search-icon-left {
+        left: 0.7rem;
+        font-size: 0.95rem;
+    }
+    
+    .menu-search-clear-button {
+        right: 0.55rem;
+        width: 20px;
+        height: 20px;
+        font-size: 0.85rem;
+    }
+    
+    .menu-search-results-info {
+        font-size: 0.7rem;
+        margin-top: 0.4rem;
+    }
 }
 </style>
-
-</body>
-</html>

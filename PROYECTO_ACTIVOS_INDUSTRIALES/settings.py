@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.usuarios',
     'apps.inventario',  # <- AGREGAR ESTA LÍNEA
     'apps.materiales',  # <- AGREGAR ESTA LÍNEA
+    'apps.reportes',  # ✅ NUEVA APP
     'apps.dashboard',
 ]
 

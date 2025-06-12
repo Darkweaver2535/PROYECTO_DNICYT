@@ -23,7 +23,7 @@ urlpatterns = [
     # Eliminar
     path('eliminar-herramienta/<int:pk>/', views.eliminar_herramienta_view, name='eliminar-herramienta'),
     
-    # Movimientos - CORREGIR ESTAS URLS
+    # ✅ CORREGIR ESTAS URLs PARA MOVIMIENTOS
     path('movimientos/', views.movimientos_view, name='movimientos'),
     path('crear-movimiento/', views.crear_movimiento_view, name='crear-movimiento'),
     path('crear-movimiento/<int:material_pk>/', views.crear_movimiento_view, name='crear-movimiento-material'),

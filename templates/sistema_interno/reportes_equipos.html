@@ -1,0 +1,585 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reportes-equipos-page {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .reportes-header {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .reportes-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), transparent);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .export-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-export {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        border: 2px solid;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-export::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-export:hover::before {
+        left: 100%;
+    }
+
+    .btn-export.excel {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border-color: #10b981;
+        box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-export.excel:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        border-color: #059669;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-export.pdf {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        border-color: #ef4444;
+        box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-export.pdf:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        border-color: #dc2626;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-export:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .btn-export i {
+        font-size: 1.1rem;
+    }
+
+    /* Loading state para los botones */
+    .btn-export.loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .btn-export.loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 0.5rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card.primary {
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .stat-card.success {
+        border-left: 4px solid var(--success-green);
+    }
+
+    .stat-card.warning {
+        border-left: 4px solid var(--warning-orange);
+    }
+
+    .stat-card.danger {
+        border-left: 4px solid var(--danger-red);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .chart-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .chart-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filters-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .export-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reportes-equipos-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="reportes-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="reportes-title">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+                        {{ titulo }}
+                    </h1>
+                    <p class="reportes-subtitle">
+                        Análisis completo del inventario de equipos
+                    </p>
+                </div>
+                <div class="export-buttons">
+                    <a href="#" onclick="exportarExcel(); return false;" class="btn-export excel" id="btn-excel">
+                        <i class="bi bi-file-earmark-excel"></i>
+                        <span>Exportar Excel</span>
+                    </a>
+                    <a href="#" onclick="exportarPDF(); return false;" class="btn-export pdf" id="btn-pdf">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        <span>Generar PDF</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas Generales -->
+        <div class="stats-grid">
+            <div class="stat-card primary">
+                <div class="stat-value">{{ total_equipos }}</div>
+                <div class="stat-label">Total de Equipos</div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-value">{{ equipos_operativos }}</div>
+                <div class="stat-label">Equipos Operativos</div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-value">{{ equipos_mantenimiento }}</div>
+                <div class="stat-label">En Mantenimiento</div>
+            </div>
+            
+            <div class="stat-card danger">
+                <div class="stat-value">{{ equipos_fuera_servicio }}</div>
+                <div class="stat-label">Fuera de Servicio</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <h3 class="chart-title">
+                <i class="bi bi-funnel"></i>
+                Filtros de Búsqueda
+            </h3>
+            <form method="get" class="filters-form">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label class="form-label">Sección</label>
+                        <select name="seccion" class="form-select">
+                            <option value="">Todas las secciones</option>
+                            {% for choice in secciones_disponibles %}
+                                <option value="{{ choice.0 }}" {% if seccion_filtro == choice.0 %}selected{% endif %}>
+                                    {{ choice.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="">Todos los estados</option>
+                            {% for choice in estados_disponibles %}
+                                <option value="{{ choice.0 }}" {% if estado_filtro == choice.0 %}selected{% endif %}>
+                                    {{ choice.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Fecha Desde</label>
+                        <input type="date" name="fecha_desde" class="form-control" value="{{ fecha_desde }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Fecha Hasta</label>
+                        <input type="date" name="fecha_hasta" class="form-control" value="{{ fecha_hasta }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i>
+                            Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h3 class="chart-title">
+                        <i class="bi bi-pie-chart"></i>
+                        Distribución por Estado
+                    </h3>
+                    <canvas id="estadosChart" height="300"></canvas>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h3 class="chart-title">
+                        <i class="bi bi-bar-chart"></i>
+                        Equipos por Sección
+                    </h3>
+                    <canvas id="seccionesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const datosGraficos = {{ datos_graficos|safe }};
+    
+    // Configuración común para gráficos
+    const colores = [
+        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+        '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
+    ];
+
+    // Gráfico de Estados
+    if (document.getElementById('estadosChart')) {
+        new Chart(document.getElementById('estadosChart'), {
+            type: 'doughnut',
+            data: {
+                labels: datosGraficos.estados.labels,
+                datasets: [{
+                    data: datosGraficos.estados.data,
+                    backgroundColor: datosGraficos.estados.colors,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Gráfico de Secciones
+    if (document.getElementById('seccionesChart')) {
+        new Chart(document.getElementById('seccionesChart'), {
+            type: 'bar',
+            data: {
+                labels: datosGraficos.ubicaciones.labels,
+                datasets: [{
+                    label: 'Cantidad de Equipos',
+                    data: datosGraficos.ubicaciones.data,
+                    backgroundColor: colores,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+
+// === FUNCIONES DE EXPORTACIÓN MEJORADAS ===
+
+function exportarExcel() {
+    const btnExcel = document.getElementById('btn-excel');
+    const originalText = btnExcel.querySelector('span').textContent;
+    
+    // Cambiar estado del botón
+    btnExcel.classList.add('loading');
+    btnExcel.querySelector('span').textContent = 'Generando...';
+    
+    // Obtener filtros actuales
+    const filtros = new URLSearchParams(window.location.search);
+    
+    // Construir URL con filtros
+    let url = '{% url "reportes:exportar-equipos-excel" %}';
+    if (filtros.toString()) {
+        url += '?' + filtros.toString();
+    }
+    
+    // Mostrar notificación
+    mostrarNotificacion('Generando archivo Excel...', 'info');
+    
+    // Simular descarga
+    setTimeout(() => {
+        // Abrir descarga
+        window.open(url, '_blank');
+        
+        // Restaurar botón
+        btnExcel.classList.remove('loading');
+        btnExcel.querySelector('span').textContent = originalText;
+        
+        // Notificación de éxito
+        mostrarNotificacion('Archivo Excel generado exitosamente', 'success');
+    }, 1500);
+}
+
+function exportarPDF() {
+    const btnPDF = document.getElementById('btn-pdf');
+    const originalText = btnPDF.querySelector('span').textContent;
+    
+    // Cambiar estado del botón
+    btnPDF.classList.add('loading');
+    btnPDF.querySelector('span').textContent = 'Procesando...';
+    
+    // Obtener filtros actuales
+    const filtros = new URLSearchParams(window.location.search);
+    
+    // Construir URL con filtros
+    let url = '{% url "reportes:exportar-equipos-pdf" %}';
+    if (filtros.toString()) {
+        url += '?' + filtros.toString();
+    }
+    
+    // Mostrar notificación
+    mostrarNotificacion('Generando reporte PDF completo...', 'info');
+    
+    // Simular procesamiento (PDF toma más tiempo)
+    setTimeout(() => {
+        // Abrir descarga
+        window.open(url, '_blank');
+        
+        // Restaurar botón
+        btnPDF.classList.remove('loading');
+        btnPDF.querySelector('span').textContent = originalText;
+        
+        // Notificación de éxito
+        mostrarNotificacion('Reporte PDF generado exitosamente', 'success');
+    }, 2500);
+}
+
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const colores = {
+        'success': '#10b981',
+        'error': '#ef4444',
+        'warning': '#f59e0b',
+        'info': '#3b82f6'
+    };
+    
+    const iconos = {
+        'success': 'bi-check-circle-fill',
+        'error': 'bi-x-circle-fill',
+        'warning': 'bi-exclamation-triangle-fill',
+        'info': 'bi-info-circle-fill'
+    };
+    
+    // Crear notificación
+    const notificacion = document.createElement('div');
+    notificacion.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: ${colores[tipo]};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        max-width: 400px;
+        animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    `;
+    
+    notificacion.innerHTML = `
+        <i class="bi ${iconos[tipo]}" style="font-size: 1.2rem;"></i>
+        <span>${mensaje}</span>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+        notificacion.style.animation = 'slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => {
+            document.body.removeChild(notificacion);
+        }, 400);
+    }, 4000);
+}
+
+// Agregar animaciones CSS
+const animationStyles = document.createElement('style');
+animationStyles.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(animationStyles);
+</script>
+{% endblock %}
