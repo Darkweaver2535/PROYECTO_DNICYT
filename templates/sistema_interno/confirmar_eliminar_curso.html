@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar {{ curso.get_tipo_display }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirmar-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .confirmar-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .confirmar-header {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .confirmar-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .confirmar-header i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .confirmar-body {
+        padding: 2rem;
+    }
+
+    .curso-info {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--danger-red);
+    }
+
+    .curso-titulo {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .curso-meta {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .curso-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 0.75rem;
+        background: white;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--danger-red);
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .warning-text {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        color: var(--danger-red);
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        transform: translateY(-1px);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+        color: white;
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            justify-content: center;
+        }
+        
+        .curso-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirmar-page">
+    <div class="container">
+        <div class="confirmar-container">
+            <div class="confirmar-header">
+                <i class="bi bi-exclamation-triangle"></i>
+                <h1>Confirmar Eliminación</h1>
+                <p class="mb-0">Esta acción no se puede deshacer</p>
+            </div>
+
+            <div class="confirmar-body">
+                <div class="curso-info">
+                    <div class="curso-titulo">{{ curso.titulo }}</div>
+                    <div class="curso-meta">
+                        <strong>Tipo:</strong> {{ curso.get_tipo_display }} • 
+                        <strong>Instructor:</strong> {{ curso.instructor }} • 
+                        <strong>Categoría:</strong> {{ curso.categoria.nombre }}
+                    </div>
+                    
+                    <div class="curso-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ curso.vistas }}</div>
+                            <div class="stat-label">Vistas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ curso.inscripciones.count }}</div>
+                            <div class="stat-label">Inscritos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ curso.duracion_formateada }}</div>
+                            <div class="stat-label">Duración</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-text">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>¡Advertencia!</strong> Al eliminar este {{ curso.get_tipo_display|lower }}, 
+                    también se eliminarán todas las inscripciones, visualizaciones y datos relacionados. 
+                    Esta acción es irreversible.
+                </div>
+
+                <form method="post" id="eliminarForm">
+                    {% csrf_token %}
+                    <div class="form-actions">
+                        <a href="{% url 'capacitacion:detalle-curso' curso.id %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger" id="confirmarBtn">
+                            <i class="bi bi-trash"></i>
+                            Eliminar {{ curso.get_tipo_display }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('eliminarForm');
+    const btn = document.getElementById('confirmarBtn');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Doble confirmación
+        const confirmacion = confirm(
+            '¿Estás completamente seguro de que deseas eliminar "{{ curso.titulo }}"?\n\n' +
+            'Esta acción eliminará:\n' +
+            '- El curso/taller\n' +
+            '- Todas las inscripciones ({{ curso.inscripciones.count }})\n' +
+            '- Todo el historial de visualizaciones\n' +
+            '- Datos estadísticos relacionados\n\n' +
+            'Esta acción NO SE PUEDE DESHACER.'
+        );
+        
+        if (confirmacion) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Eliminando...';
+            this.submit();
+        }
+    });
+});
+</script>
+{% endblock %}

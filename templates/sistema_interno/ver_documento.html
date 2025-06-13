@@ -1,0 +1,838 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ documento.titulo }} - Documentos Técnicos{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ver-documento-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .documento-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .documento-header {
+        background: linear-gradient(135deg, #065f46, #047857, #10b981);
+        color: white;
+        padding: 3rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .documento-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(100px, -100px);
+    }
+
+    .documento-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .documento-breadcrumb {
+        background: var(--off-white);
+        padding: 1rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.875rem;
+    }
+
+    .documento-breadcrumb a {
+        color: #047857;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .documento-breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .documento-meta {
+        background: var(--off-white);
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .documento-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .meta-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .meta-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #047857, #10b981);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .meta-content h6 {
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+    }
+
+    .meta-content span {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .documento-content {
+        padding: 3rem 2rem;
+    }
+
+    .content-section {
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: var(--off-white);
+        border-radius: 1rem;
+        border-left: 4px solid #10b981;
+    }
+
+    .content-section h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .content-section h3 i {
+        color: #047857;
+        font-size: 1.5rem;
+    }
+
+    .content-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .content-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .content-list li:last-child {
+        border-bottom: none;
+    }
+
+    .content-list li::before {
+        content: '✓';
+        background: linear-gradient(135deg, #047857, #10b981);
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+
+    .documento-actions {
+        background: var(--off-white);
+        padding: 2rem;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+    }
+
+    .btn-documento {
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition-speed) ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .btn-documento.btn-primary {
+        background: linear-gradient(135deg, #047857, #10b981);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-documento.btn-primary:hover {
+        background: linear-gradient(135deg, #065f46, #047857);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-documento.btn-secondary {
+        background: transparent;
+        border: 2px solid var(--border-color);
+        color: var(--text-light);
+    }
+
+    .btn-documento.btn-secondary:hover {
+        background: var(--light-blue);
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        text-decoration: none;
+    }
+
+    .btn-documento.btn-download {
+        background: linear-gradient(135deg, var(--warning-orange), #d97706);
+        color: white;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-documento.btn-download:hover {
+        background: linear-gradient(135deg, #d97706, #b45309);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .documento-tipo-badge {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        backdrop-filter: blur(10px);
+        z-index: 3;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .type-manual { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .type-procedimiento { background: linear-gradient(135deg, var(--danger-red), #dc2626); }
+    .type-especificacion { background: linear-gradient(135deg, var(--primary-blue), #1d4ed8); }
+    .type-guia { background: linear-gradient(135deg, #10b981, #047857); }
+    .type-normativa { background: linear-gradient(135deg, var(--warning-orange), #d97706); }
+    .type-ficha { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    .type-catalogo { background: linear-gradient(135deg, #ec4899, #db2777); }
+    .type-instructivo { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+    .type-reporte { background: linear-gradient(135deg, #64748b, #475569); }
+    .type-protocolo { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+
+    .relacionados-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    .relacionados-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .relacionado-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+        text-decoration: none;
+        color: var(--text-dark);
+    }
+
+    .relacionado-item:hover {
+        background: var(--light-blue);
+        border-color: #10b981;
+        text-decoration: none;
+        color: var(--text-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .relacionado-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #047857, #10b981);
+        color: white;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .relacionado-content h6 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .relacionado-content small {
+        color: var(--text-light);
+        font-size: 0.75rem;
+    }
+
+    /* Estadísticas del documento */
+    .documento-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: rgba(16, 185, 129, 0.05);
+        border-radius: 1rem;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #047857;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Valoración */
+    .valoracion-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+        margin-top: 2rem;
+    }
+
+    .stars-rating {
+        display: flex;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        margin: 1rem 0;
+    }
+
+    .star {
+        color: #d1d5db;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .star.active,
+    .star:hover {
+        color: #fbbf24;
+    }
+
+    @media (max-width: 768px) {
+        .documento-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .documento-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .documento-meta-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .documento-content {
+            padding: 2rem 1.5rem;
+        }
+
+        .btn-documento {
+            margin: 0.5rem 0;
+            justify-content: center;
+        }
+
+        .relacionados-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .documento-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ver-documento-page">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="documento-container">
+                    <!-- Breadcrumb -->
+                    <div class="documento-breadcrumb">
+                        <nav>
+                            <a href="{% url 'capacitacion:documentos-tecnicos' %}">
+                                <i class="bi bi-arrow-left"></i> Documentos Técnicos
+                            </a>
+                            <span class="mx-2">›</span>
+                            <span>{{ documento.categoria.nombre }}</span>
+                            <span class="mx-2">›</span>
+                            <span class="text-muted">{{ documento.titulo|truncatechars:50 }}</span>
+                        </nav>
+                    </div>
+
+                    <!-- Header del documento -->
+                    <div class="documento-header">
+                        <div class="documento-tipo-badge type-{{ documento.tipo }}">
+                            {{ documento.get_tipo_display }}
+                        </div>
+                        
+                        <h1>{{ documento.titulo }}</h1>
+                        <p class="mb-0" style="opacity: 0.9; font-size: 1.1rem;">
+                            <i class="bi bi-person-circle me-2"></i>
+                            <strong>Autor:</strong> {{ documento.autor_documento }}
+                        </p>
+                    </div>
+
+                    <!-- Metadatos del documento -->
+                    <div class="documento-meta">
+                        <div class="documento-meta-grid">
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="bi bi-tag"></i>
+                                </div>
+                                <div class="meta-content">
+                                    <h6>Categoría</h6>
+                                    <span>{{ documento.categoria.nombre }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="bi bi-code-square"></i>
+                                </div>
+                                <div class="meta-content">
+                                    <h6>Versión</h6>
+                                    <span>{{ documento.version }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="bi bi-calendar"></i>
+                                </div>
+                                <div class="meta-content">
+                                    <h6>Fecha</h6>
+                                    <span>{{ documento.fecha_creacion|date:"d/m/Y" }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="bi bi-file-earmark"></i>
+                                </div>
+                                <div class="meta-content">
+                                    <h6>Formato</h6>
+                                    <span>{{ documento.get_formato_display }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="bi bi-speedometer2"></i>
+                                </div>
+                                <div class="meta-content">
+                                    <h6>Dificultad</h6>
+                                    <span>{{ documento.get_dificultad_display }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <div class="meta-content">
+                                    <h6>Confidencialidad</h6>
+                                    <span>{{ documento.get_confidencialidad_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas del documento -->
+                    <div class="documento-content">
+                        <div class="documento-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">{{ stats_documento.total_vistas }}</div>
+                                <div class="stat-label">Visualizaciones</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ stats_documento.total_descargas }}</div>
+                                <div class="stat-label">Descargas</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ stats_documento.valoracion_promedio|floatformat:1 }}★</div>
+                                <div class="stat-label">Valoración</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ stats_documento.total_valoraciones }}</div>
+                                <div class="stat-label">Reviews</div>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="content-section">
+                            <h3>
+                                <i class="bi bi-info-circle"></i>
+                                Descripción del Documento
+                            </h3>
+                            <p style="line-height: 1.8; font-size: 1rem; color: var(--text-dark);">
+                                {{ documento.descripcion|linebreaks }}
+                            </p>
+                        </div>
+
+                        <!-- Objetivos -->
+                        {% if documento.objetivos_lista %}
+                        <div class="content-section">
+                            <h3>
+                                <i class="bi bi-bullseye"></i>
+                                Objetivos
+                            </h3>
+                            <ul class="content-list">
+                                {% for objetivo in documento.objetivos_lista %}
+                                    <li>{{ objetivo }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Prerequisitos -->
+                        {% if documento.prerequisitos_lista %}
+                        <div class="content-section">
+                            <h3>
+                                <i class="bi bi-clipboard-check"></i>
+                                Prerequisitos
+                            </h3>
+                            <ul class="content-list">
+                                {% for requisito in documento.prerequisitos_lista %}
+                                    <li>{{ requisito }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Área de aplicación -->
+                        {% if documento.aplicacion %}
+                        <div class="content-section">
+                            <h3>
+                                <i class="bi bi-geo-alt"></i>
+                                Área de Aplicación
+                            </h3>
+                            <p style="line-height: 1.8; font-size: 1rem; color: var(--text-dark);">
+                                {{ documento.aplicacion|linebreaks }}
+                            </p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Palabras clave -->
+                        {% if documento.palabras_clave_lista %}
+                        <div class="content-section">
+                            <h3>
+                                <i class="bi bi-tags"></i>
+                                Palabras Clave
+                            </h3>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                {% for palabra in documento.palabras_clave_lista %}
+                                    <span style="background: #e0f2fe; color: #0277bd; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500;">
+                                        {{ palabra }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Acciones del documento -->
+                    <div class="documento-actions">
+                        <!-- ✅ BOTÓN DE DESCARGA REAL -->
+                        <form method="post" action="{% url 'capacitacion:descargar-documento' documento.id %}" style="display: inline;" id="downloadForm">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-documento btn-download" id="downloadBtn">
+                                <i class="bi bi-download"></i>
+                                Descargar Documento
+                            </button>
+                        </form>
+                        
+                        <a href="#" class="btn-documento btn-secondary" onclick="simularCompartir('{{ documento.titulo }}')">
+                            <i class="bi bi-share"></i>
+                            Compartir
+                        </a>
+                        
+                        <a href="#" class="btn-documento btn-secondary" onclick="simularImprimir()">
+                            <i class="bi bi-printer"></i>
+                            Imprimir
+                        </a>
+                        
+                        {% if es_admin %}
+                        <a href="{% url 'capacitacion:editar-documento' documento.id %}" class="btn-documento btn-primary">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'capacitacion:documentos-tecnicos' %}" class="btn-documento btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Volver a Documentos
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Documentos relacionados -->
+                {% if documentos_relacionados %}
+                <div class="relacionados-section">
+                    <h3 style="color: var(--text-dark); margin-bottom: 1.5rem; font-weight: 700;">
+                        <i class="bi bi-files"></i>
+                        Documentos Relacionados
+                    </h3>
+                    
+                    <div class="relacionados-grid">
+                        {% for doc_rel in documentos_relacionados %}
+                        <a href="{% url 'capacitacion:ver-documento' doc_rel.id %}" class="relacionado-item">
+                            <div class="relacionado-icon">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <div class="relacionado-content">
+                                <h6>{{ doc_rel.titulo|truncatechars:60 }}</h6>
+                                <small>{{ doc_rel.get_tipo_display }} • v{{ doc_rel.version }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 Documento técnico cargado: {{ documento.titulo }}');
+    
+    // ✅ MANEJO DEL FORMULARIO DE DESCARGA
+    const downloadForm = document.getElementById('downloadForm');
+    const downloadBtn = document.getElementById('downloadBtn');
+    
+    if (downloadForm && downloadBtn) {
+        downloadForm.addEventListener('submit', function(e) {
+            // Cambiar texto del botón mientras se procesa
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Preparando descarga...';
+            downloadBtn.disabled = true;
+            
+            // Habilitar el botón después de 3 segundos
+            setTimeout(() => {
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }, 3000);
+        });
+    }
+    
+    // ✅ SISTEMA DE VALORACIÓN POR ESTRELLAS
+    const stars = document.querySelectorAll('.star');
+    const ratingValue = document.getElementById('ratingValue');
+    
+    if (stars.length > 0) {
+        stars.forEach((star, index) => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.dataset.rating);
+                ratingValue.value = rating;
+                
+                // Actualizar visualización de estrellas
+                stars.forEach((s, i) => {
+                    if (i < rating) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+            
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.dataset.rating);
+                stars.forEach((s, i) => {
+                    if (i < rating) {
+                        s.style.color = '#fbbf24';
+                    } else {
+                        s.style.color = '#d1d5db';
+                    }
+                });
+            });
+        });
+        
+        // Inicializar con 5 estrellas por defecto
+        stars.forEach(star => star.classList.add('active'));
+    }
+    
+    // Animación de entrada para las secciones
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.content-section').forEach((section) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(section);
+    });
+});
+
+function simularCompartir(titulo) {
+    // Compartir nativo si está disponible
+    if (navigator.share) {
+        navigator.share({
+            title: titulo,
+            text: `Revisa este documento técnico: ${titulo}`,
+            url: window.location.href
+        }).catch(console.error);
+    } else {
+        // Fallback: copiar al portapapeles
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert(`🔗 Enlace copiado al portapapeles\n\nPuedes compartir este documento usando: ${window.location.href}`);
+        }).catch(() => {
+            alert(`🔗 Para compartir, copia este enlace:\n${window.location.href}`);
+        });
+    }
+}
+
+function simularImprimir() {
+    // Abrir diálogo de impresión real
+    window.print();
+}
+
+// Efecto de ripple en botones
+document.querySelectorAll('.btn-documento').forEach(button => {
+    button.addEventListener('click', function(e) {
+        if (this.href === '#') {
+            e.preventDefault();
+        }
+        
+        let ripple = document.createElement('span');
+        this.appendChild(ripple);
+        
+        let rect = this.getBoundingClientRect();
+        let size = Math.max(rect.width, rect.height);
+        let x = e.clientX - rect.left - size / 2;
+        let y = e.clientY - rect.top - size / 2;
+        
+        ripple.style.cssText = `
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            left: ${x}px;
+            top: ${y}px;
+            width: ${size}px;
+            height: ${size}px;
+            pointer-events: none;
+        `;
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    });
+});
+
+// Agregar animación de ripple al CSS
+const style = document.createElement('style');
+style.textContent = `
+@keyframes ripple {
+    to {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

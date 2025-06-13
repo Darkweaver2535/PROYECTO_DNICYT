@@ -1,0 +1,545 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ curso.titulo }} - Biblioteca de Cursos{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detalle-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .video-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 2rem;
+    }
+
+    .video-embed {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+    }
+
+    .video-embed iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .curso-header {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .curso-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .badge-curso { background: linear-gradient(135deg, #10b981, #059669); }
+    .badge-taller { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .badge-conferencia { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .badge-seminario { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+    .curso-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        line-height: 1.3;
+    }
+
+    .curso-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .meta-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: 0.75rem;
+    }
+
+    .meta-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-size: 1.25rem;
+        color: white;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    }
+
+    .meta-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+    }
+
+    .meta-value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .info-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .objetivos-list, .requisitos-list, .temas-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .objetivos-list li, .requisitos-list li, .temas-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .objetivos-list li:before {
+        content: '🎯';
+        position: absolute;
+        left: 0;
+    }
+
+    .requisitos-list li:before {
+        content: '📋';
+        position: absolute;
+        left: 0;
+    }
+
+    .temas-list li:before {
+        content: '📚';
+        position: absolute;
+        left: 0;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary-lg {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary-lg:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-2px);
+    }
+
+    .btn-success-lg {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-outline-lg {
+        background: transparent;
+        color: var(--text-primary);
+        padding: 1rem 2rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .inscrito-status {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .relacionados-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .curso-relacionado {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .curso-relacionado:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-box {
+        text-align: center;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: 0.75rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .curso-title {
+            font-size: 1.5rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .btn-primary-lg, .btn-success-lg, .btn-outline-lg {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detalle-page">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'capacitacion:biblioteca-cursos' %}">Biblioteca</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="?categoria={{ curso.categoria.id }}">{{ curso.categoria.nombre }}</a>
+                </li>
+                <li class="breadcrumb-item active">{{ curso.titulo|truncatechars:50 }}</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Video -->
+                {% if curso.youtube_embed_url %}
+                <div class="video-container">
+                    <div class="video-embed">
+                        <iframe src="{{ curso.youtube_embed_url }}" 
+                                title="{{ curso.titulo }}"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Información principal -->
+                <div class="curso-header">
+                    <div class="curso-badge badge-{{ curso.tipo }}">
+                        {{ curso.get_tipo_display }}
+                    </div>
+                    
+                    {% if curso.destacado %}
+                    <div class="curso-badge" style="background: linear-gradient(135deg, #ef4444, #dc2626); margin-left: 0.5rem;">
+                        <i class="bi bi-star-fill"></i> Destacado
+                    </div>
+                    {% endif %}
+
+                    <h1 class="curso-title">{{ curso.titulo }}</h1>
+                    
+                    <p class="lead mb-4">{{ curso.descripcion }}</p>
+
+                    <!-- Metadatos -->
+                    <div class="curso-meta-grid">
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div class="meta-label">Instructor</div>
+                            <div class="meta-value">{{ curso.instructor }}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div class="meta-label">Duración</div>
+                            <div class="meta-value">{{ curso.duracion_formateada }}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="bi bi-signal"></i>
+                            </div>
+                            <div class="meta-label">Dificultad</div>
+                            <div class="meta-value">{{ curso.get_dificultad_display }}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="bi bi-geo"></i>
+                            </div>
+                            <div class="meta-label">Modalidad</div>
+                            <div class="meta-value">{{ curso.get_modalidad_display }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="action-buttons">
+                        {% if inscripcion %}
+                        <div class="inscrito-status">
+                            <i class="bi bi-check-circle"></i>
+                            Ya estás inscrito
+                        </div>
+                        {% else %}
+                        <form method="post" action="{% url 'capacitacion:inscribirse-curso' curso.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-success-lg">
+                                <i class="bi bi-plus-circle"></i>
+                                Inscribirse al {{ curso.get_tipo_display }}
+                            </button>
+                        </form>
+                        {% endif %}
+                        
+                        <a href="{{ curso.enlace_youtube }}" target="_blank" class="btn-primary-lg">
+                            <i class="bi bi-youtube"></i>
+                            Ver en YouTube
+                        </a>
+                        
+                        {% if es_admin %}
+                        <a href="{% url 'capacitacion:editar-curso' curso.id %}" class="btn-outline-lg">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Objetivos -->
+                {% if curso.objetivos_lista %}
+                <div class="info-section">
+                    <h3 class="section-title">🎯 Objetivos de Aprendizaje</h3>
+                    <ul class="objetivos-list">
+                        {% for objetivo in curso.objetivos_lista %}
+                        <li>{{ objetivo }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Contenido -->
+                {% if curso.temas_lista %}
+                <div class="info-section">
+                    <h3 class="section-title">📚 Contenido del Curso</h3>
+                    <ul class="temas-list">
+                        {% for tema in curso.temas_lista %}
+                        <li>{{ tema }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Requisitos -->
+                {% if curso.requisitos_lista %}
+                <div class="info-section">
+                    <h3 class="section-title">📋 Requisitos Previos</h3>
+                    <ul class="requisitos-list">
+                        {% for requisito in curso.requisitos_lista %}
+                        <li>{{ requisito }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Estadísticas del curso -->
+                <div class="info-section">
+                    <h3 class="section-title">📊 Estadísticas</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-number">{{ curso.vistas }}</div>
+                            <div class="stat-label">Vistas</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">{{ stats_curso.total_inscritos }}</div>
+                            <div class="stat-label">Inscritos</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">{{ stats_curso.completados }}</div>
+                            <div class="stat-label">Completados</div>
+                        </div>
+                        {% if stats_curso.promedio_calificacion > 0 %}
+                        <div class="stat-box">
+                            <div class="stat-number">{{ stats_curso.promedio_calificacion|floatformat:1 }}</div>
+                            <div class="stat-label">Rating</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Información adicional -->
+                <div class="info-section">
+                    <h3 class="section-title">ℹ️ Información</h3>
+                    <div class="mb-3">
+                        <strong>Categoría:</strong><br>
+                        <span class="badge" style="background-color: {{ curso.categoria.color_hex }}; color: white;">
+                            <i class="{{ curso.categoria.icono }}"></i>
+                            {{ curso.categoria.nombre }}
+                        </span>
+                    </div>
+                    
+                    {% if curso.fecha_programada %}
+                    <div class="mb-3">
+                        <strong>Fecha programada:</strong><br>
+                        {{ curso.fecha_programada|date:"d/m/Y H:i" }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if curso.max_participantes > 0 %}
+                    <div class="mb-3">
+                        <strong>Límite de participantes:</strong><br>
+                        {{ stats_curso.total_inscritos }}/{{ curso.max_participantes }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <strong>Puntos de capacitación:</strong><br>
+                        {{ curso.puntos_capacitacion }} puntos
+                    </div>
+                    
+                    {% if curso.certificacion_disponible %}
+                    <div class="mb-3">
+                        <span class="badge bg-success">
+                            <i class="bi bi-award"></i>
+                            Otorga certificación
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if curso.etiquetas_lista %}
+                    <div class="mb-3">
+                        <strong>Etiquetas:</strong><br>
+                        {% for etiqueta in curso.etiquetas_lista %}
+                        <span class="badge bg-light text-dark me-1">{{ etiqueta }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Cursos relacionados -->
+                {% if cursos_relacionados %}
+                <div class="info-section">
+                    <h3 class="section-title">🔗 Cursos Relacionados</h3>
+                    <div class="relacionados-grid">
+                        {% for relacionado in cursos_relacionados %}
+                        <a href="{% url 'capacitacion:detalle-curso' relacionado.id %}" class="curso-relacionado">
+                            <h6 class="mb-2">{{ relacionado.titulo|truncatechars:60 }}</h6>
+                            <small class="text-muted">
+                                <i class="bi bi-person"></i> {{ relacionado.instructor }}<br>
+                                <i class="bi bi-clock"></i> {{ relacionado.duracion_formateada }}
+                            </small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎥 Detalle de curso cargado');
+    
+    // Confirmación para inscripción
+    const formInscripcion = document.querySelector('form[action*="inscribirse"]');
+    if (formInscripcion) {
+        formInscripcion.addEventListener('submit', function(e) {
+            if (!confirm('¿Estás seguro de que quieres inscribirte a este curso?')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,957 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Videos y Multimedia - Sistema de Capacitación{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ✅ ESTILOS ESPECÍFICOS PARA VIDEOS Y MULTIMEDIA CON PREFIJO */
+    .multimedia-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    /* Contenedor principal de multimedia */
+    .multimedia-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .multimedia-container:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .multimedia-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .multimedia-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50%, -50%);
+    }
+
+    .multimedia-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .multimedia-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Stats de multimedia */
+    .multimedia-stats {
+        background: var(--off-white);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .multimedia-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+    }
+
+    .multimedia-stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .multimedia-stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .multimedia-stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        line-height: 1;
+    }
+
+    .multimedia-stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.5rem;
+    }
+
+    /* Filtros de multimedia */
+    .multimedia-filters {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border-color);
+        background: white;
+    }
+
+    .multimedia-filters-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr auto;
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .multimedia-form-control,
+    .multimedia-form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        transition: all var(--transition-speed) ease;
+        background: var(--pure-white);
+        font-size: 0.9rem;
+    }
+
+    .multimedia-form-control:focus,
+    .multimedia-form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .multimedia-search-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all var(--transition-speed) ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .multimedia-search-btn:hover {
+        background: linear-gradient(135deg, #5a67d8, #6b46c1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Grid de videos */
+    .multimedia-video-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    .multimedia-video-card {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+        position: relative;
+        border: 1px solid var(--border-color);
+    }
+
+    .multimedia-video-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+        border-color: #667eea;
+    }
+
+    .multimedia-video-thumbnail {
+        position: relative;
+        height: 180px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .multimedia-video-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform var(--transition-speed) ease;
+    }
+
+    .multimedia-video-card:hover .multimedia-video-thumbnail img {
+        transform: scale(1.05);
+    }
+
+    .multimedia-play-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 1rem;
+        border-radius: 50%;
+        font-size: 2rem;
+        transition: all var(--transition-speed) ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .multimedia-video-card:hover .multimedia-play-overlay {
+        background: rgba(102, 126, 234, 0.9);
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .multimedia-video-duration {
+        position: absolute;
+        bottom: 0.75rem;
+        right: 0.75rem;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+    }
+
+    .multimedia-video-type {
+        position: absolute;
+        top: 0.75rem;
+        left: 0.75rem;
+        padding: 0.5rem 1rem;
+        border-radius: 1.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .multimedia-type-curso {
+        background: linear-gradient(135deg, var(--success-green), #047857);
+    }
+
+    .multimedia-type-taller {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .multimedia-type-conferencia {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+
+    .multimedia-type-seminario {
+        background: linear-gradient(135deg, var(--warning-orange), #d97706);
+    }
+
+    .multimedia-video-content {
+        padding: 1.5rem;
+    }
+
+    .multimedia-video-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .multimedia-video-instructor {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .multimedia-video-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .multimedia-video-views {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .multimedia-video-difficulty {
+        background: var(--off-white);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-weight: 500;
+    }
+
+    .multimedia-video-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .multimedia-btn-play {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.5rem 1.25rem;
+        border-radius: 0.75rem;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all var(--transition-speed) ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+    }
+
+    .multimedia-btn-play:hover {
+        background: linear-gradient(135deg, #5a67d8, #6b46c1);
+        transform: translateY(-1px);
+        color: white;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .multimedia-btn-info {
+        background: transparent;
+        color: var(--text-light);
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all var(--transition-speed) ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .multimedia-btn-info:hover {
+        background: var(--light-blue);
+        border-color: #667eea;
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    /* Sidebar de multimedia */
+    .multimedia-sidebar {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .multimedia-sidebar-title {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border-color);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .multimedia-category-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        color: var(--text-light);
+        text-decoration: none;
+        border-radius: 0.5rem;
+        transition: all var(--transition-speed) ease;
+        margin-bottom: 0.5rem;
+    }
+
+    .multimedia-category-item:hover {
+        background: linear-gradient(135deg, #f7fafc, #edf2f7);
+        color: #667eea;
+        text-decoration: none;
+        transform: translateX(4px);
+    }
+
+    .multimedia-category-count {
+        background: #667eea;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        min-width: 1.5rem;
+        text-align: center;
+    }
+
+    .multimedia-recent-item {
+        display: flex;
+        gap: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        transition: all var(--transition-speed) ease;
+        margin-bottom: 0.75rem;
+        text-decoration: none;
+        color: var(--text-dark);
+    }
+
+    .multimedia-recent-item:hover {
+        background: var(--off-white);
+        text-decoration: none;
+        color: var(--text-dark);
+    }
+
+    .multimedia-recent-thumb {
+        width: 60px;
+        height: 40px;
+        border-radius: 0.375rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .multimedia-recent-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .multimedia-recent-info h6 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin: 0;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .multimedia-recent-info small {
+        color: var(--text-light);
+        font-size: 0.75rem;
+    }
+
+    /* Estado sin videos */
+    .multimedia-no-videos {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        margin: 2rem;
+    }
+
+    .multimedia-no-videos i {
+        font-size: 4rem;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .multimedia-no-videos h4 {
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .multimedia-no-videos p {
+        color: var(--text-light);
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+
+    /* Paginación de multimedia */
+    .multimedia-pagination {
+        display: flex;
+        justify-content: center;
+        padding: 2rem;
+        background: white;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .multimedia-pagination .page-link {
+        border: 2px solid var(--border-color);
+        color: var(--text-light);
+        padding: 0.75rem 1rem;
+        margin: 0 0.25rem;
+        border-radius: 0.5rem;
+        transition: all var(--transition-speed) ease;
+        font-weight: 500;
+    }
+
+    .multimedia-pagination .page-link:hover {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+    }
+
+    .multimedia-pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-color: #667eea;
+        color: white;
+    }
+
+    /* Responsividad específica de multimedia */
+    @media (max-width: 768px) {
+        .multimedia-filters-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .multimedia-video-grid {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+        }
+
+        .multimedia-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .multimedia-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .multimedia-video-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .multimedia-btn-play,
+        .multimedia-btn-info {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .multimedia-stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .multimedia-header {
+            padding: 1.5rem;
+        }
+
+        .multimedia-filters {
+            padding: 1.5rem;
+        }
+
+        .multimedia-video-grid {
+            padding: 1rem;
+            gap: 1.5rem;
+        }
+    }
+
+    /* Animaciones de entrada */
+    @keyframes multimedia-slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .multimedia-video-card {
+        animation: multimedia-slideIn 0.6s ease-out forwards;
+    }
+
+    .multimedia-video-card:nth-child(1) { animation-delay: 0.1s; }
+    .multimedia-video-card:nth-child(2) { animation-delay: 0.2s; }
+    .multimedia-video-card:nth-child(3) { animation-delay: 0.3s; }
+    .multimedia-video-card:nth-child(4) { animation-delay: 0.4s; }
+    .multimedia-video-card:nth-child(5) { animation-delay: 0.5s; }
+    .multimedia-video-card:nth-child(6) { animation-delay: 0.6s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="multimedia-page">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Contenido principal -->
+            <div class="col-lg-9">
+                <div class="multimedia-container">
+                    <!-- Header -->
+                    <div class="multimedia-header">
+                        <h1>
+                            <i class="bi bi-play-circle"></i>
+                            Videos y Multimedia
+                        </h1>
+                        <p>Aprende con contenido audiovisual especializado para operarios industriales</p>
+                    </div>
+
+                    <!-- Estadísticas -->
+                    <div class="multimedia-stats">
+                        <div class="multimedia-stats-grid">
+                            <div class="multimedia-stat-item">
+                                <div class="multimedia-stat-value">{{ stats.total_videos }}</div>
+                                <div class="multimedia-stat-label">Videos Disponibles</div>
+                            </div>
+                            <div class="multimedia-stat-item">
+                                <div class="multimedia-stat-value">{{ stats.videos_este_mes }}</div>
+                                <div class="multimedia-stat-label">Nuevos Este Mes</div>
+                            </div>
+                            <div class="multimedia-stat-item">
+                                <div class="multimedia-stat-value">{{ stats.mis_videos_vistos }}</div>
+                                <div class="multimedia-stat-label">Videos Vistos</div>
+                            </div>
+                            <div class="multimedia-stat-item">
+                                <div class="multimedia-stat-value">{{ stats.tiempo_total_contenido }}h</div>
+                                <div class="multimedia-stat-label">Horas de Contenido</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="multimedia-filters">
+                        <form method="get" class="multimedia-filters-form">
+                            <div class="multimedia-filters-grid">
+                                <input type="text" 
+                                       name="busqueda" 
+                                       value="{{ busqueda }}" 
+                                       placeholder="Buscar videos por título, instructor o contenido..."
+                                       class="multimedia-form-control">
+                                
+                                <select name="categoria" class="multimedia-form-select">
+                                    <option value="">Todas las categorías</option>
+                                    {% for categoria in categorias %}
+                                        <option value="{{ categoria.id }}" {% if categoria_filtro == categoria.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ categoria.nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <select name="tipo" class="multimedia-form-select">
+                                    <option value="">Todos los tipos</option>
+                                    {% for tipo_value, tipo_label in tipos %}
+                                        <option value="{{ tipo_value }}" {% if tipo_filtro == tipo_value %}selected{% endif %}>
+                                            {{ tipo_label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <select name="dificultad" class="multimedia-form-select">
+                                    <option value="">Todas las dificultades</option>
+                                    {% for dif_value, dif_label in dificultades %}
+                                        <option value="{{ dif_value }}" {% if dificultad_filtro == dif_value %}selected{% endif %}>
+                                            {{ dif_label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <button type="submit" class="multimedia-search-btn">
+                                    <i class="bi bi-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Grid de videos -->
+                    {% if videos %}
+                        <div class="multimedia-video-grid">
+                            {% for video in videos %}
+                            <div class="multimedia-video-card">
+                                <div class="multimedia-video-thumbnail" onclick="window.location.href='{% url 'capacitacion:reproducir-video' video.id %}'">
+                                    {% if video.youtube_thumbnail_url %}
+                                        <img src="{{ video.youtube_thumbnail_url }}" alt="{{ video.titulo }}" loading="lazy">
+                                    {% else %}
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <i class="bi bi-play-circle text-white" style="font-size: 3rem;"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="multimedia-play-overlay">
+                                        <i class="bi bi-play-fill"></i>
+                                    </div>
+                                    
+                                    <div class="multimedia-video-duration">
+                                        {{ video.duracion_formateada }}
+                                    </div>
+                                    
+                                    <div class="multimedia-video-type multimedia-type-{{ video.tipo }}">
+                                        {{ video.get_tipo_display }}
+                                    </div>
+                                </div>
+
+                                <div class="multimedia-video-content">
+                                    <h3 class="multimedia-video-title">{{ video.titulo }}</h3>
+                                    
+                                    <div class="multimedia-video-instructor">
+                                        <i class="bi bi-person-circle"></i>
+                                        <strong>{{ video.instructor }}</strong>
+                                    </div>
+
+                                    <div class="multimedia-video-meta">
+                                        <div class="multimedia-video-views">
+                                            <i class="bi bi-eye"></i>
+                                            <span>{{ video.vistas }} visualizaciones</span>
+                                        </div>
+                                        <div class="multimedia-video-difficulty">
+                                            {{ video.get_dificultad_display }}
+                                        </div>
+                                    </div>
+
+                                    <div class="multimedia-video-actions">
+                                        <a href="{% url 'capacitacion:reproducir-video' video.id %}" class="multimedia-btn-play">
+                                            <i class="bi bi-play-circle"></i>
+                                            Reproducir
+                                        </a>
+                                        <a href="{% url 'capacitacion:detalle-curso' video.id %}" class="multimedia-btn-info">
+                                            <i class="bi bi-info-circle"></i>
+                                            Detalles
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Paginación -->
+                        {% if page_obj.has_other_pages %}
+                        <div class="multimedia-pagination">
+                            <nav aria-label="Paginación de videos">
+                                <ul class="pagination">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                                <i class="bi bi-chevron-double-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                                <i class="bi bi-chevron-double-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="multimedia-no-videos">
+                            <i class="bi bi-camera-video"></i>
+                            <h4>No hay videos disponibles</h4>
+                            <p>No se encontraron videos que coincidan con los filtros seleccionados.</p>
+                            <a href="{% url 'capacitacion:videos-multimedia' %}" class="btn btn-primary">
+                                <i class="bi bi-arrow-clockwise"></i> Limpiar Filtros
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <!-- Videos populares -->
+                {% if videos_populares %}
+                <div class="multimedia-sidebar">
+                    <h4 class="multimedia-sidebar-title">
+                        <i class="bi bi-fire"></i>
+                        Videos Populares
+                    </h4>
+                    {% for video in videos_populares %}
+                    <a href="{% url 'capacitacion:reproducir-video' video.id %}" class="multimedia-recent-item">
+                        <div class="multimedia-recent-thumb">
+                            {% if video.youtube_thumbnail_url %}
+                                <img src="{{ video.youtube_thumbnail_url }}" alt="{{ video.titulo }}">
+                            {% endif %}
+                        </div>
+                        <div class="multimedia-recent-info">
+                            <h6>{{ video.titulo|truncatechars:40 }}</h6>
+                            <small>{{ video.vistas }} vistas • {{ video.instructor }}</small>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Videos recientes -->
+                {% if videos_recientes %}
+                <div class="multimedia-sidebar">
+                    <h4 class="multimedia-sidebar-title">
+                        <i class="bi bi-clock-history"></i>
+                        Vistos Recientemente
+                    </h4>
+                    {% for historial in videos_recientes %}
+                    <a href="{% url 'capacitacion:reproducir-video' historial.curso.id %}" class="multimedia-recent-item">
+                        <div class="multimedia-recent-thumb">
+                            {% if historial.curso.youtube_thumbnail_url %}
+                                <img src="{{ historial.curso.youtube_thumbnail_url }}" alt="{{ historial.curso.titulo }}">
+                            {% endif %}
+                        </div>
+                        <div class="multimedia-recent-info">
+                            <h6>{{ historial.curso.titulo|truncatechars:40 }}</h6>
+                            <small>{{ historial.fecha_visualizacion|timesince }} atrás</small>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Categorías -->
+                <div class="multimedia-sidebar">
+                    <h4 class="multimedia-sidebar-title">
+                        <i class="bi bi-tags"></i>
+                        Categorías
+                    </h4>
+                    {% for categoria in categorias_stats %}
+                    <a href="?categoria={{ categoria.id }}" class="multimedia-category-item">
+                        <div class="d-flex align-items-center">
+                            <i class="{{ categoria.icono }} me-2" style="color: {{ categoria.color_hex }};"></i>
+                            <span>{{ categoria.nombre }}</span>
+                        </div>
+                        <span class="multimedia-category-count">{{ categoria.total_videos }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎥 Videos y Multimedia cargado');
+    
+    // Auto-submit en cambio de filtros
+    const selectFilters = document.querySelectorAll('.multimedia-form-select');
+    selectFilters.forEach(select => {
+        select.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    });
+    
+    // Efecto hover mejorado para las tarjetas de video
+    document.querySelectorAll('.multimedia-video-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-12px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Animación de entrada para las tarjetas
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.multimedia-video-card').forEach((card) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+
+    // Efecto de ripple en botones
+    document.querySelectorAll('.multimedia-btn-play, .multimedia-search-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            let ripple = document.createElement('span');
+            this.appendChild(ripple);
+            
+            let rect = this.getBoundingClientRect();
+            let size = Math.max(rect.width, rect.height);
+            let x = e.clientX - rect.left - size / 2;
+            let y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.6);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                left: ${x}px;
+                top: ${y}px;
+                width: ${size}px;
+                height: ${size}px;
+                pointer-events: none;
+            `;
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+});
+
+// Agregar animación de ripple al CSS
+const style = document.createElement('style');
+style.textContent = `
+@keyframes ripple {
+    to {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

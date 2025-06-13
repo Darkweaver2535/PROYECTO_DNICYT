@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Cursos - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .mis-cursos-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    /* Usar estilos del dashboard */
+    .dashboard-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .dashboard-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-4px);
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-left: 4px solid var(--primary-blue);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        line-height: 1;
+    }
+
+    .metric-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.5rem;
+    }
+
+    .inscripcion-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .inscripcion-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--primary-blue);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border-radius: 2px;
+    }
+
+    .no-cursos {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--pure-white);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    .no-cursos i {
+        font-size: 4rem;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        opacity: 0.6;
+    }
+
+    .progreso-bar {
+        background: var(--off-white);
+        border-radius: 1rem;
+        height: 0.5rem;
+        overflow: hidden;
+        margin: 0.5rem 0;
+    }
+
+    .progreso-fill {
+        height: 100%;
+        background: linear-gradient(135deg, var(--success-green), #047857);
+        border-radius: 1rem;
+        transition: width 0.8s ease;
+    }
+
+    .estado-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .estado-inscrito {
+        background: linear-gradient(135deg, var(--primary-blue), #1d4ed8);
+        color: white;
+    }
+
+    .estado-en-progreso {
+        background: linear-gradient(135deg, var(--warning-orange), #d97706);
+        color: white;
+    }
+
+    .estado-completado {
+        background: linear-gradient(135deg, var(--success-green), #047857);
+        color: white;
+    }
+
+    .estado-cancelado {
+        background: linear-gradient(135deg, var(--danger-red), #dc2626);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mis-cursos-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="dashboard-card p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-2 fw-bold text-primary">
+                                📚 Mis Cursos y Talleres
+                            </h1>
+                            <p class="text-muted mb-0">Gestiona tu progreso de aprendizaje</p>
+                        </div>
+                        <a href="{% url 'capacitacion:biblioteca-cursos' %}" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Explorar Más Cursos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="dashboard-card metric-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="metric-value">{{ stats_usuario.total_inscritos }}</div>
+                            <div class="metric-label">Total Inscritos</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-bookmark text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="dashboard-card metric-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="metric-value">{{ stats_usuario.completados }}</div>
+                            <div class="metric-label">Completados</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-check-circle text-success" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="dashboard-card metric-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="metric-value">{{ stats_usuario.en_progreso }}</div>
+                            <div class="metric-label">En Progreso</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-clock text-warning" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="dashboard-card metric-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="metric-value">{{ stats_usuario.horas_totales }}</div>
+                            <div class="metric-label">Horas Completadas</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-hourglass text-info" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de cursos -->
+        <div class="row">
+            <div class="col-12">
+                <h2 class="section-title">
+                    <i class="bi bi-list-check"></i>
+                    Mis Inscripciones
+                </h2>
+                
+                {% if inscripciones %}
+                    {% for inscripcion in inscripciones %}
+                    <div class="inscripcion-card">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <div style="height: 200px; background: linear-gradient(135deg, var(--light-blue), var(--light-yellow)); position: relative;">
+                                    {% if inscripcion.curso.youtube_thumbnail_url %}
+                                        <img src="{{ inscripcion.curso.youtube_thumbnail_url }}" 
+                                             alt="{{ inscripcion.curso.titulo }}" 
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% else %}
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <i class="bi bi-play-circle text-primary" style="font-size: 4rem;"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="position-absolute top-0 start-0 m-3">
+                                        <span class="estado-badge estado-{{ inscripcion.estado|slugify }}">
+                                            {{ inscripcion.get_estado_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h5 class="card-title mb-2">{{ inscripcion.curso.titulo }}</h5>
+                                            <div class="text-muted mb-2">
+                                                <i class="bi bi-person-circle me-1"></i>
+                                                {{ inscripcion.curso.instructor }}
+                                                <span class="mx-2">•</span>
+                                                <i class="bi bi-clock me-1"></i>
+                                                {{ inscripcion.curso.duracion_formateada }}
+                                                <span class="mx-2">•</span>
+                                                <i class="bi bi-tag me-1"></i>
+                                                {{ inscripcion.curso.categoria.nombre }}
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">
+                                                Inscrito: {{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="text-muted mb-3">{{ inscripcion.curso.descripcion|truncatechars:150 }}</p>
+                                    
+                                    <!-- Progreso -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted">Progreso</small>
+                                            <small class="text-muted">{{ inscripcion.progreso_porcentaje }}%</small>
+                                        </div>
+                                        <div class="progreso-bar">
+                                            <div class="progreso-fill" style="width: {{ inscripcion.progreso_porcentaje }}%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Acciones -->
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'capacitacion:detalle-curso' inscripcion.curso.id %}" 
+                                           class="btn btn-primary btn-sm">
+                                            <i class="bi bi-eye"></i> Ver Detalles
+                                        </a>
+                                        
+                                        {% if inscripcion.estado != 'completado' %}
+                                        <a href="{{ inscripcion.curso.enlace_youtube }}" 
+                                           target="_blank" 
+                                           class="btn btn-success btn-sm">
+                                            <i class="bi bi-play-circle"></i> Continuar
+                                        </a>
+                                        {% endif %}
+                                        
+                                        {% if inscripcion.estado == 'completado' and inscripcion.calificacion %}
+                                        <span class="btn btn-outline-warning btn-sm">
+                                            <i class="bi bi-star-fill"></i> 
+                                            Calificación: {{ inscripcion.calificacion }}/5
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-cursos">
+                        <i class="bi bi-bookmark"></i>
+                        <h4>No tienes cursos inscritos</h4>
+                        <p>Explora nuestra biblioteca de cursos y comienza tu aprendizaje.</p>
+                        <a href="{% url 'capacitacion:biblioteca-cursos' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-search"></i> Explorar Cursos
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📚 Mis cursos cargado');
+    
+    // Animación de barras de progreso
+    const progressBars = document.querySelectorAll('.progreso-fill');
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
+    });
+});
+</script>
+{% endblock %}

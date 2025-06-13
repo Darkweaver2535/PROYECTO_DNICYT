@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ video.titulo }} - Videos y Multimedia{% endblock %}
+
+{% block extra_css %}
+<style>
+    .video-player-page {
+        background: #000;
+        min-height: calc(100vh - var(--navbar-height));
+        color: white;
+    }
+
+    .video-container {
+        position: relative;
+        width: 100%;
+        height: 60vh;
+        background: #000;
+    }
+
+    .video-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .video-info {
+        background: var(--pure-white);
+        padding: 2rem;
+        margin-top: 0;
+    }
+
+    .video-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+    }
+
+    .video-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .video-instructor {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .video-stats {
+        display: flex;
+        gap: 2rem;
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+
+    .video-description {
+        background: var(--off-white);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        color: var(--text-dark);
+    }
+
+    .related-videos {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .related-video-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        transition: all var(--transition-speed) ease;
+        text-decoration: none;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+    }
+
+    .related-video-item:hover {
+        background: var(--off-white);
+        text-decoration: none;
+        color: var(--text-dark);
+        transform: translateX(4px);
+    }
+
+    .related-thumb {
+        width: 120px;
+        height: 80px;
+        border-radius: 0.5rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        flex-shrink: 0;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .related-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .related-thumb .play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .related-info h6 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .related-info small {
+        color: var(--text-light);
+        font-size: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+        .video-container {
+            height: 40vh;
+        }
+        
+        .video-meta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .video-stats {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .related-thumb {
+            width: 80px;
+            height: 60px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="video-player-page">
+    <!-- Reproductor de video -->
+    <div class="video-container">
+        {% if video.youtube_embed_url %}
+            <iframe 
+                class="video-iframe"
+                src="{{ video.youtube_embed_url }}?autoplay=1&rel=0&modestbranding=1"
+                allowfullscreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+            </iframe>
+        {% else %}
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center">
+                    <i class="bi bi-exclamation-triangle text-warning mb-3" style="font-size: 3rem;"></i>
+                    <h4>Video no disponible</h4>
+                    <p>No se pudo cargar el video. Verifica la URL de YouTube.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Información del video -->
+    <div class="video-info">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="video-title">{{ video.titulo }}</h1>
+                    
+                    <div class="video-meta">
+                        <div class="video-instructor">
+                            <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong>{{ video.instructor }}</strong>
+                                <br>
+                                <small>{{ video.get_tipo_display }} • {{ video.categoria.nombre }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="video-stats">
+                            <span><i class="bi bi-eye"></i> {{ video.vistas }} visualizaciones</span>
+                            <span><i class="bi bi-clock"></i> {{ video.duracion_formateada }}</span>
+                            <span><i class="bi bi-signal"></i> {{ video.get_dificultad_display }}</span>
+                        </div>
+                    </div>
+
+                    {% if video.descripcion %}
+                    <div class="video-description">
+                        <h5><i class="bi bi-info-circle"></i> Descripción</h5>
+                        <p>{{ video.descripcion|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Objetivos y contenido -->
+                    {% if video.objetivos_lista %}
+                    <div class="video-description">
+                        <h5><i class="bi bi-bullseye"></i> Objetivos de Aprendizaje</h5>
+                        <ul>
+                            {% for objetivo in video.objetivos_lista %}
+                                <li>{{ objetivo }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if video.temas_lista %}
+                    <div class="video-description">
+                        <h5><i class="bi bi-list-ul"></i> Contenido del Video</h5>
+                        <ul>
+                            {% for tema in video.temas_lista %}
+                                <li>{{ tema }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-lg-4">
+                    {% if videos_relacionados %}
+                    <div class="related-videos">
+                        <h5 class="mb-4">
+                            <i class="bi bi-collection-play"></i>
+                            Videos Relacionados
+                        </h5>
+                        
+                        {% for video_rel in videos_relacionados %}
+                        <a href="{% url 'capacitacion:reproducir-video' video_rel.id %}" class="related-video-item">
+                            <div class="related-thumb">
+                                {% if video_rel.youtube_thumbnail_url %}
+                                    <img src="{{ video_rel.youtube_thumbnail_url }}" alt="{{ video_rel.titulo }}">
+                                {% endif %}
+                                <div class="play-icon">
+                                    <i class="bi bi-play-circle-fill"></i>
+                                </div>
+                            </div>
+                            <div class="related-info">
+                                <h6>{{ video_rel.titulo|truncatechars:60 }}</h6>
+                                <small>
+                                    {{ video_rel.instructor }} • {{ video_rel.duracion_formateada }}
+                                    <br>
+                                    {{ video_rel.vistas }} visualizaciones
+                                </small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                        
+                        <div class="text-center mt-3">
+                            <a href="{% url 'capacitacion:videos-multimedia' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-grid-3x3-gap"></i> Ver Todos los Videos
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎥 Reproductor de video cargado: {{ video.titulo }}');
+    
+    // Registro de tiempo de visualización
+    let tiempoInicio = Date.now();
+    
+    window.addEventListener('beforeunload', function() {
+        let tiempoTotal = Math.floor((Date.now() - tiempoInicio) / 1000);
+        
+        // Enviar tiempo de visualización via fetch (opcional)
+        if (tiempoTotal > 10) { // Solo si vio más de 10 segundos
+            fetch(`/capacitacion/api/curso/{{ video.id }}/tiempo-visualizado/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                    tiempo_segundos: tiempoTotal
+                })
+            }).catch(err => console.log('Error registrando tiempo:', err));
+        }
+    });
+
+    // Efecto suave al cargar videos relacionados
+    document.querySelectorAll('.related-video-item').forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(20px)';
+        
+        setTimeout(() => {
+            item.style.transition = 'all 0.5s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

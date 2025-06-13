@@ -1518,19 +1518,21 @@
                     Capacitación
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <!-- ✅ HABILITAR ENLACE A CURSOS Y TALLERES -->
+                        <a href="{% url 'capacitacion:cursos-talleres' %}" class="nav-link {% if request.resolver_match.url_name == 'cursos-talleres' %}active{% endif %}">
                         <i class="nav-icon bi bi-journal-bookmark"></i>
                         <span class="nav-text">Cursos y Talleres</span>
+                        <span class="nav-badge beta">Interno</span>
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                        <a href="{% url 'capacitacion:videos-multimedia' %}" class="nav-link">
                         <i class="nav-icon bi bi-camera-video"></i>
                         <span class="nav-text">Videos y Multimedia</span>
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                        <a href="{% url 'capacitacion:documentos-tecnicos' %}" class="nav-link">
                         <i class="nav-icon bi bi-file-earmark-text"></i>
                         <span class="nav-text">Documentos Técnicos</span>
                     </a>

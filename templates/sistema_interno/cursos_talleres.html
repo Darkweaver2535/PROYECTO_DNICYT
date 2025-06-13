@@ -1,0 +1,971 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Biblioteca de Cursos y Talleres - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ✅ USAR EXACTAMENTE LOS MISMOS ESTILOS QUE EL DASHBOARD */
+    .cursos-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    /* Usar las mismas clases del dashboard */
+    .dashboard-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .dashboard-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-4px);
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-left: 4px solid var(--primary-blue);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--light-blue), transparent);
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+        opacity: 0.3;
+    }
+
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        line-height: 1;
+    }
+
+    .metric-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.5rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border-radius: 2px;
+    }
+
+    .quick-action-btn {
+        background: linear-gradient(135deg, var(--pure-white), var(--off-white));
+        border: 2px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        transition: all var(--transition-speed) ease;
+        height: 100%;
+    }
+
+    .quick-action-btn:hover {
+        background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        text-decoration: none;
+    }
+
+    .quick-action-icon {
+        font-size: 2.5rem;
+        color: var(--primary-blue);
+    }
+
+    .quick-action-text {
+        font-weight: 600;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    /* Filtros con estilo dashboard */
+    .filtros-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .filtros-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr auto;
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        transition: all var(--transition-speed) ease;
+        background: var(--pure-white);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    /* Grid de cursos con estilo dashboard */
+    .curso-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .curso-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+        position: relative;
+        box-shadow: var(--shadow-md);
+    }
+
+    .curso-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--primary-blue);
+    }
+
+    .curso-thumbnail {
+        position: relative;
+        height: 200px;
+        background: linear-gradient(135deg, var(--light-blue), var(--light-yellow));
+        overflow: hidden;
+    }
+
+    .curso-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform var(--transition-speed) ease;
+    }
+
+    .curso-card:hover .curso-thumbnail img {
+        transform: scale(1.05);
+    }
+
+    .curso-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+        backdrop-filter: blur(10px);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .badge-curso { 
+        background: linear-gradient(135deg, var(--success-green), #047857);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .badge-taller { 
+        background: linear-gradient(135deg, var(--primary-blue), #1d4ed8);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .badge-conferencia { 
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+    .badge-seminario { 
+        background: linear-gradient(135deg, var(--warning-orange), #d97706);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .curso-destacado {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: linear-gradient(135deg, var(--danger-red), #dc2626);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .curso-content {
+        padding: 2rem;
+    }
+
+    .curso-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .curso-instructor {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .curso-meta {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+        color: var(--text-light);
+        flex-wrap: wrap;
+    }
+
+    .curso-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-weight: 500;
+    }
+
+    .curso-descripcion {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .curso-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    /* Botones con estilo dashboard */
+    .btn-curso {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition-speed) ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .btn-curso.btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-curso.btn-primary:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-curso.btn-success {
+        background: linear-gradient(135deg, var(--success-green), #047857);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-curso.btn-success:hover {
+        background: linear-gradient(135deg, #047857, #065f46);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-curso.btn-outline {
+        background: transparent;
+        border: 2px solid var(--border-color);
+        color: var(--text-light);
+    }
+
+    .btn-curso.btn-outline:hover {
+        background: var(--light-blue);
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        text-decoration: none;
+    }
+
+    .inscrito-badge {
+        background: linear-gradient(135deg, var(--success-green), #047857);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Sidebar con estilo dashboard */
+    .sidebar-section {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-section:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar-title {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border-color);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .categoria-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        color: var(--text-light);
+        text-decoration: none;
+        border-radius: 0.75rem;
+        transition: all var(--transition-speed) ease;
+        margin-bottom: 0.5rem;
+        border: 1px solid transparent;
+    }
+
+    .categoria-item:hover {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        border-color: var(--primary-blue);
+        transform: translateX(4px);
+        text-decoration: none;
+    }
+
+    .categoria-count {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        padding: 0.375rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        min-width: 2rem;
+        text-align: center;
+    }
+
+    /* Paginación con estilo dashboard */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 3rem;
+    }
+
+    .pagination .page-link {
+        border: 2px solid var(--border-color);
+        color: var(--text-light);
+        padding: 0.75rem 1rem;
+        margin: 0 0.25rem;
+        border-radius: 0.75rem;
+        transition: all var(--transition-speed) ease;
+        font-weight: 500;
+    }
+
+    .pagination .page-link:hover {
+        background: var(--light-blue);
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border-color: var(--primary-blue);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Estado sin resultados */
+    .no-resultados {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--pure-white);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    .no-resultados i {
+        font-size: 4rem;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        opacity: 0.6;
+    }
+
+    .no-resultados h4 {
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .no-resultados p {
+        color: var(--text-light);
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+
+    /* Header principal */
+    .cursos-header {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cursos-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--success-green), var(--primary-blue));
+    }
+
+    /* Responsividad exacta del dashboard */
+    @media (max-width: 768px) {
+        .filtros-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .curso-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+        }
+        
+        .quick-action-btn {
+            padding: 1rem;
+        }
+        
+        .quick-action-icon {
+            font-size: 2rem;
+        }
+
+        .curso-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-curso {
+            justify-content: center;
+        }
+    }
+
+    /* Animaciones del dashboard */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .curso-card {
+        animation: slideIn 0.6s ease-out forwards;
+    }
+
+    .curso-card:nth-child(1) { animation-delay: 0.1s; }
+    .curso-card:nth-child(2) { animation-delay: 0.2s; }
+    .curso-card:nth-child(3) { animation-delay: 0.3s; }
+    .curso-card:nth-child(4) { animation-delay: 0.4s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cursos-page">
+    <div class="container-fluid">
+        <!-- Header principal con bienvenida (mismo estilo del dashboard) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="cursos-header">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div>
+                            <h1 class="h1 mb-2 fw-bold text-primary">
+                                Biblioteca de Cursos y Talleres
+                            </h1>
+                            <p class="text-muted mb-0">Explora y accede a contenido de capacitación especializado</p>
+                            <small class="text-muted">Sistema de Gestión Integral - Lab Metal Mecánica EMI</small>
+                        </div>
+                        {% if es_admin %}
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'capacitacion:crear-curso' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Nuevo Curso
+                            </a>
+                            <a href="{% url 'capacitacion:gestionar-categorias' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-tags"></i> Categorías
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Métricas principales (mismo estilo del dashboard) -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="dashboard-card metric-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="metric-value">{{ stats.total_cursos }}</div>
+                            <div class="metric-label">Total de Cursos</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-collection-play text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="dashboard-card metric-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="metric-value">{{ stats.categorias_count }}</div>
+                            <div class="metric-label">Categorías</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-tags text-success" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="dashboard-card metric-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="metric-value">{{ stats.cursos_destacados }}</div>
+                            <div class="metric-label">Destacados</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-star text-warning" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="dashboard-card metric-card p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="metric-value">{{ stats.total_horas }}</div>
+                            <div class="metric-label">Horas de Contenido</div>
+                        </div>
+                        <div class="ms-3">
+                            <i class="bi bi-clock text-info" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones rápidas (mismo estilo del dashboard) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="section-title">
+                    <i class="bi bi-lightning-charge"></i>
+                    Acciones Rápidas
+                </h2>
+            </div>
+            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+                <a href="{% url 'capacitacion:mis-cursos' %}" class="quick-action-btn">
+                    <i class="bi bi-bookmark quick-action-icon"></i>
+                    <span class="quick-action-text">Mis Cursos</span>
+                </a>
+            </div>
+            {% if es_admin %}
+            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+                <a href="{% url 'capacitacion:crear-curso' %}" class="quick-action-btn">
+                    <i class="bi bi-plus-circle quick-action-icon"></i>
+                    <span class="quick-action-text">Crear Curso</span>
+                </a>
+            </div>
+            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+                <a href="{% url 'capacitacion:gestionar-categorias' %}" class="quick-action-btn">
+                    <i class="bi bi-tags quick-action-icon"></i>
+                    <span class="quick-action-text">Gestionar Categorías</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            <!-- Contenido principal -->
+            <div class="col-lg-9">
+                <!-- Filtros -->
+                <div class="filtros-section">
+                    <h3 class="section-title mb-3">
+                        <i class="bi bi-funnel"></i>
+                        Filtros de Búsqueda
+                    </h3>
+                    <form method="get" class="filtros-form">
+                        <div class="filtros-grid">
+                            {{ form_filtros.busqueda }}
+                            {{ form_filtros.categoria }}
+                            {{ form_filtros.tipo }}
+                            {{ form_filtros.dificultad }}
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-search"></i> Filtrar
+                            </button>
+                        </div>
+                        <div class="mt-3">
+                            <div class="form-check form-check-inline">
+                                {{ form_filtros.solo_destacados }}
+                                <label class="form-check-label" for="{{ form_filtros.solo_destacados.id_for_label }}">
+                                    <strong>Solo mostrar contenido destacado</strong>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Grid de cursos -->
+                {% if page_obj %}
+                <div class="dashboard-card p-3 mb-4">
+                    <h3 class="section-title">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        Cursos Disponibles ({{ page_obj.paginator.count }} total)
+                    </h3>
+                    <div class="curso-grid">
+                        {% for curso in page_obj %}
+                        <div class="curso-card">
+                            <div class="curso-thumbnail">
+                                {% if curso.youtube_thumbnail_url %}
+                                    <img src="{{ curso.youtube_thumbnail_url }}" alt="{{ curso.titulo }}" loading="lazy">
+                                {% else %}
+                                    <div class="d-flex align-items-center justify-content-center h-100">
+                                        <i class="bi bi-play-circle text-muted" style="font-size: 4rem;"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="curso-badge badge-{{ curso.tipo }}">
+                                    {{ curso.get_tipo_display }}
+                                </div>
+                                
+                                {% if curso.destacado %}
+                                <div class="curso-destacado">
+                                    <i class="bi bi-star-fill"></i> Destacado
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="curso-content">
+                                <h3 class="curso-title">{{ curso.titulo }}</h3>
+                                <div class="curso-instructor">
+                                    <i class="bi bi-person-circle"></i>
+                                    <strong>{{ curso.instructor }}</strong>
+                                </div>
+
+                                <div class="curso-meta">
+                                    <span><i class="bi bi-clock-fill"></i> {{ curso.duracion_formateada }}</span>
+                                    <span><i class="bi bi-signal"></i> {{ curso.get_dificultad_display }}</span>
+                                    <span><i class="bi bi-eye-fill"></i> {{ curso.vistas }}</span>
+                                </div>
+
+                                <p class="curso-descripcion">{{ curso.descripcion }}</p>
+
+                                <div class="curso-actions">
+                                    {% if curso.id in mis_inscripciones %}
+                                        <span class="inscrito-badge">
+                                            <i class="bi bi-check-circle-fill"></i> Ya Inscrito
+                                        </span>
+                                    {% else %}
+                                        <form method="post" action="{% url 'capacitacion:inscribirse-curso' curso.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-curso btn-success">
+                                                <i class="bi bi-plus-circle-fill"></i> Inscribirse
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    
+                                    <a href="{% url 'capacitacion:detalle-curso' curso.id %}" class="btn-curso btn-primary">
+                                        <i class="bi bi-eye-fill"></i> Ver Detalles
+                                    </a>
+                                    
+                                    {% if es_admin %}
+                                    <a href="{% url 'capacitacion:editar-curso' curso.id %}" class="btn-curso btn-outline">
+                                        <i class="bi bi-pencil-fill"></i> Editar
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Paginación -->
+                {% if page_obj.has_other_pages %}
+                <div class="pagination-container">
+                    <nav aria-label="Paginación de cursos">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                        <i class="bi bi-chevron-double-left"></i> Primera
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                        <i class="bi bi-chevron-left"></i> Anterior
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                        Siguiente <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                        Última <i class="bi bi-chevron-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="no-resultados">
+                    <i class="bi bi-search"></i>
+                    <h4>No se encontraron cursos</h4>
+                    <p>Intenta ajustar los filtros de búsqueda o explora otras categorías.</p>
+                    <a href="{% url 'capacitacion:biblioteca-cursos' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-arrow-clockwise"></i> Limpiar Filtros
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <!-- Mis cursos -->
+                <div class="sidebar-section">
+                    <h4 class="sidebar-title">
+                        <i class="bi bi-bookmark-fill"></i>
+                        Mis Cursos
+                    </h4>
+                    <a href="{% url 'capacitacion:mis-cursos' %}" class="btn btn-primary w-100 mb-3">
+                        <i class="bi bi-list-ul"></i> Ver Todos Mis Cursos
+                    </a>
+                    <div class="text-center">
+                        <small class="text-muted">Gestiona tus inscripciones y progreso</small>
+                    </div>
+                </div>
+
+                <!-- Cursos destacados -->
+                {% if cursos_destacados %}
+                <div class="sidebar-section">
+                    <h4 class="sidebar-title">
+                        <i class="bi bi-star-fill"></i>
+                        Destacados
+                    </h4>
+                    {% for curso in cursos_destacados %}
+                    <div class="mb-3">
+                        <a href="{% url 'capacitacion:detalle-curso' curso.id %}" class="categoria-item">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-3">
+                                    <div style="width: 50px; height: 35px; background: linear-gradient(135deg, var(--light-blue), var(--light-yellow)); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-play-circle text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 small fw-bold">{{ curso.titulo|truncatechars:40 }}</h6>
+                                    <small class="text-muted">{{ curso.instructor }}</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Categorías -->
+                <div class="sidebar-section">
+                    <h4 class="sidebar-title">
+                        <i class="bi bi-tags-fill"></i>
+                        Categorías
+                    </h4>
+                    <div class="categoria-list">
+                        {% for categoria in categorias_stats %}
+                        <a href="?categoria={{ categoria.id }}" class="categoria-item">
+                            <div class="d-flex align-items-center">
+                                <i class="{{ categoria.icono }} me-2" style="color: {{ categoria.color_hex }}; font-size: 1.2rem;"></i>
+                                <span class="fw-medium">{{ categoria.nombre }}</span>
+                            </div>
+                            <span class="categoria-count">{{ categoria.total_cursos }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📚 Biblioteca de cursos cargada con estilo dashboard');
+    
+    // Auto-submit en cambio de filtros
+    const selectFilters = document.querySelectorAll('.filtros-form select');
+    selectFilters.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+    
+    // Confirmación para inscripción (mismo estilo del dashboard)
+    const formsInscripcion = document.querySelectorAll('form[action*="inscribirse"]');
+    formsInscripcion.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const titulo = this.closest('.curso-card').querySelector('.curso-title').textContent;
+            if (!confirm(`¿Estás seguro de que quieres inscribirte al curso "${titulo.trim()}"?`)) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Animación de entrada para las tarjetas
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.curso-card').forEach((card) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+
+    // Efecto hover mejorado para las tarjetas
+    document.querySelectorAll('.curso-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}

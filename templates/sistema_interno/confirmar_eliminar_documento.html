@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Documento - {{ documento.titulo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .eliminar-documento-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .eliminar-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .eliminar-header {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .eliminar-header i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .eliminar-body {
+        padding: 2rem;
+    }
+
+    .documento-info {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #ef4444;
+    }
+
+    .eliminar-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-eliminar {
+        padding: 0.75rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition-speed) ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .btn-eliminar.btn-danger {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+    }
+
+    .btn-eliminar.btn-danger:hover {
+        background: linear-gradient(135deg, #b91c1c, #dc2626);
+        transform: translateY(-2px);
+    }
+
+    .btn-eliminar.btn-secondary {
+        background: transparent;
+        border: 2px solid var(--border-color);
+        color: var(--text-light);
+    }
+
+    .btn-eliminar.btn-secondary:hover {
+        background: var(--light-blue);
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="eliminar-documento-page">
+    <div class="container">
+        <div class="eliminar-container">
+            <!-- Header -->
+            <div class="eliminar-header">
+                <i class="bi bi-exclamation-triangle"></i>
+                <h1>Confirmar Eliminación</h1>
+                <p>Esta acción no se puede deshacer</p>
+            </div>
+
+            <!-- Body -->
+            <div class="eliminar-body">
+                <div class="documento-info">
+                    <h4>{{ documento.titulo }}</h4>
+                    <p><strong>Tipo:</strong> {{ documento.get_tipo_display }}</p>
+                    <p><strong>Autor:</strong> {{ documento.autor_documento }}</p>
+                    <p><strong>Versión:</strong> {{ documento.version }}</p>
+                    <p><strong>Categoría:</strong> {{ documento.categoria.nombre }}</p>
+                    <p><strong>Estado:</strong> {{ documento.get_estado_display }}</p>
+                </div>
+
+                <div class="alert alert-danger">
+                    <strong>¿Está seguro de que desea eliminar este documento?</strong><br>
+                    Esta acción eliminará permanentemente el documento y todos sus datos asociados.
+                </div>
+
+                <form method="post" class="eliminar-actions">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-eliminar btn-danger">
+                        <i class="bi bi-trash"></i>
+                        Sí, Eliminar Documento
+                    </button>
+                    
+                    <a href="{% url 'capacitacion:ver-documento' documento.id %}" class="btn-eliminar btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                        Cancelar
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestionar Categorías - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .categorias-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .dashboard-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-speed) ease;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border-radius: 2px;
+    }
+
+    .categoria-item {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        background: var(--pure-white);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        margin-bottom: 1rem;
+        transition: all var(--transition-speed) ease;
+    }
+
+    .categoria-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-blue);
+    }
+
+    .categoria-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-right: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .form-categoria {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        transition: all var(--transition-speed) ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .badge-cursos {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .toggle-activo {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .toggle-activo input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--success-green);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="categorias-page">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="dashboard-card p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-2 fw-bold text-primary">
+                                🏷️ Gestionar Categorías
+                            </h1>
+                            <p class="text-muted mb-0">Organiza y administra las categorías de capacitación</p>
+                        </div>
+                        <a href="{% url 'capacitacion:biblioteca-cursos' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left"></i> Volver a Biblioteca
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Formulario para crear categoría -->
+            <div class="col-lg-4 mb-4">
+                <div class="dashboard-card p-4">
+                    <h3 class="section-title mb-3">
+                        <i class="bi bi-plus-circle"></i>
+                        Nueva Categoría
+                    </h3>
+                    
+                    <form method="post" class="form-categoria">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                {{ form.nombre.label }}
+                            </label>
+                            {{ form.nombre }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                {{ form.descripcion.label }}
+                            </label>
+                            {{ form.descripcion }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.color_hex.id_for_label }}" class="form-label">
+                                        {{ form.color_hex.label }}
+                                    </label>
+                                    {{ form.color_hex }}
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.icono.id_for_label }}" class="form-label">
+                                        {{ form.icono.label }}
+                                    </label>
+                                    {{ form.icono }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.orden.id_for_label }}" class="form-label">
+                                        {{ form.orden.label }}
+                                    </label>
+                                    {{ form.orden }}
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <div class="form-check mt-4">
+                                        {{ form.activo }}
+                                        <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                            {{ form.activo.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Crear Categoría
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Lista de categorías existentes -->
+            <div class="col-lg-8">
+                <div class="dashboard-card p-4">
+                    <h3 class="section-title mb-3">
+                        <i class="bi bi-tags"></i>
+                        Categorías Existentes ({{ categorias.count }})
+                    </h3>
+                    
+                    {% if categorias %}
+                        {% for categoria in categorias %}
+                        <div class="categoria-item">
+                            <div class="categoria-icon" style="background-color: {{ categoria.color_hex }};">
+                                <i class="{{ categoria.icono }}"></i>
+                            </div>
+                            
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="mb-1">{{ categoria.nombre }}</h5>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge-cursos">
+                                            {{ categoria.total_cursos }} curso{{ categoria.total_cursos|pluralize }}
+                                        </span>
+                                        <label class="toggle-activo">
+                                            <input type="checkbox" {% if categoria.activo %}checked{% endif %} 
+                                                   onchange="toggleCategoria({{ categoria.id }}, this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                {% if categoria.descripcion %}
+                                <p class="text-muted mb-2">{{ categoria.descripcion }}</p>
+                                {% endif %}
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted small">
+                                        <strong>Orden:</strong> {{ categoria.orden }} • 
+                                        <strong>Estado:</strong> 
+                                        {% if categoria.activo %}
+                                            <span class="text-success">Activa</span>
+                                        {% else %}
+                                            <span class="text-danger">Inactiva</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" 
+                                                onclick="editarCategoria({{ categoria.id }})">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </button>
+                                        {% if categoria.total_cursos == 0 %}
+                                        <button class="btn btn-outline-danger" 
+                                                onclick="eliminarCategoria({{ categoria.id }}, '{{ categoria.nombre }}')">
+                                            <i class="bi bi-trash"></i> Eliminar
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-tags text-muted" style="font-size: 4rem; opacity: 0.5;"></i>
+                            <h5 class="text-muted mt-3">No hay categorías creadas</h5>
+                            <p class="text-muted">Crea la primera categoría para organizar los cursos.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🏷️ Gestión de categorías cargada');
+});
+
+function toggleCategoria(categoriaId, activo) {
+    // Aquí puedes agregar una llamada AJAX para actualizar el estado
+    console.log(`Categoría ${categoriaId} ${activo ? 'activada' : 'desactivada'}`);
+}
+
+function editarCategoria(categoriaId) {
+    // Implementar edición inline o redirección
+    console.log(`Editar categoría ${categoriaId}`);
+}
+
+function eliminarCategoria(categoriaId, nombre) {
+    if (confirm(`¿Estás seguro de eliminar la categoría "${nombre}"?`)) {
+        // Implementar eliminación
+        console.log(`Eliminar categoría ${categoriaId}`);
+    }
+}
+</script>
+{% endblock %}

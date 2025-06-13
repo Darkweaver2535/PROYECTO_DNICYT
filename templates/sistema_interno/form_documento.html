@@ -1,0 +1,544 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Documentos Técnicos{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-documento-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .form-documento-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .form-documento-header {
+        background: linear-gradient(135deg, #065f46, #047857, #10b981);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .form-documento-header h1 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+
+    .form-documento-body {
+        padding: 3rem 2rem;
+    }
+
+    .form-documento-section {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #10b981;
+    }
+
+    .form-documento-section h3 {
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-documento-section h3 i {
+        color: #047857;
+    }
+
+    .documento-form-control,
+    .documento-form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        transition: all var(--transition-speed) ease;
+        background: var(--pure-white);
+        font-size: 0.9rem;
+        width: 100%;
+    }
+
+    .documento-form-control:focus,
+    .documento-form-select:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        outline: none;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-help {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        margin-top: 0.5rem;
+    }
+
+    .form-error {
+        color: var(--danger-red);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+
+    .documento-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .documento-form-row.single {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        background: var(--off-white);
+        padding: 2rem;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-documento {
+        padding: 0.75rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all var(--transition-speed) ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-documento.btn-primary {
+        background: linear-gradient(135deg, #047857, #10b981);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-documento.btn-primary:hover {
+        background: linear-gradient(135deg, #065f46, #047857);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-documento.btn-secondary {
+        background: transparent;
+        border: 2px solid var(--border-color);
+        color: var(--text-light);
+    }
+
+    .btn-documento.btn-secondary:hover {
+        background: var(--light-blue);
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        text-decoration: none;
+    }
+
+    .archivo-preview {
+        background: var(--light-blue);
+        border: 2px dashed #10b981;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .archivo-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .archivo-icon {
+        font-size: 2rem;
+        color: #047857;
+    }
+
+    .checkbox-group {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .documento-form-check {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+        .documento-form-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-documento {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-documento-page">
+    <div class="container">
+        <div class="form-documento-container">
+            <!-- Header -->
+            <div class="form-documento-header">
+                <h1>{{ titulo }}</h1>
+                {% if accion == 'editar' %}
+                    <p>Modificando: {{ documento.get_tipo_display }} - Versión {{ documento.version }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Formulario -->
+            <form method="post" enctype="multipart/form-data" id="documentoForm">
+                {% csrf_token %}
+                
+                <div class="form-documento-body">
+                    <!-- Información Básica -->
+                    <div class="form-documento-section">
+                        <h3>
+                            <i class="bi bi-info-circle"></i>
+                            Información Básica
+                        </h3>
+                        
+                        <div class="documento-form-row single">
+                            <div class="form-group">
+                                <label for="{{ form.titulo.id_for_label }}" class="form-label">{{ form.titulo.label }}</label>
+                                {{ form.titulo }}
+                                {% if form.titulo.errors %}
+                                    <div class="form-error">{{ form.titulo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="documento-form-row">
+                            <div class="form-group">
+                                <label for="{{ form.tipo.id_for_label }}" class="form-label">{{ form.tipo.label }}</label>
+                                {{ form.tipo }}
+                                {% if form.tipo.errors %}
+                                    <div class="form-error">{{ form.tipo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.categoria.id_for_label }}" class="form-label">{{ form.categoria.label }}</label>
+                                {{ form.categoria }}
+                                {% if form.categoria.errors %}
+                                    <div class="form-error">{{ form.categoria.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="documento-form-row single">
+                            <div class="form-group">
+                                <label for="{{ form.descripcion.id_for_label }}" class="form-label">{{ form.descripcion.label }}</label>
+                                {{ form.descripcion }}
+                                <div class="form-help">Descripción detallada del contenido y propósito del documento</div>
+                                {% if form.descripcion.errors %}
+                                    <div class="form-error">{{ form.descripcion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Archivo y Formato -->
+                    <div class="form-documento-section">
+                        <h3>
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                            Archivo y Formato
+                        </h3>
+
+                        <div class="documento-form-row">
+                            <div class="form-group">
+                                <label for="{{ form.archivo_principal.id_for_label }}" class="form-label">{{ form.archivo_principal.label }}</label>
+                                {{ form.archivo_principal }}
+                                <div class="form-help">Tamaño máximo: 50MB. Formatos permitidos: PDF, Word, Excel, PowerPoint, TXT, DWG, ZIP</div>
+                                {% if form.archivo_principal.errors %}
+                                    <div class="form-error">{{ form.archivo_principal.errors.0 }}</div>
+                                {% endif %}
+                                
+                                {% if documento.archivo_principal %}
+                                <div class="archivo-info">
+                                    <i class="bi bi-file-earmark archivo-icon"></i>
+                                    <div>
+                                        <strong>Archivo actual:</strong> {{ documento.archivo_principal.name|truncatechars:50 }}<br>
+                                        <small>Tamaño: {{ documento.tamaño_formateado }}</small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.formato.id_for_label }}" class="form-label">{{ form.formato.label }}</label>
+                                {{ form.formato }}
+                                {% if form.formato.errors %}
+                                    <div class="form-error">{{ form.formato.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información Técnica -->
+                    <div class="form-documento-section">
+                        <h3>
+                            <i class="bi bi-gear"></i>
+                            Información Técnica
+                        </h3>
+
+                        <div class="documento-form-row">
+                            <div class="form-group">
+                                <label for="{{ form.autor_documento.id_for_label }}" class="form-label">{{ form.autor_documento.label }}</label>
+                                {{ form.autor_documento }}
+                                {% if form.autor_documento.errors %}
+                                    <div class="form-error">{{ form.autor_documento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.version.id_for_label }}" class="form-label">{{ form.version.label }}</label>
+                                {{ form.version }}
+                                {% if form.version.errors %}
+                                    <div class="form-error">{{ form.version.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="documento-form-row">
+                            <div class="form-group">
+                                <label for="{{ form.dificultad.id_for_label }}" class="form-label">{{ form.dificultad.label }}</label>
+                                {{ form.dificultad }}
+                                {% if form.dificultad.errors %}
+                                    <div class="form-error">{{ form.dificultad.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.confidencialidad.id_for_label }}" class="form-label">{{ form.confidencialidad.label }}</label>
+                                {{ form.confidencialidad }}
+                                {% if form.confidencialidad.errors %}
+                                    <div class="form-error">{{ form.confidencialidad.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fechas -->
+                    <div class="form-documento-section">
+                        <h3>
+                            <i class="bi bi-calendar"></i>
+                            Control de Fechas
+                        </h3>
+
+                        <div class="documento-form-row">
+                            <div class="form-group">
+                                <label for="{{ form.fecha_creacion_documento.id_for_label }}" class="form-label">{{ form.fecha_creacion_documento.label }}</label>
+                                {{ form.fecha_creacion_documento }}
+                                {% if form.fecha_creacion_documento.errors %}
+                                    <div class="form-error">{{ form.fecha_creacion_documento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.fecha_vencimiento.id_for_label }}" class="form-label">{{ form.fecha_vencimiento.label }}</label>
+                                {{ form.fecha_vencimiento }}
+                                <div class="form-help">Fecha en que el documento debe ser revisado o actualizado</div>
+                                {% if form.fecha_vencimiento.errors %}
+                                    <div class="form-error">{{ form.fecha_vencimiento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contenido Adicional -->
+                    <div class="form-documento-section">
+                        <h3>
+                            <i class="bi bi-list-ul"></i>
+                            Contenido y Objetivos
+                        </h3>
+
+                        <div class="documento-form-row single">
+                            <div class="form-group">
+                                <label for="{{ form.objetivos.id_for_label }}" class="form-label">{{ form.objetivos.label }}</label>
+                                {{ form.objetivos }}
+                                <div class="form-help">Un objetivo por línea</div>
+                                {% if form.objetivos.errors %}
+                                    <div class="form-error">{{ form.objetivos.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="documento-form-row">
+                            <div class="form-group">
+                                <label for="{{ form.aplicacion.id_for_label }}" class="form-label">{{ form.aplicacion.label }}</label>
+                                {{ form.aplicacion }}
+                                {% if form.aplicacion.errors %}
+                                    <div class="form-error">{{ form.aplicacion.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.palabras_clave.id_for_label }}" class="form-label">{{ form.palabras_clave.label }}</label>
+                                {{ form.palabras_clave }}
+                                {% if form.palabras_clave.errors %}
+                                    <div class="form-error">{{ form.palabras_clave.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Control y Estado -->
+                    <div class="form-documento-section">
+                        <h3>
+                            <i class="bi bi-sliders"></i>
+                            Control y Estado
+                        </h3>
+
+                        <div class="documento-form-row">
+                            <div class="form-group">
+                                <label for="{{ form.estado.id_for_label }}" class="form-label">{{ form.estado.label }}</label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="form-error">{{ form.estado.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <div class="checkbox-item">
+                                        {{ form.es_obligatorio }}
+                                        <label for="{{ form.es_obligatorio.id_for_label }}">{{ form.es_obligatorio.label }}</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        {{ form.requiere_actualizacion }}
+                                        <label for="{{ form.requiere_actualizacion.id_for_label }}">{{ form.requiere_actualizacion.label }}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-documento btn-primary">
+                        <i class="bi bi-check-circle"></i>
+                        {% if accion == 'crear' %}Crear Documento{% else %}Guardar Cambios{% endif %}
+                    </button>
+                    
+                    <a href="{% if accion == 'editar' %}{% url 'capacitacion:ver-documento' documento.id %}{% else %}{% url 'capacitacion:documentos-tecnicos' %}{% endif %}" class="btn-documento btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 Formulario de documento técnico cargado');
+    
+    // Validación del formulario
+    const form = document.getElementById('documentoForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let valid = true;
+            const requiredFields = form.querySelectorAll('[required]');
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    valid = false;
+                    field.focus();
+                    return false;
+                }
+            });
+            
+            if (!valid) {
+                e.preventDefault();
+                alert('Por favor, complete todos los campos obligatorios.');
+            }
+        });
+    }
+    
+    // Preview del archivo seleccionado
+    const archivoInput = document.querySelector('input[type="file"]');
+    if (archivoInput) {
+        archivoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const size = (file.size / 1024 / 1024).toFixed(2);
+                console.log(`Archivo seleccionado: ${file.name} (${size} MB)`);
+                
+                // Validar tamaño
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('El archivo es demasiado grande. Máximo 50MB.');
+                    e.target.value = '';
+                }
+            }
+        });
+    }
+    
+    // Sincronizar formato con archivo
+    const formatoSelect = document.querySelector('select[name="formato"]');
+    if (formatoSelect && archivoInput) {
+        archivoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const extension = file.name.split('.').pop().toLowerCase();
+                const formatoOption = formatoSelect.querySelector(`option[value="${extension}"]`);
+                if (formatoOption) {
+                    formatoSelect.value = extension;
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
