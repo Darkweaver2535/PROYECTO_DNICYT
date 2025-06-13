@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Q  # ✅ AGREGAR ESTA IMPORTACIÓN
-from .models import PerfilUsuario, ConfiguracionUsuario
+from .models import PerfilUsuario, ConfiguracionUsuario, RolPersonalizado, PermisoSistema, HistorialRoles
 
 class UsuarioCreateForm(UserCreationForm):
     """Formulario para crear nuevos usuarios"""
@@ -244,4 +244,126 @@ class ConfiguracionUsuarioForm(forms.ModelForm):
             'notificar_mantenimiento': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'notificar_stock_bajo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'notificar_fallas': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+class RolPersonalizadoForm(forms.ModelForm):
+    """Formulario para crear/editar roles personalizados"""
+    
+    permisos = forms.ModelMultipleChoiceField(
+        queryset=PermisoSistema.objects.filter(activo=True),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Permisos"
+    )
+    
+    class Meta:
+        model = RolPersonalizado
+        fields = ['nombre', 'descripcion', 'color', 'icono', 'permisos', 'activo']
+        
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre del rol'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Descripción del rol y sus responsabilidades'
+            }),
+            'color': forms.TextInput(attrs={
+                'class': 'form-control',
+                'type': 'color'
+            }),
+            'icono': forms.Select(attrs={
+                'class': 'form-select'
+            }, choices=[
+                ('bi-person-badge', 'Persona con credencial'),
+                ('bi-shield-check', 'Escudo con check'),
+                ('bi-gear', 'Engranaje'),
+                ('bi-tools', 'Herramientas'),
+                ('bi-clipboard-data', 'Clipboard con datos'),
+                ('bi-graph-up', 'Gráfico ascendente'),
+                ('bi-eye', 'Ojo'),
+                ('bi-lock', 'Candado'),
+            ]),
+            'activo': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Agrupar permisos por categoría
+        self.permisos_por_categoria = {}
+        for permiso in PermisoSistema.objects.filter(activo=True).order_by('categoria', 'nombre'):
+            categoria = permiso.get_categoria_display()
+            if categoria not in self.permisos_por_categoria:
+                self.permisos_por_categoria[categoria] = []
+            self.permisos_por_categoria[categoria].append(permiso)
+
+class AsignarRolForm(forms.Form):
+    """Formulario para asignar rol a usuario"""
+    
+    usuario = forms.ModelChoiceField(
+        queryset=User.objects.filter(is_active=True),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label="Usuario"
+    )
+    
+    rol_sistema = forms.ChoiceField(
+        choices=PerfilUsuario.ROL_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label="Rol del Sistema",
+        required=False
+    )
+    
+    rol_personalizado = forms.ModelChoiceField(
+        queryset=RolPersonalizado.objects.filter(activo=True),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label="Rol Personalizado",
+        required=False,
+        empty_label="Ninguno"
+    )
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        rol_sistema = cleaned_data.get('rol_sistema')
+        rol_personalizado = cleaned_data.get('rol_personalizado')
+        
+        if not rol_sistema and not rol_personalizado:
+            raise forms.ValidationError("Debe seleccionar al menos un tipo de rol.")
+        
+        return cleaned_data
+
+class PermisoSistemaForm(forms.ModelForm):
+    """Formulario para crear/editar permisos del sistema"""
+    
+    class Meta:
+        model = PermisoSistema
+        fields = ['codigo', 'nombre', 'descripcion', 'categoria', 'es_critico', 'activo']
+        
+        widgets = {
+            'codigo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'codigo_permiso'
+            }),
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre del permiso'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Descripción del permiso'
+            }),
+            'categoria': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'es_critico': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'activo': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
         }

@@ -1,0 +1,862 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .historial-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .historial-header {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .historial-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--primary-yellow));
+    }
+
+    .historial-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .historial-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .historial-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .historial-stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .historial-stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
+    }
+
+    .historial-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .historial-stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+    }
+
+    .historial-stat-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .historial-filters {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .historial-filters-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .historial-filter-input {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .historial-filter-input:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        outline: none;
+    }
+
+    .historial-timeline {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .historial-timeline-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: var(--pure-white);
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .historial-timeline-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .historial-timeline-body {
+        padding: 2rem;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .historial-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .historial-item:last-child {
+        border-bottom: none;
+    }
+
+    .historial-item:hover {
+        background: var(--light-blue);
+        border-radius: 0.5rem;
+        margin: 0 -1rem;
+        padding: 1.5rem 1rem;
+    }
+
+    .historial-item-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--pure-white);
+        flex-shrink: 0;
+        box-shadow: var(--shadow-md);
+    }
+
+    .historial-item-icon.crear {
+        background: linear-gradient(135deg, var(--success-green), #059669);
+    }
+
+    .historial-item-icon.editar {
+        background: linear-gradient(135deg, var(--warning-orange), #ea6c04);
+    }
+
+    .historial-item-icon.eliminar {
+        background: linear-gradient(135deg, var(--danger-red), #dc2626);
+    }
+
+    .historial-item-icon.asignar {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    }
+
+    .historial-item-icon.remover {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+    }
+
+    .historial-item-icon.cambiar {
+        background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+        color: var(--text-dark);
+    }
+
+    .historial-item-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .historial-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .historial-item-action {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .historial-item-time {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        font-weight: 500;
+        background: var(--off-white);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+    }
+
+    .historial-item-description {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0.5rem 0;
+    }
+
+    .historial-item-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .historial-item-tag {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .historial-item-tag.usuario {
+        background: var(--light-yellow);
+        color: #92400e;
+    }
+
+    .historial-item-tag.rol {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    .historial-item-tag.ip {
+        background: #f0f9ff;
+        color: #0c4a6e;
+    }
+
+    .historial-vacio {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-light);
+    }
+
+    .historial-vacio-icono {
+        font-size: 4rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+
+    .historial-pagination {
+        background: var(--off-white);
+        padding: 1rem 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .historial-btn {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+    }
+
+    .historial-btn:hover {
+        background: var(--secondary-blue);
+        color: var(--pure-white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        text-decoration: none;
+    }
+
+    .historial-btn-secondary {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .historial-btn-secondary:hover {
+        background: var(--border-color);
+        color: var(--text-dark);
+    }
+
+    .historial-sidebar {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .historial-widget {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .historial-widget-header {
+        background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--secondary-yellow) 100%);
+        color: var(--text-dark);
+        padding: 1rem;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .historial-widget-body {
+        padding: 1rem;
+    }
+
+    .top-usuario-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .top-usuario-item:last-child {
+        border-bottom: none;
+    }
+
+    .top-usuario-nombre {
+        font-weight: 500;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .top-usuario-count {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .actividad-chart {
+        height: 200px;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 0.25rem;
+        padding: 1rem 0;
+    }
+
+    .actividad-bar {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border-radius: 0.25rem 0.25rem 0 0;
+        min-height: 5px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: end;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .actividad-bar:hover {
+        background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+        transform: scaleY(1.1);
+    }
+
+    .actividad-bar-label {
+        font-size: 0.7rem;
+        color: var(--text-light);
+        text-align: center;
+        margin-top: 0.5rem;
+    }
+
+    .actividad-bar-value {
+        position: absolute;
+        top: -1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .actividad-bar:hover .actividad-bar-value {
+        opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .historial-page {
+            padding: 1rem 0;
+        }
+
+        .historial-header {
+            padding: 1.5rem;
+        }
+
+        .historial-title {
+            font-size: 1.5rem;
+        }
+
+        .historial-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .historial-item {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .historial-item-icon {
+            align-self: center;
+        }
+
+        .historial-item-header {
+            justify-content: center;
+            text-align: center;
+        }
+
+        .historial-timeline-body {
+            padding: 1rem;
+            max-height: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="historial-page">
+    <div class="container">
+        
+        <!-- Header -->
+        <div class="historial-header">
+            <h1 class="historial-title">
+                <i class="bi bi-clock-history"></i>
+                Historial de Roles y Permisos
+            </h1>
+            <p class="historial-subtitle">
+                Registro completo de cambios y modificaciones en el sistema de roles
+            </p>
+            
+            <!-- Acciones principales -->
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                <a href="{% url 'usuarios:roles-permisos' %}" class="historial-btn historial-btn-secondary">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver a Roles
+                </a>
+                <button type="button" class="historial-btn" onclick="exportarHistorial()">
+                    <i class="bi bi-download"></i>
+                    Exportar Historial
+                </button>
+                <button type="button" class="historial-btn" onclick="window.print()">
+                    <i class="bi bi-printer"></i>
+                    Imprimir
+                </button>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="historial-stats">
+            <div class="historial-stat-card">
+                <div class="historial-stat-value">{{ stats.total_cambios }}</div>
+                <div class="historial-stat-label">Total Cambios</div>
+            </div>
+            <div class="historial-stat-card">
+                <div class="historial-stat-value">{{ stats.cambios_hoy }}</div>
+                <div class="historial-stat-label">Cambios Hoy</div>
+            </div>
+            <div class="historial-stat-card">
+                <div class="historial-stat-value">{{ stats.cambios_semana }}</div>
+                <div class="historial-stat-label">Esta Semana</div>
+            </div>
+            <div class="historial-stat-card">
+                <div class="historial-stat-value">{{ stats.cambios_mes }}</div>
+                <div class="historial-stat-label">Este Mes</div>
+            </div>
+            <div class="historial-stat-card">
+                <div class="historial-stat-value">{{ stats.usuarios_activos }}</div>
+                <div class="historial-stat-label">Usuarios Activos</div>
+            </div>
+            <div class="historial-stat-card">
+                <div class="historial-stat-value">{{ stats.roles_afectados }}</div>
+                <div class="historial-stat-label">Roles Afectados</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="historial-filters">
+            <h3 class="historial-filters-title">
+                <i class="bi bi-funnel"></i>
+                Filtros de Búsqueda
+            </h3>
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Buscar Usuario</label>
+                    <input type="text" name="usuario" class="historial-filter-input" 
+                           placeholder="Nombre o username..."
+                           value="{{ usuario_filtro }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tipo de Acción</label>
+                    <select name="accion" class="historial-filter-input">
+                        <option value="">Todas las acciones</option>
+                        {% for codigo, nombre in acciones_choices %}
+                        <option value="{{ codigo }}" {% if accion_filtro == codigo %}selected{% endif %}>
+                            {{ nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Desde</label>
+                    <input type="date" name="fecha_desde" class="historial-filter-input" 
+                           value="{{ fecha_desde }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Hasta</label>
+                    <input type="date" name="fecha_hasta" class="historial-filter-input" 
+                           value="{{ fecha_hasta }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Rol</label>
+                    <input type="text" name="rol" class="historial-filter-input" 
+                           placeholder="Nombre del rol..."
+                           value="{{ rol_filtro }}">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="historial-btn w-100">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row">
+            <!-- Timeline Principal -->
+            <div class="col-lg-8">
+                <div class="historial-timeline">
+                    <div class="historial-timeline-header">
+                        <h2 class="historial-timeline-title">
+                            <i class="bi bi-list-task"></i>
+                            Timeline de Cambios
+                        </h2>
+                        <span class="badge bg-light text-dark">
+                            {{ page_obj.paginator.count }} registro{{ page_obj.paginator.count|pluralize }}
+                        </span>
+                    </div>
+                    
+                    <div class="historial-timeline-body">
+                        {% if historial %}
+                            {% for item in historial %}
+                            <div class="historial-item">
+                                <div class="historial-item-icon {{ item.accion|slice:':6' }}">
+                                    {% if item.accion == 'crear_rol' %}
+                                        <i class="bi bi-plus-circle"></i>
+                                    {% elif item.accion == 'editar_rol' %}
+                                        <i class="bi bi-pencil-square"></i>
+                                    {% elif item.accion == 'eliminar_rol' %}
+                                        <i class="bi bi-trash"></i>
+                                    {% elif item.accion == 'asignar_permiso' %}
+                                        <i class="bi bi-shield-plus"></i>
+                                    {% elif item.accion == 'remover_permiso' %}
+                                        <i class="bi bi-shield-minus"></i>
+                                    {% elif item.accion == 'cambiar_rol_usuario' %}
+                                        <i class="bi bi-person-gear"></i>
+                                    {% else %}
+                                        <i class="bi bi-gear"></i>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="historial-item-content">
+                                    <div class="historial-item-header">
+                                        <h4 class="historial-item-action">{{ item.get_accion_display }}</h4>
+                                        <span class="historial-item-time">
+                                            {{ item.fecha|timesince }} atrás
+                                        </span>
+                                    </div>
+                                    
+                                    <p class="historial-item-description">
+                                        {{ item.descripcion }}
+                                    </p>
+                                    
+                                    <div class="historial-item-details">
+                                        <span class="historial-item-tag usuario">
+                                            <i class="bi bi-person"></i>
+                                            {{ item.usuario.get_full_name|default:item.usuario.username }}
+                                        </span>
+                                        
+                                        {% if item.rol_afectado %}
+                                        <span class="historial-item-tag rol">
+                                            <i class="bi bi-shield"></i>
+                                            {{ item.rol_afectado.nombre }}
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if item.usuario_afectado %}
+                                        <span class="historial-item-tag usuario">
+                                            <i class="bi bi-person-check"></i>
+                                            {{ item.usuario_afectado.get_full_name|default:item.usuario_afectado.username }}
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if item.ip_address %}
+                                        <span class="historial-item-tag ip">
+                                            <i class="bi bi-globe"></i>
+                                            {{ item.ip_address }}
+                                        </span>
+                                        {% endif %}
+                                        
+                                        <span class="historial-item-tag">
+                                            <i class="bi bi-calendar"></i>
+                                            {{ item.fecha|date:"d/m/Y H:i" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="historial-vacio">
+                                <div class="historial-vacio-icono">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <h3>No hay registros de historial</h3>
+                                <p>No se encontraron cambios que coincidan con los filtros seleccionados.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Paginación -->
+                    {% if page_obj.has_other_pages %}
+                    <div class="historial-pagination">
+                        <nav aria-label="Navegación del historial">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if accion_filtro %}&accion={{ accion_filtro }}{% endif %}{% if usuario_filtro %}&usuario={{ usuario_filtro }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if rol_filtro %}&rol={{ rol_filtro }}{% endif %}">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if accion_filtro %}&accion={{ accion_filtro }}{% endif %}{% if usuario_filtro %}&usuario={{ usuario_filtro }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if rol_filtro %}&rol={{ rol_filtro }}{% endif %}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if accion_filtro %}&accion={{ accion_filtro }}{% endif %}{% if usuario_filtro %}&usuario={{ usuario_filtro }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if rol_filtro %}&rol={{ rol_filtro }}{% endif %}">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar con Widgets -->
+            <div class="col-lg-4">
+                <div class="historial-sidebar">
+                    
+                    <!-- Top Usuarios -->
+                    <div class="historial-widget">
+                        <div class="historial-widget-header">
+                            <i class="bi bi-trophy"></i>
+                            Usuarios Más Activos
+                        </div>
+                        <div class="historial-widget-body">
+                            {% for usuario in top_usuarios %}
+                            <div class="top-usuario-item">
+                                <span class="top-usuario-nombre">
+                                    {{ usuario.usuario__first_name|default:usuario.usuario__username }}
+                                    {{ usuario.usuario__last_name }}
+                                </span>
+                                <span class="top-usuario-count">{{ usuario.total_cambios }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Actividad Semanal -->
+                    <div class="historial-widget">
+                        <div class="historial-widget-header">
+                            <i class="bi bi-graph-up"></i>
+                            Actividad de la Semana
+                        </div>
+                        <div class="historial-widget-body">
+                            <div class="actividad-chart">
+                                {% for dia in actividad_semanal %}
+                                <div class="actividad-bar" style="height: {% if dia.cambios > 0 %}{{ dia.cambios|floatformat:0 }}%{% else %}5px{% endif %};">
+                                    <span class="actividad-bar-value">{{ dia.cambios }}</span>
+                                    <span class="actividad-bar-label">{{ dia.fecha }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen de Acciones -->
+                    <div class="historial-widget">
+                        <div class="historial-widget-header">
+                            <i class="bi bi-pie-chart"></i>
+                            Tipos de Cambios
+                        </div>
+                        <div class="historial-widget-body">
+                            {% for accion, count in actividad_por_accion.items %}
+                            <div class="top-usuario-item">
+                                <span class="top-usuario-nombre">{{ accion }}</span>
+                                <span class="top-usuario-count">{{ count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Vista de Historial de Roles cargada correctamente');
+
+    // Función para exportar historial
+    window.exportarHistorial = function() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('export', 'csv');
+        window.open(url.toString(), '_blank');
+    };
+
+    // Auto-actualización de fecha hasta cuando se cambia fecha desde
+    const fechaDesde = document.querySelector('input[name="fecha_desde"]');
+    const fechaHasta = document.querySelector('input[name="fecha_hasta"]');
+    
+    if (fechaDesde && fechaHasta) {
+        fechaDesde.addEventListener('change', function() {
+            if (this.value && !fechaHasta.value) {
+                fechaHasta.value = this.value;
+            }
+        });
+    }
+
+    // Tooltips para elementos del historial
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Animación de entrada para items del historial
+    const historialItems = document.querySelectorAll('.historial-item');
+    historialItems.forEach((item, index) => {
+        setTimeout(() => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            item.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => {
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, 50);
+        }, index * 50);
+    });
+
+    // Función para actualizar URL con filtros
+    function updateFilters() {
+        const form = document.querySelector('form');
+        const formData = new FormData(form);
+        const urlParams = new URLSearchParams();
+        
+        for (let [key, value] of formData.entries()) {
+            if (value.trim() !== '') {
+                urlParams.append(key, value);
+            }
+        }
+        
+        const newUrl = window.location.pathname + '?' + urlParams.toString();
+        window.history.replaceState({}, '', newUrl);
+    }
+
+    // Auto-submit en cambio de filtros de select
+    const selectFilters = document.querySelectorAll('select[name]');
+    selectFilters.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}

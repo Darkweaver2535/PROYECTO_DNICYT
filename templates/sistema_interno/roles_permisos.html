@@ -1,0 +1,790 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .roles-permisos-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .roles-permisos-header {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .roles-permisos-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--primary-yellow));
+    }
+
+    .roles-permisos-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .roles-permisos-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .roles-permisos-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+    }
+
+    .roles-permisos-btn {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+    }
+
+    .roles-permisos-btn:hover {
+        background: var(--secondary-blue);
+        color: var(--pure-white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        text-decoration: none;
+    }
+
+    .roles-permisos-btn-warning {
+        background: var(--primary-yellow);
+        color: var(--text-dark);
+    }
+
+    .roles-permisos-btn-warning:hover {
+        background: var(--secondary-yellow);
+        color: var(--text-dark);
+    }
+
+    .roles-permisos-btn-success {
+        background: var(--success-green);
+        color: var(--pure-white);
+    }
+
+    .roles-permisos-btn-success:hover {
+        background: #059669;
+        color: var(--pure-white);
+    }
+
+    .roles-permisos-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .roles-permisos-stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .roles-permisos-stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
+    }
+
+    .roles-permisos-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .roles-permisos-stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+    }
+
+    .roles-permisos-stat-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .roles-permisos-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .roles-permisos-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .roles-permisos-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .roles-permisos-card-header {
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .roles-permisos-card-header-admin {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .roles-permisos-card-header-operario {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .roles-permisos-card-header-personalizado {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+
+    .roles-permisos-rol-info {
+        color: var(--pure-white);
+        flex: 1;
+    }
+
+    .roles-permisos-rol-titulo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .roles-permisos-rol-descripcion {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 1rem;
+        max-width: 80%;
+        line-height: 1.4;
+    }
+
+    .roles-permisos-rol-usuarios {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.75rem 1.25rem;
+        border-radius: 2rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .roles-permisos-card-body {
+        padding: 2rem;
+    }
+
+    .roles-permisos-card-footer {
+        background: var(--off-white);
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .roles-permisos-permisos-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    .roles-permisos-permiso-item {
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        border-left: 4px solid var(--primary-blue);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .roles-permisos-permiso-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-left-color: var(--primary-yellow);
+    }
+
+    .roles-permisos-permiso-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .roles-permisos-permiso-descripcion {
+        color: var(--text-light);
+        margin: 0;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .roles-permisos-actividad {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+    }
+
+    .roles-permisos-actividad-titulo {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .roles-permisos-actividad-lista {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .roles-permisos-actividad-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .roles-permisos-actividad-item:last-child {
+        border-bottom: none;
+    }
+
+    .roles-permisos-actividad-item:hover {
+        background: var(--light-blue);
+        border-radius: 0.5rem;
+        margin: 0 -1rem;
+        padding: 1rem;
+    }
+
+    .roles-permisos-actividad-icono {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .roles-permisos-actividad-contenido {
+        flex-grow: 1;
+    }
+
+    .roles-permisos-actividad-texto {
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .roles-permisos-actividad-usuario {
+        font-weight: 600;
+        color: var(--primary-blue);
+    }
+
+    .roles-permisos-actividad-fecha {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .roles-permisos-vacio {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-light);
+    }
+
+    .roles-permisos-vacio-icono {
+        font-size: 4rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+
+    .roles-permisos-tab-nav {
+        display: flex;
+        background: var(--off-white);
+        border-radius: 0.75rem;
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .roles-permisos-tab-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        color: var(--text-light);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .roles-permisos-tab-btn.active {
+        background: var(--pure-white);
+        color: var(--primary-blue);
+        box-shadow: var(--shadow-sm);
+        font-weight: 600;
+    }
+
+    .roles-permisos-tab-content {
+        display: none;
+    }
+
+    .roles-permisos-tab-content.active {
+        display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .roles-permisos-page {
+            padding: 1rem 0;
+        }
+
+        .roles-permisos-header {
+            padding: 1.5rem;
+        }
+
+        .roles-permisos-title {
+            font-size: 1.5rem;
+        }
+
+        .roles-permisos-stats {
+            gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .roles-permisos-card-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .roles-permisos-rol-descripcion {
+            max-width: 100%;
+        }
+
+        .roles-permisos-permisos-list {
+            grid-template-columns: 1fr;
+        }
+
+        .roles-permisos-card-footer {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .roles-permisos-actions {
+            justify-content: center;
+        }
+
+        .roles-permisos-tab-nav {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="roles-permisos-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="roles-permisos-header">
+            <h1 class="roles-permisos-title">
+                <i class="bi bi-shield-lock"></i>
+                Roles y Permisos
+            </h1>
+            <p class="roles-permisos-subtitle">
+                Gestión completa de roles, permisos y accesos del sistema industrial
+            </p>
+            
+            <!-- Acciones principales -->
+            <div class="roles-permisos-actions">
+                <a href="{% url 'usuarios:crear-rol' %}" class="roles-permisos-btn roles-permisos-btn-success">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear Rol Personalizado
+                </a>
+                <!-- ✅ BOTÓN HABILITADO PARA HISTORIAL -->
+                <a href="{% url 'usuarios:historial-roles' %}" class="roles-permisos-btn">
+                    <i class="bi bi-clock-history"></i>
+                    Historial
+                </a>
+            </div>
+        </div>
+
+        <!-- Navegación por pestañas -->
+        <div class="roles-permisos-tab-nav">
+            <button class="roles-permisos-tab-btn active" onclick="showTab('sistema')">
+                <i class="bi bi-shield-check"></i>
+                Roles del Sistema
+            </button>
+            <button class="roles-permisos-tab-btn" onclick="showTab('personalizados')">
+                <i class="bi bi-gear-wide"></i>
+                Roles Personalizados
+            </button>
+            <button class="roles-permisos-tab-btn" onclick="showTab('estadisticas')">
+                <i class="bi bi-graph-up"></i>
+                Estadísticas
+            </button>
+        </div>
+
+        <!-- Tab: Roles del Sistema -->
+        <div id="tab-sistema" class="roles-permisos-tab-content active">
+            <!-- Estadísticas -->
+            <div class="roles-permisos-stats">
+                <div class="roles-permisos-stat-card">
+                    <div class="roles-permisos-stat-value">{{ stats.total_usuarios }}</div>
+                    <div class="roles-permisos-stat-label">Total Usuarios</div>
+                </div>
+                <div class="roles-permisos-stat-card">
+                    <div class="roles-permisos-stat-value">{{ stats.administradores }}</div>
+                    <div class="roles-permisos-stat-label">Administradores</div>
+                </div>
+                <div class="roles-permisos-stat-card">
+                    <div class="roles-permisos-stat-value">{{ stats.operarios }}</div>
+                    <div class="roles-permisos-stat-label">Operarios</div>
+                </div>
+                <div class="roles-permisos-stat-card">
+                    <div class="roles-permisos-stat-value">{{ stats.permisos_sistema }}</div>
+                    <div class="roles-permisos-stat-label">Permisos Sistema</div>
+                </div>
+            </div>
+
+            <!-- Contenedor de Roles del Sistema -->
+            <div class="roles-permisos-container">
+                {% for rol in roles %}
+                    {% if rol.es_sistema %}
+                    <div class="roles-permisos-card">
+                        <!-- Cabecera de Rol -->
+                        <div class="roles-permisos-card-header {% if rol.id == 'administrador' %}roles-permisos-card-header-admin{% else %}roles-permisos-card-header-operario{% endif %}">
+                            <div class="roles-permisos-rol-info">
+                                <h2 class="roles-permisos-rol-titulo">
+                                    <i class="bi {{ rol.icono }}"></i>
+                                    {{ rol.nombre }}
+                                </h2>
+                                <p class="roles-permisos-rol-descripcion">{{ rol.descripcion }}</p>
+                            </div>
+                            <div class="roles-permisos-rol-usuarios">
+                                <i class="bi bi-people-fill"></i>
+                                {{ rol.usuarios_count }} usuario{{ rol.usuarios_count|pluralize }}
+                            </div>
+                        </div>
+
+                        <!-- Lista de Permisos -->
+                        <div class="roles-permisos-card-body">
+                            <div class="roles-permisos-permisos-list">
+                                {% for permiso in rol.permisos %}
+                                <div class="roles-permisos-permiso-item">
+                                    <div class="roles-permisos-permiso-name">
+                                        <i class="bi bi-check-circle"></i>
+                                        {{ permiso.nombre }}
+                                    </div>
+                                    <p class="roles-permisos-permiso-descripcion">{{ permiso.descripcion }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Acciones de Rol -->
+                        <div class="roles-permisos-card-footer">
+                            <div>
+                                <span class="text-muted">{{ rol.permisos|length }} permisos definidos</span>
+                            </div>
+                            <div>
+                                <!-- ✅ BOTÓN HABILITADO CON URL CORRECTA -->
+                                <a href="{% url 'usuarios:ver-permisos-rol' rol.id %}" class="roles-permisos-btn">
+                                    <i class="bi bi-eye"></i>
+                                    Ver Permisos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tab: Roles Personalizados -->
+        <div id="tab-personalizados" class="roles-permisos-tab-content">
+            <div class="roles-permisos-stats">
+                <div class="roles-permisos-stat-card">
+                    <div class="roles-permisos-stat-value">{{ stats.roles_personalizados }}</div>
+                    <div class="roles-permisos-stat-label">Roles Personalizados</div>
+                </div>
+                <div class="roles-permisos-stat-card">
+                    <div class="roles-permisos-stat-value">{{ stats.usuarios_con_roles_personalizados }}</div>
+                    <div class="roles-permisos-stat-label">Usuarios con Roles Personalizados</div>
+                </div>
+            </div>
+
+            <div class="roles-permisos-container">
+                {% for rol in roles %}
+                    {% if not rol.es_sistema %}
+                    <div class="roles-permisos-card">
+                        <div class="roles-permisos-card-header roles-permisos-card-header-personalizado">
+                            <div class="roles-permisos-rol-info">
+                                <h2 class="roles-permisos-rol-titulo">
+                                    <i class="bi {{ rol.icono }}"></i>
+                                    {{ rol.nombre }}
+                                </h2>
+                                <p class="roles-permisos-rol-descripcion">{{ rol.descripcion }}</p>
+                            </div>
+                            <div class="roles-permisos-rol-usuarios">
+                                <i class="bi bi-people-fill"></i>
+                                {{ rol.usuarios_count }} usuario{{ rol.usuarios_count|pluralize }}
+                            </div>
+                        </div>
+
+                        <div class="roles-permisos-card-body">
+                            <div class="roles-permisos-permisos-list">
+                                {% for permiso in rol.permisos %}
+                                <div class="roles-permisos-permiso-item">
+                                    <div class="roles-permisos-permiso-name">
+                                        <i class="bi bi-check-circle"></i>
+                                        {{ permiso.nombre }}
+                                    </div>
+                                    <p class="roles-permisos-permiso-descripcion">{{ permiso.descripcion }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="roles-permisos-card-footer">
+                            <div>
+                                <span class="text-muted">{{ rol.permisos|length }} permisos asignados</span>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <!-- ✅ BOTÓN VER PERMISOS HABILITADO -->
+                                <a href="{% url 'usuarios:ver-permisos-rol' rol.obj.id %}" class="roles-permisos-btn">
+                                    <i class="bi bi-eye"></i>
+                                    Ver Permisos
+                                </a>
+                                <a href="{% url 'usuarios:editar-rol' rol.obj.id %}" class="roles-permisos-btn roles-permisos-btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                    Editar
+                                </a>
+                                <button type="button" class="roles-permisos-btn" style="background: var(--danger-red);" onclick="confirmarEliminarRol('{{ rol.obj.id }}', '{{ rol.nombre }}')">
+                                    <i class="bi bi-trash"></i>
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="roles-permisos-vacio">
+                        <div class="roles-permisos-vacio-icono">
+                            <i class="bi bi-gear"></i>
+                        </div>
+                        <h4>No hay roles personalizados</h4>
+                        <p class="text-muted">Crea tu primer rol personalizado para comenzar</p>
+                        <a href="{% url 'usuarios:crear-rol' %}" class="roles-permisos-btn roles-permisos-btn-success">
+                            <i class="bi bi-plus-circle"></i>
+                            Crear Primer Rol
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tab: Estadísticas -->
+        <div id="tab-estadisticas" class="roles-permisos-tab-content">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="roles-permisos-card">
+                        <div class="roles-permisos-card-body">
+                            <h3><i class="bi bi-pie-chart"></i> Distribución de Usuarios por Rol</h3>
+                            <canvas id="chartRoles" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="roles-permisos-card">
+                        <div class="roles-permisos-card-body">
+                            <h3><i class="bi bi-shield-check"></i> Permisos por Categoría</h3>
+                            {% for categoria, data in permisos_por_categoria.items %}
+                            <div class="mb-3">
+                                <h6>{{ categoria }}</h6>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-primary" 
+                                         role="progressbar" 
+                                         style="width: {{ data.percentage }}%;"
+                                         aria-valuenow="{{ data.count }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ data.count }} permiso{{ data.count|pluralize }}
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ data.percentage }}% del total</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actividad Reciente -->
+        <div class="roles-permisos-actividad">
+            <h3 class="roles-permisos-actividad-titulo">
+                <i class="bi bi-activity"></i>
+                Actividad Reciente
+            </h3>
+
+            {% if actividad_reciente %}
+            <ul class="roles-permisos-actividad-lista">
+                {% for item in actividad_reciente %}
+                <li class="roles-permisos-actividad-item">
+                    <div class="roles-permisos-actividad-icono">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="roles-permisos-actividad-contenido">
+                        <p class="roles-permisos-actividad-texto">
+                            <span class="roles-permisos-actividad-usuario">@{{ item.usuario.username }}</span>
+                            {{ item.descripcion }}
+                        </p>
+                        <div class="roles-permisos-actividad-fecha">
+                            {{ item.fecha|timesince }} atrás - {{ item.fecha|date:"d/m/Y H:i" }}
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="roles-permisos-vacio">
+                <div class="roles-permisos-vacio-icono">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h4>No hay actividad reciente</h4>
+                <p class="text-muted">Los cambios en roles y permisos se mostrarán aquí</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Vista de Roles y Permisos cargada correctamente');
+
+    // Inicializar gráfico de roles
+    const ctx = document.getElementById('chartRoles');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Administradores', 'Operarios', 'Roles Personalizados'],
+                datasets: [{
+                    data: [{{ stats.administradores }}, {{ stats.operarios }}, {{ stats.usuarios_con_roles_personalizados }}],
+                    backgroundColor: ['#ef4444', '#10b981', '#8b5cf6'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Función para cambiar pestañas
+function showTab(tabName) {
+    // Ocultar todas las pestañas
+    document.querySelectorAll('.roles-permisos-tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remover clase active de todos los botones
+    document.querySelectorAll('.roles-permisos-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Mostrar pestaña seleccionada
+    document.getElementById('tab-' + tabName).classList.add('active');
+    
+    // Activar botón correspondiente
+    event.target.classList.add('active');
+}
+
+// Función para confirmar eliminación de rol personalizado
+function confirmarEliminarRol(rolId, nombreRol) {
+    if (confirm(`¿Está seguro que desea eliminar el rol "${nombreRol}"?\n\nEsta acción no se puede deshacer.`)) {
+        window.location.href = `/usuarios/roles/eliminar/${rolId}/`;
+    }
+}
+</script>
+{% endblock %}

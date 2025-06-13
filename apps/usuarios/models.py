@@ -68,6 +68,15 @@ class PerfilUsuario(models.Model):
     fecha_creacion = models.DateTimeField("Fecha de Creación", auto_now_add=True)
     fecha_actualizacion = models.DateTimeField("Última Actualización", auto_now=True)
     
+    # Agregar campo para rol personalizado
+    rol_personalizado = models.ForeignKey(
+        'RolPersonalizado', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        verbose_name="Rol Personalizado"
+    )
+    
     class Meta:
         verbose_name = "Perfil de Usuario"
         verbose_name_plural = "Perfiles de Usuarios"
@@ -187,3 +196,144 @@ class ConfiguracionUsuario(models.Model):
     
     def __str__(self):
         return f"Configuración de {self.usuario.username}"
+
+class PermisoSistema(models.Model):
+    """Modelo para definir permisos específicos del sistema"""
+    
+    CATEGORIA_CHOICES = [
+        ('usuarios', 'Gestión de Usuarios'),
+        ('equipos', 'Gestión de Equipos'),
+        ('inventario', 'Gestión de Inventario'),
+        ('mantenimiento', 'Mantenimiento'),
+        ('reportes', 'Reportes y Análisis'),
+        ('configuracion', 'Configuración del Sistema'),
+        ('seguridad', 'Seguridad Industrial'),
+        ('operaciones', 'Operaciones Diarias'),
+    ]
+    
+    codigo = models.CharField("Código del Permiso", max_length=50, unique=True)
+    nombre = models.CharField("Nombre del Permiso", max_length=100)
+    descripcion = models.TextField("Descripción", blank=True)
+    categoria = models.CharField("Categoría", max_length=20, choices=CATEGORIA_CHOICES)
+    es_critico = models.BooleanField("Permiso Crítico", default=False, help_text="No se puede desactivar")
+    activo = models.BooleanField("Activo", default=True)
+    
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Permiso del Sistema"
+        verbose_name_plural = "Permisos del Sistema"
+        ordering = ['categoria', 'nombre']
+    
+    def __str__(self):
+        return f"{self.nombre} ({self.get_categoria_display()})"
+
+class RolPersonalizado(models.Model):
+    """Modelo para roles personalizados del sistema"""
+    
+    nombre = models.CharField("Nombre del Rol", max_length=50, unique=True)
+    descripcion = models.TextField("Descripción", blank=True)
+    color = models.CharField("Color", max_length=7, default="#6b7280", help_text="Color hexadecimal")
+    icono = models.CharField("Icono", max_length=50, default="bi-person", help_text="Clase de Bootstrap Icon")
+    
+    # Permisos asignados
+    permisos = models.ManyToManyField(PermisoSistema, blank=True, verbose_name="Permisos")
+    
+    # Configuración
+    es_sistema = models.BooleanField("Rol del Sistema", default=False, help_text="No se puede eliminar")
+    activo = models.BooleanField("Activo", default=True)
+    
+    # Metadatos
+    creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='roles_creados')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Rol Personalizado"
+        verbose_name_plural = "Roles Personalizados"
+        ordering = ['nombre']
+    
+    def __str__(self):
+        return self.nombre
+    
+    def get_usuarios_count(self):
+        """Retorna el número de usuarios con este rol"""
+        return User.objects.filter(perfil__rol_personalizado=self).count()
+    
+    def get_permisos_por_categoria(self):
+        """Retorna permisos agrupados por categoría"""
+        permisos_dict = {}
+        for permiso in self.permisos.filter(activo=True):
+            categoria = permiso.get_categoria_display()
+            if categoria not in permisos_dict:
+                permisos_dict[categoria] = []
+            permisos_dict[categoria].append(permiso)
+        return permisos_dict
+
+class HistorialRoles(models.Model):
+    """Historial de cambios en roles y permisos"""
+    
+    ACCION_CHOICES = [
+        ('crear_rol', 'Rol Creado'),
+        ('editar_rol', 'Rol Editado'),
+        ('eliminar_rol', 'Rol Eliminado'),
+        ('asignar_permiso', 'Permiso Asignado'),
+        ('remover_permiso', 'Permiso Removido'),
+        ('cambiar_rol_usuario', 'Rol de Usuario Cambiado'),
+        # ✅ AGREGAR NUEVAS ACCIONES PARA RESPALDOS
+        ('crear_respaldo', 'Respaldo Creado'),
+        ('descargar_respaldo', 'Respaldo Descargado'),
+        ('eliminar_respaldo', 'Respaldo Eliminado'),
+    ]
+    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='historial_roles')
+    accion = models.CharField("Acción", max_length=20, choices=ACCION_CHOICES)
+    descripcion = models.TextField("Descripción")
+    
+    # Referencias opcionales
+    rol_afectado = models.ForeignKey(RolPersonalizado, on_delete=models.SET_NULL, null=True, blank=True)
+    usuario_afectado = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='cambios_rol')
+    permiso_afectado = models.ForeignKey(PermisoSistema, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Datos adicionales
+    datos_antiguos = models.JSONField("Datos Anteriores", default=dict, blank=True)
+    datos_nuevos = models.JSONField("Datos Nuevos", default=dict, blank=True)
+    ip_address = models.GenericIPAddressField("Dirección IP", null=True, blank=True)
+    
+    fecha = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Historial de Roles"
+        verbose_name_plural = "Historial de Roles"
+        ordering = ['-fecha']
+    
+    def __str__(self):
+        return f"{self.usuario.username} - {self.get_accion_display()} - {self.fecha.strftime('%d/%m/%Y %H:%M')}"
+
+    def get_permisos_efectivos(self):
+        """Obtiene todos los permisos efectivos del usuario"""
+        permisos = set()
+        
+        # Permisos por rol del sistema (compatibilidad)
+        if self.rol_sistema == 'administrador':
+            permisos.update([
+                'gestionar_usuarios', 'configurar_sistema', 'eliminar_equipos',
+                'ver_todos_reportes', 'gestionar_mantenimiento', 'gestionar_inventario',
+                'eliminar_registros', 'exportar_datos'
+            ])
+        else:
+            permisos.update([
+                'ver_equipos', 'crear_reportes', 'ver_inventario',
+                'registrar_operaciones', 'ver_manuales'
+            ])
+        
+        # Permisos por rol personalizado
+        if self.rol_personalizado:
+            permisos.update([p.codigo for p in self.rol_personalizado.permisos.filter(activo=True)])
+        
+        return list(permisos)
+    
+    def tiene_permiso(self, codigo_permiso):
+        """Verifica si el usuario tiene un permiso específico"""
+        return codigo_permiso in self.get_permisos_efectivos()

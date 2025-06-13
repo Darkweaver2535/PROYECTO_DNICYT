@@ -1,0 +1,864 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .respaldos-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .respaldos-header {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .respaldos-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--primary-yellow));
+    }
+
+    .respaldos-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .respaldos-subtitle {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .respaldos-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .respaldos-btn {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+        cursor: pointer;
+    }
+
+    .respaldos-btn:hover {
+        background: var(--secondary-blue);
+        color: var(--pure-white);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        text-decoration: none;
+    }
+
+    .respaldos-btn-success {
+        background: var(--success-green);
+    }
+
+    .respaldos-btn-success:hover {
+        background: #059669;
+    }
+
+    .respaldos-btn-warning {
+        background: var(--warning-orange);
+    }
+
+    .respaldos-btn-warning:hover {
+        background: #ea6c04;
+    }
+
+    .respaldos-btn-danger {
+        background: var(--danger-red);
+    }
+
+    .respaldos-btn-danger:hover {
+        background: #dc2626;
+    }
+
+    .respaldos-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .respaldos-stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .respaldos-stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
+    }
+
+    .respaldos-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .respaldos-stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+    }
+
+    .respaldos-stat-label {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .respaldos-main-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .respaldos-list-container {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .respaldos-list-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: var(--pure-white);
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .respaldos-list-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .respaldos-list-body {
+        padding: 0;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .respaldo-item {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .respaldo-item:last-child {
+        border-bottom: none;
+    }
+
+    .respaldo-item:hover {
+        background: var(--light-blue);
+    }
+
+    .respaldo-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--pure-white);
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .respaldo-icon.db {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    }
+
+    .respaldo-icon.completo {
+        background: linear-gradient(135deg, var(--success-green), #059669);
+    }
+
+    .respaldo-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .respaldo-nombre {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+        word-break: break-all;
+    }
+
+    .respaldo-details {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .respaldo-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .respaldo-btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 0.5rem;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .respaldo-btn-download {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+    }
+
+    .respaldo-btn-download:hover {
+        background: var(--secondary-blue);
+        color: var(--pure-white);
+        transform: translateY(-2px);
+    }
+
+    .respaldo-btn-delete {
+        background: var(--danger-red);
+        color: var(--pure-white);
+    }
+
+    .respaldo-btn-delete:hover {
+        background: #dc2626;
+        color: var(--pure-white);
+        transform: translateY(-2px);
+    }
+
+    .respaldos-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .respaldos-widget {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .respaldos-widget-header {
+        background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--secondary-yellow) 100%);
+        color: var(--text-dark);
+        padding: 1rem;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .respaldos-widget-body {
+        padding: 1.5rem;
+    }
+
+    .respaldos-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .respaldos-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .respaldos-form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .respaldos-form-select {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: var(--pure-white);
+    }
+
+    .respaldos-form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        outline: none;
+    }
+
+    .respaldos-form-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+    }
+
+    .respaldos-info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+
+    .respaldos-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .respaldos-info-label {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .respaldos-info-value {
+        color: var(--text-light);
+        text-align: right;
+        word-break: break-all;
+        max-width: 60%;
+    }
+
+    .respaldos-empty {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-light);
+    }
+
+    .respaldos-empty-icon {
+        font-size: 4rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+
+    .respaldos-alert {
+        background: linear-gradient(135deg, #fef3c7, #fbbf24);
+        border: 1px solid #f59e0b;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .respaldos-alert-icon {
+        color: #92400e;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+    }
+
+    .respaldos-alert-content {
+        flex: 1;
+    }
+
+    .respaldos-alert-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 0.5rem;
+    }
+
+    .respaldos-alert-text {
+        color: #92400e;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .respaldos-page {
+            padding: 1rem 0;
+        }
+
+        .respaldos-header {
+            padding: 1.5rem;
+        }
+
+        .respaldos-title {
+            font-size: 1.5rem;
+        }
+
+        .respaldos-main-content {
+            grid-template-columns: 1fr;
+        }
+
+        .respaldos-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .respaldo-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .respaldo-actions {
+            justify-content: center;
+        }
+
+        .respaldos-actions {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="respaldos-page">
+    <div class="container">
+        
+        <!-- Header -->
+        <div class="respaldos-header">
+            <h1 class="respaldos-title">
+                <i class="bi bi-shield-plus"></i>
+                Gestión de Respaldos del Sistema
+            </h1>
+            <p class="respaldos-subtitle">
+                Cree, administre y restaure respaldos de seguridad del sistema industrial
+            </p>
+            
+            <!-- Acciones principales -->
+            <div class="respaldos-actions">
+                <button type="button" class="respaldos-btn respaldos-btn-success" data-bs-toggle="modal" data-bs-target="#modalCrearRespaldo">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear Respaldo
+                </button>
+                <button type="button" class="respaldos-btn respaldos-btn-warning" onclick="window.print()">
+                    <i class="bi bi-printer"></i>
+                    Imprimir Lista
+                </button>
+            </div>
+        </div>
+
+        <!-- Alerta informativa -->
+        <div class="respaldos-alert">
+            <div class="respaldos-alert-icon">
+                <i class="bi bi-info-circle"></i>
+            </div>
+            <div class="respaldos-alert-content">
+                <h3 class="respaldos-alert-title">Importante sobre los Respaldos</h3>
+                <p class="respaldos-alert-text">
+                    Los respaldos son fundamentales para la seguridad de sus datos. Se recomienda crear respaldos completos semanalmente y respaldos de base de datos diariamente. Mantenga copias en ubicaciones seguras fuera del servidor.
+                </p>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="respaldos-stats">
+            <div class="respaldos-stat-card">
+                <div class="respaldos-stat-value">{{ total_respaldos }}</div>
+                <div class="respaldos-stat-label">Total Respaldos</div>
+            </div>
+            <div class="respaldos-stat-card">
+                <div class="respaldos-stat-value">{{ tamaño_total_legible }}</div>
+                <div class="respaldos-stat-label">Espacio Utilizado</div>
+            </div>
+            <div class="respaldos-stat-card">
+                <div class="respaldos-stat-value">{{ stats_sistema.total_usuarios }}</div>
+                <div class="respaldos-stat-label">Usuarios en Sistema</div>
+            </div>
+            <div class="respaldos-stat-card">
+                <div class="respaldos-stat-value">
+                    {% if ultimo_respaldo %}
+                        {{ ultimo_respaldo.fecha_creacion|timesince }}
+                    {% else %}
+                        Nunca
+                    {% endif %}
+                </div>
+                <div class="respaldos-stat-label">Último Respaldo</div>
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="respaldos-main-content">
+            
+            <!-- Lista de respaldos -->
+            <div class="respaldos-list-container">
+                <div class="respaldos-list-header">
+                    <h2 class="respaldos-list-title">
+                        <i class="bi bi-archive"></i>
+                        Respaldos Disponibles
+                    </h2>
+                    <span class="badge bg-light text-dark">{{ total_respaldos }} archivo{{ total_respaldos|pluralize }}</span>
+                </div>
+                
+                <div class="respaldos-list-body">
+                    {% if respaldos_existentes %}
+                        {% for respaldo in respaldos_existentes %}
+                        <div class="respaldo-item">
+                            <div class="respaldo-icon {% if respaldo.tipo == 'Completo' %}completo{% else %}db{% endif %}">
+                                {% if respaldo.tipo == 'Completo' %}
+                                    <i class="bi bi-archive-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-database"></i>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="respaldo-info">
+                                <h4 class="respaldo-nombre">{{ respaldo.nombre }}</h4>
+                                <div class="respaldo-details">
+                                    <span><i class="bi bi-tag"></i> {{ respaldo.tipo }}</span>
+                                    <span><i class="bi bi-calendar"></i> {{ respaldo.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                                    <span><i class="bi bi-hdd"></i> {{ respaldo.tamaño_legible }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="respaldo-actions">
+                                <a href="{% url 'usuarios:descargar-respaldo' respaldo.nombre %}" 
+                                   class="respaldo-btn respaldo-btn-download" 
+                                   title="Descargar respaldo">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                                
+                                <button type="button" 
+                                        class="respaldo-btn respaldo-btn-delete" 
+                                        onclick="confirmarEliminarRespaldo('{{ respaldo.nombre }}')"
+                                        title="Eliminar respaldo">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="respaldos-empty">
+                            <div class="respaldos-empty-icon">
+                                <i class="bi bi-archive-x"></i>
+                            </div>
+                            <h3>No hay respaldos disponibles</h3>
+                            <p>No se han creado respaldos del sistema aún.</p>
+                            <button type="button" class="respaldos-btn respaldos-btn-success" data-bs-toggle="modal" data-bs-target="#modalCrearRespaldo">
+                                <i class="bi bi-plus-circle"></i>
+                                Crear Primer Respaldo
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar con información -->
+            <div class="respaldos-sidebar">
+                
+                <!-- Información del sistema -->
+                <div class="respaldos-widget">
+                    <div class="respaldos-widget-header">
+                        <i class="bi bi-info-circle"></i>
+                        Información del Sistema
+                    </div>
+                    <div class="respaldos-widget-body">
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Python:</span>
+                            <span class="respaldos-info-value">{{ info_sistema.python_version }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Django:</span>
+                            <span class="respaldos-info-value">{{ info_sistema.django_version }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Base de Datos:</span>
+                            <span class="respaldos-info-value">SQLite3</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Modo Debug:</span>
+                            <span class="respaldos-info-value">
+                                {% if info_sistema.debug_mode %}
+                                    <span class="badge bg-warning">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-success">Inactivo</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas de datos -->
+                <div class="respaldos-widget">
+                    <div class="respaldos-widget-header">
+                        <i class="bi bi-graph-up"></i>
+                        Estadísticas de Datos
+                    </div>
+                    <div class="respaldos-widget-body">
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Usuarios Totales:</span>
+                            <span class="respaldos-info-value">{{ stats_sistema.total_usuarios }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Usuarios Activos:</span>
+                            <span class="respaldos-info-value">{{ stats_sistema.usuarios_activos }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Roles Personalizados:</span>
+                            <span class="respaldos-info-value">{{ stats_sistema.roles_personalizados }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Permisos del Sistema:</span>
+                            <span class="respaldos-info-value">{{ stats_sistema.permisos_sistema }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Registros de Historial:</span>
+                            <span class="respaldos-info-value">{{ stats_sistema.historial_registros }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Sesiones Registradas:</span>
+                            <span class="respaldos-info-value">{{ stats_sistema.sesiones_registradas }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Último respaldo -->
+                {% if ultimo_respaldo %}
+                <div class="respaldos-widget">
+                    <div class="respaldos-widget-header">
+                        <i class="bi bi-clock-history"></i>
+                        Último Respaldo
+                    </div>
+                    <div class="respaldos-widget-body">
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Archivo:</span>
+                            <span class="respaldos-info-value">{{ ultimo_respaldo.nombre }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Tipo:</span>
+                            <span class="respaldos-info-value">{{ ultimo_respaldo.tipo }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Fecha:</span>
+                            <span class="respaldos-info-value">{{ ultimo_respaldo.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="respaldos-info-item">
+                            <span class="respaldos-info-label">Tamaño:</span>
+                            <span class="respaldos-info-value">{{ ultimo_respaldo.tamaño_legible }}</span>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <a href="{% url 'usuarios:descargar-respaldo' ultimo_respaldo.nombre %}" class="respaldos-btn">
+                                <i class="bi bi-download"></i>
+                                Descargar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para crear respaldo -->
+<div class="modal fade" id="modalCrearRespaldo" tabindex="-1" aria-labelledby="modalCrearRespaldoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalCrearRespaldoLabel">
+                    <i class="bi bi-plus-circle"></i>
+                    Crear Nuevo Respaldo
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'usuarios:crear-respaldo' %}" id="formCrearRespaldo">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="respaldos-form">
+                        <div class="respaldos-form-group">
+                            <label class="respaldos-form-label">Tipo de Respaldo:</label>
+                            <select name="tipo_respaldo" class="respaldos-form-select" required>
+                                <option value="base_datos">Solo Base de Datos (Rápido)</option>
+                                <option value="completo">Respaldo Completo (Recomendado)</option>
+                            </select>
+                            <small class="text-muted">El respaldo completo incluye configuraciones y archivos del sistema.</small>
+                        </div>
+                        
+                        <div class="respaldos-form-group">
+                            <label class="respaldos-form-checkbox">
+                                <input type="checkbox" name="incluir_media" checked>
+                                Incluir archivos de media (imágenes, documentos)
+                            </label>
+                            <small class="text-muted">Solo aplicable para respaldo completo. Aumenta el tamaño del archivo.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Nota:</strong> El proceso puede tardar varios minutos dependiendo del tamaño de los datos. No cierre esta ventana durante el proceso.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success" id="btnCrearRespaldo">
+                        <i class="bi bi-plus-circle"></i>
+                        Crear Respaldo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="modalEliminarRespaldo" tabindex="-1" aria-labelledby="modalEliminarRespaldoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalEliminarRespaldoLabel">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea eliminar el respaldo <strong id="nombreRespaldoEliminar"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Advertencia:</strong> Esta acción no se puede deshacer. El archivo se eliminará permanentemente del servidor.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" id="formEliminarRespaldo" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i>
+                        Eliminar Respaldo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Vista de Gestión de Respaldos cargada correctamente');
+
+    // Función para confirmar eliminación de respaldo
+    window.confirmarEliminarRespaldo = function(nombreRespaldo) {
+        document.getElementById('nombreRespaldoEliminar').textContent = nombreRespaldo;
+        document.getElementById('formEliminarRespaldo').action = 
+            `{% url 'usuarios:eliminar-respaldo' 'PLACEHOLDER' %}`.replace('PLACEHOLDER', nombreRespaldo);
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalEliminarRespaldo'));
+        modal.show();
+    };
+
+    // Manejar envío del formulario de crear respaldo
+    const formCrearRespaldo = document.getElementById('formCrearRespaldo');
+    const btnCrearRespaldo = document.getElementById('btnCrearRespaldo');
+
+    if (formCrearRespaldo) {
+        formCrearRespaldo.addEventListener('submit', function() {
+            btnCrearRespaldo.disabled = true;
+            btnCrearRespaldo.innerHTML = '<i class="bi bi-hourglass-split"></i> Creando Respaldo...';
+            
+            // Mostrar notificación de proceso
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-info';
+            alertDiv.innerHTML = '<i class="bi bi-info-circle"></i> Creando respaldo, por favor espere...';
+            document.querySelector('.modal-body').appendChild(alertDiv);
+        });
+    }
+
+    // Actualizar opciones según tipo de respaldo
+    const tipoRespaldo = document.querySelector('select[name="tipo_respaldo"]');
+    const incluirMedia = document.querySelector('input[name="incluir_media"]');
+
+    if (tipoRespaldo && incluirMedia) {
+        tipoRespaldo.addEventListener('change', function() {
+            if (this.value === 'base_datos') {
+                incluirMedia.disabled = true;
+                incluirMedia.checked = false;
+            } else {
+                incluirMedia.disabled = false;
+                incluirMedia.checked = true;
+            }
+        });
+    }
+
+    // Auto-refresh cada 30 segundos para detectar nuevos respaldos
+    setInterval(function() {
+        // Solo si no hay modales abiertos
+        const modalAbierto = document.querySelector('.modal.show');
+        if (!modalAbierto) {
+            location.reload();
+        }
+    }, 30000);
+
+    // Tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

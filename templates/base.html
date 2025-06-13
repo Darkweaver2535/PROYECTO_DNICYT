@@ -1498,13 +1498,13 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-shield-lock"></i>
+                    <a href="{% url 'usuarios:roles-permisos' %}" class="nav-link {% if request.resolver_match.url_name == 'roles-permisos' %}active{% endif %}">
+                        <i class="bi bi-shield-lock nav-icon"></i>
                         <span class="nav-text">Roles y Permisos</span>
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a href="{% url 'usuarios:respaldos' %}" class="nav-link {% if request.resolver_match.url_name == 'respaldos' %}active{% endif %}">
                         <i class="nav-icon bi bi-arrow-clockwise"></i>
                         <span class="nav-text">Respaldos</span>
                     </a>

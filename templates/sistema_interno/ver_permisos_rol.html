@@ -1,0 +1,757 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ver-permisos-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .ver-permisos-header {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .ver-permisos-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, {{ color }}, {{ color }}dd);
+    }
+
+    .ver-permisos-header-content {
+        padding: 2rem;
+        background: linear-gradient(135deg, {{ color }}15, {{ color }}08);
+    }
+
+    .ver-permisos-rol-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .ver-permisos-rol-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, {{ color }}, {{ color }}dd);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--pure-white);
+        font-size: 2rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .ver-permisos-rol-details h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ver-permisos-rol-badge {
+        background: {{ color }};
+        color: var(--pure-white);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .ver-permisos-rol-description {
+        color: var(--text-light);
+        font-size: 1.1rem;
+        margin: 0.5rem 0 0;
+        line-height: 1.5;
+    }
+
+    .ver-permisos-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .ver-permisos-stat-card {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+    }
+
+    .ver-permisos-stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .ver-permisos-stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: {{ color }};
+        margin-bottom: 0.25rem;
+    }
+
+    .ver-permisos-stat-label {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .ver-permisos-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .ver-permisos-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: var(--shadow-md);
+    }
+
+    .ver-permisos-btn-primary {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+    }
+
+    .ver-permisos-btn-primary:hover {
+        background: var(--secondary-blue);
+        color: var(--pure-white);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .ver-permisos-btn-secondary {
+        background: var(--off-white);
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .ver-permisos-btn-secondary:hover {
+        background: var(--border-color);
+        color: var(--text-dark);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .ver-permisos-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    .ver-permisos-main {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .ver-permisos-main-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: var(--pure-white);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .ver-permisos-main-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ver-permisos-filter {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--pure-white);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .ver-permisos-filter:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+    }
+
+    .ver-permisos-main-body {
+        padding: 2rem;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .ver-permisos-categoria {
+        margin-bottom: 2rem;
+    }
+
+    .ver-permisos-categoria-header {
+        background: linear-gradient(135deg, {{ color }}15, {{ color }}08);
+        border: 1px solid {{ color }}30;
+        border-radius: 0.75rem 0.75rem 0 0;
+        padding: 1rem 1.5rem;
+        margin-bottom: 0;
+    }
+
+    .ver-permisos-categoria-titulo {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ver-permisos-categoria-count {
+        background: {{ color }};
+        color: var(--pure-white);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .ver-permisos-categoria-body {
+        border: 1px solid {{ color }}30;
+        border-top: none;
+        border-radius: 0 0 0.75rem 0.75rem;
+        background: var(--pure-white);
+    }
+
+    .ver-permisos-permiso {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .ver-permisos-permiso:last-child {
+        border-bottom: none;
+    }
+
+    .ver-permisos-permiso:hover {
+        background: var(--light-blue);
+        transform: translateX(4px);
+    }
+
+    .ver-permisos-permiso-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .ver-permisos-permiso-info {
+        flex: 1;
+    }
+
+    .ver-permisos-permiso-nombre {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0 0 0.25rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ver-permisos-permiso-codigo {
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        color: var(--text-light);
+        background: var(--off-white);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+
+    .ver-permisos-permiso-descripcion {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .ver-permisos-permiso-badges {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .ver-permisos-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .ver-permisos-badge-critico {
+        background: var(--danger-red);
+        color: var(--pure-white);
+    }
+
+    .ver-permisos-badge-activo {
+        background: var(--success-green);
+        color: var(--pure-white);
+    }
+
+    .ver-permisos-badge-sistema {
+        background: var(--primary-blue);
+        color: var(--pure-white);
+    }
+
+    .ver-permisos-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .ver-permisos-usuarios-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .ver-permisos-usuarios-header {
+        background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--secondary-yellow) 100%);
+        color: var(--text-dark);
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .ver-permisos-usuarios-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .ver-permisos-usuarios-body {
+        padding: 1.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .ver-permisos-usuario-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .ver-permisos-usuario-item:last-child {
+        border-bottom: none;
+    }
+
+    .ver-permisos-usuario-item:hover {
+        background: var(--light-blue);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin: 0 -0.75rem;
+    }
+
+    .ver-permisos-usuario-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, {{ color }}, {{ color }}dd);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--pure-white);
+        font-weight: 600;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .ver-permisos-usuario-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ver-permisos-usuario-nombre {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ver-permisos-usuario-username {
+        color: var(--text-light);
+        font-size: 0.8rem;
+        margin: 0;
+    }
+
+    .ver-permisos-vacio {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-light);
+    }
+
+    .ver-permisos-vacio-icono {
+        font-size: 3rem;
+        opacity: 0.5;
+        margin-bottom: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .ver-permisos-page {
+            padding: 1rem 0;
+        }
+
+        .ver-permisos-content {
+            grid-template-columns: 1fr;
+        }
+
+        .ver-permisos-rol-info {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .ver-permisos-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .ver-permisos-actions {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .ver-permisos-permiso-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ver-permisos-page">
+    <div class="container">
+        
+        <!-- Header -->
+        <div class="ver-permisos-header">
+            <div class="ver-permisos-header-content">
+                <div class="ver-permisos-rol-info">
+                    <div class="ver-permisos-rol-icon">
+                        <i class="{{ icono }}"></i>
+                    </div>
+                    <div class="ver-permisos-rol-details">
+                        <h1>
+                            {{ rol_nombre }}
+                            {% if es_rol_sistema %}
+                            <span class="ver-permisos-rol-badge">SISTEMA</span>
+                            {% else %}
+                            <span class="ver-permisos-rol-badge">PERSONALIZADO</span>
+                            {% endif %}
+                        </h1>
+                        <p class="ver-permisos-rol-description">
+                            {% if es_rol_sistema %}
+                                {% if rol_id == 'administrador' %}
+                                Control total del sistema, incluyendo usuarios, equipos y configuraciones
+                                {% else %}
+                                Acceso limitado al sistema para operaciones diarias
+                                {% endif %}
+                            {% else %}
+                                {{ rol_obj.descripcion }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="ver-permisos-stats">
+                    <div class="ver-permisos-stat-card">
+                        <div class="ver-permisos-stat-value">{{ stats.total_permisos }}</div>
+                        <div class="ver-permisos-stat-label">Total Permisos</div>
+                    </div>
+                    <div class="ver-permisos-stat-card">
+                        <div class="ver-permisos-stat-value">{{ stats.permisos_criticos }}</div>
+                        <div class="ver-permisos-stat-label">Críticos</div>
+                    </div>
+                    <div class="ver-permisos-stat-card">
+                        <div class="ver-permisos-stat-value">{{ stats.usuarios_asignados }}</div>
+                        <div class="ver-permisos-stat-label">Usuarios</div>
+                    </div>
+                    <div class="ver-permisos-stat-card">
+                        <div class="ver-permisos-stat-value">{{ stats.categorias }}</div>
+                        <div class="ver-permisos-stat-label">Categorías</div>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="ver-permisos-actions">
+                    <a href="{% url 'usuarios:roles-permisos' %}" class="ver-permisos-btn ver-permisos-btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Volver a Roles
+                    </a>
+                    {% if not es_rol_sistema %}
+                    <a href="{% url 'usuarios:editar-rol' rol_obj.id %}" class="ver-permisos-btn ver-permisos-btn-primary">
+                        <i class="bi bi-pencil"></i>
+                        Editar Rol
+                    </a>
+                    {% endif %}
+                    <button type="button" class="ver-permisos-btn ver-permisos-btn-primary" onclick="window.print()">
+                        <i class="bi bi-printer"></i>
+                        Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido -->
+        <div class="ver-permisos-content">
+            <!-- Lista de Permisos -->
+            <div class="ver-permisos-main">
+                <div class="ver-permisos-main-header">
+                    <h2 class="ver-permisos-main-title">
+                        <i class="bi bi-shield-check"></i>
+                        Permisos Asignados
+                    </h2>
+                    <select class="ver-permisos-filter" id="filtroCategoria">
+                        <option value="">Todas las categorías</option>
+                        {% for categoria in permisos_por_categoria.keys %}
+                        <option value="{{ categoria }}">{{ categoria }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="ver-permisos-main-body">
+                    {% for categoria, permisos in permisos_por_categoria.items %}
+                    <div class="ver-permisos-categoria" data-categoria="{{ categoria }}">
+                        <div class="ver-permisos-categoria-header">
+                            <h3 class="ver-permisos-categoria-titulo">
+                                <i class="bi bi-folder"></i>
+                                {{ categoria }}
+                                <span class="ver-permisos-categoria-count">{{ permisos|length }}</span>
+                            </h3>
+                        </div>
+                        <div class="ver-permisos-categoria-body">
+                            {% for permiso in permisos %}
+                            <div class="ver-permisos-permiso">
+                                <div class="ver-permisos-permiso-header">
+                                    <div class="ver-permisos-permiso-info">
+                                        <h4 class="ver-permisos-permiso-nombre">
+                                            <i class="bi bi-check-circle text-success"></i>
+                                            {{ permiso.nombre }}
+                                        </h4>
+                                        <div class="ver-permisos-permiso-codigo">{{ permiso.codigo }}</div>
+                                        <p class="ver-permisos-permiso-descripcion">{{ permiso.descripcion }}</p>
+                                    </div>
+                                    <div class="ver-permisos-permiso-badges">
+                                        {% if permiso.es_critico %}
+                                        <span class="ver-permisos-badge ver-permisos-badge-critico">Crítico</span>
+                                        {% endif %}
+                                        {% if permiso.activo %}
+                                        <span class="ver-permisos-badge ver-permisos-badge-activo">Activo</span>
+                                        {% endif %}
+                                        {% if es_rol_sistema %}
+                                        <span class="ver-permisos-badge ver-permisos-badge-sistema">Sistema</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="ver-permisos-sidebar">
+                <!-- Usuarios con este rol -->
+                <div class="ver-permisos-usuarios-card">
+                    <div class="ver-permisos-usuarios-header">
+                        <h3 class="ver-permisos-usuarios-title">
+                            <i class="bi bi-people"></i>
+                            Usuarios con este Rol
+                        </h3>
+                    </div>
+                    <div class="ver-permisos-usuarios-body">
+                        {% if usuarios_con_rol %}
+                            {% for usuario in usuarios_con_rol %}
+                            <div class="ver-permisos-usuario-item">
+                                <div class="ver-permisos-usuario-avatar">
+                                    {% if usuario.perfil.avatar %}
+                                        <img src="{{ usuario.perfil.avatar.url }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                    {% else %}
+                                        {{ usuario.perfil.get_iniciales|default:usuario.username|slice:":2"|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="ver-permisos-usuario-info">
+                                    <p class="ver-permisos-usuario-nombre">{{ usuario.get_full_name|default:usuario.username }}</p>
+                                    <p class="ver-permisos-usuario-username">@{{ usuario.username }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if stats.usuarios_asignados > usuarios_con_rol|length %}
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    Y {{ stats.usuarios_asignados|add:usuarios_con_rol|length|add:"-10" }} usuario{{ stats.usuarios_asignados|add:usuarios_con_rol|length|add:"-10"|pluralize }} más...
+                                </small>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="ver-permisos-vacio">
+                                <div class="ver-permisos-vacio-icono">
+                                    <i class="bi bi-person-x"></i>
+                                </div>
+                                <h4>Sin usuarios asignados</h4>
+                                <p>No hay usuarios con este rol actualmente.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Información adicional -->
+                <div class="ver-permisos-usuarios-card">
+                    <div class="ver-permisos-usuarios-header">
+                        <h3 class="ver-permisos-usuarios-title">
+                            <i class="bi bi-info-circle"></i>
+                            Información del Rol
+                        </h3>
+                    </div>
+                    <div class="ver-permisos-usuarios-body">
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div>
+                                <strong>Tipo:</strong>
+                                {% if es_rol_sistema %}
+                                <span class="badge bg-primary">Rol del Sistema</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Rol Personalizado</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if not es_rol_sistema %}
+                            <div>
+                                <strong>Creado:</strong>
+                                <small class="text-muted">{{ rol_obj.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            
+                            {% if rol_obj.creado_por %}
+                            <div>
+                                <strong>Creado por:</strong>
+                                <small class="text-muted">{{ rol_obj.creado_por.get_full_name|default:rol_obj.creado_por.username }}</small>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                            
+                            <div>
+                                <strong>Estado:</strong>
+                                {% if es_rol_sistema or rol_obj.activo %}
+                                <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Vista de permisos del rol cargada correctamente');
+
+    // Filtro por categoría
+    const filtroCategoria = document.getElementById('filtroCategoria');
+    const categorias = document.querySelectorAll('.ver-permisos-categoria');
+
+    filtroCategoria.addEventListener('change', function() {
+        const categoriaSeleccionada = this.value;
+        
+        categorias.forEach(categoria => {
+            const nombreCategoria = categoria.getAttribute('data-categoria');
+            
+            if (categoriaSeleccionada === '' || nombreCategoria === categoriaSeleccionada) {
+                categoria.style.display = 'block';
+            } else {
+                categoria.style.display = 'none';
+            }
+        });
+    });
+
+    // Animación de entrada para los permisos
+    const permisos = document.querySelectorAll('.ver-permisos-permiso');
+    permisos.forEach((permiso, index) => {
+        setTimeout(() => {
+            permiso.style.opacity = '0';
+            permiso.style.transform = 'translateY(20px)';
+            permiso.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => {
+                permiso.style.opacity = '1';
+                permiso.style.transform = 'translateY(0)';
+            }, 50);
+        }, index * 50);
+    });
+
+    // Scroll suave para navegación
+    window.scrollToCategory = function(categoria) {
+        const elemento = document.querySelector(`[data-categoria="${categoria}"]`);
+        if (elemento) {
+            elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+});
+</script>
+{% endblock %}
