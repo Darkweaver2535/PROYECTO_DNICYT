@@ -1,0 +1,997 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Alertas y Gestión de Riesgos - Sistema de Gestión{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* === ESTILOS ESPECÍFICOS PARA ALERTAS Y RIESGOS === */
+    .alertas-riesgos-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .alertas-header {
+        background: linear-gradient(135deg, var(--danger-red) 0%, #dc2626 50%, #b91c1c 100%);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+        animation: pulseAlert 2s infinite;
+    }
+
+    .alertas-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: rotate(45deg);
+    }
+
+    .alertas-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .alertas-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 2;
+    }
+
+    .alertas-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .alertas-stat-item {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: transform var(--transition-speed) ease;
+    }
+
+    .alertas-stat-item:hover {
+        transform: translateY(-4px);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .alertas-stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .alertas-stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .alerta-critica-banner {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+        border: 2px solid var(--danger-red);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        animation: pulseAlertBanner 1.5s infinite;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .alerta-critica-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .alerta-critica-icon {
+        font-size: 2.5rem;
+        animation: shake 0.5s infinite alternate;
+    }
+
+    .alerta-critica-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .alertas-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .alertas-main {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .alertas-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .alertas-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .alertas-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .alertas-card-header {
+        background: linear-gradient(135deg, var(--off-white), #f1f5f9);
+        border-bottom: 2px solid var(--border-color);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .alertas-card-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alertas-card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--danger-red), #dc2626);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: var(--shadow-md);
+        flex-shrink: 0;
+    }
+
+    .alertas-card-body {
+        padding: 1.5rem;
+    }
+
+    .alertas-filtros {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .filtros-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .filtro-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filtro-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .filtro-select {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        background: var(--pure-white);
+        transition: border-color var(--transition-speed) ease;
+    }
+
+    .filtro-select:focus {
+        border-color: var(--danger-red);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .alertas-lista {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .alerta-item {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border-left: 4px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-speed) ease;
+        position: relative;
+    }
+
+    .alerta-item:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateX(4px);
+    }
+
+    .alerta-item.critica {
+        border-left-color: var(--danger-red);
+        background: linear-gradient(135deg, var(--pure-white), rgba(239, 68, 68, 0.02));
+    }
+
+    .alerta-item.alta {
+        border-left-color: var(--warning-orange);
+        background: linear-gradient(135deg, var(--pure-white), rgba(245, 158, 11, 0.02));
+    }
+
+    .alerta-item.media {
+        border-left-color: var(--primary-blue);
+        background: linear-gradient(135deg, var(--pure-white), rgba(59, 130, 246, 0.02));
+    }
+
+    .alerta-item.baja {
+        border-left-color: var(--success-green);
+        background: linear-gradient(135deg, var(--pure-white), rgba(16, 185, 129, 0.02));
+    }
+
+    .alerta-header-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .alerta-titulo {
+        font-weight: 700;
+        color: var(--text-dark);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .alerta-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin-bottom: 0.75rem;
+    }
+
+    .alerta-descripcion {
+        color: var(--text-dark);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+
+    .alerta-badges {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .alerta-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .alerta-badge.prioridad-critica {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-red);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .alerta-badge.prioridad-alta {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .alerta-badge.prioridad-media {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--primary-blue);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .alerta-badge.prioridad-baja {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .alerta-badge.tipo {
+        background: rgba(100, 116, 139, 0.1);
+        color: var(--text-light);
+        border: 1px solid rgba(100, 116, 139, 0.3);
+    }
+
+    .alerta-badge.estado {
+        background: rgba(30, 64, 175, 0.1);
+        color: var(--primary-blue);
+        border: 1px solid rgba(30, 64, 175, 0.3);
+    }
+
+    .riesgos-lista {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .riesgo-item {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .riesgo-item:hover {
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-blue);
+    }
+
+    .riesgo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .riesgo-nivel {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .riesgo-nivel.alto {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-red);
+    }
+
+    .riesgo-nivel.medio {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+    }
+
+    .riesgo-nivel.bajo {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+    }
+
+    .riesgo-descripcion {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .riesgo-area {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 0.75rem;
+    }
+
+    .riesgo-matriz {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .matriz-item {
+        background: var(--off-white);
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        text-align: center;
+    }
+
+    .matriz-valor {
+        font-weight: 700;
+        color: var(--primary-blue);
+        font-size: 1.2rem;
+    }
+
+    .estadisticas-areas {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .area-stat {
+        background: var(--pure-white);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .area-stat:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .area-nombre {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .area-numeros {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+    }
+
+    .area-numero {
+        text-align: center;
+    }
+
+    .area-valor {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--primary-blue);
+    }
+
+    .area-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
+    }
+
+    .acciones-lista {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .accion-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background var(--transition-speed) ease;
+    }
+
+    .accion-item:hover {
+        background: var(--off-white);
+    }
+
+    .accion-item:last-child {
+        border-bottom: none;
+    }
+
+    .accion-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: var(--primary-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .accion-content {
+        flex: 1;
+    }
+
+    .accion-descripcion {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .accion-meta {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    /* Animaciones específicas */
+    @keyframes pulseAlert {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
+        }
+    }
+
+    @keyframes pulseAlertBanner {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+        }
+        50% {
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        }
+    }
+
+    @keyframes shake {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(4px); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .alertas-content {
+            grid-template-columns: 1fr;
+        }
+
+        .alertas-title {
+            font-size: 1.8rem;
+        }
+
+        .alertas-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filtros-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .alerta-header-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .alerta-badges {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .riesgo-matriz {
+            grid-template-columns: 1fr;
+        }
+
+        .area-numeros {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="alertas-riesgos-page">
+    <div class="container-fluid">
+        <!-- Header Principal -->
+        <div class="alertas-header fade-in">
+            <h1 class="alertas-title">
+                <i class="bi bi-exclamation-triangle"></i>
+                Alertas y Gestión de Riesgos
+            </h1>
+            <p class="alertas-subtitle">
+                Sistema de monitoreo y gestión proactiva de riesgos de seguridad industrial
+            </p>
+            
+            <!-- Estadísticas en el header -->
+            <div class="alertas-stats">
+                <div class="alertas-stat-item">
+                    <span class="alertas-stat-value">{{ stats.alertas_criticas }}</span>
+                    <span class="alertas-stat-label">Alertas Críticas</span>
+                </div>
+                <div class="alertas-stat-item">
+                    <span class="alertas-stat-value">{{ stats.riesgos_altos }}</span>
+                    <span class="alertas-stat-label">Riesgos Altos</span>
+                </div>
+                <div class="alertas-stat-item">
+                    <span class="alertas-stat-value">{{ stats.incidentes_hoy }}</span>
+                    <span class="alertas-stat-label">Incidentes Hoy</span>
+                </div>
+                <div class="alertas-stat-item">
+                    <span class="alertas-stat-value">{{ stats.normativas_vencidas }}</span>
+                    <span class="alertas-stat-label">Normativas Vencidas</span>
+                </div>
+                <div class="alertas-stat-item">
+                    <span class="alertas-stat-value">{{ stats.nivel_riesgo_general }}%</span>
+                    <span class="alertas-stat-label">Nivel Riesgo General</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banner de Alerta Crítica -->
+        {% if alerta_critica_activa %}
+        <div class="alerta-critica-banner fade-in">
+            <div class="alerta-critica-header">
+                <i class="bi bi-exclamation-triangle-fill alerta-critica-icon"></i>
+                <h3 class="alerta-critica-title">{{ alerta_critica_activa.titulo }}</h3>
+            </div>
+            <p>{{ alerta_critica_activa.descripcion }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Filtros -->
+        <div class="alertas-filtros fade-in">
+            <form method="get" id="filtros-form">
+                <div class="filtros-grid">
+                    <div class="filtro-group">
+                        <label class="filtro-label">Prioridad:</label>
+                        <select name="prioridad" class="filtro-select">
+                            <option value="">Todas las prioridades</option>
+                            <option value="critica" {% if prioridad_filtro == 'critica' %}selected{% endif %}>Crítica</option>
+                            <option value="alta" {% if prioridad_filtro == 'alta' %}selected{% endif %}>Alta</option>
+                            <option value="media" {% if prioridad_filtro == 'media' %}selected{% endif %}>Media</option>
+                            <option value="baja" {% if prioridad_filtro == 'baja' %}selected{% endif %}>Baja</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="filtro-label">Área:</label>
+                        <select name="area" class="filtro-select">
+                            <option value="">Todas las áreas</option>
+                            <option value="soldadura" {% if area_filtro == 'soldadura' %}selected{% endif %}>Soldadura</option>
+                            <option value="maquinado" {% if area_filtro == 'maquinado' %}selected{% endif %}>Maquinado</option>
+                            <option value="fundicion" {% if area_filtro == 'fundicion' %}selected{% endif %}>Fundición</option>
+                            <option value="almacen" {% if area_filtro == 'almacen' %}selected{% endif %}>Almacén</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="filtro-label">Estado:</label>
+                        <select name="estado" class="filtro-select">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="en-progreso" {% if estado_filtro == 'en-progreso' %}selected{% endif %}>En Progreso</option>
+                            <option value="resuelto" {% if estado_filtro == 'resuelto' %}selected{% endif %}>Resuelto</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="filtro-label">Tipo:</label>
+                        <select name="tipo" class="filtro-select">
+                            <option value="">Todos los tipos</option>
+                            <option value="seguridad" {% if tipo_filtro == 'seguridad' %}selected{% endif %}>Seguridad</option>
+                            <option value="normativa" {% if tipo_filtro == 'normativa' %}selected{% endif %}>Normativa</option>
+                            <option value="mantenimiento" {% if tipo_filtro == 'mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="filtro-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-funnel"></i>
+                            Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="alertas-content">
+            <!-- Columna Principal -->
+            <div class="alertas-main">
+                <!-- Alertas Activas -->
+                <div class="alertas-card fade-in">
+                    <div class="alertas-card-header">
+                        <h3 class="alertas-card-title">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Alertas Activas
+                        </h3>
+                        <div class="alertas-card-icon">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                    </div>
+                    <div class="alertas-card-body">
+                        <div class="alertas-lista">
+                            {% for alerta in alertas_activas %}
+                            <div class="alerta-item {{ alerta.prioridad }}">
+                                <div class="alerta-header-item">
+                                    <div>
+                                        <h4 class="alerta-titulo">{{ alerta.titulo }}</h4>
+                                        <div class="alerta-meta">
+                                            <span><i class="bi bi-geo-alt"></i> {{ alerta.area_afectada }}</span>
+                                            <span><i class="bi bi-calendar"></i> {{ alerta.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <p class="alerta-descripcion">{{ alerta.descripcion|truncatechars:150 }}</p>
+                                
+                                <div class="alerta-badges">
+                                    <span class="alerta-badge prioridad-{{ alerta.prioridad }}">
+                                        {{ alerta.get_prioridad_display }}
+                                    </span>
+                                    <span class="alerta-badge tipo">
+                                        {{ alerta.tipo|title }}
+                                    </span>
+                                    <span class="alerta-badge estado">
+                                        {{ alerta.get_estado_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                                <h4 class="mt-3 text-success">¡No hay alertas activas!</h4>
+                                <p class="text-muted">Todos los sistemas están funcionando correctamente.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Evaluación de Riesgos -->
+                <div class="alertas-card fade-in">
+                    <div class="alertas-card-header">
+                        <h3 class="alertas-card-title">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            Riesgos Identificados
+                        </h3>
+                        <div class="alertas-card-icon">
+                            <i class="bi bi-shield-exclamation"></i>
+                        </div>
+                    </div>
+                    <div class="alertas-card-body">
+                        <div class="riesgos-lista">
+                            {% for riesgo in riesgos_identificados %}
+                            <div class="riesgo-item">
+                                <div class="riesgo-header">
+                                    <span class="riesgo-nivel {{ riesgo.nivel_riesgo }}">
+                                        {{ riesgo.get_nivel_riesgo_display }}
+                                    </span>
+                                </div>
+                                
+                                <div class="riesgo-descripcion">{{ riesgo.descripcion_riesgo }}</div>
+                                <div class="riesgo-area">
+                                    <i class="bi bi-building"></i> {{ riesgo.area_evaluada }}
+                                </div>
+                                
+                                <div class="riesgo-matriz">
+                                    <div class="matriz-item">
+                                        <div class="matriz-valor">{{ riesgo.probabilidad }}/5</div>
+                                        <div>Probabilidad</div>
+                                    </div>
+                                    <div class="matriz-item">
+                                        <div class="matriz-valor">{{ riesgo.impacto }}/5</div>
+                                        <div>Impacto</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="alertas-sidebar">
+                <!-- Estadísticas por Área -->
+                <div class="alertas-card fade-in">
+                    <div class="alertas-card-header">
+                        <h3 class="alertas-card-title">
+                            <i class="bi bi-building"></i>
+                            Por Área
+                        </h3>
+                    </div>
+                    <div class="alertas-card-body">
+                        <div class="estadisticas-areas">
+                            {% for area in estadisticas_areas %}
+                            <div class="area-stat">
+                                <div class="area-nombre">{{ area.nombre }}</div>
+                                <div class="area-numeros">
+                                    <div class="area-numero">
+                                        <div class="area-valor">{{ area.total_alertas }}</div>
+                                        <div class="area-label">Total</div>
+                                    </div>
+                                    <div class="area-numero">
+                                        <div class="area-valor text-danger">{{ area.alertas_criticas }}</div>
+                                        <div class="area-label">Críticas</div>
+                                    </div>
+                                    <div class="area-numero">
+                                        <div class="area-valor text-warning">{{ area.alertas_altas }}</div>
+                                        <div class="area-label">Altas</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Últimas Acciones -->
+                <div class="alertas-card fade-in">
+                    <div class="alertas-card-header">
+                        <h3 class="alertas-card-title">
+                            <i class="bi bi-clock-history"></i>
+                            Últimas Acciones
+                        </h3>
+                    </div>
+                    <div class="alertas-card-body">
+                        <div class="acciones-lista">
+                            {% for accion in ultimas_acciones %}
+                            <div class="accion-item">
+                                <div class="accion-icon">
+                                    {% if accion.tipo == 'normativa' %}
+                                        <i class="bi bi-file-text"></i>
+                                    {% elif accion.tipo == 'incidente' %}
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    {% else %}
+                                        <i class="bi bi-activity"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="accion-content">
+                                    <div class="accion-descripcion">{{ accion.descripcion|truncatechars:50 }}</div>
+                                    <div class="accion-meta">
+                                        <i class="bi bi-calendar"></i> {{ accion.fecha|timesince }} ago
+                                        {% if accion.usuario %}
+                                        • <i class="bi bi-person"></i> {{ accion.usuario.get_full_name|default:accion.usuario.username }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-3 text-muted">
+                                <p class="mb-0">No hay acciones recientes</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones Rápidas -->
+                <div class="alertas-card fade-in">
+                    <div class="alertas-card-header">
+                        <h3 class="alertas-card-title">
+                            <i class="bi bi-lightning"></i>
+                            Acciones Rápidas
+                        </h3>
+                    </div>
+                    <div class="alertas-card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'normativas:crear-incidente' %}" class="btn btn-danger btn-sm">
+                                <i class="bi bi-plus-circle me-2"></i>Reportar Incidente
+                            </a>
+                            <a href="{% url 'normativas:inspecciones' %}" class="btn btn-warning btn-sm">
+                                <i class="bi bi-clipboard-check me-2"></i>Nueva Inspección
+                            </a>
+                            <a href="{% url 'normativas:normativas' %}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-file-earmark-text me-2"></i>Ver Normativas
+                            </a>
+                            <a href="{% url 'normativas:api-dashboard-stats' %}" class="btn btn-info btn-sm">
+                                <i class="bi bi-graph-up me-2"></i>Estadísticas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de entrada para elementos
+    const observador = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.fade-in').forEach(elemento => {
+        elemento.style.opacity = '0';
+        elemento.style.transform = 'translateY(20px)';
+        elemento.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observador.observe(elemento);
+    });
+
+    // Auto-submit de filtros
+    const selectores = document.querySelectorAll('.filtro-select');
+    selectores.forEach(selector => {
+        selector.addEventListener('change', function() {
+            document.getElementById('filtros-form').submit();
+        });
+    });
+
+    // Actualizar estadísticas en tiempo real
+    function actualizarEstadisticas() {
+        fetch('{% url "normativas:api-dashboard-stats" %}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Estadísticas actualizadas:', data.stats);
+                    // Aquí puedes actualizar los valores en la página si es necesario
+                }
+            })
+            .catch(error => console.error('Error al actualizar estadísticas:', error));
+    }
+
+    // Actualizar cada 2 minutos
+    setInterval(actualizarEstadisticas, 120000);
+
+    // Confirmación para acciones críticas
+    const botonesCriticos = document.querySelectorAll('.btn-danger');
+    botonesCriticos.forEach(boton => {
+        if (boton.textContent.includes('Reportar')) {
+            boton.addEventListener('click', function(e) {
+                if (!confirm('¿Está seguro de reportar un nuevo incidente?')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+
+    // Sonido de alerta (opcional)
+    {% if alerta_critica_activa %}
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Alerta Crítica de Seguridad', {
+            body: '{{ alerta_critica_activa.descripcion|truncatechars:100 }}',
+            icon: '{% static "icons/alert.png" %}'
+        });
+    }
+    {% endif %}
+});
+</script>
+{% endblock %}

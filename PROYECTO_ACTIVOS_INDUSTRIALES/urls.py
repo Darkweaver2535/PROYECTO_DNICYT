@@ -47,4 +47,6 @@ urlpatterns = [
     path('reportes/', include('apps.reportes.urls')),  # ✅ NUEVA LÍNEA
     path('usuarios/', include('apps.usuarios.urls')),
     path('capacitacion/', include('apps.capacitacion.urls')),  # ✅ Agregar esta línea si no existe
+    path('normativas/', include('apps.normativas.urls')),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

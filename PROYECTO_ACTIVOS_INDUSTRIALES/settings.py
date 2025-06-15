@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'apps.materiales',  # <- AGREGAR ESTA LÍNEA
     'apps.reportes',  # ✅ NUEVA APP
     'apps.dashboard',
+    'apps.normativas',  # <- AGREGAR ESTA LÍNEA
+
 ]
 
 MIDDLEWARE = [

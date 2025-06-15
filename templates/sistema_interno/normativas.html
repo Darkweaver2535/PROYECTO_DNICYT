@@ -1,0 +1,909 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Normativas y Seguridad - Sistema de Gestión Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* === ESTILOS ESPECÍFICOS PARA NORMATIVAS === */
+    .normativas-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .normativas-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        color: white;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .normativas-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: rotate(45deg);
+    }
+
+    .normativas-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .normativas-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .normativas-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .normativas-stat-card {
+        background: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--primary-blue);
+        transition: all var(--transition-speed) ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .normativas-stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .normativas-stat-card.critica {
+        border-left-color: var(--danger-red);
+    }
+
+    .normativas-stat-card.alerta {
+        border-left-color: var(--warning-orange);
+    }
+
+    .normativas-stat-card.exito {
+        border-left-color: var(--success-green);
+    }
+
+    .normativas-stat-icon {
+        font-size: 2.5rem;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+    }
+
+    .normativas-stat-card.critica .normativas-stat-icon {
+        color: var(--danger-red);
+    }
+
+    .normativas-stat-card.alerta .normativas-stat-icon {
+        color: var(--warning-orange);
+    }
+
+    .normativas-stat-card.exito .normativas-stat-icon {
+        color: var(--success-green);
+    }
+
+    .normativas-stat-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .normativas-stat-label {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .normativas-filters {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+
+    .normativas-filter-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .normativas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .normativas-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+        position: relative;
+    }
+
+    .normativas-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .normativas-card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .normativas-card-tipo {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+    }
+
+    .normativas-card-tipo.normativa {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--primary-blue);
+    }
+
+    .normativas-card-tipo.protocolo {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+    }
+
+    .normativas-card-tipo.procedimiento {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-orange);
+    }
+
+    .normativas-card-tipo.manual {
+        background: rgba(139, 92, 246, 0.1);
+        color: #8b5cf6;
+    }
+
+    .normativas-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .normativas-card-descripcion {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .normativas-card-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .normativas-card-body {
+        padding: 1.5rem;
+    }
+
+    .normativas-card-stats {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .normativas-card-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .normativas-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .normativas-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all var(--transition-speed) ease;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .normativas-btn-primary {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .normativas-btn-primary:hover {
+        background: var(--secondary-blue);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .normativas-btn-outline {
+        background: transparent;
+        color: var(--primary-blue);
+        border: 1px solid var(--primary-blue);
+    }
+
+    .normativas-btn-outline:hover {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .normativas-btn-danger {
+        background: var(--danger-red);
+        color: white;
+    }
+
+    .normativas-btn-danger:hover {
+        background: #dc2626;
+        color: white;
+    }
+
+    .normativas-prioridad-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .normativas-prioridad-badge.alta {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-red);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .normativas-prioridad-badge.critica {
+        background: var(--danger-red);
+        color: white;
+        animation: pulse 2s infinite;
+    }
+
+    .normativas-prioridad-badge.media {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-orange);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .normativas-prioridad-badge.baja {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .normativas-alertas {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+
+    .normativas-alerta-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid var(--warning-orange);
+        background: linear-gradient(135deg, var(--pure-white), rgba(245, 158, 11, 0.02));
+    }
+
+    .normativas-alerta-item.critica {
+        border-left-color: var(--danger-red);
+        background: linear-gradient(135deg, var(--pure-white), rgba(239, 68, 68, 0.02));
+    }
+
+    .normativas-alerta-icon {
+        font-size: 1.5rem;
+        color: var(--warning-orange);
+    }
+
+    .normativas-alerta-item.critica .normativas-alerta-icon {
+        color: var(--danger-red);
+    }
+
+    .normativas-section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .normativas-section-title::before {
+        content: '';
+        width: 4px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        border-radius: 2px;
+    }
+
+    .normativas-empty {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-light);
+    }
+
+    .normativas-empty-icon {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 1rem;
+    }
+
+    /* Filtros responsivos */
+    @media (max-width: 768px) {
+        .normativas-title {
+            font-size: 2rem;
+        }
+
+        .normativas-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .normativas-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .normativas-card-actions {
+            flex-direction: column;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .normativas-loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+    }
+
+    .normativas-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--border-color);
+        border-top: 4px solid var(--primary-blue);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Paginación específica */
+    .normativas-pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .normativas-pagination .page-link {
+        color: var(--primary-blue);
+        border-color: var(--border-color);
+        border-radius: 0.5rem;
+        margin: 0 0.25rem;
+    }
+
+    .normativas-pagination .page-link:hover {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+        color: white;
+    }
+
+    .normativas-pagination .page-item.active .page-link {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="normativas-page">
+    <div class="container-fluid">
+        <!-- Header principal -->
+        <div class="normativas-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="normativas-title">
+                        <i class="bi bi-shield-exclamation me-3"></i>
+                        Normativas y Seguridad Industrial
+                    </h1>
+                    <p class="normativas-subtitle">
+                        Gestión integral de normativas, protocolos de seguridad y cumplimiento regulatorio
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if es_admin %}
+                    <a href="{% url 'normativas:crear-normativa' %}" class="normativas-btn normativas-btn-primary">
+                        <i class="bi bi-plus-circle"></i>
+                        Nueva Normativa
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas principales -->
+        <div class="normativas-stats">
+            <div class="normativas-stat-card">
+                <i class="bi bi-file-earmark-text normativas-stat-icon"></i>
+                <div class="normativas-stat-value">{{ stats.vigentes|default:0 }}</div>
+                <div class="normativas-stat-label">Normativas Vigentes</div>
+            </div>
+            
+            <div class="normativas-stat-card critica">
+                <i class="bi bi-exclamation-triangle normativas-stat-icon"></i>
+                <div class="normativas-stat-value">{{ stats.criticas|default:0 }}</div>
+                <div class="normativas-stat-label">Prioridad Crítica</div>
+            </div>
+            
+            <div class="normativas-stat-card alerta">
+                <i class="bi bi-clock normativas-stat-icon"></i>
+                <div class="normativas-stat-value">{{ stats.por_revisar|default:0 }}</div>
+                <div class="normativas-stat-label">Requieren Revisión</div>
+            </div>
+            
+            <div class="normativas-stat-card exito">
+                <i class="bi bi-check-circle normativas-stat-icon"></i>
+                <div class="normativas-stat-value">{{ stats.total_incidentes|default:0 }}</div>
+                <div class="normativas-stat-label">Incidentes Totales</div>
+            </div>
+        </div>
+
+        <!-- Alertas importantes -->
+        {% if alertas %}
+        <div class="normativas-alertas">
+            <h3 class="normativas-section-title">
+                <i class="bi bi-exclamation-triangle"></i>
+                Alertas Importantes
+            </h3>
+            
+            {% for alerta in alertas %}
+            <div class="normativas-alerta-item {% if alerta.tipo == 'critica' %}critica{% endif %}">
+                <i class="bi bi-exclamation-triangle normativas-alerta-icon"></i>
+                <div class="flex-grow-1">
+                    <strong>{{ alerta.titulo }}</strong>
+                    <p class="mb-0">{{ alerta.mensaje }}</p>
+                </div>
+                <small class="text-muted">{{ alerta.fecha|timesince }} ago</small>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Filtros de búsqueda -->
+        <div class="normativas-filters">
+            <div class="normativas-filter-title">
+                <i class="bi bi-funnel"></i>
+                Filtros de Búsqueda
+            </div>
+            
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Búsqueda</label>
+                    <input type="text" class="form-control" name="busqueda" 
+                           value="{{ busqueda }}" placeholder="Buscar normativas...">
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Categoría</label>
+                    <select class="form-select" name="categoria">
+                        <option value="">Todas</option>
+                        {% for categoria in categorias %}
+                        <option value="{{ categoria.id }}" {% if categoria_filtro == categoria.id|stringformat:"s" %}selected{% endif %}>
+                            {{ categoria.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" name="tipo">
+                        <option value="">Todos</option>
+                        {% for valor, etiqueta in tipos %}
+                        <option value="{{ valor }}" {% if tipo_filtro == valor %}selected{% endif %}>
+                            {{ etiqueta }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Prioridad</label>
+                    <select class="form-select" name="prioridad">
+                        <option value="">Todas</option>
+                        {% for valor, etiqueta in prioridades %}
+                        <option value="{{ valor }}" {% if prioridad_filtro == valor %}selected{% endif %}>
+                            {{ etiqueta }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Estado</label>
+                    <select class="form-select" name="estado">
+                        <option value="">Todos</option>
+                        {% for valor, etiqueta in estados %}
+                        <option value="{{ valor }}" {% if estado_filtro == valor %}selected{% endif %}>
+                            {{ etiqueta }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="normativas-btn normativas-btn-primary w-100">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Grid de normativas -->
+        {% if normativas %}
+        <div class="normativas-grid">
+            {% for normativa in normativas %}
+            <div class="normativas-card">
+                <!-- Badge de prioridad -->
+                <div class="normativas-prioridad-badge {{ normativa.prioridad }}">
+                    {{ normativa.get_prioridad_display }}
+                </div>
+                
+                <div class="normativas-card-header">
+                    <div class="normativas-card-tipo {{ normativa.tipo }}">
+                        {{ normativa.get_tipo_display }}
+                    </div>
+                    
+                    <h5 class="normativas-card-title">
+                        <a href="{% url 'normativas:ver-normativa' normativa.id %}" class="text-decoration-none">
+                            {{ normativa.titulo }}
+                        </a>
+                    </h5>
+                    
+                    <p class="normativas-card-descripcion">
+                        {{ normativa.descripcion|truncatewords:25 }}
+                    </p>
+                    
+                    <div class="normativas-card-meta">
+                        <span>
+                            <i class="bi bi-calendar3"></i>
+                            {{ normativa.fecha_modificacion|date:"d/m/Y" }}
+                        </span>
+                        <span>
+                            <i class="bi bi-bookmark"></i>
+                            {{ normativa.categoria.nombre }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="normativas-card-body">
+                    <div class="normativas-card-stats">
+                        <div class="normativas-card-stat">
+                            <i class="bi bi-eye"></i>
+                            {{ normativa.vistas|default:0 }}
+                        </div>
+                        <div class="normativas-card-stat">
+                            <i class="bi bi-download"></i>
+                            {{ normativa.descargas|default:0 }}
+                        </div>
+                        {% if normativa.requiere_revision %}
+                        <div class="normativas-card-stat text-warning">
+                            <i class="bi bi-clock-history"></i>
+                            Revisión pendiente
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="normativas-card-actions">
+                        <a href="{% url 'normativas:ver-normativa' normativa.id %}" 
+                           class="normativas-btn normativas-btn-primary">
+                            <i class="bi bi-eye"></i>
+                            Ver Detalle
+                        </a>
+                        
+                        {% if normativa.archivo_principal %}
+                        <a href="{% url 'normativas:descargar-normativa' normativa.id %}" 
+                           class="normativas-btn normativas-btn-outline">
+                            <i class="bi bi-download"></i>
+                            Descargar
+                        </a>
+                        {% endif %}
+                        
+                        {% if es_admin %}
+                        <a href="{% url 'normativas:editar-normativa' normativa.id %}" 
+                           class="normativas-btn normativas-btn-outline">
+                            <i class="bi bi-pencil"></i>
+                            Editar
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación de normativas" class="normativas-pagination">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.busqueda %}&busqueda={{ request.GET.busqueda }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.busqueda %}&busqueda={{ request.GET.busqueda }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.busqueda %}&busqueda={{ request.GET.busqueda }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.busqueda %}&busqueda={{ request.GET.busqueda }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.busqueda %}&busqueda={{ request.GET.busqueda }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <!-- Estado vacío -->
+        <div class="normativas-empty">
+            <i class="bi bi-file-earmark-x normativas-empty-icon"></i>
+            <h3>No se encontraron normativas</h3>
+            <p>No hay normativas que coincidan con los filtros seleccionados.</p>
+            {% if es_admin %}
+            <a href="{% url 'normativas:crear-normativa' %}" class="normativas-btn normativas-btn-primary">
+                <i class="bi bi-plus-circle"></i>
+                Crear Primera Normativa
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Sección de normativas críticas y populares -->
+        <div class="row mt-4">
+            <!-- Normativas Críticas -->
+            {% if normativas_criticas %}
+            <div class="col-lg-6 mb-4">
+                <div class="normativas-alertas">
+                    <h3 class="normativas-section-title">
+                        <i class="bi bi-exclamation-diamond"></i>
+                        Normativas Críticas
+                    </h3>
+                    
+                    {% for normativa in normativas_criticas %}
+                    <div class="normativas-alerta-item critica">
+                        <i class="bi bi-shield-exclamation normativas-alerta-icon"></i>
+                        <div class="flex-grow-1">
+                            <strong>
+                                <a href="{% url 'normativas:ver-normativa' normativa.id %}" class="text-decoration-none">
+                                    {{ normativa.titulo }}
+                                </a>
+                            </strong>
+                            <p class="mb-0 small">{{ normativa.descripcion|truncatewords:15 }}</p>
+                            <small class="text-muted">
+                                {{ normativa.get_tipo_display }} • {{ normativa.categoria.nombre }}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Normativas Más Consultadas -->
+            {% if normativas_populares %}
+            <div class="col-lg-6 mb-4">
+                <div class="normativas-alertas">
+                    <h3 class="normativas-section-title">
+                        <i class="bi bi-graph-up"></i>
+                        Más Consultadas
+                    </h3>
+                    
+                    {% for normativa in normativas_populares %}
+                    <div class="normativas-alerta-item">
+                        <i class="bi bi-eye normativas-alerta-icon text-primary"></i>
+                        <div class="flex-grow-1">
+                            <strong>
+                                <a href="{% url 'normativas:ver-normativa' normativa.id %}" class="text-decoration-none">
+                                    {{ normativa.titulo }}
+                                </a>
+                            </strong>
+                            <p class="mb-0 small">{{ normativa.descripcion|truncatewords:15 }}</p>
+                            <small class="text-muted">
+                                {{ normativa.vistas }} vistas • {{ normativa.descargas }} descargas
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal para acciones rápidas (si es necesario) -->
+<div class="modal fade" id="accionRapidaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Acción Rápida</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Contenido del modal para acciones rápidas</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Funcionalidad de búsqueda en tiempo real (opcional)
+    const busquedaInput = document.querySelector('input[name="busqueda"]');
+    let busquedaTimeout;
+
+    if (busquedaInput) {
+        busquedaInput.addEventListener('input', function() {
+            clearTimeout(busquedaTimeout);
+            busquedaTimeout = setTimeout(() => {
+                // Aquí podrías implementar búsqueda AJAX si lo deseas
+                console.log('Búsqueda:', this.value);
+            }, 500);
+        });
+    }
+
+    // Tooltips para elementos que lo necesiten
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Confirmación para acciones de eliminación
+    const deleteButtons = document.querySelectorAll('.normativas-btn-danger');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!confirm('¿Está seguro de que desea realizar esta acción?')) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Animación de entrada para las cards
+    const observador = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.normativas-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observador.observe(card);
+    });
+
+    // Actualizar estadísticas cada 5 minutos
+    setInterval(() => {
+        fetch('{% url "normativas:api-dashboard-stats" %}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Estadísticas actualizadas:', data.stats);
+                    // Aquí podrías actualizar los valores en la página
+                }
+            })
+            .catch(error => console.error('Error al actualizar estadísticas:', error));
+    }, 300000); // 5 minutos
+});
+</script>
+{% endblock %}

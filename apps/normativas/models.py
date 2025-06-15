@@ -4,7 +4,6 @@ from django.core.validators import FileExtensionValidator, MinValueValidator, Ma
 from django.utils import timezone
 from django.utils.text import slugify
 from datetime import timedelta
-import os
 
 class CategoriaSeguridad(models.Model):
     """Categorías para clasificar normativas y protocolos de seguridad"""
@@ -37,7 +36,7 @@ class CategoriaSeguridad(models.Model):
     
     @property
     def color_badge(self):
-        return self.color_hex
+        return f"badge" if not self.es_critica else "badge badge-danger"
 
 class NormativaSeguridad(models.Model):
     """Modelo principal para normativas y protocolos de seguridad industrial"""
@@ -124,7 +123,8 @@ class NormativaSeguridad(models.Model):
     # Control de versiones
     version = models.CharField('Versión', max_length=10, default='1.0')
     version_anterior = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True,
-                                       verbose_name='Versión Anterior')
+                                       verbose_name='Versión Anterior',
+                                       related_name='versiones_posteriores')
     motivo_actualizacion = models.TextField('Motivo de Actualización', blank=True)
     
     # Vigencia y revisión
@@ -152,7 +152,8 @@ class NormativaSeguridad(models.Model):
     
     # Normativas relacionadas
     normativas_relacionadas = models.ManyToManyField('self', blank=True, symmetrical=False,
-                                                   verbose_name='Normativas Relacionadas')
+                                                   verbose_name='Normativas Relacionadas',
+                                                   related_name='relacionadas_por')
     
     # Timestamps
     fecha_creacion = models.DateTimeField('Fecha de Creación', auto_now_add=True)
@@ -165,8 +166,8 @@ class NormativaSeguridad(models.Model):
         ordering = ['-fecha_modificacion']
         indexes = [
             models.Index(fields=['estado', 'categoria']),
-            models.Index(fields=['tipo', 'ambito_aplicacion']),
-            models.Index(fields=['prioridad', '-fecha_modificacion']),
+            models.Index(fields=['tipo', 'prioridad']),
+            models.Index(fields=['-fecha_modificacion']),
             models.Index(fields=['codigo']),
         ]
     
@@ -176,21 +177,31 @@ class NormativaSeguridad(models.Model):
     def save(self, *args, **kwargs):
         # Generar slug automáticamente
         if not self.slug:
-            self.slug = slugify(self.titulo)
-            counter = 1
-            original_slug = self.slug
-            while NormativaSeguridad.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
-                self.slug = f"{original_slug}-{counter}"
-                counter += 1
+            self.slug = slugify(self.titulo)[:250]
         
         # Generar código automáticamente
         if not self.codigo:
-            year = timezone.now().year
-            tipo_prefix = self.tipo[:3].upper()
-            count = NormativaSeguridad.objects.filter(
-                codigo__startswith=f"NS-{tipo_prefix}-{year}"
-            ).count() + 1
-            self.codigo = f"NS-{tipo_prefix}-{year}-{count:04d}"
+            # Generar código basado en tipo y fecha
+            fecha = self.fecha_vigencia_inicio or timezone.now().date()
+            tipo_codigo = self.tipo[:3].upper()
+            fecha_codigo = fecha.strftime('%Y')
+            
+            # Buscar el siguiente número secuencial
+            prefix = f"NORM-{tipo_codigo}-{fecha_codigo}"
+            last_norm = NormativaSeguridad.objects.filter(
+                codigo__startswith=prefix
+            ).order_by('-codigo').first()
+            
+            if last_norm and last_norm.codigo:
+                try:
+                    last_num = int(last_norm.codigo.split('-')[-1])
+                    next_num = last_num + 1
+                except (ValueError, IndexError):
+                    next_num = 1
+            else:
+                next_num = 1
+            
+            self.codigo = f"{prefix}-{next_num:04d}"
         
         # Calcular próxima revisión
         if not self.proxima_revision and self.fecha_vigencia_inicio:
@@ -340,20 +351,17 @@ class InspeccionSeguridad(models.Model):
         return f"Inspección {self.normativa.codigo} - {self.fecha_inspeccion.strftime('%d/%m/%Y')}"
     
     @property
-    def color_resultado(self):
-        colores = {
-            'cumple': '#10b981',
-            'cumple_observaciones': '#f59e0b',
-            'no_cumple': '#ef4444',
-            'no_aplica': '#6b7280',
-        }
-        return colores.get(self.resultado, '#6b7280')
+    def esta_vencida(self):
+        if not self.fecha_limite_correccion:
+            return False
+        return self.fecha_limite_correccion < timezone.now().date() and not self.corregido
     
     @property
-    def esta_vencida(self):
-        if not self.fecha_limite_correccion or self.corregido:
-            return False
-        return timezone.now().date() > self.fecha_limite_correccion
+    def dias_para_vencimiento(self):
+        if not self.fecha_limite_correccion:
+            return None
+        delta = self.fecha_limite_correccion - timezone.now().date()
+        return delta.days
 
 class IncidenteSeguridad(models.Model):
     """Registro de incidentes relacionados con seguridad industrial"""
@@ -411,7 +419,8 @@ class IncidenteSeguridad(models.Model):
     
     # Normativas relacionadas
     normativas_incumplidas = models.ManyToManyField(NormativaSeguridad, blank=True,
-                                                   verbose_name='Normativas Incumplidas')
+                                                   verbose_name='Normativas Incumplidas',
+                                                   related_name='incidentes_relacionados')
     
     # Acciones tomadas
     acciones_inmediatas = models.TextField('Acciones Inmediatas Tomadas')
@@ -439,16 +448,17 @@ class IncidenteSeguridad(models.Model):
         verbose_name = 'Incidente de Seguridad'
         verbose_name_plural = 'Incidentes de Seguridad'
         ordering = ['-fecha_incidente']
-        
+    
     def __str__(self):
-        return f"Incidente {self.numero_incidente} - {self.get_tipo_incidente_display()}"
+        return f"Incidente {self.numero_incidente or self.id} - {self.fecha_incidente.strftime('%d/%m/%Y')}"
     
     def save(self, *args, **kwargs):
+        # Generar número de incidente automáticamente
         if not self.numero_incidente:
-            year = timezone.now().year
-            month = timezone.now().month
-            prefix = f"INC-{year}{month:02d}"
+            fecha = timezone.now()
+            prefix = f"INC-{fecha.strftime('%Y%m')}"
             
+            # Buscar el siguiente número secuencial
             last_incident = IncidenteSeguridad.objects.filter(
                 numero_incidente__startswith=prefix
             ).order_by('-numero_incidente').first()
@@ -467,7 +477,11 @@ class IncidenteSeguridad(models.Model):
         super().save(*args, **kwargs)
     
     @property
-    def color_gravedad(self):
+    def esta_pendiente(self):
+        return self.estado in ['reportado', 'investigando']
+    
+    @property
+    def gravedad_color(self):
         colores = {
             'leve': '#10b981',
             'moderado': '#f59e0b',
@@ -476,10 +490,6 @@ class IncidenteSeguridad(models.Model):
             'critico': '#7c2d12',
         }
         return colores.get(self.gravedad, '#6b7280')
-    
-    @property
-    def dias_desde_incidente(self):
-        return (timezone.now().date() - self.fecha_incidente.date()).days
 
 class HistorialNormativa(models.Model):
     """Historial de cambios y accesos a normativas"""
@@ -517,7 +527,7 @@ class HistorialNormativa(models.Model):
         ordering = ['-fecha']
     
     def __str__(self):
-        return f"{self.normativa.codigo} - {self.get_accion_display()} por {self.usuario.username}"
+        return f"{self.normativa.titulo} - {self.get_accion_display()}"
 
 class CapacitacionSeguridad(models.Model):
     """Capacitaciones relacionadas con normativas de seguridad"""
@@ -540,7 +550,8 @@ class CapacitacionSeguridad(models.Model):
     descripcion = models.TextField('Descripción')
     
     normativas_cubiertas = models.ManyToManyField(NormativaSeguridad, 
-                                                 verbose_name='Normativas Cubiertas')
+                                                 verbose_name='Normativas Cubiertas',
+                                                 related_name='capacitaciones')
     
     fecha_inicio = models.DateTimeField('Fecha de Inicio')
     fecha_fin = models.DateTimeField('Fecha de Finalización')
@@ -550,7 +561,8 @@ class CapacitacionSeguridad(models.Model):
     instructor = models.CharField('Instructor/Facilitador', max_length=100)
     max_participantes = models.PositiveIntegerField('Máximo de Participantes', default=20)
     participantes = models.ManyToManyField(User, through='ParticipacionCapacitacion',
-                                         verbose_name='Participantes')
+                                         verbose_name='Participantes',
+                                         related_name='capacitaciones_seguridad')
     
     estado = models.CharField('Estado', max_length=15, choices=ESTADO_CHOICES, default='programada')
     es_obligatoria = models.BooleanField('Capacitación Obligatoria', default=False)
@@ -571,51 +583,44 @@ class CapacitacionSeguridad(models.Model):
         ordering = ['-fecha_inicio']
     
     def __str__(self):
-        return f"{self.titulo} - {self.fecha_inicio.strftime('%d/%m/%Y')}"
+        return self.titulo
     
     @property
-    def participantes_inscritos(self):
-        return self.participaciones.filter(estado='inscrito').count()
+    def esta_activa(self):
+        ahora = timezone.now()
+        return self.fecha_inicio <= ahora <= self.fecha_fin
     
     @property
-    def participantes_completaron(self):
-        return self.participaciones.filter(estado='completado').count()
+    def dias_para_inicio(self):
+        if self.fecha_inicio > timezone.now():
+            delta = self.fecha_inicio - timezone.now()
+            return delta.days
+        return 0
 
 class ParticipacionCapacitacion(models.Model):
-    """Participación de usuarios en capacitaciones de seguridad"""
+    """Tabla intermedia para participación en capacitaciones"""
     
     ESTADO_CHOICES = [
         ('inscrito', 'Inscrito'),
-        ('presente', 'Presente'),
+        ('asistio', 'Asistió'),
+        ('completo', 'Completó'),
+        ('abandono', 'Abandonó'),
         ('ausente', 'Ausente'),
-        ('completado', 'Completado'),
-        ('reprobado', 'Reprobado'),
     ]
     
-    capacitacion = models.ForeignKey(CapacitacionSeguridad, on_delete=models.CASCADE,
-                                   related_name='participaciones')
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE,
-                              related_name='participaciones_seguridad')
-    
+    capacitacion = models.ForeignKey(CapacitacionSeguridad, on_delete=models.CASCADE)
+    participante = models.ForeignKey(User, on_delete=models.CASCADE)
     estado = models.CharField('Estado', max_length=15, choices=ESTADO_CHOICES, default='inscrito')
+    
     fecha_inscripcion = models.DateTimeField('Fecha de Inscripción', auto_now_add=True)
-    fecha_asistencia = models.DateTimeField('Fecha de Asistencia', blank=True, null=True)
-    
-    calificacion = models.DecimalField('Calificación', max_digits=4, decimal_places=2, 
-                                     blank=True, null=True)
-    aprobado = models.BooleanField('Aprobado', default=False)
-    
-    certificado_emitido = models.BooleanField('Certificado Emitido', default=False)
-    fecha_certificacion = models.DateField('Fecha de Certificación', blank=True, null=True)
-    vigencia_certificacion = models.DateField('Vigencia del Certificado', blank=True, null=True)
-    
-    observaciones = models.TextField('Observaciones', blank=True)
+    calificacion = models.DecimalField('Calificación', max_digits=4, decimal_places=2, null=True, blank=True)
+    certificado_otorgado = models.BooleanField('Certificado Otorgado', default=False)
+    comentarios = models.TextField('Comentarios', blank=True)
     
     class Meta:
         verbose_name = 'Participación en Capacitación'
         verbose_name_plural = 'Participaciones en Capacitaciones'
-        unique_together = ['capacitacion', 'usuario']
-        ordering = ['-fecha_inscripcion']
+        unique_together = ['capacitacion', 'participante']
     
     def __str__(self):
-        return f"{self.usuario.get_full_name()} - {self.capacitacion.titulo}"
+        return f"{self.participante.username} - {self.capacitacion.titulo}"

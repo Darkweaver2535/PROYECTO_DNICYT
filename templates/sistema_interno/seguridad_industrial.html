@@ -1,0 +1,1015 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Seguridad Industrial - Sistema de Gestión{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* === ESTILOS ESPECÍFICOS PARA SEGURIDAD INDUSTRIAL === */
+    .seguridad-industrial-page {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 2rem 0;
+    }
+
+    .seguridad-header {
+        background: linear-gradient(135deg, var(--danger-red) 0%, #dc2626 50%, #b91c1c 100%);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .seguridad-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: rotate(45deg);
+    }
+
+    .seguridad-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .seguridad-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 2;
+    }
+
+    .seguridad-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .seguridad-stat-item {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: transform var(--transition-speed) ease;
+    }
+
+    .seguridad-stat-item:hover {
+        transform: translateY(-4px);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .seguridad-stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .seguridad-stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .seguridad-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .seguridad-main {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .seguridad-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .seguridad-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .seguridad-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .seguridad-card-header {
+        background: linear-gradient(135deg, var(--off-white), #f1f5f9);
+        border-bottom: 2px solid var(--border-color);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .seguridad-card-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+        flex: 1;
+    }
+
+    .seguridad-card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--danger-red), #dc2626);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .seguridad-card-body {
+        padding: 1.5rem;
+    }
+
+    .alerta-critica {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        border: 2px solid var(--danger-red);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        animation: pulseAlerta 2s infinite;
+    }
+
+    .alerta-critica-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .alerta-critica-icon {
+        font-size: 2rem;
+        color: var(--danger-red);
+        animation: shake 0.5s infinite alternate;
+    }
+
+    .alerta-critica-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--danger-red);
+        margin: 0;
+    }
+
+    .alerta-critica-text {
+        color: var(--text-dark);
+        font-weight: 500;
+        line-height: 1.6;
+    }
+
+    .normativas-lista {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .normativa-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        background: var(--pure-white);
+        transition: all var(--transition-speed) ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .normativa-item:hover {
+        border-color: var(--danger-red);
+        background: linear-gradient(135deg, var(--pure-white), rgba(239, 68, 68, 0.02));
+        transform: translateX(4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .normativa-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: white;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .normativa-icon.critica {
+        background: var(--danger-red);
+    }
+
+    .normativa-icon.alta {
+        background: #f59e0b;
+    }
+
+    .normativa-icon.media {
+        background: var(--primary-blue);
+    }
+
+    .normativa-icon.baja {
+        background: var(--success-green);
+    }
+
+    .normativa-content {
+        flex: 1;
+    }
+
+    .normativa-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+
+    .normativa-meta {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .normativa-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .normativa-badge.critica {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-red);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .normativa-badge.alta {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .normativa-badge.media {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--primary-blue);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .normativa-badge.baja {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .incidentes-lista {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .incidente-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background var(--transition-speed) ease;
+    }
+
+    .incidente-item:hover {
+        background: var(--off-white);
+    }
+
+    .incidente-item:last-child {
+        border-bottom: none;
+    }
+
+    .incidente-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--danger-red);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .incidente-content {
+        flex: 1;
+    }
+
+    .incidente-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+    }
+
+    .incidente-details {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+    }
+
+    .incidente-status {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .incidente-status.reportado {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-red);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .incidente-status.investigando {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .incidente-status.resuelto {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-green);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .seguridad-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .seguridad-action-card {
+        background: var(--pure-white);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        border: 2px solid var(--border-color);
+        transition: all var(--transition-speed) ease;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .seguridad-action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .seguridad-action-card:hover::before {
+        left: 100%;
+    }
+
+    .seguridad-action-card:hover {
+        border-color: var(--danger-red);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        background: linear-gradient(135deg, var(--pure-white), rgba(239, 68, 68, 0.02));
+    }
+
+    .seguridad-action-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--danger-red), #dc2626);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8rem;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        z-index: 2;
+    }
+
+    .seguridad-action-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .seguridad-action-description {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        line-height: 1.5;
+        position: relative;
+        z-index: 2;
+    }
+
+    .inspeccion-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background var(--transition-speed) ease;
+    }
+
+    .inspeccion-item:hover {
+        background: var(--off-white);
+    }
+
+    .inspeccion-item:last-child {
+        border-bottom: none;
+    }
+
+    .inspeccion-status {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .inspeccion-status.cumple {
+        background: var(--success-green);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+
+    .inspeccion-status.no-cumple {
+        background: var(--danger-red);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+    }
+
+    .inspeccion-status.observaciones {
+        background: var(--warning-orange);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    }
+
+    .inspeccion-content {
+        flex: 1;
+    }
+
+    .inspeccion-normativa {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .inspeccion-details {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .progreso-seguridad {
+        background: var(--off-white);
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .progreso-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .progreso-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .progreso-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .progreso-valor {
+        font-weight: 700;
+        color: var(--danger-red);
+        font-size: 1.1rem;
+    }
+
+    .progreso-bar-container {
+        background: #e5e7eb;
+        border-radius: 1rem;
+        height: 8px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+    }
+
+    .progreso-bar {
+        height: 100%;
+        border-radius: 1rem;
+        transition: width 0.8s ease;
+    }
+
+    .progreso-bar.excelente {
+        background: linear-gradient(90deg, var(--success-green), #10b981);
+    }
+
+    .progreso-bar.bueno {
+        background: linear-gradient(90deg, var(--primary-blue), #3b82f6);
+    }
+
+    .progreso-bar.regular {
+        background: linear-gradient(90deg, var(--warning-orange), #f59e0b);
+    }
+
+    .progreso-bar.critico {
+        background: linear-gradient(90deg, var(--danger-red), #dc2626);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .seguridad-content {
+            grid-template-columns: 1fr;
+        }
+
+        .seguridad-title {
+            font-size: 1.8rem;
+        }
+
+        .seguridad-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .seguridad-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .normativa-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes pulseAlerta {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
+        }
+    }
+
+    @keyframes shake {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(4px); }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Scrollbar personalizado para listas */
+    .incidentes-lista::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .incidentes-lista::-webkit-scrollbar-track {
+        background: var(--off-white);
+        border-radius: 3px;
+    }
+
+    .incidentes-lista::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+    }
+
+    .incidentes-lista::-webkit-scrollbar-thumb:hover {
+        background: var(--text-light);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="seguridad-industrial-page">
+    <div class="container-fluid">
+        <!-- Header Principal -->
+        <div class="seguridad-header fade-in">
+            <h1 class="seguridad-title">
+                <i class="bi bi-shield-exclamation"></i>
+                Seguridad Industrial
+            </h1>
+            <p class="seguridad-subtitle">
+                Sistema integral de gestión de seguridad para el Laboratorio de Metal Mecánica
+            </p>
+            
+            <!-- Estadísticas en el header -->
+            <div class="seguridad-stats">
+                <div class="seguridad-stat-item">
+                    <span class="seguridad-stat-value">{{ stats.normativas_vigentes }}</span>
+                    <span class="seguridad-stat-label">Normativas Vigentes</span>
+                </div>
+                <div class="seguridad-stat-item">
+                    <span class="seguridad-stat-value">{{ stats.incidentes_este_mes }}</span>
+                    <span class="seguridad-stat-label">Incidentes este Mes</span>
+                </div>
+                <div class="seguridad-stat-item">
+                    <span class="seguridad-stat-value">{{ stats.inspecciones_pendientes }}</span>
+                    <span class="seguridad-stat-label">Inspecciones Pendientes</span>
+                </div>
+                <div class="seguridad-stat-item">
+                    <span class="seguridad-stat-value">{{ stats.cumplimiento_promedio }}%</span>
+                    <span class="seguridad-stat-label">Cumplimiento General</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerta Crítica (si existe) -->
+        {% if alerta_critica %}
+        <div class="alerta-critica fade-in">
+            <div class="alerta-critica-header">
+                <i class="bi bi-exclamation-triangle-fill alerta-critica-icon"></i>
+                <h3 class="alerta-critica-title">{{ alerta_critica.titulo }}</h3>
+            </div>
+            <p class="alerta-critica-text">{{ alerta_critica.mensaje }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Acciones Rápidas -->
+        <div class="seguridad-actions fade-in">
+            <a href="{% url 'normativas:normativas' %}" class="seguridad-action-card">
+                <div class="seguridad-action-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <h4 class="seguridad-action-title">Ver Normativas</h4>
+                <p class="seguridad-action-description">Consultar todas las normativas de seguridad vigentes</p>
+            </a>
+
+            <a href="{% url 'normativas:crear-normativa' %}" class="seguridad-action-card">
+                <div class="seguridad-action-icon">
+                    <i class="bi bi-plus-circle"></i>
+                </div>
+                <h4 class="seguridad-action-title">Nueva Normativa</h4>
+                <p class="seguridad-action-description">Crear una nueva normativa de seguridad</p>
+            </a>
+
+            <a href="{% url 'normativas:incidentes' %}" class="seguridad-action-card">
+                <div class="seguridad-action-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h4 class="seguridad-action-title">Reportar Incidente</h4>
+                <p class="seguridad-action-description">Reportar un incidente de seguridad</p>
+            </a>
+
+            <a href="{% url 'normativas:inspecciones' %}" class="seguridad-action-card">
+                <div class="seguridad-action-icon">
+                    <i class="bi bi-clipboard-check"></i>
+                </div>
+                <h4 class="seguridad-action-title">Inspecciones</h4>
+                <p class="seguridad-action-description">Realizar y gestionar inspecciones de seguridad</p>
+            </a>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="seguridad-content">
+            <!-- Columna Principal -->
+            <div class="seguridad-main">
+                <!-- Normativas Críticas -->
+                <div class="seguridad-card fade-in">
+                    <div class="seguridad-card-header">
+                        <div class="seguridad-card-icon">
+                            <i class="bi bi-shield-fill-exclamation"></i>
+                        </div>
+                        <h3 class="seguridad-card-title">Normativas Críticas</h3>
+                        <a href="{% url 'normativas:normativas' %}?prioridad=critica" class="btn btn-sm btn-outline-danger">
+                            Ver Todas
+                        </a>
+                    </div>
+                    <div class="seguridad-card-body">
+                        <div class="normativas-lista">
+                            {% for normativa in normativas_criticas %}
+                            <a href="{% url 'normativas:ver-normativa' normativa.id %}" class="normativa-item">
+                                <div class="normativa-icon {{ normativa.prioridad }}">
+                                    <i class="{{ normativa.icono_tipo|default:'bi-shield-exclamation' }}"></i>
+                                </div>
+                                <div class="normativa-content">
+                                    <div class="normativa-title">{{ normativa.titulo|truncatechars:50 }}</div>
+                                    <div class="normativa-meta">
+                                        <span class="normativa-badge {{ normativa.prioridad }}">
+                                            {{ normativa.get_prioridad_display }}
+                                        </span>
+                                        <span><i class="bi bi-building"></i> {{ normativa.get_ambito_aplicacion_display }}</span>
+                                        <span><i class="bi bi-calendar"></i> {{ normativa.fecha_vigencia_inicio|date:"d/m/Y" }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                            {% empty %}
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-check-circle text-success fs-2"></i>
+                                <p class="mt-2">No hay normativas críticas pendientes</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Incidentes Recientes -->
+                <div class="seguridad-card fade-in">
+                    <div class="seguridad-card-header">
+                        <div class="seguridad-card-icon">
+                            <i class="bi bi-exclamation-circle"></i>
+                        </div>
+                        <h3 class="seguridad-card-title">Incidentes Recientes</h3>
+                        <a href="{% url 'normativas:incidentes' %}" class="btn btn-sm btn-outline-danger">
+                            Ver Todos
+                        </a>
+                    </div>
+                    <div class="seguridad-card-body">
+                        <div class="incidentes-lista">
+                            {% for incidente in incidentes_recientes %}
+                            <div class="incidente-item">
+                                <div class="incidente-icon">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </div>
+                                <div class="incidente-content">
+                                    <div class="incidente-title">{{ incidente.get_tipo_incidente_display }}</div>
+                                    <div class="incidente-details">
+                                        <i class="bi bi-geo-alt"></i> {{ incidente.area_afectada }} • 
+                                        <i class="bi bi-calendar"></i> {{ incidente.fecha_incidente|date:"d/m/Y H:i" }} •
+                                        <i class="bi bi-person"></i> {{ incidente.reportado_por.get_full_name|default:incidente.reportado_por.username }}
+                                    </div>
+                                    <span class="incidente-status {{ incidente.estado }}">
+                                        {{ incidente.get_estado_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-check-circle text-success fs-2"></i>
+                                <p class="mt-2">No hay incidentes recientes</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="seguridad-sidebar">
+                <!-- Progreso de Cumplimiento -->
+                <div class="seguridad-card fade-in">
+                    <div class="seguridad-card-header">
+                        <div class="seguridad-card-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h3 class="seguridad-card-title">Indicadores</h3>
+                    </div>
+                    <div class="seguridad-card-body">
+                        <div class="progreso-seguridad">
+                            <div class="progreso-item">
+                                <span class="progreso-label">Cumplimiento General</span>
+                                <span class="progreso-valor">{{ stats.cumplimiento_promedio }}%</span>
+                            </div>
+                            <div class="progreso-bar-container">
+                                <div class="progreso-bar {% if stats.cumplimiento_promedio >= 90 %}excelente{% elif stats.cumplimiento_promedio >= 75 %}bueno{% elif stats.cumplimiento_promedio >= 60 %}regular{% else %}critico{% endif %}" 
+                                     style="width: {{ stats.cumplimiento_promedio }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="progreso-seguridad">
+                            <div class="progreso-item">
+                                <span class="progreso-label">Inspecciones al Día</span>
+                                <span class="progreso-valor">{{ stats.porcentaje_inspecciones }}%</span>
+                            </div>
+                            <div class="progreso-bar-container">
+                                <div class="progreso-bar {% if stats.porcentaje_inspecciones >= 90 %}excelente{% elif stats.porcentaje_inspecciones >= 75 %}bueno{% elif stats.porcentaje_inspecciones >= 60 %}regular{% else %}critico{% endif %}" 
+                                     style="width: {{ stats.porcentaje_inspecciones }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="progreso-seguridad">
+                            <div class="progreso-item">
+                                <span class="progreso-label">Capacitaciones</span>
+                                <span class="progreso-valor">{{ stats.porcentaje_capacitaciones }}%</span>
+                            </div>
+                            <div class="progreso-bar-container">
+                                <div class="progreso-bar {% if stats.porcentaje_capacitaciones >= 90 %}excelente{% elif stats.porcentaje_capacitaciones >= 75 %}bueno{% elif stats.porcentaje_capacitaciones >= 60 %}regular{% else %}critico{% endif %}" 
+                                     style="width: {{ stats.porcentaje_capacitaciones }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Últimas Inspecciones -->
+                <div class="seguridad-card fade-in">
+                    <div class="seguridad-card-header">
+                        <div class="seguridad-card-icon">
+                            <i class="bi bi-clipboard-check"></i>
+                        </div>
+                        <h3 class="seguridad-card-title">Últimas Inspecciones</h3>
+                    </div>
+                    <div class="seguridad-card-body">
+                        {% for inspeccion in inspecciones_recientes %}
+                        <div class="inspeccion-item">
+                            <div class="inspeccion-status {% if inspeccion.resultado == 'cumple' %}cumple{% elif inspeccion.resultado == 'no_cumple' %}no-cumple{% else %}observaciones{% endif %}"></div>
+                            <div class="inspeccion-content">
+                                <div class="inspeccion-normativa">{{ inspeccion.normativa.titulo|truncatechars:40 }}</div>
+                                <div class="inspeccion-details">
+                                    {{ inspeccion.area_inspeccionada }} • {{ inspeccion.fecha_inspeccion|date:"d/m/Y" }}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-3 text-muted">
+                            <p class="mb-0">No hay inspecciones registradas</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Próximas Capacitaciones -->
+                <div class="seguridad-card fade-in">
+                    <div class="seguridad-card-header">
+                        <div class="seguridad-card-icon">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <h3 class="seguridad-card-title">Próximas Capacitaciones</h3>
+                    </div>
+                    <div class="seguridad-card-body">
+                        {% for capacitacion in capacitaciones_proximas %}
+                        <div class="inspeccion-item">
+                            <div class="inspeccion-status" style="background: var(--primary-blue);"></div>
+                            <div class="inspeccion-content">
+                                <div class="inspeccion-normativa">{{ capacitacion.titulo|truncatechars:40 }}</div>
+                                <div class="inspeccion-details">
+                                    <i class="bi bi-calendar"></i> {{ capacitacion.fecha_inicio|date:"d/m/Y H:i" }} •
+                                    <i class="bi bi-person"></i> {{ capacitacion.instructor }}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-3 text-muted">
+                            <p class="mb-0">No hay capacitaciones programadas</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Enlaces Rápidos -->
+                <div class="seguridad-card fade-in">
+                    <div class="seguridad-card-header">
+                        <div class="seguridad-card-icon">
+                            <i class="bi bi-link-45deg"></i>
+                        </div>
+                        <h3 class="seguridad-card-title">Enlaces Rápidos</h3>
+                    </div>
+                    <div class="seguridad-card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'normativas:capacitaciones' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-mortarboard me-2"></i>Capacitaciones
+                            </a>
+                            <a href="{% url 'normativas:gestionar-normativas' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-gear me-2"></i>Gestionar Normativas
+                            </a>
+                            <a href="{% url 'normativas:api-dashboard-stats' %}" class="btn btn-outline-info btn-sm">
+                                <i class="bi bi-graph-up me-2"></i>Estadísticas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de entrada para elementos
+    const observador = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.fade-in').forEach(elemento => {
+        elemento.style.opacity = '0';
+        elemento.style.transform = 'translateY(20px)';
+        elemento.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observador.observe(elemento);
+    });
+
+    // Actualizar estadísticas en tiempo real
+    function actualizarEstadisticas() {
+        fetch('{% url "normativas:api-dashboard-stats" %}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar contadores si es necesario
+                    console.log('Estadísticas actualizadas:', data.stats);
+                }
+            })
+            .catch(error => console.error('Error al actualizar estadísticas:', error));
+    }
+
+    // Actualizar cada 5 minutos
+    setInterval(actualizarEstadisticas, 300000);
+
+    // Animación de barras de progreso
+    function animarBarrasProgreso() {
+        const barras = document.querySelectorAll('.progreso-bar');
+        barras.forEach(barra => {
+            const ancho = barra.style.width;
+            barra.style.width = '0%';
+            setTimeout(() => {
+                barra.style.width = ancho;
+            }, 300);
+        });
+    }
+
+    // Animar barras al cargar
+    setTimeout(animarBarrasProgreso, 500);
+
+    // Tooltips para elementos interactivos
+    const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipElements.forEach(element => {
+        new bootstrap.Tooltip(element);
+    });
+
+    // Confirmación para acciones críticas
+    const accionesCriticas = document.querySelectorAll('.accion-critica');
+    accionesCriticas.forEach(accion => {
+        accion.addEventListener('click', function(e) {
+            if (!confirm('¿Está seguro de realizar esta acción?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

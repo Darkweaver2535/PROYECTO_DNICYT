@@ -1546,21 +1546,25 @@
                     Normativas y Seguridad
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
-                        <i class="nav-icon bi bi-clipboard-check"></i>
+                    <a href="{% url 'normativas:normativas' %}" class="nav-link {% if request.resolver_match.namespace == 'normativas' %}active{% endif %}">
+                        <i class="nav-icon bi bi-file-earmark-text"></i>
                         <span class="nav-text">Normativas</span>
+                        <span class="nav-counter" id="normativas-counter">{{ stats.normativas_vigentes|default:0 }}</span>
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a href="{% url 'normativas:seguridad-industrial' %}" class="nav-link {% if request.resolver_match.url_name == 'seguridad-industrial' %}active{% endif %}">
                         <i class="nav-icon bi bi-shield-check"></i>
                         <span class="nav-text">Seguridad Industrial</span>
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link disabled" href="#">
+                    <a href="{% url 'normativas:alertas-riesgos' %}" class="nav-link {% if request.resolver_match.url_name == 'alertas-riesgos' %}active{% endif %}">
                         <i class="nav-icon bi bi-exclamation-triangle"></i>
                         <span class="nav-text">Alertas y Riesgos</span>
+                        {% if stats.alertas_criticas > 0 %}
+                        <span class="nav-counter pulse">{{ stats.alertas_criticas }}</span>
+                        {% endif %}
                     </a>
                 </div>
             </div>
