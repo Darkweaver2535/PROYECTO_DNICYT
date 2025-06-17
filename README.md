@@ -574,7 +574,7 @@ python manage.py collectstatic
 
 ### **Contacto**
 - 📧 **Email**: soporte@laboratorio-metalmecanica.edu.bo
-- 📱 **WhatsApp**: +591 XXXX-XXXX
+- 📱 **WhatsApp**: +591 76260216
 - 🌐 **Web**: https://laboratorio-metalmecanica.edu.bo
 
 ---
@@ -594,7 +594,6 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ---
 
-**Última actualización**: Diciembre 2024  
 **Versión del Sistema**: 2.0.0  
 **Estado**: En desarrollo activo ✅
 
