@@ -1292,11 +1292,13 @@
                     <i class="bi bi-speedometer2"></i>
                     Dashboard
                 </div>
+                <!-- Dashboard en el sidebar -->
                 <div class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
-                       href="{% url 'dashboard' %}">
+                    <a href="/dashboard/" 
+                       class="nav-link" 
+                       id="dashboard-link">
                         <i class="nav-icon bi bi-speedometer2"></i>
-                        <span class="nav-text">Inicio / Dashboard</span>
+                        <span class="nav-text">Inicio - Dashboard</span>
                     </a>
                 </div>
             </div>
@@ -1392,6 +1394,14 @@
                         <span class="nav-text">Análisis de Riesgos</span>
                     </a>
                 </div>
+                    <!-- NUEVO ENLACE UNIFICADO -->
+                <div class="nav-item">
+                    <a href="{% url 'operaciones:movimientos-unificados' %}" class="nav-link {% if request.resolver_match.url_name == 'movimientos-unificados' %}active{% endif %}">
+                    <i class="nav-icon bi bi-arrow-repeat"></i>
+                    <span class="nav-text">Movimientos</span>
+                    <span class="nav-badge beta">Unificado</span>
+                    </a>
+                </div>
             </div>
 
             <!-- INVENTARIO -->
@@ -1418,14 +1428,7 @@
                     </a>
                 </div>
                 
-                    <!-- NUEVO ENLACE UNIFICADO -->
-                <div class="nav-item">
-                    <a href="{% url 'operaciones:movimientos-unificados' %}" class="nav-link {% if request.resolver_match.url_name == 'movimientos-unificados' %}active{% endif %}">
-                    <i class="nav-icon bi bi-arrow-repeat"></i>
-                    <span class="nav-text">Movimientos</span>
-                    <span class="nav-badge beta">Unificado</span>
-                    </a>
-                </div>
+                
                 
                 <div class="nav-item">
                     <a href="{% url 'inventario:proveedores' %}" 
@@ -1846,8 +1849,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+      // ✅ VERIFICACIÓN ESPECÍFICA PARA DASHBOARD (PRIMERA PRIORIDAD)
+    if (currentPath === '/dashboard/' || currentPath === '/dashboard' || currentPath === '/') {
+        console.log('Detectada página de Dashboard');
+        markActiveLink('#dashboard-link', true);
+        return; // Salir aquí para evitar otras verificaciones
+    }
     // ✅ MARCADO ESPECÍFICO PARA USUARIOS
-    if (currentPath.includes('/usuarios/roles-permisos/') || currentPath.includes('roles-permisos')) {
+    else if (currentPath.includes('/usuarios/roles-permisos/') || currentPath.includes('roles-permisos')) {
         markActiveLink('a[href*="roles-permisos"]', ['/usuarios/roles-permisos'], true);
     }
     else if (currentPath.includes('/usuarios/respaldos/')) {
@@ -1919,26 +1928,132 @@ document.addEventListener('DOMContentLoaded', function() {
         markActiveLink('a[href*="normativas"][href$="/normativas/"]', ['/normativas'], true);
     }
     
-    // ✅ MARCADO ESPECÍFICO PARA INVENTARIO
-    else if (currentPath.includes('/inventario/repuestos/')) {
-        markActiveLink('a[href*="repuestos"]', ['/inventario/repuestos'], true);
-    } else if (currentPath.includes('/inventario/stock-critico/')) {
+    // ✅ MARCADO ESPECÍFICO PARA INVENTARIO (CORREGIDO)
+    else if (currentPath.includes('/inventario/repuestos/') || 
+             currentPath.includes('/inventario/crear-repuesto/') ||
+             currentPath.includes('/inventario/repuesto/') ||
+             currentPath.includes('/inventario/editar-repuesto/') ||
+             currentPath.includes('/inventario/eliminar-repuesto/') ||
+             currentPath.includes('/inventario/exportar-repuestos/')) {
+        markActiveLink('a[href*="inventario/repuestos"]', ['/inventario/repuestos'], true);
+    }
+    else if (currentPath.includes('/inventario/stock-critico/')) {
         markActiveLink('a[href*="stock-critico"]', ['/inventario/stock-critico'], true);
-    } else if (currentPath.includes('/inventario/proveedores/')) {
-        markActiveLink('a[href*="proveedores"]', ['/inventario/proveedores'], true);
-    } else if (currentPath.includes('/inventario/')) {
-        markActiveLink('a[href*="inventario"]', ['/inventario'], true);
+    }
+    else if (currentPath.includes('/inventario/proveedores/') ||
+             currentPath.includes('/inventario/crear-proveedor/') ||
+             currentPath.includes('/inventario/detalle-proveedor/') ||
+             currentPath.includes('/inventario/editar-proveedor/') ||
+             currentPath.includes('/inventario/eliminar-proveedor/')) {
+        markActiveLink('a[href*="inventario/proveedores"]', ['/inventario/proveedores'], true);
+    }
+    else if (currentPath.includes('/inventario/movimientos/') || 
+             currentPath.includes('/inventario/crear-movimiento/') ||
+             currentPath.includes('/inventario/movimiento/')) {
+        markActiveLink('a[href*="inventario/movimientos"]', ['/inventario/movimientos'], true);
+    }
+    else if (currentPath.includes('/inventario/reportes-inventario/') ||
+             currentPath.includes('/inventario/exportar-excel/') ||
+             currentPath.includes('/inventario/exportar-pdf/')) {
+        markActiveLink('a[href*="reportes-inventario"]', ['/inventario/reportes-inventario'], true);
+    }
+    else if (currentPath.includes('/inventario/') && 
+             !currentPath.includes('repuestos') && 
+             !currentPath.includes('stock-critico') && 
+             !currentPath.includes('proveedores') &&
+             !currentPath.includes('movimientos') &&
+             !currentPath.includes('reportes-inventario') &&
+             !currentPath.includes('exportar')) {
+        markActiveLink('a[href*="inventario"][href$="/inventario/"]', ['/inventario'], true);
     }
     
-    // === RESTO DE SECCIONES ===
-    else if (currentPath.includes('/equipos/')) {
-        markActiveLink('a[href*="equipos"]', ['/equipos'], true);
+    // ✅ MARCADO ESPECÍFICO PARA EQUIPOS (CORREGIDO)
+    else if (currentPath.includes('/equipos/fichas-tecnicas/') ||
+             currentPath.includes('/equipos/crear-ficha/') ||
+             currentPath.includes('/equipos/editar-ficha/') ||
+             currentPath.includes('/equipos/ficha-pdf/') ||
+             currentPath.includes('/equipos/imprimir-ficha/') ||
+             currentPath.includes('/equipos/ficha-detallada/')) {
+        markActiveLink('a[href*="fichas-tecnicas"]', ['/equipos/fichas-tecnicas'], true);
     }
-    else if (currentPath.includes('/mantenimiento/')) {
-        markActiveLink('a[href*="mantenimiento"]', ['/mantenimiento'], true);
+    else if (currentPath.includes('/equipos/codigos-qr/') ||
+             currentPath.includes('/equipos/generar-qr/')) {
+        markActiveLink('a[href*="codigos-qr"]', ['/equipos/codigos-qr'], true);
     }
-    else if (currentPath.includes('/operaciones/')) {
-        markActiveLink('a[href*="operaciones"]', ['/operaciones'], true);
+    else if (currentPath.includes('/equipos/') && 
+             !currentPath.includes('fichas-tecnicas') && 
+             !currentPath.includes('codigos-qr') &&
+             !currentPath.includes('generar-qr') &&
+             !currentPath.includes('crear-ficha') &&
+             !currentPath.includes('editar-ficha') &&
+             !currentPath.includes('ficha-pdf') &&
+             !currentPath.includes('imprimir-ficha') &&
+             !currentPath.includes('ficha-detallada')) {
+        markActiveLink('a[href*="equipos"][href$="/equipos/"]', ['/equipos'], true);
+    }
+    // ✅ MARCADO ESPECÍFICO PARA MANTENIMIENTO (CORREGIDO)
+    else if (currentPath.includes('/mantenimiento/planes/') ||
+             currentPath.includes('/mantenimiento/crear-plan/') ||
+             currentPath.includes('/mantenimiento/editar-plan/') ||
+             currentPath.includes('/mantenimiento/plan-detalle/') ||
+             currentPath.includes('/mantenimiento/eliminar-plan/')) {
+        markActiveLink('a[href*="planes-mantenimiento"]', ['/mantenimiento/planes'], true);
+    }
+    else if (currentPath.includes('/mantenimiento/ordenes/') ||
+             currentPath.includes('/mantenimiento/crear-orden/') ||
+             currentPath.includes('/mantenimiento/orden-detalle/') ||
+             currentPath.includes('/mantenimiento/actualizar-orden/')) {
+        markActiveLink('a[href*="ordenes-trabajo"]', ['/mantenimiento/ordenes'], true);
+    }
+    else if (currentPath.includes('/mantenimiento/tareas/') ||
+             currentPath.includes('/mantenimiento/crear-tarea/')) {
+        markActiveLink('a[href*="mantenimiento/tareas"]', ['/mantenimiento/tareas'], true);
+    }
+    else if (currentPath.includes('/mantenimiento/analisis-predictivo/')) {
+        markActiveLink('a[href*="analisis-predictivo"]', ['/mantenimiento/analisis-predictivo'], true);
+    }
+    else if (currentPath.includes('/mantenimiento/') && 
+             !currentPath.includes('planes') && 
+             !currentPath.includes('ordenes') && 
+             !currentPath.includes('tareas') &&
+             !currentPath.includes('analisis-predictivo')) {
+        markActiveLink('a[href*="mantenimiento"][href$="/mantenimiento/"]', ['/mantenimiento'], true);
+    }
+     // ✅ MARCADO ESPECÍFICO PARA OPERACIONES (CORREGIDO)
+    else if (currentPath.includes('/operaciones/movimientos/') || 
+             currentPath.includes('/operaciones/crear-movimiento/') ||
+             currentPath.includes('/operaciones/movimiento/') ||
+             currentPath.includes('/operaciones/editar-movimiento/') ||
+             currentPath.includes('/operaciones/eliminar-movimiento/') ||
+             currentPath.includes('operaciones/movimientos')) {
+        markActiveLink('a[href*="operaciones/movimientos"]', ['/operaciones/movimientos'], true);
+    }
+    else if (currentPath.includes('/operaciones/pops/') || 
+             currentPath.includes('/operaciones/procedimientos/') ||
+             currentPath.includes('/operaciones/crear-pop/') ||
+             currentPath.includes('/operaciones/pop/') ||
+             currentPath.includes('procedimientos')) {
+        markActiveLink('a[href*="pops"]', ['/operaciones/pops', '/operaciones/procedimientos'], true);
+    }
+    else if (currentPath.includes('/operaciones/analisis-riesgos/') ||
+             currentPath.includes('/operaciones/crear-analisis/') ||
+             currentPath.includes('/operaciones/analisis/') ||
+             currentPath.includes('analisis-riesgos')) {
+        markActiveLink('a[href*="analisis-riesgos"]', ['/operaciones/analisis-riesgos'], true);
+    }
+    else if (currentPath.includes('/operaciones/diagnosticos/') ||
+             currentPath.includes('/operaciones/crear-diagnostico/') ||
+             currentPath.includes('/operaciones/diagnostico/') ||
+             currentPath.includes('diagnosticos')) {
+        markActiveLink('a[href*="diagnosticos"]', ['/operaciones/diagnosticos'], true);
+    }
+    else if (currentPath.includes('/operaciones/') && 
+             !currentPath.includes('movimientos') && 
+             !currentPath.includes('pops') && 
+             !currentPath.includes('procedimientos') &&
+             !currentPath.includes('analisis-riesgos') &&
+             !currentPath.includes('diagnosticos')) {
+        markActiveLink('a[href*="operaciones"][href$="/operaciones/"]', ['/operaciones'], true);
     }
     else if (currentPath.includes('/dashboard/') || currentPath === '/') {
         markActiveLink('a[href*="dashboard"]', ['/dashboard'], true);
