@@ -396,40 +396,31 @@
         </ol>
     </nav>
 
-    <!-- Header Principal -->
+    <!-- MODIFICAR: Cambiar el estilo en la sección del encabezado para un fondo azul -->
     <div class="ficha-header">
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h1 class="h2 mb-3 fw-bold">
-                    <i class="bi bi-file-earmark-text me-3"></i>
-                    Ficha Técnica Completa
+                    {{ equipo.nombre }}
                 </h1>
                 <div class="ficha-equipment-code mb-3">{{ equipo.codigo_interno }}</div>
                 <h2 class="h3 mb-3">{{ equipo.nombre }}</h2>
                 <p class="mb-3 opacity-75 fs-5">{{ equipo.fabricante|default:"Fabricante no especificado" }} | {{ equipo.modelo|default:"Modelo no especificado" }}</p>
                 <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <span class="ficha-status-badge 
-                        {% if equipo.estado == 'OPERATIVO' %}status-operativo
-                        {% elif equipo.estado == 'MANTENIMIENTO' %}status-mantenimiento
-                        {% else %}status-fuera-servicio{% endif %}">
-                        {% if equipo.estado == 'OPERATIVO' %}
-                            <i class="bi bi-check-circle-fill"></i>
-                        {% elif equipo.estado == 'MANTENIMIENTO' %}
-                            <i class="bi bi-tools"></i>
-                        {% else %}
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                        {% endif %}
+                    <span class="ficha-status-badge {% if equipo.estado == 'OPERATIVO' %}status-operativo{% elif equipo.estado == 'MANTENIMIENTO' %}status-mantenimiento{% else %}status-fuera-servicio{% endif %}">
+                        <i class="bi bi-circle-fill"></i>
                         {{ equipo.get_estado_display }}
                     </span>
                 </div>
             </div>
             <div class="col-md-4 text-md-end">
-                <div class="ficha-progress">
+                <div class="ficha-progress" style="background: linear-gradient(135deg, var(--ficha-light), rgba(37, 99, 235, 0.1)); border-radius: 1rem; padding: 1.5rem;">
                     <h4 class="mb-2">Completitud de Documentación</h4>
                     <div class="ficha-progress-bar">
-                        <div class="ficha-progress-fill" style="width: {{ equipo.calcular_completitud_ficha }}%"></div>
+                        <div class="ficha-progress-fill" style="width: {{ equipo.calcular_completitud_ficha }}%;"></div>
                     </div>
-                    <div class="fw-bold fs-4">{{ equipo.calcular_completitud_ficha }}%</div>
+                    <div class="fw-bold fs-5 mt-2">{{ equipo.calcular_completitud_ficha }}%</div>
+                    <small class="text-muted">Completitud de la ficha técnica</small>
                 </div>
             </div>
         </div>
@@ -462,13 +453,14 @@
                 </div>
             </div>
             
-            <div class="ficha-item {% if equipo.numero_serie %}has-data{% else %}no-data{% endif %}">
+            <!-- Corregir número de serie -->
+            <div class="ficha-item {% if equipo.serie %}has-data{% else %}no-data{% endif %}">
                 <div class="ficha-label">
                     <i class="bi bi-upc"></i>
                     Número de Serie
                 </div>
-                <div class="ficha-value {% if not equipo.numero_serie %}empty{% endif %}">
-                    {{ equipo.numero_serie|default:"No especificado" }}
+                <div class="ficha-value {% if not equipo.serie %}empty{% endif %}">
+                    {{ equipo.serie|default:"No especificado" }}
                 </div>
             </div>
             
@@ -504,7 +496,7 @@
             
             <div class="ficha-item {% if equipo.peso %}has-data{% else %}no-data{% endif %}">
                 <div class="ficha-label">
-                    <i class="bi bi-rulers"></i>
+                    <i class="bi bi-border-width"></i>
                     Peso
                 </div>
                 <div class="ficha-value {% if not equipo.peso %}empty{% endif %}">
@@ -529,16 +521,6 @@
                 </div>
                 <div class="ficha-value {% if not equipo.capacidad %}empty{% endif %}">
                     {{ equipo.capacidad|default:"No especificada" }}
-                </div>
-            </div>
-            
-            <div class="ficha-item {% if equipo.serie %}has-data{% else %}no-data{% endif %}">
-                <div class="ficha-label">
-                    <i class="bi bi-barcode"></i>
-                    Serie
-                </div>
-                <div class="ficha-value {% if not equipo.serie %}empty{% endif %}">
-                    {{ equipo.serie|default:"No especificado" }}
                 </div>
             </div>
             
@@ -662,7 +644,7 @@
             
             <div class="ficha-item {% if equipo.presion_trabajo %}has-data{% else %}no-data{% endif %}">
                 <div class="ficha-label">
-                    <i class="bi bi-speedometer2"></i>
+                    <i class="bi bi-speedometer"></i>
                     Presión de Trabajo
                 </div>
                 <div class="ficha-value {% if not equipo.presion_trabajo %}empty{% endif %}">
@@ -682,6 +664,91 @@
         </div>
     </div>
 
+        <!-- AGREGAR: Materiales y Herramientas -->
+    <div class="ficha-section">
+        <h2 class="ficha-section-title">
+            <i class="bi bi-tools ficha-section-icon"></i>
+            Materiales y Herramientas
+        </h2>
+        
+        <!-- Layout Horizontal: Materiales y Herramientas lado a lado -->
+        <div class="row g-4">
+            <!-- Columna Materiales -->
+            <div class="col-lg-6">
+                <h3 class="mb-3 fw-bold">
+                    <i class="bi bi-box-seam me-2"></i>Materiales Necesarios
+                </h3>
+                {% if equipo.materiales_necesarios.exists %}
+                    <div class="row g-3">
+                        {% for material in equipo.materiales_necesarios.all %}
+                            <div class="col-12">
+                                <div class="ficha-item has-data">
+                                    <div class="ficha-label">
+                                        <i class="bi bi-box2"></i>
+                                        {{ material.nombre }}
+                                    </div>
+                                    <div class="ficha-value">
+                                        <div><strong>Código:</strong> {{ material.codigo }}</div>
+                                        <div><strong>Stock:</strong> {{ material.stock_actual }} {{ material.get_unidad_medida_display }}</div>
+                                        <div>
+                                            <span class="badge {% if material.estado == 'disponible' %}bg-success{% elif material.estado == 'agotado' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                {{ material.get_estado_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="ficha-empty-state">
+                        <div class="ficha-empty-icon">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <h3>Sin Materiales Asignados</h3>
+                        <p class="text-muted">No hay materiales registrados para este equipo.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Columna Herramientas -->
+            <div class="col-lg-6">
+                <h3 class="mb-3 fw-bold">
+                    <i class="bi bi-wrench me-2"></i>Herramientas Necesarias
+                </h3>
+                {% if equipo.herramientas_necesarias.exists %}
+                    <div class="row g-3">
+                        {% for herramienta in equipo.herramientas_necesarias.all %}
+                            <div class="col-12">
+                                <div class="ficha-item has-data">
+                                    <div class="ficha-label">
+                                        <i class="bi bi-tools"></i>
+                                        {{ herramienta.nombre }}
+                                    </div>
+                                    <div class="ficha-value">
+                                        <div><strong>Código:</strong> {{ herramienta.codigo }}</div>
+                                        <div>
+                                            <span class="badge {% if herramienta.estado == 'disponible' %}bg-success{% elif herramienta.estado == 'en_uso' %}bg-info{% else %}bg-warning{% endif %}">
+                                                {{ herramienta.get_estado_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="ficha-empty-state">
+                        <div class="ficha-empty-icon">
+                            <i class="bi bi-wrench"></i>
+                        </div>
+                        <h3>Sin Herramientas Asignadas</h3>
+                        <p class="text-muted">No hay herramientas registradas para este equipo.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
     <!-- Ubicación y Organización -->
     <div class="ficha-section">
         <h2 class="ficha-section-title">

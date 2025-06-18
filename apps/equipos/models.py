@@ -2,6 +2,7 @@
 from django.db import models
 from django.urls import reverse
 from django.core.validators import RegexValidator
+from apps.materiales.models import Material
 
 class Seccion(models.Model):
     nombre = models.CharField(max_length=100)
@@ -138,9 +139,6 @@ class Equipo(models.Model):
     presion_trabajo = models.DecimalField("Presión de Trabajo (Bar)", max_digits=6, decimal_places=2, blank=True, null=True)
     caudal_aire = models.IntegerField("Caudal de Aire (L/min)", blank=True, null=True)
     
-    # Seguridad industrial (por ahora como texto, después se puede expandir)
-    epp_requerido = models.TextField("Equipos de Protección Personal", blank=True, null=True)
-    
     # Documentos técnicos
     esquema_electrico = models.FileField("Esquema Eléctrico", upload_to='documentos/esquemas/', blank=True, null=True)
     manual_operacion = models.FileField("Manual de Operación", upload_to='documentos/manuales/', blank=True, null=True)
@@ -157,6 +155,33 @@ class Equipo(models.Model):
     ficha_tecnica_completa = models.BooleanField("Ficha Técnica Completa", default=False)
     fecha_actualizacion_ficha = models.DateTimeField("Última Actualización Ficha", auto_now=True)
 
+    # Relaciones con materiales y herramientas
+    materiales_necesarios = models.ManyToManyField(
+        Material, 
+        related_name='equipos_que_lo_usan',
+        blank=True,
+        limit_choices_to={'tipo__in': [
+            'material_construccion', 'material_soldadura', 'consumible_general',
+            'quimico_laboratorio', 'lubricante', 'adhesivo_sellante', 'material_abrasivo',
+            'material_electrico', 'material_metalico', 'combustible', 'gas_industrial',
+            'pintura_recubrimiento'
+        ]},
+        verbose_name="Materiales Necesarios"
+    )
+    herramientas_necesarias = models.ManyToManyField(
+        Material,
+        related_name='equipos_que_lo_requieren',
+        blank=True,
+        limit_choices_to={'tipo__in': [
+            'herramienta_manual', 'herramienta_electrica', 'herramienta_precision',
+            'herramienta_soldadura', 'herramienta_corte', 'herramienta_medicion',
+            'herramienta_seguridad', 'instrumento_laboratorio', 'herramienta_neumatica',
+            'herramienta_hidraulica', 'equipo_calibracion', 'instrumento_medicion_digital',
+            'herramienta_especial'
+        ]},
+        verbose_name="Herramientas Necesarias"
+    )
+
     def __str__(self):
         return f"{self.codigo_interno} - {self.nombre}"
 
@@ -165,7 +190,7 @@ class Equipo(models.Model):
     
     def calcular_completitud_ficha(self):
         """Calcula el porcentaje de completitud de la ficha técnica"""
-        campos_totales = 25  # Total de campos importantes para la ficha
+        campos_totales = 26  # Total de campos importantes para la ficha (incluyendo materiales/herramientas)
         campos_completos = 0
         
         # Campos básicos (peso 2 cada uno por ser fundamentales)
@@ -210,6 +235,14 @@ class Equipo(models.Model):
         if self.responsable:
             campos_completos += 1
         
+        # Materiales y herramientas (peso 2 cada uno por su importancia)
+        # Solo verificar si el objeto ya existe en la base de datos
+        if self.pk is not None:  # Verificamos si el objeto ya tiene ID (ya está guardado)
+            if self.materiales_necesarios.exists():
+                campos_completos += 2
+            if self.herramientas_necesarias.exists():
+                campos_completos += 2
+        
         porcentaje = min(int((campos_completos / campos_totales) * 100), 100)
         
         # Actualizar el campo de ficha completa
@@ -222,7 +255,7 @@ class Equipo(models.Model):
         # Verificar si tiene al menos algunos campos técnicos completos
         campos_tecnicos = [
             self.numero_serie, self.voltaje, self.peso, self.amperaje, 
-            self.temperatura_min, self.temperatura_max, self.epp_requerido,
+            self.temperatura_min, self.temperatura_max, 
             self.frecuencia_mantenimiento, self.ubicacion_especifica
         ]
         
@@ -232,11 +265,16 @@ class Equipo(models.Model):
         return campos_completos >= 2
 
     def save(self, *args, **kwargs):
-        # Actualizar completitud y estado de ficha al guardar
-        completitud = self.calcular_completitud_ficha()
-        # Cambiar la lógica: si tiene más del 30% de completitud O tiene datos técnicos significativos
-        self.ficha_tecnica_completa = completitud >= 30 or self.tiene_ficha_tecnica()
+        # Primero guardar el objeto para que tenga un ID
+        es_nuevo = self.pk is None
         super().save(*args, **kwargs)
+        
+        # Después de guardar, ahora podemos calcular la completitud
+        if not es_nuevo:  # Si no es un objeto nuevo, actualizar completitud
+            completitud = self.calcular_completitud_ficha()
+            self.ficha_tecnica_completa = completitud >= 30 or self.tiene_ficha_tecnica()
+            if self._state.db:  # Evitar llamadas recursivas a save
+                super().save(update_fields=['ficha_tecnica_completa'])
     
     def clean(self):
         from django.core.exceptions import ValidationError

@@ -793,8 +793,7 @@
                                         </label>
                                         {{ form.fabricante }}
                                         <div class="form-text">
-                                            <i class="bi bi-info-circle"></i>
-                                            Empresa fabricante del equipo
+                                            <i class="bi bi-info-circle"></i> Empresa responsable de la fabricación del equipo
                                         </div>
                                     </div>
                                 </div>
@@ -806,34 +805,94 @@
                                         </label>
                                         {{ form.año_fabricacion }}
                                         <div class="form-text">
-                                            <i class="bi bi-info-circle"></i>
-                                            Año de fabricación del equipo
+                                            <i class="bi bi-info-circle"></i> Año en que el equipo fue fabricado
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="id_potencia" class="form-label">
-                                            <i class="bi bi-lightning"></i>
-                                            Potencia
+                                            <i class="bi bi-lightning-charge"></i> Potencia
                                         </label>
                                         {{ form.potencia }}
                                         <div class="form-text">
-                                            <i class="bi bi-info-circle"></i>
-                                            Ejemplo: 5 kW, 10 HP, 220V
+                                            <i class="bi bi-info-circle"></i> Potencia nominal del equipo
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="id_capacidad" class="form-label">
-                                            <i class="bi bi-speedometer2"></i>
-                                            Capacidad
+                                            <i class="bi bi-speedometer"></i> Capacidad
                                         </label>
                                         {{ form.capacidad }}
                                         <div class="form-text">
-                                            <i class="bi bi-info-circle"></i>
-                                            Ejemplo: 200 kg/h, 500 mm, 10 bar
+                                            <i class="bi bi-info-circle"></i> Capacidad o volumen operativo
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- NUEVA SUBSECCIÓN DE ESPECIFICACIONES ELÉCTRICAS -->
+                            <div class="mt-4 pt-3 border-top">
+                                <h5 class="form-section-title" style="font-size: 1.1rem; margin-bottom: 1.2rem;">
+                                    <i class="bi bi-lightning" style="font-size: 1.3rem;"></i>
+                                    Especificaciones Eléctricas
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="id_voltaje" class="form-label">
+                                                <i class="bi bi-lightning-fill"></i> Voltaje
+                                            </label>
+                                            {{ form.voltaje }}
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle"></i> Voltaje de operación del equipo
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="id_amperaje" class="form-label">
+                                                <i class="bi bi-lightning-charge-fill"></i> Amperaje
+                                            </label>
+                                            {{ form.amperaje }}
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle"></i> Corriente consumida por el equipo
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="id_fases" class="form-label">
+                                                <i class="bi bi-diagram-3"></i> Tipo de Alimentación
+                                            </label>
+                                            {{ form.fases }}
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle"></i> Tipo de alimentación eléctrica
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="id_frecuencia" class="form-label">
+                                                <i class="bi bi-activity"></i> Frecuencia
+                                            </label>
+                                            {{ form.frecuencia }}
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle"></i> Frecuencia de la corriente eléctrica
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="id_consumo_electrico" class="form-label">
+                                                <i class="bi bi-battery-charging"></i> Consumo Eléctrico
+                                            </label>
+                                            {{ form.consumo_electrico }}
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle"></i> Consumo eléctrico en kW
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -963,6 +1022,80 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- NUEVA SECCIÓN: Materiales y Herramientas -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-tools"></i>
+                                Materiales y Herramientas
+                            </div>
+                            
+                            <!-- Materiales -->
+                            <div class="mb-4">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-box-seam me-2"></i>Materiales Necesarios
+                                </h5>
+                                
+                                {% if materiales_disponibles %}
+                                    <div class="form-group">
+                                        <label for="id_materiales_necesarios" class="form-label">
+                                            Seleccione los materiales que utilizará este equipo
+                                        </label>
+                                        {{ form.materiales_necesarios }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i> Puede seleccionar múltiples materiales manteniendo presionada la tecla Ctrl (o Cmd en Mac)
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">No hay materiales disponibles</h6>
+                                                <p class="mb-0">Para agregar materiales al equipo, primero debe registrarlos en el sistema.</p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <a href="{% url 'materiales:crear-material' %}" class="btn btn-warning">
+                                            <i class="bi bi-plus-circle me-2"></i>Ir a Crear Materiales
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Herramientas -->
+                            <div>
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-wrench me-2"></i>Herramientas Necesarias
+                                </h5>
+                                
+                                {% if herramientas_disponibles %}
+                                    <div class="form-group">
+                                        <label for="id_herramientas_necesarias" class="form-label">
+                                            Seleccione las herramientas que se necesitan para este equipo
+                                        </label>
+                                        {{ form.herramientas_necesarias }}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle"></i> Puede seleccionar múltiples herramientas manteniendo presionada la tecla Ctrl (o Cmd en Mac)
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">No hay herramientas disponibles</h6>
+                                                <p class="mb-0">Para agregar herramientas al equipo, primero debe registrarlas en el sistema.</p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <a href="{% url 'materiales:crear-herramienta' %}" class="btn btn-warning">
+                                            <i class="bi bi-plus-circle me-2"></i>Ir a Crear Herramientas
+                                        </a>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
 

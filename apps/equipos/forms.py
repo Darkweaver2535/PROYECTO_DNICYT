@@ -8,7 +8,11 @@ class EquipoForm(forms.ModelForm):
             'codigo_interno', 'nombre', 'modelo', 'serie', 'fabricante',
             'año_fabricacion', 'potencia', 'capacidad', 'ubicacion_fisica',
             'seccion', 'tipo_equipo', 'estado', 'responsable', 'observaciones',
-            'udb_unidad', 'udb_numero', 'foto'  # <-- Agregar este campo
+            'udb_unidad', 'udb_numero', 'foto',
+            # Especificaciones eléctricas
+            'voltaje', 'amperaje', 'fases', 'frecuencia', 'consumo_electrico',
+            # Materiales y herramientas
+            'materiales_necesarios', 'herramientas_necesarias'
         ]
         
         widgets = {
@@ -79,15 +83,70 @@ class EquipoForm(forms.ModelForm):
                 'class': 'form-control edit-equipment-container',
                 'accept': 'image/*'
             }),
+            # Añadimos los widgets para las especificaciones eléctricas
+            'voltaje': forms.Select(attrs={
+                'class': 'form-select edit-equipment-container'
+            }),
+            'amperaje': forms.TextInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'placeholder': 'Ej: 10A, 15-20A'
+            }),
+            'fases': forms.Select(attrs={
+                'class': 'form-select edit-equipment-container'
+            }),
+            'frecuencia': forms.Select(attrs={
+                'class': 'form-select edit-equipment-container'
+            }),
+            'consumo_electrico': forms.NumberInput(attrs={
+                'class': 'form-control edit-equipment-container',
+                'step': '0.01',
+                'placeholder': 'Consumo en kW'
+            }),
+            # Añadir al final:
+            'materiales_necesarios': forms.SelectMultiple(attrs={
+                'class': 'form-select edit-equipment-container select2',
+                'data-placeholder': 'Seleccione los materiales necesarios'
+            }),
+            'herramientas_necesarias': forms.SelectMultiple(attrs={
+                'class': 'form-select edit-equipment-container select2',
+                'data-placeholder': 'Seleccione las herramientas necesarias'
+            }),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Hacer obligatorios los campos esenciales
-        self.fields['codigo_interno'].required = True
-        self.fields['nombre'].required = True
-        self.fields['seccion'].required = True
-        self.fields['estado'].required = True
+        
+        # Optimizar consultas para mejorar rendimiento
+        from apps.materiales.models import Material
+        
+        # Configurar campos de materiales y herramientas
+        materiales = Material.objects.filter(
+            tipo__in=[
+                'material_construccion', 'material_soldadura', 'consumible_general',
+                'quimico_laboratorio', 'lubricante', 'adhesivo_sellante', 'material_abrasivo',
+                'material_electrico', 'material_metalico', 'combustible', 'gas_industrial',
+                'pintura_recubrimiento'
+            ],
+            activo=True
+        ).order_by('nombre')
+        
+        herramientas = Material.objects.filter(
+            tipo__in=[
+                'herramienta_manual', 'herramienta_electrica', 'herramienta_precision',
+                'herramienta_soldadura', 'herramienta_corte', 'herramienta_medicion',
+                'herramienta_seguridad', 'instrumento_laboratorio', 'herramienta_neumatica',
+                'herramienta_hidraulica', 'equipo_calibracion', 'instrumento_medicion_digital',
+                'herramienta_especial'
+            ],
+            activo=True
+        ).order_by('nombre')
+        
+        self.fields['materiales_necesarios'].queryset = materiales
+        self.fields['herramientas_necesarias'].queryset = herramientas
+        
+        # Verificar si hay materiales y herramientas disponibles
+        self.materiales_disponibles = materiales.exists()
+        self.herramientas_disponibles = herramientas.exists()
 
 class FichaTecnicaForm(forms.ModelForm):
     class Meta:
@@ -95,12 +154,8 @@ class FichaTecnicaForm(forms.ModelForm):
         fields = [
             # Información técnica básica
             'numero_serie', 'peso',
-            # Especificaciones eléctricas
-            'voltaje', 'amperaje', 'fases', 'frecuencia', 'consumo_electrico',
             # Condiciones de operación
             'temperatura_min', 'temperatura_max', 'humedad_max', 'presion_trabajo', 'caudal_aire',
-            # Seguridad
-            'epp_requerido',
             # Documentos
             'esquema_electrico', 'manual_operacion',
             # Mantenimiento
@@ -118,24 +173,6 @@ class FichaTecnicaForm(forms.ModelForm):
                 'class': 'form-control',
                 'step': '0.01',
                 'placeholder': 'Peso en kilogramos'
-            }),
-            'voltaje': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'amperaje': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ej: 10A, 15-20A'
-            }),
-            'fases': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'frecuencia': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'consumo_electrico': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'placeholder': 'Consumo en kW'
             }),
             'temperatura_min': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -159,11 +196,6 @@ class FichaTecnicaForm(forms.ModelForm):
             'caudal_aire': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Caudal en L/min'
-            }),
-            'epp_requerido': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Equipos de protección personal requeridos'
             }),
             'esquema_electrico': forms.FileInput(attrs={
                 'class': 'form-control',

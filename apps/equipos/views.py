@@ -76,7 +76,38 @@ class EquipoCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['current_year'] = datetime.now().year
+        
+        # Comprobar si hay materiales y herramientas disponibles
+        form = self.get_form()
+        context['materiales_disponibles'] = getattr(form, 'materiales_disponibles', False)
+        context['herramientas_disponibles'] = getattr(form, 'herramientas_disponibles', False)
+        
         return context
+    
+    def form_valid(self, form):
+        # Guardar los valores seleccionados de los campos ManyToMany
+        materiales = form.cleaned_data.get('materiales_necesarios', [])
+        herramientas = form.cleaned_data.get('herramientas_necesarias', [])
+        
+        # Eliminar temporalmente del cleaned_data para evitar el error
+        form.cleaned_data.pop('materiales_necesarios', None)
+        form.cleaned_data.pop('herramientas_necesarias', None)
+        
+        # Primero guardar el equipo sin las relaciones ManyToMany
+        self.object = form.save()
+        
+        # Después de guardar, añadir las relaciones ManyToMany
+        if materiales:
+            self.object.materiales_necesarios.set(materiales)
+            
+        if herramientas:
+            self.object.herramientas_necesarias.set(herramientas)
+        
+        # Calcular completitud ahora que tenemos el objeto guardado
+        self.object.calcular_completitud_ficha()
+        self.object.save()
+        
+        return super().form_valid(form)
 
 class EquipoUpdateView(UpdateView):
     model = Equipo
@@ -259,7 +290,7 @@ def exportar_ficha_pdf_view(request, pk):
     story.append(title)
     story.append(Spacer(1, 12))
     
-    # Datos del equipo
+    # Datos básicos del equipo
     data = [
         ['Campo', 'Valor'],
         ['Código Interno', equipo.codigo_interno],
@@ -271,6 +302,19 @@ def exportar_ficha_pdf_view(request, pk):
         ['Sección', equipo.get_seccion_display()],
     ]
     
+    # Añadir datos eléctricos
+    if equipo.voltaje:
+        data.append(['Voltaje', equipo.voltaje])
+    if equipo.amperaje:
+        data.append(['Amperaje', equipo.amperaje])
+    if equipo.fases:
+        data.append(['Tipo de Alimentación', equipo.get_fases_display()])
+    if equipo.frecuencia:
+        data.append(['Frecuencia', equipo.frecuencia])
+    if equipo.consumo_electrico:
+        data.append(['Consumo Eléctrico', f"{equipo.consumo_electrico} kW"])
+        
+    # Tabla principal
     table = Table(data, colWidths=[2*inch, 4*inch])
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -284,6 +328,71 @@ def exportar_ficha_pdf_view(request, pk):
     ]))
     
     story.append(table)
+    story.append(Spacer(1, 20))
+    
+    # Añadir sección de materiales y herramientas
+    subtitle = Paragraph("Materiales y Herramientas Necesarios", styles['Heading2'])
+    story.append(subtitle)
+    story.append(Spacer(1, 10))
+    
+    # Tabla de materiales
+    if equipo.materiales_necesarios.exists():
+        story.append(Paragraph("Materiales:", styles['Heading3']))
+        story.append(Spacer(1, 6))
+        materiales_data = [['Nombre', 'Código', 'Stock Actual', 'Estado']]
+        
+        for material in equipo.materiales_necesarios.all():
+            materiales_data.append([
+                material.nombre,
+                material.codigo,
+                str(material.stock_actual),
+                material.get_estado_display()
+            ])
+        
+        materiales_table = Table(materiales_data, colWidths=[2.5*inch, inch, inch, 1.5*inch])
+        materiales_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        story.append(materiales_table)
+        story.append(Spacer(1, 15))
+    else:
+        story.append(Paragraph("Materiales: No se han especificado", styles['Normal']))
+        story.append(Spacer(1, 10))
+    
+    # Tabla de herramientas
+    if equipo.herramientas_necesarias.exists():
+        story.append(Paragraph("Herramientas:", styles['Heading3']))
+        story.append(Spacer(1, 6))
+        herramientas_data = [['Nombre', 'Código', 'Estado']]
+        
+        for herramienta in equipo.herramientas_necesarias.all():
+            herramientas_data.append([
+                herramienta.nombre,
+                herramienta.codigo,
+                herramienta.get_estado_display()
+            ])
+        
+        herramientas_table = Table(herramientas_data, colWidths=[3*inch, 1.5*inch, 1.5*inch])
+        herramientas_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgreen),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        story.append(herramientas_table)
+    else:
+        story.append(Paragraph("Herramientas: No se han especificado", styles['Normal']))
+    
+    # Construir el PDF
     doc.build(story)
     
     return response
@@ -314,10 +423,19 @@ def imprimir_ficha_view(request, pk):
 
 @login_required
 def ficha_detallada_view(request, pk):
-    equipo = get_object_or_404(Equipo, pk=pk)
+    # Usar select_related y prefetch_related para optimizar consultas
+    equipo = get_object_or_404(
+        Equipo.objects.prefetch_related('materiales_necesarios', 'herramientas_necesarias'),
+        pk=pk
+    )
+    
+    # Calcular completitud explícitamente para asegurar que esté actualizada
+    completitud = equipo.calcular_completitud_ficha()
     
     context = {
         'equipo': equipo,
+        'completitud': completitud,
+        'titulo': f'Ficha Técnica - {equipo.nombre}'
     }
     return render(request, 'sistema_interno/ficha_detallada.html', context)
 

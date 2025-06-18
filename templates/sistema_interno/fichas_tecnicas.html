@@ -934,31 +934,6 @@
                             </div>
                         </div>
 
-                        <!-- Nueva Sección: Seguridad Industrial -->
-                        <div class="ficha-subsection mt-3">
-                            <h5 class="ficha-subsection-title">
-                                <i class="bi bi-shield-check"></i>
-                                Seguridad Industrial
-                            </h5>
-                            <div class="ficha-details-grid">
-                                <div class="ficha-detail-item">
-                                    <i class="bi bi-person-gear ficha-detail-icon"></i>
-                                    <span class="ficha-detail-label">EPP Requerido:</span>
-                                    <span class="ficha-detail-value">{{ equipo.epp_requerido|default:"No especificado" }}</span>
-                                </div>
-                                <div class="ficha-detail-item ficha-detail-disabled">
-                                    <i class="bi bi-exclamation-triangle ficha-detail-icon"></i>
-                                    <span class="ficha-detail-label">Procedimiento POP:</span>
-                                    <span class="ficha-detail-value">En desarrollo</span>
-                                </div>
-                                <div class="ficha-detail-item ficha-detail-disabled">
-                                    <i class="bi bi-shield-x ficha-detail-icon"></i>
-                                    <span class="ficha-detail-label">Matriz IPER:</span>
-                                    <span class="ficha-detail-value">En desarrollo</span>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Nueva Sección: Documentos Técnicos -->
                         <div class="ficha-subsection mt-3">
                             <h5 class="ficha-subsection-title">
@@ -1019,7 +994,6 @@
                             <h5 class="ficha-subsection-title">
                                 <i class="bi bi-clipboard-check"></i>
                                 Normativas y Cumplimiento
-                                <span class="ficha-badge-coming-soon">Próximamente</span>
                             </h5>
                             <div class="ficha-compliance-grid">
                                 <div class="ficha-compliance-item ficha-compliance-disabled">
@@ -1036,6 +1010,38 @@
                                     <i class="bi bi-gear-wide"></i>
                                     <span class="compliance-title">IEEE</span>
                                     <small>Estándares Eléctricos</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nueva Sección: Materiales y Herramientas -->
+                        <div class="ficha-subsection mt-3">
+                            <h5 class="ficha-subsection-title">
+                                <i class="bi bi-tools"></i>
+                                Materiales y Herramientas
+                            </h5>
+                            <div class="ficha-details-grid">
+                                <div class="ficha-detail-item">
+                                    <i class="bi bi-box-seam ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Materiales:</span>
+                                    <span class="ficha-detail-value">
+                                        {% if equipo.materiales_necesarios.exists %}
+                                            {{ equipo.materiales_necesarios.count }} materiales asignados
+                                        {% else %}
+                                            No especificados
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="ficha-detail-item">
+                                    <i class="bi bi-wrench ficha-detail-icon"></i>
+                                    <span class="ficha-detail-label">Herramientas:</span>
+                                    <span class="ficha-detail-value">
+                                        {% if equipo.herramientas_necesarias.exists %}
+                                            {{ equipo.herramientas_necesarias.count }} herramientas asignadas
+                                        {% else %}
+                                            No especificadas
+                                        {% endif %}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -1060,8 +1066,6 @@
                                         <button class="ficha-btn-qr" onclick="showQRCode('{{ equipo.codigo_interno }}', '{{ equipo.qr_code.url }}')">
                                             <i class="bi bi-qr-code"></i>
                                         </button>
-                                    {% else %}
-                                        <span class="ficha-badge-coming-soon small">QR Próximamente</span>
                                     {% endif %}
                                 </div>
                             </div>
