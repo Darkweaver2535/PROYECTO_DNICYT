@@ -1402,17 +1402,19 @@
                 </div>
                 
                 <div class="nav-item">
-                    <a href="{% url 'inventario:repuestos' %}" class="nav-link">
-                        <span class="nav-icon"><i class="bi bi-gear"></i></span>
+                    <a href="{% url 'inventario:repuestos' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'inventario' and 'repuesto' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="nav-icon bi bi-gear"></i>
                         <span class="nav-text">Repuestos</span>
                     </a>
                 </div>
                 
                 <div class="nav-item">
-                    <a href="{% url 'inventario:stock-critico' %}" class="nav-link" id="stock-critico-link">
-                        <span class="nav-icon"><i class="bi bi-exclamation-triangle"></i></span>
+                    <a href="{% url 'inventario:stock-critico' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'inventario' and 'stock' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="nav-icon bi bi-exclamation-triangle text-warning"></i>
                         <span class="nav-text">Stock Crítico</span>
-                        <span class="nav-counter" id="alertas-counter" style="display: none;">0</span>
+                        <span class="nav-counter critical" id="stock-critico-counter">{{ stats.stock_critico|default:0 }}</span>
                     </a>
                 </div>
                 
@@ -1426,8 +1428,9 @@
                 </div>
                 
                 <div class="nav-item">
-                    <a href="{% url 'inventario:proveedores' %}" class="nav-link">
-                        <span class="nav-icon"><i class="bi bi-building"></i></span>
+                    <a href="{% url 'inventario:proveedores' %}" 
+                       class="nav-link {% if request.resolver_match.namespace == 'inventario' and 'proveedor' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="nav-icon bi bi-truck"></i>
                         <span class="nav-text">Proveedores</span>
                     </a>
                 </div>
@@ -1491,15 +1494,17 @@
                     <i class="bi bi-gear"></i>
                     Administración
                 </div>
+                <!-- USUARIOS -->
                 <div class="nav-item">
-                    <a class="nav-link" href="{% url 'usuarios:lista-usuarios' %}">
-                    <i class="nav-icon bi bi-people"></i>
-                    <span class="nav-text">Usuarios</span>
+                    <a href="{% url 'usuarios:lista-usuarios' %}" 
+                    class="nav-link {% if request.resolver_match.namespace == 'usuarios' or 'usuario' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="nav-icon bi bi-people"></i>
+                        <span class="nav-text">Usuarios</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="{% url 'usuarios:roles-permisos' %}" class="nav-link {% if request.resolver_match.url_name == 'roles-permisos' %}active{% endif %}">
-                        <i class="bi bi-shield-lock nav-icon"></i>
+                        <i class="nav-icon bi bi-shield-lock nav-icon"></i>
                         <span class="nav-text">Roles y Permisos</span>
                     </a>
                 </div>
@@ -1787,6 +1792,160 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script>
+window.addEventListener('load', function() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    
+    // Restaurar posición
+    const pos = localStorage.getItem('sidebarPos');
+    if (pos) sidebar.scrollTop = pos;
+    
+    // Guardar posición
+    sidebar.onscroll = function() {
+        localStorage.setItem('sidebarPos', sidebar.scrollTop);
+    };
+    
+    // Guardar antes de navegar
+    sidebar.onclick = function() {
+        localStorage.setItem('sidebarPos', sidebar.scrollTop);
+    };
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var currentPath = window.location.pathname;
+    var currentUrl = window.location.href;
+    
+    function markActiveLink(selector, keywords, exact = false) {
+        var link = document.querySelector(selector);
+        if (link) {
+            var isActive = false;
+            
+            if (exact) {
+                keywords.forEach(function(keyword) {
+                    if (currentPath === keyword || currentPath.includes(keyword + '/')) {
+                        isActive = true;
+                    }
+                });
+            } else {
+                keywords.forEach(function(keyword) {
+                    if (currentPath.includes(keyword) || currentUrl.includes(keyword)) {
+                        isActive = true;
+                    }
+                });
+            }
+            
+            if (isActive) {
+                document.querySelectorAll('.sidebar .nav-link').forEach(function(otherLink) {
+                    otherLink.classList.remove('active');
+                });
+                link.classList.add('active');
+            }
+        }
+    }
+    
+    // ✅ MARCADO ESPECÍFICO PARA USUARIOS
+    if (currentPath.includes('/usuarios/roles-permisos/') || currentPath.includes('roles-permisos')) {
+        markActiveLink('a[href*="roles-permisos"]', ['/usuarios/roles-permisos'], true);
+    }
+    else if (currentPath.includes('/usuarios/respaldos/')) {
+        markActiveLink('a[href*="respaldos"]', ['/usuarios/respaldos'], true);
+    }
+    else if (currentPath.includes('/usuarios/configuracion/')) {
+        markActiveLink('a[href*="configuracion"]', ['/usuarios/configuracion'], true);
+    }
+    else if (currentPath.includes('/usuarios/mi-perfil/')) {
+        markActiveLink('a[href*="mi-perfil"]', ['/usuarios/mi-perfil'], true);
+    }
+    else if (currentPath.includes('/usuarios/') && 
+             !currentPath.includes('roles-permisos') && 
+             !currentPath.includes('respaldos') && 
+             !currentPath.includes('configuracion') && 
+             !currentPath.includes('mi-perfil')) {
+        markActiveLink('a[href*="usuarios"][href$="/usuarios/"]', ['/usuarios'], true);
+    }
+    
+    // ✅ MARCADO ESPECÍFICO PARA CAPACITACIÓN
+    else if (currentPath.includes('/capacitacion/videos-multimedia/')) {
+        markActiveLink('a[href*="videos-multimedia"]', ['/capacitacion/videos-multimedia'], true);
+    }
+    else if (currentPath.includes('/capacitacion/documentos-tecnicos/')) {
+        markActiveLink('a[href*="documentos-tecnicos"]', ['/capacitacion/documentos-tecnicos'], true);
+    }
+    else if (currentPath.includes('/capacitacion/cursos-talleres/') || 
+             (currentPath.includes('/capacitacion/') && 
+              !currentPath.includes('videos-multimedia') && 
+              !currentPath.includes('documentos-tecnicos') &&
+              (currentPath === '/capacitacion/' || currentPath.includes('/curso/') || currentPath.includes('/crear/') || currentPath.includes('/mis-cursos/')))) {
+        markActiveLink('a[href*="cursos-talleres"]', ['/capacitacion/cursos-talleres', '/capacitacion/'], true);
+    }
+    
+    // ✅ MARCADO ESPECÍFICO PARA REPORTES (NUEVO)
+    else if (currentPath.includes('/reportes/analisis-fallas/') || 
+             currentPath.includes('/reportes/crear-falla/') ||
+             currentPath.includes('/reportes/falla/') ||
+             currentPath.includes('/reportes/editar-falla/') ||
+             currentPath.includes('/reportes/eliminar-falla/') ||
+             currentPath.includes('/reportes/cerrar-falla/') ||
+             currentPath.includes('/reportes/asignar-falla/') ||
+             currentPath.includes('analisis-fallas')) {
+        markActiveLink('a[href*="analisis-fallas"]', ['/reportes/analisis-fallas'], true);
+    }
+    else if (currentPath.includes('/reportes/equipos/') || 
+             currentPath.includes('/reportes/exportar/') ||
+             currentPath.includes('reportes-equipos')) {
+        markActiveLink('a[href*="reportes-equipos"]', ['/reportes/equipos'], true);
+    }
+    else if (currentPath.includes('/reportes/') && 
+             !currentPath.includes('analisis-fallas') && 
+             !currentPath.includes('equipos')) {
+        markActiveLink('a[href*="reportes"][href$="/reportes/"]', ['/reportes'], true);
+    }
+    
+    // ✅ MARCADO ESPECÍFICO PARA NORMATIVAS Y SEGURIDAD
+    else if (currentPath.includes('/normativas/seguridad-industrial/')) {
+        markActiveLink('a[href*="seguridad-industrial"]', ['/normativas/seguridad-industrial'], true);
+    } else if (currentPath.includes('/normativas/alertas-riesgos/')) {
+        markActiveLink('a[href*="alertas-riesgos"]', ['/normativas/alertas-riesgos'], true);
+    } else if (currentPath.includes('/normativas/incidentes/')) {
+        markActiveLink('a[href*="incidentes"]', ['/normativas/incidentes'], true);
+    } else if (currentPath.includes('/normativas/inspecciones/')) {
+        markActiveLink('a[href*="inspecciones"]', ['/normativas/inspecciones'], true);
+    } else if (currentPath.includes('/normativas/capacitaciones/')) {
+        markActiveLink('a[href*="capacitaciones"]', ['/normativas/capacitaciones'], true);
+    } else if (currentPath.includes('/normativas/') && !currentPath.includes('seguridad-industrial') && !currentPath.includes('alertas-riesgos')) {
+        markActiveLink('a[href*="normativas"][href$="/normativas/"]', ['/normativas'], true);
+    }
+    
+    // ✅ MARCADO ESPECÍFICO PARA INVENTARIO
+    else if (currentPath.includes('/inventario/repuestos/')) {
+        markActiveLink('a[href*="repuestos"]', ['/inventario/repuestos'], true);
+    } else if (currentPath.includes('/inventario/stock-critico/')) {
+        markActiveLink('a[href*="stock-critico"]', ['/inventario/stock-critico'], true);
+    } else if (currentPath.includes('/inventario/proveedores/')) {
+        markActiveLink('a[href*="proveedores"]', ['/inventario/proveedores'], true);
+    } else if (currentPath.includes('/inventario/')) {
+        markActiveLink('a[href*="inventario"]', ['/inventario'], true);
+    }
+    
+    // === RESTO DE SECCIONES ===
+    else if (currentPath.includes('/equipos/')) {
+        markActiveLink('a[href*="equipos"]', ['/equipos'], true);
+    }
+    else if (currentPath.includes('/mantenimiento/')) {
+        markActiveLink('a[href*="mantenimiento"]', ['/mantenimiento'], true);
+    }
+    else if (currentPath.includes('/operaciones/')) {
+        markActiveLink('a[href*="operaciones"]', ['/operaciones'], true);
+    }
+    else if (currentPath.includes('/dashboard/') || currentPath === '/') {
+        markActiveLink('a[href*="dashboard"]', ['/dashboard'], true);
+    }
+});
+</script>
+
 <!-- ✅ ESTILOS ÚNICOS PARA EL BUSCADOR DE MENÚ -->
 <style>
 /* === ESTILOS EXCLUSIVOS PARA EL BUSCADOR DEL MENÚ === */
@@ -1926,19 +2085,3 @@ document.addEventListener('DOMContentLoaded', function() {
     
     .menu-search-icon-left {
         left: 0.7rem;
-        font-size: 0.95rem;
-    }
-    
-    .menu-search-clear-button {
-        right: 0.55rem;
-        width: 20px;
-        height: 20px;
-        font-size: 0.85rem;
-    }
-    
-    .menu-search-results-info {
-        font-size: 0.7rem;
-        margin-top: 0.4rem;
-    }
-}
-</style>
