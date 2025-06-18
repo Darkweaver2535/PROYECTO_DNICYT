@@ -1212,6 +1212,180 @@
         margin-top: 0.4rem;
     }
 }
+
+/* ✅ NAVBAR USER PROFILE - Siguiendo estilos del login.html */
+.navbar-user-profile {
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--pure-white) !important;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.navbar-user-profile:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: var(--pure-white) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    text-decoration: none !important;
+}
+
+.navbar-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #1e3a8a;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.navbar-user-profile:hover .navbar-user-avatar {
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.navbar-user-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--pure-white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+/* ✅ NAVBAR LOGOUT - AMARILLO CON LETRAS NEGRAS */
+.navbar-logout-yellow {
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border: 1px solid #f59e0b;
+    color: #1e3a8a !important;
+    transition: all 0.3s ease;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+}
+
+.navbar-logout-yellow:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #1e3a8a !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+    text-decoration: none !important;
+    border-color: #d97706;
+}
+
+.navbar-logout-yellow i {
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    color: #1e3a8a;
+}
+
+.navbar-logout-yellow:hover i {
+    transform: scale(1.1);
+    color: #1e3a8a;
+}
+
+.navbar-logout-yellow .navbar-logout-text {
+    color: #1e3a8a;
+    font-weight: 700;
+}
+
+/* ✅ NAVBAR LOGIN */
+.navbar-login {
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--pure-white) !important;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+}
+
+.navbar-login:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: var(--pure-white) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    text-decoration: none !important;
+}
+
+/* ✅ RESPONSIVE PARA NAVBAR */
+@media (max-width: 768px) {
+    .navbar-user-name,
+    .navbar-logout-text {
+        display: none;
+    }
+    
+    .navbar-user-profile,
+    .navbar-logout-yellow,
+    .navbar-login {
+        padding: 0.5rem;
+        min-width: 44px;
+        justify-content: center;
+    }
+    
+    .navbar-user-profile {
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+    }
+    
+    .navbar-user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .navbar-logout-yellow {
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-user-profile,
+    .navbar-logout-yellow,
+    .navbar-login {
+        padding: 0.4rem;
+        min-width: 40px;
+        gap: 0;
+    }
+    
+    .navbar-user-profile {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .navbar-user-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+    
+    .navbar-logout-yellow {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+}
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -1230,11 +1404,44 @@
                 <i class="bi bi-list"></i>
             </button>
             <div class="navbar-actions">
-                <div class="user-menu">
-                    <a href="{% url 'logout' %}" class="logout-btn">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span class="d-none d-sm-inline">Cerrar sesión</span>
-                    </a>
+                <!-- Navbar derecho - Usuario y logout -->
+                <div class="d-flex align-items-center gap-3">
+                    {% if user.is_authenticated %}
+                        <!-- Mi Perfil con nombre del usuario -->
+                        <a href="{% url 'usuarios:mi-perfil' %}" 
+                           class="navbar-user-profile d-flex align-items-center gap-2 text-decoration-none"
+                           title="Ver mi perfil">
+                            
+                            <!-- Avatar pequeño -->
+                            <div class="navbar-user-avatar">
+                                {% if user.perfil.avatar %}
+                                    <img src="{{ user.perfil.avatar.url }}" alt="Mi Avatar">
+                                {% else %}
+                                    {{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper|default:user.username|slice:":2"|upper }}
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Nombre del usuario -->
+                            <span class="navbar-user-name">
+                                {{ user.get_full_name|default:user.username|truncatechars:20 }}
+                            </span>
+                        </a>
+                        
+                        <!-- Cerrar Sesión (Amarillo con letras negras) -->
+                        <a href="{% url 'logout' %}" 
+                           class="navbar-logout-yellow d-flex align-items-center gap-2 text-decoration-none"
+                           title="Cerrar sesión">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="navbar-logout-text">Cerrar Sesión</span>
+                        </a>
+                    {% else %}
+                        <!-- Iniciar Sesión -->
+                        <a href="{% url 'login' %}" 
+                           class="navbar-login d-flex align-items-center gap-2 text-decoration-none">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span>Iniciar Sesión</span>
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -1298,7 +1505,7 @@
                        class="nav-link" 
                        id="dashboard-link">
                         <i class="nav-icon bi bi-speedometer2"></i>
-                        <span class="nav-text">Inicio - Dashboard</span>
+                        <span class="nav-text">Inicio</span>
                     </a>
                 </div>
             </div>
@@ -1849,7 +2056,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-      // ✅ VERIFICACIÓN ESPECÍFICA PARA DASHBOARD (PRIMERA PRIORIDAD)
+       // ✅ VERIFICACIÓN ESPECÍFICA PARA DASHBOARD (PRIMERA PRIORIDAD)
     if (currentPath === '/dashboard/' || currentPath === '/dashboard' || currentPath === '/') {
         console.log('Detectada página de Dashboard');
         markActiveLink('#dashboard-link', true);
@@ -2060,143 +2267,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-<!-- ✅ ESTILOS ÚNICOS PARA EL BUSCADOR DE MENÚ -->
-<style>
-/* === ESTILOS EXCLUSIVOS PARA EL BUSCADOR DEL MENÚ === */
-.menu-search-wrapper {
-    margin-top: 1rem;
-    margin-bottom: 0;
-    padding: 0;
-}
-
-.menu-search-input-container {
-    position: relative;
-    width: 100%;
-    margin: 0;
-}
-
-.menu-search-field {
-    width: 100%;
-    height: 40px;
-    padding: 0.6rem 2.2rem 0.6rem 2.5rem;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 20px;
-    background-color: #ffffff;
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: #1e293b;
-    outline: none;
-    transition: all 0.25s ease;
-    box-shadow: 0 1px 3px rgba(30, 64, 175, 0.06);
-}
-
-.menu-search-field:focus {
-    border-color: #fbbf24;
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
-    background-color: #ffffff;
-}
-
-.menu-search-field::placeholder {
-    color: #64748b;
-    font-weight: 400;
-}
-
-.menu-search-icon-left {
-    position: absolute;
-    left: 0.85rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #64748b;
-    font-size: 1.1rem;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.menu-search-clear-button {
-    position: absolute;
-    right: 0.7rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #64748b;
-    font-size: 1rem;
-    cursor: pointer;
-    padding: 0.3rem;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-    z-index: 3;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.menu-search-clear-button:hover {
-    background-color: #f1f5f9;
-    color: #1e293b;
-}
-
-.menu-search-clear-button:focus {
-    outline: 2px solid #fbbf24;
-    outline-offset: 1px;
-}
-
-.menu-search-results-info {
-    font-size: 0.75rem;
-    margin-top: 0.5rem;
-    text-align: center;
-    font-weight: 500;
-    display: none;
-}
-
-.menu-search-results-found {
-    color: #1e40af !important;
-}
-
-.menu-search-results-empty {
-    color: #ef4444 !important;
-    font-style: italic;
-}
-
-.menu-search-text-highlight {
-    background-color: #fbbf24;
-    color: #1e293b;
-    padding: 0.1rem 0.15rem;
-    border-radius: 3px;
-    font-weight: 600;
-    box-decoration-break: clone;
-}
-
-/* Responsividad específica para el buscador */
-@media (max-width: 991px) {
-    .menu-search-field {
-        height: 38px;
-        padding: 0.55rem 2rem 0.55rem 2.3rem;
-        font-size: 0.85rem;
-    }
-    
-    .menu-search-icon-left {
-        left: 0.75rem;
-        font-size: 1rem;
-    }
-    
-    .menu-search-clear-button {
-        right: 0.6rem;
-        width: 22px;
-        height: 22px;
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .menu-search-field {
-        height: 36px;
-        padding: 0.5rem 1.8rem 0.5rem 2.1rem;
-        font-size: 0.8rem;
-    }
-    
-    .menu-search-icon-left {
-        left: 0.7rem;
+</body>
+</html>
