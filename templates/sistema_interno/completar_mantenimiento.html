@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Completar Mantenimiento - {{ plan.codigo_plan }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .complete-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .complete-header {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .complete-form {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .form-help {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+    
+    .plan-info {
+        background: #f9fafb;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .plan-info-title {
+        font-weight: 600;
+        color: #2563eb;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="complete-container">
+        <!-- Header -->
+        <div class="complete-header">
+            <h1 class="fs-3 mb-2">Registrar Ejecución de Mantenimiento</h1>
+            <p class="mb-0">{{ plan.codigo_plan }} - {{ plan.nombre }}</p>
+        </div>
+        
+        <!-- Información del Plan -->
+        <div class="plan-info">
+            <div class="plan-info-title">Información del Plan</div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div><strong>Equipo:</strong> {{ plan.equipo.codigo_interno }} - {{ plan.equipo.nombre }}</div>
+                    <div><strong>Tipo:</strong> {{ plan.get_tipo_mantenimiento_display }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div><strong>Frecuencia:</strong> {{ plan.get_frecuencia_display }}</div>
+                    <div><strong>Estimación:</strong> {{ plan.get_duracion_estimada_rango_display }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulario -->
+        <div class="complete-form">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="id_duracion_real" class="form-label">
+                        <i class="bi bi-clock me-2"></i>Duración Real (horas)
+                    </label>
+                    {{ form.duracion_real }}
+                    {% if form.duracion_real.errors %}
+                        <div class="text-danger mt-1">
+                            {{ form.duracion_real.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <div class="form-help">
+                        Ingrese el tiempo real que tomó completar el mantenimiento en horas
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="id_observaciones" class="form-label">
+                        <i class="bi bi-journal-text me-2"></i>Observaciones
+                    </label>
+                    {{ form.observaciones }}
+                    <div class="form-help">
+                        Registre detalles importantes sobre el mantenimiento realizado
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'mantenimiento:plan-detalle' plan.pk %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2-circle me-1"></i>Registrar Finalización
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

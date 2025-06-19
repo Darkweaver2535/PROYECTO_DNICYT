@@ -10,6 +10,7 @@ urlpatterns = [
     path('planes/editar/<int:pk>/', views.editar_plan_view, name='editar-plan'),
     path('planes/detalle/<int:pk>/', views.detalle_plan_view, name='plan-detalle'),
     path('planes/eliminar/<int:pk>/', views.eliminar_plan_view, name='eliminar-plan'),
+    path('planes/completar/<int:pk>/', views.completar_mantenimiento_view, name='completar-mantenimiento'),
     
     # Órdenes de Trabajo
     path('ordenes/', views.ordenes_trabajo_view, name='ordenes-trabajo'),

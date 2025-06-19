@@ -522,6 +522,19 @@
                         <div class="detail-info-label">Criticidad</div>
                         <div class="detail-info-value">{{ plan.get_nivel_criticidad_display }}</div>
                     </div>
+
+                    <!-- Nueva sección para la estimación de duración -->
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Estimación de Duración</div>
+                        <div class="detail-info-value">{{ plan.get_duracion_estimada_rango_display }}</div>
+                    </div>
+
+                    {% if plan.duracion_real %}
+                    <div class="detail-info-item">
+                        <div class="detail-info-label">Duración Real</div>
+                        <div class="detail-info-value">{{ plan.duracion_real }} horas</div>
+                    </div>
+                    {% endif %}
                 </div>
 
                 {% if plan.descripcion %}
@@ -720,10 +733,10 @@
                 
                 <div class="d-grid gap-2">
                     {% if plan.atrasado or plan.dias_restantes <= 7 %}
-                        <button class="detail-btn detail-btn-success" onclick="ejecutarMantenimiento({{ plan.pk }})">
+                        <a href="{% url 'mantenimiento:completar-mantenimiento' plan.pk %}" class="detail-btn detail-btn-success">
                             <i class="bi bi-play-circle"></i>
-                            Ejecutar Ahora
-                        </button>
+                            Registrar Ejecución
+                        </a>
                     {% endif %}
                     
                     <a href="{% url 'mantenimiento:crear-tarea' plan.pk %}" class="detail-btn detail-btn-primary">

@@ -876,31 +876,61 @@
             <div class="col-md-6 mb-3">
                 {% if equipo.esquema_electrico %}
                 <a href="{{ equipo.esquema_electrico.url }}" target="_blank" class="ficha-document-item available">
-                    <i class="bi bi-diagram-2 ficha-document-icon available"></i>
-                    <h5 class="mb-2">Esquema Eléctrico</h5>
-                    <p class="mb-0 text-success">Disponible - Hacer clic para ver</p>
+                    <div class="ficha-document-icon available">
+                        <i class="bi bi-file-earmark-richtext"></i>
+                    </div>
+                    <h3>Esquema Eléctrico</h3>
+                    <p class="text-muted mb-0">Diagrama de conexiones eléctricas del equipo</p>
                 </a>
                 {% else %}
                 <div class="ficha-document-item">
-                    <i class="bi bi-diagram-2 ficha-document-icon"></i>
-                    <h5 class="mb-2">Esquema Eléctrico</h5>
-                    <p class="mb-0 text-muted">No disponible</p>
+                    <div class="ficha-document-icon">
+                        <i class="bi bi-file-earmark-richtext"></i>
+                    </div>
+                    <h3>Esquema Eléctrico</h3>
+                    <p class="text-muted mb-0">No disponible</p>
                 </div>
                 {% endif %}
             </div>
             
+            {% if equipo.requiere_sistema_neumatico %}
             <div class="col-md-6 mb-3">
-                {% if equipo.manual_operacion %}
-                <a href="{{ equipo.manual_operacion.url }}" target="_blank" class="ficha-document-item available">
-                    <i class="bi bi-book ficha-document-icon available"></i>
-                    <h5 class="mb-2">Manual de Operación</h5>
-                    <p class="mb-0 text-success">Disponible - Hacer clic para ver</p>
+                {% if equipo.diagrama_neumatico %}
+                <a href="{{ equipo.diagrama_neumatico.url }}" target="_blank" class="ficha-document-item available">
+                    <div class="ficha-document-icon available">
+                        <i class="bi bi-gear-wide-connected"></i>
+                    </div>
+                    <h3>Diagrama Neumático</h3>
+                    <p class="text-muted mb-0">Diagrama del sistema neumático</p>
                 </a>
                 {% else %}
                 <div class="ficha-document-item">
-                    <i class="bi bi-book ficha-document-icon"></i>
-                    <h5 class="mb-2">Manual de Operación</h5>
-                    <p class="mb-0 text-muted">No disponible</p>
+                    <div class="ficha-document-icon">
+                        <i class="bi bi-gear-wide-connected"></i>
+                    </div>
+                    <h3>Diagrama Neumático</h3>
+                    <p class="text-muted mb-0">No disponible</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <div class="col-md-6 mb-3">
+                {% if equipo.manual_operacion %}
+                <a href="{{ equipo.manual_operacion.url }}" target="_blank" class="ficha-document-item available">
+                    <div class="ficha-document-icon available">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <h3>Manual de Operación</h3>
+                    <p class="text-muted mb-0">Instrucciones de uso y manejo del equipo</p>
+                </a>
+                {% else %}
+                <div class="ficha-document-item">
+                    <div class="ficha-document-icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <h3>Manual de Operación</h3>
+                    <p class="text-muted mb-0">No disponible</p>
                 </div>
                 {% endif %}
             </div>

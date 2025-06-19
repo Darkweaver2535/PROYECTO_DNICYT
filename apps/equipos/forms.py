@@ -162,6 +162,8 @@ class FichaTecnicaForm(forms.ModelForm):
             'frecuencia_mantenimiento', 'tiempo_mantenimiento', 'procedimientos_mantenimiento',
             # Ubicación
             'ubicacion_especifica',
+            # Nuevos campos
+            'requiere_sistema_neumatico', 'diagrama_neumatico',
         ]
         
         widgets = {
@@ -221,5 +223,15 @@ class FichaTecnicaForm(forms.ModelForm):
             'ubicacion_especifica': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ubicación específica del equipo'
+            }),
+            # Nuevos widgets
+            'requiere_sistema_neumatico': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+                'id': 'requiere_sistema_neumatico'
+            }),
+            'diagrama_neumatico': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf,.jpg,.jpeg,.png',
+                'id': 'diagrama_neumatico_input'
             }),
         }

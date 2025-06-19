@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.db import models
 from datetime import date, timedelta
 from .models import PlanMantenimiento, TareaMantenimiento, RepuestoCritico, OrdenTrabajo
-from .forms import PlanMantenimientoForm, TareaMantenimientoForm, OrdenTrabajoForm, OrdenTrabajoUpdateForm
+from .forms import PlanMantenimientoForm, TareaMantenimientoForm, OrdenTrabajoForm, OrdenTrabajoUpdateForm, CompletarMantenimientoForm
 from apps.equipos.models import Equipo
 
 import json
@@ -154,9 +154,15 @@ def crear_plan_view(request):
                     f'❌ Error al crear el plan: {str(e)}'
                 )
         else:
+            # Log detallado de los errores
+            print("❌ ERRORES DEL FORMULARIO:")
+            for field, errors in form.errors.items():
+                print(f"  - Campo '{field}': {errors}")
+            
+            error_fields = ', '.join(form.errors.keys())
             messages.error(
                 request, 
-                '❌ Error en el formulario. Por favor revise los campos marcados en rojo.'
+                f'❌ Error en el formulario. Revise los siguientes campos: {error_fields}'
             )
     else:
         form = PlanMantenimientoForm()
@@ -761,3 +767,61 @@ def crear_tarea_view(request, plan_pk):
     }
     
     return render(request, 'sistema_interno/crear_tarea.html', context)
+
+@login_required
+def completar_mantenimiento_view(request, pk):
+    """Vista para registrar la finalización de un mantenimiento"""
+    
+    plan = get_object_or_404(PlanMantenimiento, pk=pk)
+    
+    if request.method == 'POST':
+        form = CompletarMantenimientoForm(request.POST, instance=plan)
+        if form.is_valid():
+            try:
+                # Guardar la duración real y observaciones
+                plan = form.save(commit=False)
+                
+                # Actualizar última_ejecucion y calcular próxima
+                plan.ultima_ejecucion = date.today()
+                plan.proxima_ejecucion = plan.calcular_siguiente_mantenimiento()
+                
+                # Incrementar el contador de ejecuciones
+                plan.numero_ejecuciones += 1
+                
+                # Calcular tiempo promedio (considerar históricos)
+                if plan.tiempo_promedio_ejecucion == 0:
+                    plan.tiempo_promedio_ejecucion = plan.duracion_real
+                else:
+                    # Promedio ponderado: 70% histórico + 30% actual
+                    plan.tiempo_promedio_ejecucion = (plan.tiempo_promedio_ejecucion * 0.7) + (plan.duracion_real * 0.3)
+                
+                # Guardar cambios
+                plan.save()
+                
+                messages.success(
+                    request, 
+                    f'✅ Mantenimiento completado exitosamente. Próximo programado para: {plan.proxima_ejecucion.strftime("%d/%m/%Y")}'
+                )
+                
+                return redirect('mantenimiento:plan-detalle', pk=plan.pk)
+                
+            except Exception as e:
+                messages.error(
+                    request, 
+                    f'❌ Error al registrar el mantenimiento: {str(e)}'
+                )
+        else:
+            messages.error(
+                request, 
+                '❌ Error en el formulario. Por favor revise los campos marcados.'
+            )
+    else:
+        form = CompletarMantenimientoForm(instance=plan)
+    
+    context = {
+        'form': form,
+        'plan': plan,
+        'titulo': 'Completar Mantenimiento',
+    }
+    
+    return render(request, 'sistema_interno/completar_mantenimiento.html', context)

@@ -649,23 +649,26 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="id_duracion_estimada" class="form-label">
+                            <label for="id_duracion_estimada_rango" class="form-label">
                                 <i class="bi bi-clock"></i>
-                                Duración Estimada (horas) <span class="required">*</span>
+                                Estimación de Duración <span class="required">*</span>
                             </label>
-                            {{ form.duracion_estimada }}
-                            {% if form.duracion_estimada.errors %}
+                            {{ form.duracion_estimada_rango }}
+                            {% if form.duracion_estimada_rango.errors %}
                                 <div class="form-error">
                                     <i class="bi bi-exclamation-circle"></i>
-                                    {{ form.duracion_estimada.errors.0 }}
+                                    {{ form.duracion_estimada_rango.errors.0 }}
                                 </div>
                             {% endif %}
+                            <div class="form-help">
+                                Seleccione un rango aproximado de tiempo para el mantenimiento (se registrará el tiempo real al completar)
+                            </div>
                         </div>
                         
                         <div class="form-group">
                             <label for="id_prioridad" class="form-label">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                Prioridad
+                                <i class="bi bi-flag"></i>
+                                Prioridad <span class="required">*</span>
                             </label>
                             {{ form.prioridad }}
                             {% if form.prioridad.errors %}
@@ -674,6 +677,9 @@
                                     {{ form.prioridad.errors.0 }}
                                 </div>
                             {% endif %}
+                            <div class="form-help">
+                                Prioridad del plan según criticidad del equipo e impacto operacional
+                            </div>
                         </div>
                     </div>
                     
@@ -711,7 +717,7 @@
                         <div class="form-group">
                             <label for="id_costo_estimado" class="form-label">
                                 <i class="bi bi-currency-dollar"></i>
-                                Costo Estimado (Bs.)
+                                Costo Estimado
                             </label>
                             {{ form.costo_estimado }}
                             {% if form.costo_estimado.errors %}
@@ -720,38 +726,8 @@
                                     {{ form.costo_estimado.errors.0 }}
                                 </div>
                             {% endif %}
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="id_nivel_criticidad" class="form-label">
-                                <i class="bi bi-shield-check"></i>
-                                Nivel de Criticidad
-                            </label>
-                            {{ form.nivel_criticidad }}
-                            {% if form.nivel_criticidad.errors %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle"></i>
-                                    {{ form.nivel_criticidad.errors.0 }}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="form-row full-width">
-                        <div class="form-group">
-                            <label for="id_herramientas_especiales" class="form-label">
-                                <i class="bi bi-wrench-adjustable"></i>
-                                Herramientas Especiales
-                            </label>
-                            {{ form.herramientas_especiales }}
-                            {% if form.herramientas_especiales.errors %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle"></i>
-                                    {{ form.herramientas_especiales.errors.0 }}
-                                </div>
-                            {% endif %}
                             <div class="form-help">
-                                Herramientas específicas requeridas para este plan
+                                Costo estimado en Bs. para este mantenimiento
                             </div>
                         </div>
                     </div>
@@ -764,7 +740,7 @@
                         Normativas y Control de Calidad
                     </h3>
                     <p class="form-section-subtitle">
-                        Configure el cumplimiento normativo y los estándares de calidad aplicables
+                        Configure la normativa técnica aplicable y los estándares de calidad
                     </p>
                     
                     <div class="form-row">
@@ -780,11 +756,14 @@
                                     {{ form.norma_aplicable.errors.0 }}
                                 </div>
                             {% endif %}
+                            <div class="form-help">
+                                Estándar o normativa técnica que se aplicará al mantenimiento
+                            </div>
                         </div>
                         
                         <div class="form-group">
                             <label for="id_norma_especifica" class="form-label">
-                                <i class="bi bi-file-earmark-text"></i>
+                                <i class="bi bi-file-text"></i>
                                 Norma Específica
                             </label>
                             {{ form.norma_especifica }}
@@ -795,35 +774,7 @@
                                 </div>
                             {% endif %}
                             <div class="form-help">
-                                Especificar si seleccionó "Otra norma específica"
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Cumplimiento Normativo -->
-                    <div class="form-row full-width">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="bi bi-check2-square"></i>
-                                Cumplimiento Normativo
-                            </label>
-                            <div class="checkbox-group">
-                                <div class="checkbox-item">
-                                    {{ form.cumple_iso }}
-                                    <label for="id_cumple_iso">ISO 55000 - Gestión de Activos</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    {{ form.cumple_api }}
-                                    <label for="id_cumple_api">API 580 - Inspección Basada en Riesgo</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    {{ form.cumple_asme }}
-                                    <label for="id_cumple_asme">ASME - Códigos de Construcción</label>
-                                </div>
-                                <div class="checkbox-item">
-                                    {{ form.certificacion_vigente }}
-                                    <label for="id_certificacion_vigente">Certificación Vigente</label>
-                                </div>
+                                Especificar sólo si seleccionó "Otra norma específica"
                             </div>
                         </div>
                     </div>
@@ -831,27 +782,20 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="id_requiere_parada_equipo" class="form-label">
-                                <i class="bi bi-pause-circle"></i>
-                                Requiere Parada de Equipo
+                                <i class="bi bi-power"></i>
+                                Parada de Equipo
                             </label>
                             <div class="checkbox-item">
                                 {{ form.requiere_parada_equipo }}
-                                <label for="id_requiere_parada_equipo">Sí, requiere parada completa del equipo</label>
+                                <label for="id_requiere_parada_equipo">Requiere parada completa del equipo</label>
                             </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="id_fecha_ultima_auditoria" class="form-label">
-                                <i class="bi bi-calendar-check"></i>
-                                Última Auditoría
-                            </label>
-                            {{ form.fecha_ultima_auditoria }}
-                            {% if form.fecha_ultima_auditoria.errors %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle"></i>
-                                    {{ form.fecha_ultima_auditoria.errors.0 }}
-                                </div>
-                            {% endif %}
+                            <div class="form-help" id="parada_equipo_help">
+                                Marque si el mantenimiento requiere detener completamente el equipo
+                            </div>
+                            <div class="form-help text-danger" id="parada_obligatoria" style="display: none;">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                El mantenimiento correctivo siempre requiere parada completa del equipo
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -920,25 +864,6 @@
                     
                     <div class="form-row full-width">
                         <div class="form-group">
-                            <label for="id_repuestos_criticos" class="form-label">
-                                <i class="bi bi-gear-wide"></i>
-                                Repuestos Críticos
-                            </label>
-                            {{ form.repuestos_criticos }}
-                            {% if form.repuestos_criticos.errors %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle"></i>
-                                    {{ form.repuestos_criticos.errors.0 }}
-                                </div>
-                            {% endif %}
-                            <div class="form-help">
-                                Mantenga presionado Ctrl (Cmd en Mac) para seleccionar múltiples repuestos
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row full-width">
-                        <div class="form-group">
                             <label for="id_observaciones" class="form-label">
                                 <i class="bi bi-chat-left-text"></i>
                                 Observaciones
@@ -955,6 +880,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- Resumen de validación -->
+        {% if form.errors %}
+        <div class="form-validation-summary show">
+            <div class="form-validation-title">
+                <i class="bi bi-exclamation-triangle"></i>
+                Por favor corrija los siguientes errores:
+            </div>
+            <ul class="form-validation-list">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li class="form-validation-item">
+                            <i class="bi bi-x-circle"></i>
+                            {% if field != '__all__' %}{{ form.fields.field.label|default:field }}: {% endif %}{{ error }}
+                        </li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
 
         <!-- Acciones del formulario -->
         <div class="form-actions">
@@ -1142,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Verificar campos requeridos
-        const camposRequeridos = ['nombre', 'equipo', 'estado', 'tipo_mantenimiento', 'frecuencia', 'duracion_estimada', 'fecha_inicio'];  // <-- Agregar 'estado'
+        const camposRequeridos = ['nombre', 'equipo', 'estado', 'tipo_mantenimiento', 'frecuencia', 'duracion_estimada_rango', 'fecha_inicio'];
         let camposFaltantes = [];
         
         camposRequeridos.forEach(campo => {
@@ -1224,6 +1169,37 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mtbfField && mttrField && disponibilidadField) {
         mtbfField.addEventListener('blur', calcularDisponibilidad);
         mttrField.addEventListener('blur', calcularDisponibilidad);
+    }
+    
+    // Control de parada obligatoria para mantenimiento correctivo
+    const tipoMantenimientoSelect = document.querySelector('[name="tipo_mantenimiento"]');
+    const requiereParadaCheckbox = document.querySelector('[name="requiere_parada_equipo"]');
+    const paradaEquipoHelp = document.getElementById('parada_equipo_help');
+    const paradaObligatoriaMsg = document.getElementById('parada_obligatoria');
+
+    // Función para manejar el cambio de tipo de mantenimiento
+    function handleTipoMantenimientoChange() {
+        if (tipoMantenimientoSelect.value === 'correctivo') {
+            // Si es correctivo, marcar como obligatorio y deshabilitar
+            requiereParadaCheckbox.checked = true;
+            requiereParadaCheckbox.disabled = true;
+            paradaEquipoHelp.style.display = 'none';
+            paradaObligatoriaMsg.style.display = 'block';
+        } else {
+            // Si es otro tipo, habilitar la opción
+            requiereParadaCheckbox.disabled = false;
+            paradaEquipoHelp.style.display = 'block';
+            paradaObligatoriaMsg.style.display = 'none';
+        }
+    }
+
+    // Inicializar el estado cuando carga la página
+    if (tipoMantenimientoSelect && requiereParadaCheckbox) {
+        // Verificar al cargar la página
+        handleTipoMantenimientoChange();
+        
+        // Agregar listener para cambios futuros
+        tipoMantenimientoSelect.addEventListener('change', handleTipoMantenimientoChange);
     }
 });
 </script>

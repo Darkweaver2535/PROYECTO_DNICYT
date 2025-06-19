@@ -76,8 +76,19 @@ class PlanMantenimiento(models.Model):
     # Tipo y frecuencia
     tipo_mantenimiento = models.CharField("Tipo de Mantenimiento", max_length=20, choices=TIPO_MANTENIMIENTO_CHOICES)
     frecuencia = models.CharField("Frecuencia", max_length=20, choices=FRECUENCIA_CHOICES)
-    duracion_estimada = models.DecimalField("Duración Estimada (horas)", max_digits=5, decimal_places=2, 
-                                          validators=[MinValueValidator(0.1)])
+    duracion_estimada_rango = models.CharField(
+        "Estimación de Duración", 
+        max_length=50, 
+        choices=[
+            ('corta', 'Corta (1-4 horas)'),
+            ('media', 'Media (4-8 horas)'),
+            ('larga', 'Larga (8-16 horas)'),
+            ('extendida', 'Extendida (16+ horas)'),
+            ('multiple_dias', 'Múltiples días'),
+        ],
+        default='media',
+        help_text="Rango aproximado de tiempo que podría tomar el mantenimiento"
+    )
     
     # Prioridad y estado
     prioridad = models.CharField("Prioridad", max_length=10, choices=PRIORIDAD_CHOICES, default='media')
@@ -170,6 +181,16 @@ class PlanMantenimiento(models.Model):
     # Observaciones
     observaciones = models.TextField("Observaciones", blank=True, null=True)
     activo = models.BooleanField("Activo", default=True)
+
+    # Nuevo campo para la duración real
+    duracion_real = models.DecimalField(
+        "Duración Real (horas)", 
+        max_digits=7, 
+        decimal_places=2, 
+        null=True, 
+        blank=True,
+        help_text="Se registra después de completar el mantenimiento"
+    )
 
     class Meta:
         verbose_name = "Plan de Mantenimiento"
@@ -276,7 +297,23 @@ class PlanMantenimiento(models.Model):
         
         # Formula básica de eficiencia considerando cumplimiento y tiempo
         factor_cumplimiento = self.tasa_cumplimiento or 0
-        factor_tiempo = 100 if self.tiempo_promedio_ejecucion <= self.duracion_estimada else 80
+        
+        # Ya no comparamos con duración numérica, sino que asignamos un factor según rango
+        factor_tiempo = 90  # Valor base razonable
+        
+        # Si tenemos duración real, podemos ajustar el factor_tiempo
+        if self.duracion_real:
+            # El factor tiempo depende del rango estimado
+            if self.duracion_estimada_rango == 'corta' and self.duracion_real <= 4:
+                factor_tiempo = 100
+            elif self.duracion_estimada_rango == 'media' and self.duracion_real <= 8:
+                factor_tiempo = 100
+            elif self.duracion_estimada_rango == 'larga' and self.duracion_real <= 16:
+                factor_tiempo = 100
+            elif self.duracion_estimada_rango == 'extendida' and self.duracion_real <= 24:
+                factor_tiempo = 100
+            elif self.duracion_real > 24:
+                factor_tiempo = 70  # Penalización por exceso de tiempo
         
         eficiencia = (factor_cumplimiento + factor_tiempo) / 2
         return min(eficiencia, 100)
@@ -298,7 +335,7 @@ class PlanMantenimiento(models.Model):
             
             self.codigo_plan = f"PM{new_number:04d}"
         
-        # MEJORAR: Calcular próxima ejecución
+        # Calcular próxima ejecución
         if not self.proxima_ejecucion:
             if self.ultima_ejecucion:
                 self.proxima_ejecucion = self.calcular_siguiente_mantenimiento()

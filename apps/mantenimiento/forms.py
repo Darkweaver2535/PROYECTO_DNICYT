@@ -10,9 +10,9 @@ class PlanMantenimientoForm(forms.ModelForm):
             # Información básica
             'nombre', 'descripcion', 'equipo', 
             # Tipo y frecuencia
-            'tipo_mantenimiento', 'frecuencia', 'duracion_estimada',
+            'tipo_mantenimiento', 'frecuencia', 'duracion_estimada_rango',
             # Prioridad y estado
-            'prioridad', 'estado', 'nivel_criticidad',
+            'prioridad', 'estado', 
             # Responsables
             'responsable_principal', 'responsables_secundarios',
             # Fechas
@@ -22,13 +22,9 @@ class PlanMantenimientoForm(forms.ModelForm):
             # Documentos
             'procedimiento_documento', 'lista_verificacion',
             # Control de calidad
-            'requiere_parada_equipo', 'herramientas_especiales', 'materiales_requeridos',
-            # Repuestos críticos
-            'repuestos_criticos',
-            # Normativas técnicas
+            'requiere_parada_equipo', 'materiales_requeridos',
+            # Normativas técnicas (simplificado)
             'norma_aplicable', 'norma_especifica',
-            # Cumplimiento normativo
-            'cumple_iso', 'cumple_api', 'cumple_asme', 'certificacion_vigente', 'fecha_ultima_auditoria',
             # Análisis de fallas
             'mtbf', 'mttr', 'disponibilidad_objetivo',
             # Observaciones
@@ -57,11 +53,9 @@ class PlanMantenimientoForm(forms.ModelForm):
             'frecuencia': forms.Select(attrs={
                 'class': 'plan-form-control plan-form-select'
             }),
-            'duracion_estimada': forms.NumberInput(attrs={
-                'class': 'plan-form-control',
-                'placeholder': 'Horas estimadas',
-                'min': '0.1',
-                'step': '0.5'
+            'duracion_estimada_rango': forms.Select(attrs={
+                'class': 'plan-form-control plan-form-select',
+                'required': True
             }),
             
             # Prioridad y estado
@@ -69,9 +63,6 @@ class PlanMantenimientoForm(forms.ModelForm):
                 'class': 'plan-form-control plan-form-select'
             }),
             'estado': forms.Select(attrs={
-                'class': 'plan-form-control plan-form-select'
-            }),
-            'nivel_criticidad': forms.Select(attrs={
                 'class': 'plan-form-control plan-form-select'
             }),
             
@@ -86,10 +77,6 @@ class PlanMantenimientoForm(forms.ModelForm):
             
             # Fechas
             'fecha_inicio': forms.DateInput(attrs={
-                'class': 'plan-form-control',
-                'type': 'date'
-            }),
-            'fecha_ultima_auditoria': forms.DateInput(attrs={
                 'class': 'plan-form-control',
                 'type': 'date'
             }),
@@ -116,21 +103,10 @@ class PlanMantenimientoForm(forms.ModelForm):
             'requiere_parada_equipo': forms.CheckboxInput(attrs={
                 'class': 'plan-form-check'
             }),
-            'herramientas_especiales': forms.Textarea(attrs={
-                'class': 'plan-form-control plan-form-textarea',
-                'rows': 3,
-                'placeholder': 'Ej: Llave de torque 50-100 Nm, Multímetro Fluke 87V, Analizador de vibraciones'
-            }),
             'materiales_requeridos': forms.Textarea(attrs={
                 'class': 'plan-form-control plan-form-textarea',
                 'rows': 3,
                 'placeholder': 'Ej: Aceite hidráulico ISO VG 46, Filtros de aire, Sellos mecánicos'
-            }),
-            
-            # Repuestos críticos
-            'repuestos_criticos': forms.SelectMultiple(attrs={
-                'class': 'plan-form-control plan-form-select-multiple',
-                'size': '6'
             }),
             
             # Normativas técnicas
@@ -140,20 +116,6 @@ class PlanMantenimientoForm(forms.ModelForm):
             'norma_especifica': forms.TextInput(attrs={
                 'class': 'plan-form-control',
                 'placeholder': 'Especificar norma si seleccionó "Otra norma específica"'
-            }),
-            
-            # Cumplimiento normativo
-            'cumple_iso': forms.CheckboxInput(attrs={
-                'class': 'plan-form-check'
-            }),
-            'cumple_api': forms.CheckboxInput(attrs={
-                'class': 'plan-form-check'
-            }),
-            'cumple_asme': forms.CheckboxInput(attrs={
-                'class': 'plan-form-check'
-            }),
-            'certificacion_vigente': forms.CheckboxInput(attrs={
-                'class': 'plan-form-check'
             }),
             
             # Análisis de fallas
@@ -199,15 +161,12 @@ class PlanMantenimientoForm(forms.ModelForm):
         # Mejorar el display del equipo en el select
         self.fields['equipo'].empty_label = "Seleccione un equipo..."
         
-        # Cargar repuestos críticos
-        self.fields['repuestos_criticos'].queryset = RepuestoCritico.objects.all().order_by('nombre')
-        
         # Configurar campos requeridos
         self.fields['nombre'].required = True
         self.fields['equipo'].required = True
         self.fields['tipo_mantenimiento'].required = True
         self.fields['frecuencia'].required = True
-        self.fields['duracion_estimada'].required = True
+        self.fields['duracion_estimada_rango'].required = True
         self.fields['fecha_inicio'].required = True
         
         # *** MEJORAR LOS WIDGETS PARA MEJOR EXPERIENCIA ***
@@ -236,6 +195,14 @@ class PlanMantenimientoForm(forms.ModelForm):
             raise forms.ValidationError({
                 'mttr': 'El MTTR debe ser menor que el MTBF'
             })
+        
+        # Validación específica para mantenimiento correctivo
+        tipo_mantenimiento = cleaned_data.get('tipo_mantenimiento')
+        requiere_parada = cleaned_data.get('requiere_parada_equipo')
+        
+        if tipo_mantenimiento == 'correctivo' and not requiere_parada:
+            # Forzar el valor a True para mantenimiento correctivo
+            cleaned_data['requiere_parada_equipo'] = True
         
         return cleaned_data
 
@@ -477,4 +444,29 @@ class OrdenTrabajoUpdateForm(forms.ModelForm):
             'calificacion_trabajo': forms.Select(attrs={
                 'class': 'form-select'
             }, choices=[(i, f'{i} estrella{"s" if i > 1 else ""}') for i in range(1, 6)]),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Inicializaciones específicas si es necesario
+
+
+class CompletarMantenimientoForm(forms.ModelForm):
+    class Meta:
+        model = PlanMantenimiento
+        fields = ['duracion_real', 'observaciones']
+        
+        widgets = {
+            'duracion_real': forms.NumberInput(attrs={
+                'class': 'plan-form-control',
+                'placeholder': 'Horas reales',
+                'min': '0.1',
+                'step': '0.1',
+                'required': True
+            }),
+            'observaciones': forms.Textarea(attrs={
+                'class': 'plan-form-control plan-form-textarea',
+                'rows': 3,
+                'placeholder': 'Observaciones sobre la ejecución del mantenimiento'
+            }),
         }

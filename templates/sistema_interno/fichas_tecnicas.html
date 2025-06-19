@@ -946,16 +946,21 @@
                                     <span>Esquema Eléctrico</span>
                                     <small>{% if equipo.esquema_electrico %}Disponible{% else %}No disponible{% endif %}</small>
                                 </div>
-                                <div class="ficha-document-item ficha-document-disabled">
+                                
+                                {% if equipo.requiere_sistema_neumatico %}
+                                <div class="ficha-document-item {% if not equipo.diagrama_neumatico %}ficha-document-disabled{% endif %}">
                                     <i class="bi bi-gear"></i>
                                     <span>Diagrama Neumático</span>
-                                    <small>En desarrollo</small>
+                                    <small>{% if equipo.diagrama_neumatico %}Disponible{% else %}No disponible{% endif %}</small>
                                 </div>
+                                {% endif %}
+                                
                                 <div class="ficha-document-item">
                                     <i class="bi bi-book"></i>
                                     <span>Manual de Operación</span>
                                     <small>{% if equipo.manual_operacion %}Disponible{% else %}No disponible{% endif %}</small>
                                 </div>
+                                
                                 <div class="ficha-document-item">
                                     <i class="bi bi-tools"></i>
                                     <span>Plan de Mantenimiento</span>

@@ -182,6 +182,10 @@ class Equipo(models.Model):
         verbose_name="Herramientas Necesarias"
     )
 
+    # Agregar estos campos en la clase Equipo, junto a los demás campos técnicos:
+    requiere_sistema_neumatico = models.BooleanField("¿Requiere Sistema Neumático?", default=False)
+    diagrama_neumatico = models.FileField("Diagrama Neumático", upload_to='documentos/diagramas/', blank=True, null=True)
+
     def __str__(self):
         return f"{self.codigo_interno} - {self.nombre}"
 

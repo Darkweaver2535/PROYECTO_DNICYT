@@ -719,6 +719,49 @@
                                 {% endif %}
                             </div>
                         </div>
+
+                        <div class="ficha-form-row">
+                            <div class="ficha-form-group">
+                                <div class="form-check mb-3">
+                                    <label class="form-check-label ficha-form-label" for="requiere_sistema_neumatico">
+                                        <i class="bi bi-wind"></i>
+                                        ¿Este equipo requiere sistema neumático?
+                                    </label>
+                                    {{ form.requiere_sistema_neumatico }}
+                                </div>
+                                
+                                <div id="diagrama_neumatico_section" style="display: none;">
+                                    <label class="ficha-form-label">
+                                        <i class="bi bi-diagram-3"></i>
+                                        Diagrama Neumático
+                                    </label>
+                                    {% if equipo.diagrama_neumatico %}
+                                        <div class="file-info">
+                                            <i class="bi bi-file-earmark-pdf file-info-icon"></i>
+                                            <div class="file-info-content">
+                                                <div class="file-info-name">
+                                                    <a href="{{ equipo.diagrama_neumatico.url }}" target="_blank">{{ equipo.diagrama_neumatico.name|basename }}</a>
+                                                </div>
+                                                <div class="file-info-details">
+                                                    Archivo actual disponible - Seleccione un nuevo archivo para reemplazar
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    {{ form.diagrama_neumatico }}
+                                    <div class="ficha-form-help">
+                                        <i class="bi bi-info-circle"></i>
+                                        PDF, JPG, PNG - Máx. 10MB - Diagrama del sistema neumático del equipo
+                                    </div>
+                                    {% if form.diagrama_neumatico.errors %}
+                                        <div class="ficha-form-error">
+                                            <i class="bi bi-exclamation-triangle"></i>
+                                            {{ form.diagrama_neumatico.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -901,6 +944,25 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Form is being submitted...'); // Debug
         return true;
     });
+    
+    // Gestionar visibilidad del campo diagrama neumático
+    const requiereSistemaNeumatico = document.getElementById('requiere_sistema_neumatico');
+    const diagramaNeumaticosSection = document.getElementById('diagrama_neumatico_section');
+    
+    // Función para gestionar la visibilidad
+    function toggleDiagramaNeumatico() {
+        if (requiereSistemaNeumatico.checked) {
+            diagramaNeumaticosSection.style.display = 'block';
+        } else {
+            diagramaNeumaticosSection.style.display = 'none';
+        }
+    }
+    
+    // Inicializar visibilidad
+    toggleDiagramaNeumatico();
+    
+    // Añadir listener para el cambio
+    requiereSistemaNeumatico.addEventListener('change', toggleDiagramaNeumatico);
 });
 </script>
 {% endblock %}
