@@ -190,6 +190,10 @@ class HerramientaForm(MaterialForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
+        # Eliminar el campo de fecha_vencimiento para herramientas
+        if 'fecha_vencimiento' in self.fields:
+            del self.fields['fecha_vencimiento']
+        
         # Filtrar tipos solo para herramientas
         tipos_herramientas = [
             ('herramienta_manual', 'Herramienta Manual'),
@@ -208,6 +212,23 @@ class HerramientaForm(MaterialForm):
         ]
         
         self.fields['tipo'].choices = tipos_herramientas
+        
+        # Actualizar las opciones de estado con estados más específicos para herramientas
+        estados_herramientas = [
+            ('disponible', 'Disponible'),
+            ('en_uso', 'En Uso'),
+            ('mantenimiento', 'En Mantenimiento'),
+            ('calibracion', 'En Calibración'),
+            ('defectuoso', 'Defectuoso'),
+            ('quebrado', 'Quebrado/Roto'),
+            ('desgastado', 'Desgastado'),
+            ('obsoleto', 'Obsoleto'),
+            ('prestado', 'Prestado'),
+            ('extraviado', 'Extraviado'),
+            ('descontinuado', 'Descontinuado'),
+        ]
+        
+        self.fields['estado'].choices = estados_herramientas
         
         # Filtrar categorías solo para herramientas
         self.fields['categoria'].queryset = CategoriaMaterial.objects.filter(

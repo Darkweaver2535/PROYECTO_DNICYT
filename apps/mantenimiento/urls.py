@@ -24,4 +24,7 @@ urlpatterns = [
     
     # Análisis Predictivo
     path('analisis-predictivo/', views.analisis_predictivo_view, name='analisis-predictivo'),
+    
+    # API para tareas pendientes
+    path('api/tareas-pendientes/', views.tareas_pendientes_api, name='api-tareas-pendientes'),
 ]

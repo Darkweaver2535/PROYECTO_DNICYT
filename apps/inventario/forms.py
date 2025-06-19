@@ -8,7 +8,7 @@ class RepuestoForm(forms.ModelForm):
         model = Repuesto
         exclude = [
             'creado_por', 'fecha_creacion', 'fecha_actualizacion', 'activo', 'codigo',
-            'precio_promedio', 'costo_ultima_compra'  # EXCLUIR ESTOS CAMPOS PROBLEMÁTICOS
+            'precio_promedio', 'costo_ultima_compra', 'punto_reorden', 'fecha_vencimiento'  # Agregamos los campos que queremos excluir
         ]
         
         widgets = {
@@ -81,11 +81,6 @@ class RepuestoForm(forms.ModelForm):
                 'step': '0.01'
             }),
             'stock_maximo': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '0',
-                'step': '0.01'
-            }),
-            'punto_reorden': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
                 'step': '0.01'
@@ -183,10 +178,6 @@ class RepuestoForm(forms.ModelForm):
                 'class': 'form-control',
                 'rows': 2,
                 'placeholder': 'Condiciones especiales de almacenamiento'
-            }),
-            'fecha_vencimiento': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
             }),
             'fecha_ultima_compra': forms.DateInput(attrs={
                 'class': 'form-control',

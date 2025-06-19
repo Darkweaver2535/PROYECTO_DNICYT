@@ -17,6 +17,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from datetime import datetime, timedelta
 from django.db.models import Count, Avg, Sum, F, Q, Case, When, IntegerField
 from django.db.models.functions import TruncMonth, TruncWeek
+from django.http import JsonResponse
 
 @login_required
 def planes_mantenimiento_view(request):
@@ -825,3 +826,29 @@ def completar_mantenimiento_view(request, pk):
     }
     
     return render(request, 'sistema_interno/completar_mantenimiento.html', context)
+
+@login_required
+def tareas_pendientes_api(request):
+    """API para obtener el número de tareas pendientes o atrasadas"""
+    user = request.user
+    
+    # Contar tareas que están pendientes o en progreso
+    tareas_pendientes = TareaMantenimiento.objects.filter(
+        Q(estado='pendiente') | Q(estado='en_progreso')
+    ).count()
+    
+    # Contar planes de mantenimiento atrasados
+    planes_atrasados = PlanMantenimiento.objects.filter(
+        proxima_ejecucion__lt=date.today(),
+        estado='activo'
+    ).count()
+    
+    # Total de notificaciones (suma de ambos)
+    total_notificaciones = tareas_pendientes + planes_atrasados
+    
+    return JsonResponse({
+        'success': True,
+        'tareas_pendientes': tareas_pendientes,
+        'planes_atrasados': planes_atrasados,
+        'total_notificaciones': total_notificaciones
+    })

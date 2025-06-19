@@ -74,51 +74,17 @@ def repuestos_view(request):
     # Calcular métricas para cada repuesto
     for repuesto in repuestos:
         repuesto.necesita_reorden = repuesto.necesita_reposicion()
-        repuesto.dias_vencimiento = repuesto.dias_hasta_vencimiento()
         repuesto.valor_total = repuesto.valor_stock_actual()
     
     # Estadísticas generales
     total_repuestos = repuestos.count()
     repuestos_disponibles = repuestos.filter(estado='disponible').count()
     repuestos_agotados = repuestos.filter(estado='agotado').count()
-    repuestos_bajo_stock = repuestos.filter(stock_actual__lte=F('punto_reorden')).count()
+    repuestos_bajo_stock = repuestos.filter(stock_actual__lte=F('stock_minimo')).count()
     repuestos_criticos = repuestos.filter(criticidad='critica').count()
     
     # Valor total del inventario
     valor_total_inventario = sum(r.valor_total for r in repuestos if r.valor_total)
-    
-    # Repuestos próximos a vencer (30 días)
-    proximos_vencer = repuestos.filter(
-        fecha_vencimiento__lte=date.today() + timedelta(days=30),
-        fecha_vencimiento__gt=date.today()
-    ).count()
-    
-    # Alertas
-    alertas = []
-    
-    if repuestos_agotados > 0:
-        alertas.append({
-            'tipo': 'danger',
-            'titulo': f'{repuestos_agotados} repuesto(s) agotado(s)',
-            'descripcion': 'Repuestos sin stock disponible',
-            'icono': 'bi-exclamation-triangle'
-        })
-    
-    if repuestos_bajo_stock > 0:
-        alertas.append({
-            'tipo': 'warning',
-            'titulo': f'{repuestos_bajo_stock} repuesto(s) con stock bajo',
-            'descripcion': 'Repuestos que necesitan reposición',
-            'icono': 'bi-arrow-down-circle'
-        })
-    
-    if proximos_vencer > 0:
-        alertas.append({
-            'tipo': 'info',
-            'titulo': f'{proximos_vencer} repuesto(s) próximos a vencer',
-            'descripcion': 'Repuestos que vencen en los próximos 30 días',
-            'icono': 'bi-calendar-x'
-        })
     
     # Obtener datos para filtros
     categorias = CategoriaRepuesto.objects.filter(activo=True).order_by('nombre')
@@ -147,9 +113,8 @@ def repuestos_view(request):
         'repuestos_agotados': repuestos_agotados,
         'repuestos_bajo_stock': repuestos_bajo_stock,
         'repuestos_criticos': repuestos_criticos,
-        'proximos_vencer': proximos_vencer,
         'valor_total_inventario': valor_total_inventario,
-        'alertas': alertas,
+        'alertas': [],
         
         'titulo': 'Inventario de Repuestos',
     }

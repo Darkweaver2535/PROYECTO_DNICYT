@@ -591,14 +591,11 @@
         }
 
         @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
-
+        
         .flash-message {
             animation: slideIn 0.3s ease;
         }
@@ -1575,6 +1572,10 @@
                        class="nav-link {% if request.resolver_match.namespace == 'mantenimiento' and 'tareas' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="bi bi-list-check nav-icon"></i>
                         <span class="nav-text">Tareas</span>
+                        <!-- Añadimos el contador de notificaciones para tareas -->
+                        <span class="badge rounded-pill bg-danger position-absolute" 
+                              style="top: 5px; right: 5px; font-size: 0.7rem; display: none;"
+                              id="tareas-counter">0</span>
                     </a>
                 </div>
             </div>
@@ -1989,6 +1990,30 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.warn('Error actualizando alertas de stock:', error);
             });
+        
+        // NUEVO: Actualizar contador de tareas pendientes/atrasadas
+        fetch('/mantenimiento/api/tareas-pendientes/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const tareasCounter = document.getElementById('tareas-counter');
+                    if (tareasCounter) {
+                        if (data.tareas_pendientes > 0) {
+                            tareasCounter.textContent = data.tareas_pendientes;
+                            tareasCounter.style.display = 'flex';
+                            
+                            // Efecto de pulsación para llamar la atención
+                            tareasCounter.classList.add('pulse');
+                            setTimeout(() => tareasCounter.classList.remove('pulse'), 2000);
+                        } else {
+                            tareasCounter.style.display = 'none';
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.warn('Error actualizando contador de tareas:', error);
+            });
     }
     
     // Actualizar inmediatamente al cargar
@@ -2091,7 +2116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         markActiveLink('a[href*="documentos-tecnicos"]', ['/capacitacion/documentos-tecnicos'], true);
     }
     else if (currentPath.includes('/capacitacion/cursos-talleres/') || 
-             (currentPath.includes('/capacitacion/') && 
+             (currentPath.includes('/capacitacion/' && 
               !currentPath.includes('videos-multimedia') && 
               !currentPath.includes('documentos-tecnicos') &&
               (currentPath === '/capacitacion/' || currentPath.includes('/curso/') || currentPath.includes('/crear/') || currentPath.includes('/mis-cursos/')))) {
@@ -2267,5 +2292,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-</body>
-</html>

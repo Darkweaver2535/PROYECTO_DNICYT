@@ -139,6 +139,21 @@ def materiales_view(request):
 def herramientas_view(request):
     """Vista principal de herramientas"""
     
+    # Actualizar lista de estados posibles para filtros
+    estados_herramientas = [
+        ('disponible', 'Disponible'),
+        ('en_uso', 'En Uso'),
+        ('mantenimiento', 'En Mantenimiento'),
+        ('calibracion', 'En Calibración'),
+        ('defectuoso', 'Defectuoso'),
+        ('quebrado', 'Quebrado/Roto'),
+        ('desgastado', 'Desgastado'),
+        ('obsoleto', 'Obsoleto'),
+        ('prestado', 'Prestado'),
+        ('extraviado', 'Extraviado'),
+        ('descontinuado', 'Descontinuado'),
+    ]
+    
     # Filtros
     search_query = request.GET.get('search', '')
     categoria_filtro = request.GET.get('categoria', '')
@@ -244,7 +259,7 @@ def herramientas_view(request):
         'criticidad_filtro': criticidad_filtro,
         'calibracion_filtro': calibracion_filtro,
         'categorias': categorias,
-        'estados': Material.ESTADO_CHOICES,
+        'estados': estados_herramientas,  # Usar la nueva lista de estados
         'criticidades': Material.CRITICIDAD_CHOICES,
         'total_herramientas': total_herramientas,
         'herramientas_disponibles': herramientas_disponibles,

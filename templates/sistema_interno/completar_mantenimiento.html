@@ -98,13 +98,29 @@
                     </div>
                 </div>
                 
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="bi bi-check2-all me-2"></i>Tareas Completadas
+                    </label>
+                    <div class="tareas-completadas p-3 bg-light rounded">
+                        {% for tarea in plan.tareas.all %}
+                        <div class="custom-control custom-checkbox mb-2">
+                            <input type="checkbox" class="custom-control-input" id="tarea_{{ tarea.id }}" name="tareas_completadas" value="{{ tarea.id }}" checked>
+                            <label class="custom-control-label" for="tarea_{{ tarea.id }}">{{ tarea.nombre }}</label>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No hay tareas definidas para este plan.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                
                 <div class="mb-4">
                     <label for="id_observaciones" class="form-label">
                         <i class="bi bi-journal-text me-2"></i>Observaciones
                     </label>
                     {{ form.observaciones }}
                     <div class="form-help">
-                        Registre detalles importantes sobre el mantenimiento realizado
+                        Registre detalles importantes sobre el mantenimiento realizado, problemas encontrados o recomendaciones para el futuro
                     </div>
                 </div>
                 
@@ -112,7 +128,7 @@
                     <a href="{% url 'mantenimiento:plan-detalle' plan.pk %}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-1"></i>Cancelar
                     </a>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-success">
                         <i class="bi bi-check2-circle me-1"></i>Registrar Finalización
                     </button>
                 </div>

@@ -454,78 +454,21 @@ class Repuesto(models.Model):
         """Actualiza el estado basado en el nivel de stock"""
         if self.stock_actual <= 0:
             self.estado = 'agotado'
-        elif self.esta_vencido():
-            self.estado = 'por_vencer'
-        elif self.stock_actual <= self.punto_reorden:
+        elif self.stock_actual <= self.stock_minimo:  # Usando stock_minimo en lugar de punto_reorden
             self.estado = 'disponible'  # Pero necesita reposición
         else:
             self.estado = 'disponible'
     
     def necesita_reposicion(self):
         """Verifica si el repuesto necesita reposición"""
-        return self.stock_actual <= self.punto_reorden
-    
-    def es_stock_critico(self):
-        """Verifica si está en nivel crítico"""
+        # Usando stock_minimo en lugar de punto_reorden
         return self.stock_actual <= self.stock_minimo
-    
-    def dias_hasta_vencimiento(self):
-        """Calcula los días hasta vencimiento"""
-        if self.fecha_vencimiento:
-            diferencia = self.fecha_vencimiento - date.today()
-            return diferencia.days
-        return None
-    
-    def esta_vencido(self):
-        """Verifica si está vencido"""
-        if self.fecha_vencimiento:
-            return date.today() > self.fecha_vencimiento
-        return False
-    
+
     def valor_stock_actual(self):
         """Calcula el valor total del stock actual"""
-        return self.stock_actual * self.precio_unitario
-    
-    def get_estado_badge_class(self):
-        """Retorna la clase CSS para el badge de estado"""
-        clases = {
-            'disponible': 'bg-success',
-            'agotado': 'bg-danger',
-            'por_vencer': 'bg-warning',
-            'descontinuado': 'bg-secondary',
-            'en_pedido': 'bg-info',
-            'en_transito': 'bg-primary',
-            'retenido_calidad': 'bg-warning',
-        }
-        return clases.get(self.estado, 'bg-secondary')
-    
-    def get_criticidad_badge_class(self):
-        """Retorna la clase CSS para el badge de criticidad"""
-        clases = {
-            'CRITICA': 'bg-danger',
-            'IMPORTANTE': 'bg-warning',
-            'MODERADA': 'bg-info',
-            'BAJA': 'bg-secondary',
-        }
-        return clases.get(self.criticidad, 'bg-secondary')
-    
-    def get_seccion_display_completo(self):
-        """Retorna el nombre completo de la sección"""
-        secciones = {
-            'S1': 'S1 - Soldadura, Corte y Perforación',
-            'S2': 'S2 - Maquinado y Mecanizado',
-            'S3': 'S3 - Prototipado',
-            'S4': 'S4 - Plásticos',
-            'S5': 'S5 - Fundición',
-            'S6': 'S6 - Sujeción y Doblado',
-            'S7': 'S7 - Transporte y Elevación',
-            'A9': 'A9 - Tecnología de la Información',
-            'ALM': 'Almacén General',
-            'MAN': 'Mantenimiento',
-            'CAL': 'Control de Calidad',
-            'SEG': 'Seguridad Industrial',
-        }
-        return secciones.get(self.seccion_trabajo, self.seccion_trabajo)
+        if self.stock_actual and self.precio_unitario:
+            return self.stock_actual * self.precio_unitario
+        return 0
 
     class Meta:
         verbose_name = "Repuesto"

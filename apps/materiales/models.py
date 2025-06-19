@@ -89,13 +89,16 @@ class Material(models.Model):
     
     ESTADO_CHOICES = [
         ('disponible', 'Disponible'),
-        ('agotado', 'Agotado'),
-        ('bajo_stock', 'Stock Bajo'),
-        ('en_pedido', 'En Pedido'),
-        ('descontinuado', 'Descontinuado'),
         ('en_uso', 'En Uso'),
         ('mantenimiento', 'En Mantenimiento'),
         ('calibracion', 'En Calibración'),
+        ('defectuoso', 'Defectuoso'),
+        ('quebrado', 'Quebrado/Roto'),
+        ('desgastado', 'Desgastado'),
+        ('obsoleto', 'Obsoleto'),
+        ('prestado', 'Prestado'),
+        ('extraviado', 'Extraviado'),
+        ('descontinuado', 'Descontinuado'),
     ]
     
     CRITICIDAD_CHOICES = [

@@ -416,16 +416,7 @@
                     <span class="detail-label">Última Actualización</span>
                     <span class="detail-value">{{ repuesto.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Fecha de Vencimiento</span>
-                    <span class="detail-value">
-                        {% if repuesto.fecha_vencimiento %}
-                            {{ repuesto.fecha_vencimiento|date:"d/m/Y" }}
-                        {% else %}
-                            No aplica
-                        {% endif %}
-                    </span>
-                </div>
+    
                 <div class="detail-row">
                     <span class="detail-label">Última Compra</span>
                     <span class="detail-value">
