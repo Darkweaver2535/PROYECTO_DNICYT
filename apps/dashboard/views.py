@@ -3,7 +3,8 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q, Avg
-from datetime import datetime, timedelta
+from django.utils import timezone
+from datetime import datetime, timedelta, date
 from apps.equipos.models import Equipo
 
 @login_required
@@ -182,7 +183,17 @@ def dashboard_view(request):
         except Exception as e:
             print(f"⚠️  Error obteniendo últimos mantenimientos: {e}")
     
-    # Ordenar por tiempo descendente
+    # Convertir todos los tiempos a datetime.datetime para permitir comparaciones
+    for item in actividad_reciente:
+        # Si el tiempo es un objeto date, conviértelo a datetime
+        if isinstance(item['tiempo'], date) and not isinstance(item['tiempo'], datetime):
+            # Convertir date a datetime (a las 00:00:00)
+            item['tiempo'] = datetime.combine(item['tiempo'], datetime.min.time())
+            # Si estamos usando zona horaria, aplicar zona horaria
+            if timezone.is_naive(item['tiempo']):
+                item['tiempo'] = timezone.make_aware(item['tiempo'])
+    
+    # Ahora podemos ordenar con seguridad
     actividad_reciente.sort(key=lambda x: x['tiempo'], reverse=True)
     
     # === PRÓXIMOS MANTENIMIENTOS ===

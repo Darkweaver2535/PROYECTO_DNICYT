@@ -347,7 +347,7 @@ def stock_critico_view(request):
         repuestos_con_metricas.append({
             'repuesto': repuesto,
             'nivel_alerta': nivel_alerta,
-            'dias_stock': repuesto.dias_hasta_vencimiento() or 0,
+            'dias_stock': repuesto.calcular_dias_stock(),
             'valor_riesgo': (repuesto.stock_minimo - repuesto.stock_actual) * repuesto.precio_unitario if repuesto.stock_actual < repuesto.stock_minimo else 0,
         })
     

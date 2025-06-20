@@ -470,6 +470,22 @@ class Repuesto(models.Model):
             return self.stock_actual * self.precio_unitario
         return 0
 
+    def calcular_dias_stock(self):
+        """
+        Calcula los días estimados que durará el stock actual basado en el tiempo 
+        de entrega o datos históricos de consumo
+        """
+        # Si no hay stock, no hay días
+        if self.stock_actual <= 0:
+            return 0
+            
+        # Si tenemos tiempo de entrega, podemos usarlo como referencia
+        if self.tiempo_entrega:
+            return self.tiempo_entrega
+            
+        # Valor predeterminado si no hay información
+        return 30  # Estimación general de 30 días
+
     class Meta:
         verbose_name = "Repuesto"
         verbose_name_plural = "Repuestos"
