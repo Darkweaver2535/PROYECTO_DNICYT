@@ -59,10 +59,10 @@ cover/
 
 # ===== DJANGO =====
 # Base de datos
-*.sqlite3
-*.db
-db.sqlite3
-db.sqlite3-journal
+#*.sqlite3
+#*.db
+#db.sqlite3
+#db.sqlite3-journal
 
 # Archivos de migración generados (opcional, comentar si quieres versionar)
 # */migrations/*.py
