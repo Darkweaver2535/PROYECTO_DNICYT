@@ -594,7 +594,7 @@
                                 <div class="info-value">{{ equipo.fabricante }}</div>
                                 
                                 <div class="info-label">Tipo de Equipo</div>
-                                <div class="info-value">{{ equipo.get_tipo_equipo_display }}</div>
+                                <div class="info-value">{{ equipo.tipo_equipo|default:"—" }}</div>
                             </div>
                         </div>
                     </div>
